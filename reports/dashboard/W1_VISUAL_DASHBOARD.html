@@ -1,0 +1,1164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>W1 Visual Dashboard V1</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #1c2430;
+      --muted: #657084;
+      --line: #d9dee7;
+      --accent: #0f766e;
+      --wait: #b45309;
+      --watch: #2563eb;
+      --play: #15803d;
+      --pass: #6b7280;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+    header { padding: 28px 32px 18px; background: #101820; color: white; }
+    header h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: 0; }
+    header p { margin: 0; color: #cbd5e1; }
+    main { padding: 24px 32px 40px; max-width: 1480px; margin: 0 auto; }
+    .status-grid { display: grid; grid-template-columns: repeat(8, minmax(120px, 1fr)); gap: 12px; margin-bottom: 22px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; box-shadow: 0 1px 2px rgba(16,24,32,.04); }
+    .metric .label { color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 700; }
+    .metric .value { font-size: 28px; font-weight: 800; margin-top: 5px; }
+    .wait { color: var(--wait); } .watch { color: var(--watch); } .play { color: var(--play); } .pass { color: var(--pass); }
+    .wide { grid-column: span 2; }
+    h2 { margin: 28px 0 12px; font-size: 20px; }
+    h3 { margin: 0 0 10px; font-size: 15px; }
+    .layout { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; align-items: start; }
+    .groups { display: grid; grid-template-columns: repeat(4, minmax(210px, 1fr)); gap: 12px; }
+    .group-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .badge { display:inline-flex; align-items:center; justify-content:center; min-width:32px; height:24px; border-radius: 999px; background:#e6f4f1; color:var(--accent); font-weight:800; }
+    .team { display:flex; align-items:center; gap:8px; padding:7px 0; border-top:1px solid #eef1f5; }
+    .seed { width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:#eef2f7; color:#475569; font-size:12px; font-weight:700; }
+    .flow { display:grid; grid-template-columns: 1fr 50px 1fr 50px 1fr; gap: 8px; align-items:center; }
+    .flow-box { min-height:84px; display:flex; flex-direction:column; justify-content:center; text-align:center; border:1px solid var(--line); background:white; border-radius:8px; padding:12px; }
+    .flow-num { font-size:34px; font-weight:900; color:var(--accent); }
+    .arrow { text-align:center; font-size:26px; color:#64748b; }
+    table { width:100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 9px; border-bottom: 1px solid #edf0f4; text-align:left; }
+    th { color: #475569; background:#f8fafc; font-weight:800; }
+    .two-col { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .first-match { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
+    .kv .k { color:var(--muted); font-size:12px; font-weight:700; }
+    .kv .v { margin-top:4px; font-size:15px; font-weight:750; }
+    .guard-no { color:var(--danger); }
+    .links { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; }
+    a { color:#075985; text-decoration:none; font-weight:750; }
+    a:hover { text-decoration:underline; }
+    @media (max-width: 1100px) { .status-grid { grid-template-columns: repeat(4,1fr); } .groups { grid-template-columns: repeat(2,1fr); } .layout,.two-col { grid-template-columns:1fr; } }
+    @media (max-width: 720px) { main, header { padding-left:16px; padding-right:16px; } .status-grid,.groups,.first-match,.links { grid-template-columns:1fr; } .flow { grid-template-columns:1fr; } .arrow { transform: rotate(90deg); } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>W1 Visual Dashboard V1</h1>
+  <p>World Cup 2026 pre-match control view. Static HTML, local data, no prediction output.</p>
+</header>
+<main>
+  <section id="status" class="status-grid"></section>
+  <section class="layout">
+    <div>
+      <h2>World Cup Group Overview</h2>
+      <div id="groups" class="groups"></div>
+    </div>
+    <div>
+      <h2>Advancement Rules</h2>
+      <div class="card">
+        <div class="flow">
+          <div class="flow-box"><div class="flow-num" id="directQ">24</div><div>direct qualifiers<br>top 2 from each group</div></div>
+          <div class="arrow">+</div>
+          <div class="flow-box"><div class="flow-num" id="thirdQ">8</div><div>best third-place qualifiers<br>from 12 groups</div></div>
+          <div class="arrow">=</div>
+          <div class="flow-box"><div class="flow-num" id="r32">32</div><div>Round of 32<br>bracket placeholder</div></div>
+        </div>
+      </div>
+      <h2>First Match Card</h2>
+      <div id="firstMatch" class="card first-match"></div>
+      <h2>Unresolved Data Gaps</h2>
+      <div class="card"><table id="gaps"></table></div>
+    </div>
+  </section>
+  <section class="two-col">
+    <div>
+      <h2>Group Standings Template</h2>
+      <div class="card"><table id="standingsTemplate"></table></div>
+    </div>
+    <div>
+      <h2>Third-Place Ranking Template</h2>
+      <div class="card"><table id="thirdTemplate"></table></div>
+    </div>
+  </section>
+  <section>
+    <h2>Report Entrypoints</h2>
+    <div id="links" class="links"></div>
+  </section>
+</main>
+<script id="w1-data" type="application/json">{
+  "schema_version": "W1_VISUAL_DASHBOARD_V1",
+  "generated_from": "local W1 fixtures/cards/ledger/state only",
+  "status_cards": {
+    "W1_WAIT": 24,
+    "W1_WATCH": 0,
+    "W1_PLAY": 0,
+    "W1_PASS": 0,
+    "watcher_version": "v2",
+    "play_guard_version": "W1_PLAY_GUARD_V1",
+    "next_refresh": "2026-06-10 18:00 CST"
+  },
+  "groups": [
+    {
+      "group": "A",
+      "teams": [
+        "Mexico",
+        "South Africa",
+        "South Korea",
+        "Czech Republic"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489369",
+          "match": "Mexico vs South Africa",
+          "kickoff_utc": "2026-06-11T19:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1538999",
+          "match": "South Korea vs Czech Republic",
+          "kickoff_utc": "2026-06-12T02:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Mexico",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "South Africa",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "South Korea",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Czech Republic",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "B",
+      "teams": [
+        "Canada",
+        "Bosnia & Herzegovina",
+        "USA",
+        "Paraguay"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1539000",
+          "match": "Canada vs Bosnia & Herzegovina",
+          "kickoff_utc": "2026-06-12T19:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489370",
+          "match": "USA vs Paraguay",
+          "kickoff_utc": "2026-06-13T01:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Canada",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Bosnia & Herzegovina",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "USA",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Paraguay",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "C",
+      "teams": [
+        "Qatar",
+        "Switzerland",
+        "Brazil",
+        "Morocco"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489373",
+          "match": "Qatar vs Switzerland",
+          "kickoff_utc": "2026-06-13T19:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489371",
+          "match": "Brazil vs Morocco",
+          "kickoff_utc": "2026-06-13T22:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Qatar",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Switzerland",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Brazil",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Morocco",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "D",
+      "teams": [
+        "Haiti",
+        "Scotland",
+        "Australia",
+        "Türkiye"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489372",
+          "match": "Haiti vs Scotland",
+          "kickoff_utc": "2026-06-14T01:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1539001",
+          "match": "Australia vs Türkiye",
+          "kickoff_utc": "2026-06-14T04:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Haiti",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Scotland",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Australia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Türkiye",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "E",
+      "teams": [
+        "Germany",
+        "Curaçao",
+        "Netherlands",
+        "Japan"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489374",
+          "match": "Germany vs Curaçao",
+          "kickoff_utc": "2026-06-14T17:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489376",
+          "match": "Netherlands vs Japan",
+          "kickoff_utc": "2026-06-14T20:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Germany",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Curaçao",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Netherlands",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Japan",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "F",
+      "teams": [
+        "Ivory Coast",
+        "Ecuador",
+        "Sweden",
+        "Tunisia"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489375",
+          "match": "Ivory Coast vs Ecuador",
+          "kickoff_utc": "2026-06-14T23:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1539002",
+          "match": "Sweden vs Tunisia",
+          "kickoff_utc": "2026-06-15T02:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Ivory Coast",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Ecuador",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Sweden",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Tunisia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "G",
+      "teams": [
+        "Spain",
+        "Cape Verde Islands",
+        "Belgium",
+        "Egypt"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489380",
+          "match": "Spain vs Cape Verde Islands",
+          "kickoff_utc": "2026-06-15T16:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489377",
+          "match": "Belgium vs Egypt",
+          "kickoff_utc": "2026-06-15T19:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Spain",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Cape Verde Islands",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Belgium",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Egypt",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "H",
+      "teams": [
+        "Saudi Arabia",
+        "Uruguay",
+        "Iran",
+        "New Zealand"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489379",
+          "match": "Saudi Arabia vs Uruguay",
+          "kickoff_utc": "2026-06-15T22:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489378",
+          "match": "Iran vs New Zealand",
+          "kickoff_utc": "2026-06-16T01:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Saudi Arabia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Uruguay",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Iran",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "New Zealand",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "I",
+      "teams": [
+        "France",
+        "Senegal",
+        "Iraq",
+        "Norway"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489383",
+          "match": "France vs Senegal",
+          "kickoff_utc": "2026-06-16T19:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1539016",
+          "match": "Iraq vs Norway",
+          "kickoff_utc": "2026-06-16T22:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "France",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Senegal",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Iraq",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Norway",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "J",
+      "teams": [
+        "Argentina",
+        "Algeria",
+        "Austria",
+        "Jordan"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489381",
+          "match": "Argentina vs Algeria",
+          "kickoff_utc": "2026-06-17T01:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489382",
+          "match": "Austria vs Jordan",
+          "kickoff_utc": "2026-06-17T04:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Argentina",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Algeria",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Austria",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Jordan",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "K",
+      "teams": [
+        "Portugal",
+        "Congo DR",
+        "England",
+        "Croatia"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1539003",
+          "match": "Portugal vs Congo DR",
+          "kickoff_utc": "2026-06-17T17:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489384",
+          "match": "England vs Croatia",
+          "kickoff_utc": "2026-06-17T20:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Portugal",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Congo DR",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "England",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Croatia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "L",
+      "teams": [
+        "Ghana",
+        "Panama",
+        "Uzbekistan",
+        "Colombia"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489385",
+          "match": "Ghana vs Panama",
+          "kickoff_utc": "2026-06-17T23:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489386",
+          "match": "Uzbekistan vs Colombia",
+          "kickoff_utc": "2026-06-18T02:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Ghana",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Panama",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Uzbekistan",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Colombia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    }
+  ],
+  "advancement_rules": {
+    "groups_total": 12,
+    "teams_per_group": 4,
+    "direct_qualifiers_per_group": 2,
+    "direct_qualifiers": 24,
+    "best_third_qualifiers": 8,
+    "round_of_32_total": 32,
+    "third_place_tiebreakers": [
+      "points",
+      "goal_diff",
+      "goals_for",
+      "fair_play",
+      "drawing_of_lots"
+    ]
+  },
+  "third_place_ranking_template": [
+    {
+      "rank": 1,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 2,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 3,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 4,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 5,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 6,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 7,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 8,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 9,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 10,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 11,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 12,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    }
+  ],
+  "first_match": {
+    "fixture_id": "1489369",
+    "match": "Mexico vs South Africa",
+    "kickoff_utc": "2026-06-11T19:00:00Z",
+    "kickoff_cst": "2026-06-12 03:00",
+    "decision": "W1_WAIT",
+    "lineup_status": "WAIT_EVENT",
+    "referee_status": "MISSING",
+    "odds_status": "READY",
+    "play_guard_pass": false,
+    "next_refresh": "2026-06-10 18:00 CST"
+  },
+  "report_entrypoints": [
+    {
+      "label": "W1_LIVE_DASHBOARD.md",
+      "path": "W1_LIVE_DASHBOARD.md"
+    },
+    {
+      "label": "W1_REPORT_TEMPLATES.md",
+      "path": "../../docs/W1_REPORT_TEMPLATES.md"
+    },
+    {
+      "label": "W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md",
+      "path": "../../docs/W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md"
+    }
+  ],
+  "unresolved_data_gaps": [
+    {
+      "gap": "confirmed_lineup",
+      "scope": "24/24 first-round cards",
+      "blocks_play": true,
+      "status": "WAIT_EVENT"
+    },
+    {
+      "gap": "referee assignment",
+      "scope": "first-round cards",
+      "blocks_play": false,
+      "status": "MISSING"
+    },
+    {
+      "gap": "suspensions",
+      "scope": "system-level",
+      "blocks_play": false,
+      "status": "PARTIAL"
+    },
+    {
+      "gap": "travel_distance",
+      "scope": "system-level",
+      "blocks_play": false,
+      "status": "PARTIAL"
+    }
+  ]
+}</script>
+<script>
+const data = JSON.parse(document.getElementById('w1-data').textContent);
+const status = data.status_cards;
+function metric(label, value, cls='') { return `<div class="card metric"><div class="label">${label}</div><div class="value ${cls}">${value}</div></div>`; }
+document.getElementById('status').innerHTML = [
+  metric('W1_WAIT', status.W1_WAIT, 'wait'), metric('W1_WATCH', status.W1_WATCH, 'watch'),
+  metric('W1_PLAY', status.W1_PLAY, 'play'), metric('W1_PASS', status.W1_PASS, 'pass'),
+  metric('watcher_version', status.watcher_version), metric('play_guard_version', status.play_guard_version),
+  `<div class="card metric wide"><div class="label">next_refresh</div><div class="value" style="font-size:18px">${status.next_refresh}</div></div>`
+].join('');
+document.getElementById('groups').innerHTML = data.groups.map(g => `
+  <div class="card"><div class="group-title"><h3>Group ${g.group}</h3><span class="badge">4</span></div>
+  ${g.teams.map((t,i)=>`<div class="team"><span class="seed">${i+1}</span><span>${t}</span></div>`).join('')}</div>`).join('');
+document.getElementById('directQ').textContent = data.advancement_rules.direct_qualifiers;
+document.getElementById('thirdQ').textContent = data.advancement_rules.best_third_qualifiers;
+document.getElementById('r32').textContent = data.advancement_rules.round_of_32_total;
+const fm = data.first_match;
+document.getElementById('firstMatch').innerHTML = [
+  ['match', fm.match], ['kickoff', fm.kickoff_utc], ['decision', fm.decision], ['lineup', fm.lineup_status],
+  ['referee', fm.referee_status], ['odds', fm.odds_status], ['play_guard_pass', fm.play_guard_pass ? 'YES' : 'NO'], ['next_refresh', fm.next_refresh]
+].map(([k,v]) => `<div class="kv"><div class="k">${k}</div><div class="v ${k==='play_guard_pass'&&!fm.play_guard_pass?'guard-no':''}">${v}</div></div>`).join('');
+function table(headers, rows) { return `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${headers.map(h=>`<td>${r[h] ?? ''}</td>`).join('')}</tr>`).join('')}</tbody>`; }
+document.getElementById('gaps').innerHTML = table(['gap','scope','blocks_play','status'], data.unresolved_data_gaps.map(g=>({...g, blocks_play: g.blocks_play ? 'yes' : 'no'})));
+document.getElementById('standingsTemplate').innerHTML = table(['team','P','W','D','L','GF','GA','GD','PTS'], data.groups[0].standings_template);
+document.getElementById('thirdTemplate').innerHTML = table(['rank','group','team','points','goal_diff','goals_for','fair_play','drawing_of_lots'], data.third_place_ranking_template);
+document.getElementById('links').innerHTML = data.report_entrypoints.map(l => `<div class="card"><a href="${l.path}">${l.label}</a></div>`).join('');
+</script>
+</body>
+</html>

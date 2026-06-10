@@ -1,0 +1,1032 @@
+{
+  "schema_version": "W1_VISUAL_DASHBOARD_V1",
+  "generated_from": "local W1 fixtures/cards/ledger/state only",
+  "status_cards": {
+    "W1_WAIT": 24,
+    "W1_WATCH": 0,
+    "W1_PLAY": 0,
+    "W1_PASS": 0,
+    "watcher_version": "v2",
+    "play_guard_version": "W1_PLAY_GUARD_V1",
+    "next_refresh": "2026-06-10 18:00 CST"
+  },
+  "groups": [
+    {
+      "group": "A",
+      "teams": [
+        "Mexico",
+        "South Africa",
+        "South Korea",
+        "Czech Republic"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489369",
+          "match": "Mexico vs South Africa",
+          "kickoff_utc": "2026-06-11T19:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1538999",
+          "match": "South Korea vs Czech Republic",
+          "kickoff_utc": "2026-06-12T02:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Mexico",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "South Africa",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "South Korea",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Czech Republic",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "B",
+      "teams": [
+        "Canada",
+        "Bosnia & Herzegovina",
+        "USA",
+        "Paraguay"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1539000",
+          "match": "Canada vs Bosnia & Herzegovina",
+          "kickoff_utc": "2026-06-12T19:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489370",
+          "match": "USA vs Paraguay",
+          "kickoff_utc": "2026-06-13T01:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Canada",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Bosnia & Herzegovina",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "USA",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Paraguay",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "C",
+      "teams": [
+        "Qatar",
+        "Switzerland",
+        "Brazil",
+        "Morocco"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489373",
+          "match": "Qatar vs Switzerland",
+          "kickoff_utc": "2026-06-13T19:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489371",
+          "match": "Brazil vs Morocco",
+          "kickoff_utc": "2026-06-13T22:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Qatar",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Switzerland",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Brazil",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Morocco",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "D",
+      "teams": [
+        "Haiti",
+        "Scotland",
+        "Australia",
+        "Türkiye"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489372",
+          "match": "Haiti vs Scotland",
+          "kickoff_utc": "2026-06-14T01:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1539001",
+          "match": "Australia vs Türkiye",
+          "kickoff_utc": "2026-06-14T04:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Haiti",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Scotland",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Australia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Türkiye",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "E",
+      "teams": [
+        "Germany",
+        "Curaçao",
+        "Netherlands",
+        "Japan"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489374",
+          "match": "Germany vs Curaçao",
+          "kickoff_utc": "2026-06-14T17:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489376",
+          "match": "Netherlands vs Japan",
+          "kickoff_utc": "2026-06-14T20:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Germany",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Curaçao",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Netherlands",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Japan",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "F",
+      "teams": [
+        "Ivory Coast",
+        "Ecuador",
+        "Sweden",
+        "Tunisia"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489375",
+          "match": "Ivory Coast vs Ecuador",
+          "kickoff_utc": "2026-06-14T23:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1539002",
+          "match": "Sweden vs Tunisia",
+          "kickoff_utc": "2026-06-15T02:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Ivory Coast",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Ecuador",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Sweden",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Tunisia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "G",
+      "teams": [
+        "Spain",
+        "Cape Verde Islands",
+        "Belgium",
+        "Egypt"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489380",
+          "match": "Spain vs Cape Verde Islands",
+          "kickoff_utc": "2026-06-15T16:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489377",
+          "match": "Belgium vs Egypt",
+          "kickoff_utc": "2026-06-15T19:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Spain",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Cape Verde Islands",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Belgium",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Egypt",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "H",
+      "teams": [
+        "Saudi Arabia",
+        "Uruguay",
+        "Iran",
+        "New Zealand"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489379",
+          "match": "Saudi Arabia vs Uruguay",
+          "kickoff_utc": "2026-06-15T22:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489378",
+          "match": "Iran vs New Zealand",
+          "kickoff_utc": "2026-06-16T01:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Saudi Arabia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Uruguay",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Iran",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "New Zealand",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "I",
+      "teams": [
+        "France",
+        "Senegal",
+        "Iraq",
+        "Norway"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489383",
+          "match": "France vs Senegal",
+          "kickoff_utc": "2026-06-16T19:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1539016",
+          "match": "Iraq vs Norway",
+          "kickoff_utc": "2026-06-16T22:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "France",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Senegal",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Iraq",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Norway",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "J",
+      "teams": [
+        "Argentina",
+        "Algeria",
+        "Austria",
+        "Jordan"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489381",
+          "match": "Argentina vs Algeria",
+          "kickoff_utc": "2026-06-17T01:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489382",
+          "match": "Austria vs Jordan",
+          "kickoff_utc": "2026-06-17T04:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Argentina",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Algeria",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Austria",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Jordan",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "K",
+      "teams": [
+        "Portugal",
+        "Congo DR",
+        "England",
+        "Croatia"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1539003",
+          "match": "Portugal vs Congo DR",
+          "kickoff_utc": "2026-06-17T17:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489384",
+          "match": "England vs Croatia",
+          "kickoff_utc": "2026-06-17T20:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Portugal",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Congo DR",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "England",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Croatia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    },
+    {
+      "group": "L",
+      "teams": [
+        "Ghana",
+        "Panama",
+        "Uzbekistan",
+        "Colombia"
+      ],
+      "round1_fixtures": [
+        {
+          "fixture_id": "1489385",
+          "match": "Ghana vs Panama",
+          "kickoff_utc": "2026-06-17T23:00:00Z",
+          "decision": "W1_WAIT"
+        },
+        {
+          "fixture_id": "1489386",
+          "match": "Uzbekistan vs Colombia",
+          "kickoff_utc": "2026-06-18T02:00:00Z",
+          "decision": "W1_WAIT"
+        }
+      ],
+      "standings_template": [
+        {
+          "team": "Ghana",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Panama",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Uzbekistan",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        },
+        {
+          "team": "Colombia",
+          "P": 0,
+          "W": 0,
+          "D": 0,
+          "L": 0,
+          "GF": 0,
+          "GA": 0,
+          "GD": 0,
+          "PTS": 0
+        }
+      ]
+    }
+  ],
+  "advancement_rules": {
+    "groups_total": 12,
+    "teams_per_group": 4,
+    "direct_qualifiers_per_group": 2,
+    "direct_qualifiers": 24,
+    "best_third_qualifiers": 8,
+    "round_of_32_total": 32,
+    "third_place_tiebreakers": [
+      "points",
+      "goal_diff",
+      "goals_for",
+      "fair_play",
+      "drawing_of_lots"
+    ]
+  },
+  "third_place_ranking_template": [
+    {
+      "rank": 1,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 2,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 3,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 4,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 5,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 6,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 7,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 8,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 9,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 10,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 11,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    },
+    {
+      "rank": 12,
+      "group": "",
+      "team": "",
+      "points": 0,
+      "goal_diff": 0,
+      "goals_for": 0,
+      "fair_play": 0,
+      "drawing_of_lots": ""
+    }
+  ],
+  "first_match": {
+    "fixture_id": "1489369",
+    "match": "Mexico vs South Africa",
+    "kickoff_utc": "2026-06-11T19:00:00Z",
+    "kickoff_cst": "2026-06-12 03:00",
+    "decision": "W1_WAIT",
+    "lineup_status": "WAIT_EVENT",
+    "referee_status": "MISSING",
+    "odds_status": "READY",
+    "play_guard_pass": false,
+    "next_refresh": "2026-06-10 18:00 CST"
+  },
+  "report_entrypoints": [
+    {
+      "label": "W1_LIVE_DASHBOARD.md",
+      "path": "W1_LIVE_DASHBOARD.md"
+    },
+    {
+      "label": "W1_REPORT_TEMPLATES.md",
+      "path": "../../docs/W1_REPORT_TEMPLATES.md"
+    },
+    {
+      "label": "W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md",
+      "path": "../../docs/W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md"
+    }
+  ],
+  "unresolved_data_gaps": [
+    {
+      "gap": "confirmed_lineup",
+      "scope": "24/24 first-round cards",
+      "blocks_play": true,
+      "status": "WAIT_EVENT"
+    },
+    {
+      "gap": "referee assignment",
+      "scope": "first-round cards",
+      "blocks_play": false,
+      "status": "MISSING"
+    },
+    {
+      "gap": "suspensions",
+      "scope": "system-level",
+      "blocks_play": false,
+      "status": "PARTIAL"
+    },
+    {
+      "gap": "travel_distance",
+      "scope": "system-level",
+      "blocks_play": false,
+      "status": "PARTIAL"
+    }
+  ]
+}
