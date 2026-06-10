@@ -1,0 +1,64 @@
+{
+  "schema_version": "w1_round1_snapshot_summary.v1",
+  "round": "Group Stage - 1",
+  "snapshot_source": "OpenClaw first-round snapshot",
+  "snapshot_time_cst": "2026-06-10 13:55 CST",
+  "snapshot_time_utc": "2026-06-10T05:55:00Z",
+  "matches_found": 24,
+  "cards_created": 24,
+  "odds_1X2": {
+    "ready": 24,
+    "total": 24,
+    "status": "READY"
+  },
+  "odds_AH": {
+    "ready": 24,
+    "total": 24,
+    "status": "READY"
+  },
+  "odds_OU": {
+    "ready": 24,
+    "total": 24,
+    "status": "READY"
+  },
+  "squads": {
+    "status": "READY",
+    "detail": "AVAILABLE in OpenClaw snapshot"
+  },
+  "standings": {
+    "status": "READY"
+  },
+  "h2h": {
+    "status": "READY",
+    "detail": "ENDPOINT_READY"
+  },
+  "lineup": {
+    "status": "WAIT_EVENT",
+    "ready": 0,
+    "total": 24
+  },
+  "referee": {
+    "status": "WAIT_EVENT",
+    "ready": 0,
+    "total": 24
+  },
+  "weather": {
+    "status": "POSSIBLE",
+    "weather_possible": true
+  },
+  "final_decision_distribution": {
+    "W1_WAIT": 24,
+    "W1_PLAY": 0,
+    "W1_WATCH": 0,
+    "W1_PASS": 0
+  },
+  "ledger_required": true,
+  "next_refresh_time_utc": "2026-06-10T11:55:00Z",
+  "boundaries": {
+    "external_api_called": false,
+    "v3_v4_m1_modified": false,
+    "disallowed_status_or_channel_written": false,
+    "remote_configured": false,
+    "pushed": false
+  }
+}
