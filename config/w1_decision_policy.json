@@ -1,0 +1,105 @@
+{
+  "policy_id": "W1_PRODUCTION_LITE_DECISION_POLICY",
+  "version": "1.0.0",
+  "decision_labels": [
+    "W1_PLAY",
+    "W1_WATCH",
+    "W1_WAIT",
+    "W1_PASS"
+  ],
+  "forbidden_terms": [
+    "opening_odds",
+    "old official",
+    "pending",
+    "QQ",
+    "稳赚",
+    "命中率"
+  ],
+  "hard_rules": [
+    {
+      "id": "confirmed_lineup_required",
+      "if": "lineups.confirmed_lineup_available != true",
+      "then_label": "W1_WAIT",
+      "data_gap_required": true
+    },
+    {
+      "id": "odds_1x2_required",
+      "if": "markets.odds_1X2.available != true",
+      "then_label": "W1_WAIT",
+      "data_gap_required": true
+    },
+    {
+      "id": "odds_ah_required",
+      "if": "markets.odds_AH.available != true",
+      "then_label": "W1_WAIT",
+      "data_gap_required": true
+    },
+    {
+      "id": "odds_ou_required",
+      "if": "markets.odds_OU.available != true",
+      "then_label": "W1_WAIT",
+      "data_gap_required": true
+    },
+    {
+      "id": "squad_required_or_degraded",
+      "if": "squad.home.available != true or squad.away.available != true",
+      "then_label_one_of": [
+        "W1_WAIT",
+        "W1_WATCH"
+      ],
+      "data_gap_required": true
+    },
+    {
+      "id": "partial_suspensions_non_blocking",
+      "if": "context.suspensions.status == PARTIAL",
+      "then_risk_flag_required": true,
+      "blocking": false
+    },
+    {
+      "id": "partial_travel_distance_non_blocking",
+      "if": "context.travel_distance.status == PARTIAL",
+      "then_risk_flag_required": true,
+      "blocking": false
+    },
+    {
+      "id": "play_requires_ledger",
+      "if": "decision.label == W1_PLAY",
+      "then": "decision.ledger_required == true"
+    }
+  ],
+  "label_policy": {
+    "W1_PLAY": {
+      "ledger_required": true,
+      "allowed_when": [
+        "confirmed lineup is available",
+        "1X2, AH, and OU odds are available",
+        "both squads are available",
+        "risk flags are explicit and accepted"
+      ]
+    },
+    "W1_WATCH": {
+      "ledger_required": false,
+      "allowed_when": [
+        "non-critical data is partial",
+        "squad degradation is explicitly explained",
+        "market or context requires observation"
+      ]
+    },
+    "W1_WAIT": {
+      "ledger_required": false,
+      "allowed_when": [
+        "confirmed lineup is missing",
+        "required odds market is missing",
+        "critical data gap needs refresh"
+      ]
+    },
+    "W1_PASS": {
+      "ledger_required": false,
+      "allowed_when": [
+        "data is sufficient but risk is unacceptable",
+        "price or context does not support analysis continuation"
+      ]
+    }
+  }
+}
+

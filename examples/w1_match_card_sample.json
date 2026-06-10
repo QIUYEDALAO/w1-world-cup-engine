@@ -1,0 +1,200 @@
+{
+  "schema_version": "w1_match_card.v1",
+  "match": {
+    "match_id": "api-football:1489369",
+    "competition": "FIFA World Cup",
+    "season": 2026,
+    "round": "Group Stage - 1",
+    "kickoff_utc": "2026-06-11T19:00:00Z",
+    "generated_at_utc": "2026-06-10T03:00:00Z",
+    "venue": {
+      "name": "Estadio Azteca",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "latitude": 19.3029,
+      "longitude": -99.1505
+    },
+    "referee": {
+      "name": null,
+      "available": false
+    }
+  },
+  "teams": {
+    "home": {
+      "team_id": "api-football:16",
+      "name": "Mexico",
+      "fifa_rank": 15,
+      "elo_rating": 1817.4
+    },
+    "away": {
+      "team_id": "api-football:1531",
+      "name": "South Africa",
+      "fifa_rank": 59,
+      "elo_rating": 1622.1
+    }
+  },
+  "data_sources": {
+    "api_football": {
+      "status": "OK",
+      "as_of_utc": "2026-06-10T02:28:22Z",
+      "note": "fixtures, odds, squads, standings, H2H endpoints available from MVP verification"
+    },
+    "open_meteo": {
+      "status": "OK",
+      "as_of_utc": "2026-06-10T03:00:00Z",
+      "note": "venue coordinate weather lookup available"
+    },
+    "fifa_rank": {
+      "status": "PARTIAL",
+      "as_of_utc": "2026-06-10T03:00:00Z",
+      "note": "rank values from crawl/snapshot path; refresh before final use"
+    },
+    "elo": {
+      "status": "PARTIAL",
+      "as_of_utc": "2026-06-10T03:00:00Z",
+      "note": "locally computed from international results CSV snapshot"
+    },
+    "local_snapshots": {
+      "status": "OK",
+      "as_of_utc": "2026-06-10T03:00:00Z",
+      "note": "sample card only; no external API called by checker"
+    }
+  },
+  "markets": {
+    "odds_snapshot_time_utc": "2026-06-10T02:28:22Z",
+    "first_seen_odds_proxy": {
+      "available": true,
+      "captured_at_utc": "2026-06-10T02:28:22Z",
+      "source": "api-football odds update field",
+      "note": "First observed W1 snapshot; not official opening odds."
+    },
+    "odds_1X2": {
+      "available": true,
+      "bookmakers_count": 14,
+      "lines": [
+        {
+          "bookmaker": "sample-consensus",
+          "home": 1.4,
+          "draw": 4.3,
+          "away": 8.75
+        }
+      ]
+    },
+    "odds_AH": {
+      "available": true,
+      "bookmakers_count": 14,
+      "lines": [
+        {
+          "bookmaker": "sample-consensus",
+          "line": "Mexico -1",
+          "home": 1.7,
+          "away": 2.1
+        }
+      ]
+    },
+    "odds_OU": {
+      "available": true,
+      "bookmakers_count": 14,
+      "lines": [
+        {
+          "bookmaker": "sample-consensus",
+          "line": "2.5",
+          "over": 1.92,
+          "under": 1.88
+        }
+      ]
+    }
+  },
+  "squad": {
+    "home": {
+      "available": true,
+      "players_count": 26,
+      "source": "api-football players/squads",
+      "missing_fields": []
+    },
+    "away": {
+      "available": true,
+      "players_count": 26,
+      "source": "api-football players/squads",
+      "missing_fields": []
+    }
+  },
+  "lineups": {
+    "confirmed_lineup_available": false,
+    "status": "MISSING",
+    "home_starting_xi": [],
+    "away_starting_xi": []
+  },
+  "context": {
+    "standings": {
+      "status": "PARTIAL",
+      "summary": "Pre-tournament group table not final enough for match importance beyond round metadata."
+    },
+    "recent_form": {
+      "status": "OK",
+      "summary": "Recent national team fixtures can be pulled from api-football team fixture endpoint."
+    },
+    "h2h": {
+      "status": "OK",
+      "summary": "Endpoint returned no direct recent H2H, which is an acceptable empty result."
+    },
+    "injuries": {
+      "status": "OK",
+      "summary": "Injury endpoint available; current sample has no listed injuries."
+    },
+    "suspensions": {
+      "status": "PARTIAL",
+      "summary": "No independent suspension endpoint verified; use injury endpoint plus manual confirmation."
+    },
+    "weather": {
+      "status": "OK",
+      "summary": "Open-Meteo forecast path available for venue coordinates."
+    },
+    "travel_distance": {
+      "status": "PARTIAL",
+      "summary": "Travel estimate is available only after venue coordinate normalization and base-camp assumptions."
+    }
+  },
+  "risk_flags": [
+    {
+      "code": "REFEREE_MISSING",
+      "severity": "LOW",
+      "message": "Referee not yet assigned in source snapshot."
+    },
+    {
+      "code": "SUSPENSIONS_PARTIAL",
+      "severity": "MEDIUM",
+      "message": "Suspension data is partial and must be manually reviewed before any W1_PLAY."
+    },
+    {
+      "code": "TRAVEL_DISTANCE_PARTIAL",
+      "severity": "LOW",
+      "message": "Travel distance is estimated from partial venue/base assumptions and does not block analysis."
+    }
+  ],
+  "data_gaps": [
+    {
+      "field": "lineups.confirmed_lineup",
+      "severity": "HIGH",
+      "message": "Confirmed starting lineups are not available yet; hard rule requires W1_WAIT.",
+      "blocks_play": true
+    },
+    {
+      "field": "match.referee",
+      "severity": "LOW",
+      "message": "Referee field is not assigned yet; keep as risk flag, not a blocker.",
+      "blocks_play": false
+    }
+  ],
+  "decision": {
+    "label": "W1_WAIT",
+    "ledger_required": false,
+    "reasons": [
+      "Confirmed lineup is missing, so hard rule forces W1_WAIT.",
+      "Required 1X2, AH, and OU markets are present.",
+      "Suspensions and travel distance are partial but non-blocking risk flags."
+    ],
+    "no_betting_commitment": true
+  }
+}
+

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w1.local/schemas/w1_ledger_schema.json",
+  "title": "W1 Production Lite Ledger Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "ledger_id",
+    "created_at_utc",
+    "match_id",
+    "decision_label",
+    "ledger_required",
+    "operator",
+    "source_card_sha256",
+    "risk_flags",
+    "data_gaps",
+    "decision_summary",
+    "no_betting_commitment"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "w1_ledger.v1"
+    },
+    "ledger_id": {
+      "type": "string"
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "match_id": {
+      "type": "string"
+    },
+    "decision_label": {
+      "type": "string",
+      "enum": [
+        "W1_PLAY",
+        "W1_WATCH",
+        "W1_WAIT",
+        "W1_PASS"
+      ]
+    },
+    "ledger_required": {
+      "type": "boolean"
+    },
+    "operator": {
+      "type": "string"
+    },
+    "source_card_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "risk_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "data_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "decision_summary": {
+      "type": "string"
+    },
+    "manual_override": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "used",
+        "reason"
+      ],
+      "properties": {
+        "used": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "no_betting_commitment": {
+      "type": "boolean",
+      "const": true
+    }
+  }
+}
+

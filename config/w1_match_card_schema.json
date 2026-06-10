@@ -1,0 +1,536 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w1.local/schemas/w1_match_card_schema.json",
+  "title": "W1 Production Lite Match Card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "match",
+    "teams",
+    "data_sources",
+    "markets",
+    "squad",
+    "lineups",
+    "context",
+    "risk_flags",
+    "data_gaps",
+    "decision"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "w1_match_card.v1"
+    },
+    "match": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "match_id",
+        "competition",
+        "season",
+        "round",
+        "kickoff_utc",
+        "generated_at_utc",
+        "venue",
+        "referee"
+      ],
+      "properties": {
+        "match_id": {
+          "type": "string"
+        },
+        "competition": {
+          "type": "string"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "round": {
+          "type": "string"
+        },
+        "kickoff_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "generated_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "venue": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "city",
+            "country",
+            "latitude",
+            "longitude"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "latitude": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "longitude": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          }
+        },
+        "referee": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "available"
+          ],
+          "properties": {
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "available": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "teams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "home",
+        "away"
+      ],
+      "properties": {
+        "home": {
+          "$ref": "#/$defs/team"
+        },
+        "away": {
+          "$ref": "#/$defs/team"
+        }
+      }
+    },
+    "data_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "api_football",
+        "open_meteo",
+        "fifa_rank",
+        "elo",
+        "local_snapshots"
+      ],
+      "properties": {
+        "api_football": {
+          "$ref": "#/$defs/source_status"
+        },
+        "open_meteo": {
+          "$ref": "#/$defs/source_status"
+        },
+        "fifa_rank": {
+          "$ref": "#/$defs/source_status"
+        },
+        "elo": {
+          "$ref": "#/$defs/source_status"
+        },
+        "local_snapshots": {
+          "$ref": "#/$defs/source_status"
+        }
+      }
+    },
+    "markets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "odds_snapshot_time_utc",
+        "first_seen_odds_proxy",
+        "odds_1X2",
+        "odds_AH",
+        "odds_OU"
+      ],
+      "properties": {
+        "odds_snapshot_time_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "first_seen_odds_proxy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "available",
+            "captured_at_utc",
+            "source",
+            "note"
+          ],
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "captured_at_utc": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "source": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "odds_1X2": {
+          "$ref": "#/$defs/market"
+        },
+        "odds_AH": {
+          "$ref": "#/$defs/market"
+        },
+        "odds_OU": {
+          "$ref": "#/$defs/market"
+        }
+      }
+    },
+    "squad": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "home",
+        "away"
+      ],
+      "properties": {
+        "home": {
+          "$ref": "#/$defs/squad_status"
+        },
+        "away": {
+          "$ref": "#/$defs/squad_status"
+        }
+      }
+    },
+    "lineups": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "confirmed_lineup_available",
+        "status",
+        "home_starting_xi",
+        "away_starting_xi"
+      ],
+      "properties": {
+        "confirmed_lineup_available": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "CONFIRMED",
+            "MISSING",
+            "PARTIAL"
+          ]
+        },
+        "home_starting_xi": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "away_starting_xi": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "standings",
+        "recent_form",
+        "h2h",
+        "injuries",
+        "suspensions",
+        "weather",
+        "travel_distance"
+      ],
+      "properties": {
+        "standings": {
+          "$ref": "#/$defs/context_block"
+        },
+        "recent_form": {
+          "$ref": "#/$defs/context_block"
+        },
+        "h2h": {
+          "$ref": "#/$defs/context_block"
+        },
+        "injuries": {
+          "$ref": "#/$defs/context_block"
+        },
+        "suspensions": {
+          "$ref": "#/$defs/context_block"
+        },
+        "weather": {
+          "$ref": "#/$defs/context_block"
+        },
+        "travel_distance": {
+          "$ref": "#/$defs/context_block"
+        }
+      }
+    },
+    "risk_flags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/flag"
+      }
+    },
+    "data_gaps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gap"
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "ledger_required",
+        "reasons",
+        "no_betting_commitment"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": [
+            "W1_PLAY",
+            "W1_WATCH",
+            "W1_WAIT",
+            "W1_PASS"
+          ]
+        },
+        "ledger_required": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "no_betting_commitment": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "team": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "team_id",
+        "name",
+        "fifa_rank",
+        "elo_rating"
+      ],
+      "properties": {
+        "team_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "fifa_rank": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "elo_rating": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "source_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "as_of_utc",
+        "note"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "OK",
+            "PARTIAL",
+            "MISSING"
+          ]
+        },
+        "as_of_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "market": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "available",
+        "bookmakers_count",
+        "lines"
+      ],
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "bookmakers_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "squad_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "available",
+        "players_count",
+        "source",
+        "missing_fields"
+      ],
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "players_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source": {
+          "type": "string"
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "context_block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "summary"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "OK",
+            "PARTIAL",
+            "MISSING"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        }
+      }
+    },
+    "flag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "severity",
+        "message",
+        "blocks_play"
+      ],
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "blocks_play": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
+
