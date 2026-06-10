@@ -1,6 +1,7 @@
 # W1 Watcher Status
 
 **Status:** READY  
+**Version:** v2  
 **Checked at:** 2026-06-10 15:30 CST  
 **Next run:** 2026-06-10 18:00 CST
 
@@ -29,8 +30,10 @@
 
 - `bash -n scripts/w1_watcher.sh`: PASS
 - dry-run: PASS
+- v2 no-change skip policy: PASS
+- `SNAPSHOT_TS` filename alignment: PASS
+- cron points to `./scripts/w1_watcher.sh`: PASS
 - credential literal scan: PASS
 - old-system path scan: PASS
 - disallowed output scan: PASS
 - remote status: no remote
-

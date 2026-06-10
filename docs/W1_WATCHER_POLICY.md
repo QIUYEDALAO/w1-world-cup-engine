@@ -1,6 +1,7 @@
 # W1 Watcher Policy
 
 **Status:** READY  
+**Version:** v2  
 **Scope:** W1 only
 
 ## Schedule
@@ -36,3 +37,21 @@ The current recorded next run is `2026-06-10 18:00 CST`.
 - The watcher must not write disallowed distribution channels or status files.
 - Remote configuration and push are outside watcher scope.
 
+## V2 Change Policy
+
+The watcher writes a new snapshot only when one of these substantial fields changes:
+
+- odds 1X2
+- AH
+- OU
+- lineup
+- referee
+- injury
+
+The watcher ignores non-substantial changes:
+
+- next refresh time
+- generated filename changes
+- runtime log changes
+
+`SNAPSHOT_TS` is the filename time source, and the internal `snapshot_time` must be generated from the same run.

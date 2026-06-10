@@ -71,6 +71,16 @@ def assert_state() -> None:
 
 def assert_script_static() -> None:
     text = read(WATCHER)
+    if "Auto Refresh Watcher v2" not in text:
+        fail("watcher must identify itself as v2")
+    if "odds_1X2/AH/OU / lineup / referee / injury" not in text:
+        fail("watcher must document the v2 substantial-change definition")
+    if "No substantial change. Snapshot NOT written." not in text:
+        fail("watcher must skip snapshot writes when there is no substantial change")
+    if "SNAPSHOT_TS=$(TZ='Asia/Shanghai' date '+%Y%m%d_%H%M')" not in text:
+        fail("watcher must use SNAPSHOT_TS for snapshot filenames")
+    if 'json.dump({"snapshot_time": SNAPSHOT_TIME' not in text:
+        fail("watcher must use SNAPSHOT_TIME inside snapshot JSON")
     if SECRET_LITERAL_RE.search(text):
         fail("watcher contains a credential literal")
     for term in OLD_SYSTEM_TERMS:
@@ -119,12 +129,25 @@ def assert_remote_absent() -> None:
         fail("git remote must not be configured")
 
 
+def assert_scheduler_points_to_watcher() -> None:
+    cron = subprocess.run(["crontab", "-l"], cwd=ROOT, text=True, capture_output=True)
+    if cron.returncode != 0:
+        fail("crontab is not readable")
+    lines = [line for line in cron.stdout.splitlines() if "w1_watcher.sh" in line and not line.lstrip().startswith("#")]
+    if not any("0 0,6,12,18 * * *" in line and "./scripts/w1_watcher.sh" in line for line in lines):
+        fail("normal cron schedule must point to ./scripts/w1_watcher.sh")
+    special_lines = [line for line in lines if "W1_REFRESH_NOW=1 ./scripts/w1_watcher.sh" in line]
+    if len(special_lines) < 3:
+        fail("first-match special cron entries must point to ./scripts/w1_watcher.sh")
+
+
 def main() -> int:
     try:
         assert_paths()
         assert_state()
         assert_script_static()
         assert_shell_checks()
+        assert_scheduler_points_to_watcher()
         assert_remote_absent()
     except CheckError as exc:
         print(f"W1 watcher self-test FAIL: {exc}", file=sys.stderr)
