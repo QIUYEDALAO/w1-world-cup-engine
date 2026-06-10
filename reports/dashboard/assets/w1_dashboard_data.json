@@ -45,7 +45,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Mexico",
-          "team_cn": "墨西哥"
+          "team_cn": "墨西哥",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "South Africa",
@@ -58,7 +60,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "South Africa",
-          "team_cn": "南非"
+          "team_cn": "南非",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "South Korea",
@@ -71,7 +75,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "South Korea",
-          "team_cn": "韩国"
+          "team_cn": "韩国",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Czech Republic",
@@ -84,7 +90,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Czech Republic",
-          "team_cn": "捷克"
+          "team_cn": "捷克",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -98,6 +106,23 @@
         "南非",
         "韩国",
         "捷克"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M79",
+          "opponent": "对 成绩较好的 C/E/F/H/I 组第三"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M73",
+          "opponent": "对 B组第2名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 E组第1名 或 G组第1名"
+        }
       ]
     },
     {
@@ -134,7 +159,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Canada",
-          "team_cn": "加拿大"
+          "team_cn": "加拿大",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Bosnia & Herzegovina",
@@ -147,7 +174,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Bosnia & Herzegovina",
-          "team_cn": "波黑"
+          "team_cn": "波黑",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "USA",
@@ -160,7 +189,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "USA",
-          "team_cn": "美国"
+          "team_cn": "美国",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Paraguay",
@@ -173,7 +204,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Paraguay",
-          "team_cn": "巴拉圭"
+          "team_cn": "巴拉圭",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -187,6 +220,23 @@
         "波黑",
         "美国",
         "巴拉圭"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M85",
+          "opponent": "对 成绩较好的 E/F/G/I/J 组第三"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M73",
+          "opponent": "对 A组第2名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 E组第1名 或 D组第1名"
+        }
       ]
     },
     {
@@ -223,7 +273,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Qatar",
-          "team_cn": "卡塔尔"
+          "team_cn": "卡塔尔",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Switzerland",
@@ -236,7 +288,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Switzerland",
-          "team_cn": "瑞士"
+          "team_cn": "瑞士",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Brazil",
@@ -249,7 +303,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Brazil",
-          "team_cn": "巴西"
+          "team_cn": "巴西",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Morocco",
@@ -262,7 +318,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Morocco",
-          "team_cn": "摩洛哥"
+          "team_cn": "摩洛哥",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -276,6 +334,23 @@
         "瑞士",
         "巴西",
         "摩洛哥"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M76",
+          "opponent": "对 F组第2名"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M75",
+          "opponent": "对 F组第1名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 E组第1名 / I组第1名 / A组第1名"
+        }
       ]
     },
     {
@@ -312,7 +387,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Haiti",
-          "team_cn": "海地"
+          "team_cn": "海地",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Scotland",
@@ -325,7 +402,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Scotland",
-          "team_cn": "苏格兰"
+          "team_cn": "苏格兰",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Australia",
@@ -338,7 +417,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Australia",
-          "team_cn": "澳大利亚"
+          "team_cn": "澳大利亚",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Türkiye",
@@ -351,7 +432,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Türkiye",
-          "team_cn": "土耳其"
+          "team_cn": "土耳其",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -365,6 +448,23 @@
         "苏格兰",
         "澳大利亚",
         "土耳其"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M81",
+          "opponent": "对 成绩较好的 B/E/F/I/J 组第三"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M88",
+          "opponent": "对 G组第2名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 E组第1名 / I组第1名 / K组第1名"
+        }
       ]
     },
     {
@@ -401,7 +501,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Germany",
-          "team_cn": "德国"
+          "team_cn": "德国",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Curaçao",
@@ -414,7 +516,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Curaçao",
-          "team_cn": "库拉索"
+          "team_cn": "库拉索",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Netherlands",
@@ -427,7 +531,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Netherlands",
-          "team_cn": "荷兰"
+          "team_cn": "荷兰",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Japan",
@@ -440,7 +546,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Japan",
-          "team_cn": "日本"
+          "team_cn": "日本",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -454,6 +562,23 @@
         "库拉索",
         "荷兰",
         "日本"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M74",
+          "opponent": "对 成绩较好的 A/B/C/D/F 组第三"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M78",
+          "opponent": "对 I组第2名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 A/B/D/G/K/L 组第1名"
+        }
       ]
     },
     {
@@ -490,7 +615,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Ivory Coast",
-          "team_cn": "科特迪瓦"
+          "team_cn": "科特迪瓦",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Ecuador",
@@ -503,7 +630,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Ecuador",
-          "team_cn": "厄瓜多尔"
+          "team_cn": "厄瓜多尔",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Sweden",
@@ -516,7 +645,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Sweden",
-          "team_cn": "瑞典"
+          "team_cn": "瑞典",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Tunisia",
@@ -529,7 +660,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Tunisia",
-          "team_cn": "突尼斯"
+          "team_cn": "突尼斯",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -543,6 +676,23 @@
         "厄瓜多尔",
         "瑞典",
         "突尼斯"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M75",
+          "opponent": "对 C组第2名"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M76",
+          "opponent": "对 C组第1名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 E/I/A/B 组第1名"
+        }
       ]
     },
     {
@@ -579,7 +729,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Spain",
-          "team_cn": "西班牙"
+          "team_cn": "西班牙",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Cape Verde Islands",
@@ -592,7 +744,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Cape Verde Islands",
-          "team_cn": "佛得角"
+          "team_cn": "佛得角",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Belgium",
@@ -605,7 +759,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Belgium",
-          "team_cn": "比利时"
+          "team_cn": "比利时",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Egypt",
@@ -618,7 +774,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Egypt",
-          "team_cn": "埃及"
+          "team_cn": "埃及",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -632,6 +790,23 @@
         "佛得角",
         "比利时",
         "埃及"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M82",
+          "opponent": "对 成绩较好的 A/E/H/I/J 组第三"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M88",
+          "opponent": "对 D组第2名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 I组第1名 或 B组第1名"
+        }
       ]
     },
     {
@@ -668,7 +843,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Saudi Arabia",
-          "team_cn": "沙特阿拉伯"
+          "team_cn": "沙特阿拉伯",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Uruguay",
@@ -681,7 +858,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Uruguay",
-          "team_cn": "乌拉圭"
+          "team_cn": "乌拉圭",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Iran",
@@ -694,7 +873,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Iran",
-          "team_cn": "伊朗"
+          "team_cn": "伊朗",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "New Zealand",
@@ -707,7 +888,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "New Zealand",
-          "team_cn": "新西兰"
+          "team_cn": "新西兰",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -721,6 +904,23 @@
         "乌拉圭",
         "伊朗",
         "新西兰"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M84",
+          "opponent": "对 J组第2名"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M86",
+          "opponent": "对 J组第1名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 I/A/L/G 组第1名"
+        }
       ]
     },
     {
@@ -757,7 +957,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "France",
-          "team_cn": "法国"
+          "team_cn": "法国",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Senegal",
@@ -770,7 +972,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Senegal",
-          "team_cn": "塞内加尔"
+          "team_cn": "塞内加尔",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Iraq",
@@ -783,7 +987,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Iraq",
-          "team_cn": "伊拉克"
+          "team_cn": "伊拉克",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Norway",
@@ -796,7 +1002,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Norway",
-          "team_cn": "挪威"
+          "team_cn": "挪威",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -810,6 +1018,23 @@
         "塞内加尔",
         "伊拉克",
         "挪威"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M77",
+          "opponent": "对 成绩较好的 C/D/F/G/H 组第三"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M78",
+          "opponent": "对 E组第2名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 A/L/D/G/B/K 组第1名"
+        }
       ]
     },
     {
@@ -846,7 +1071,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Argentina",
-          "team_cn": "阿根廷"
+          "team_cn": "阿根廷",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Algeria",
@@ -859,7 +1086,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Algeria",
-          "team_cn": "阿尔及利亚"
+          "team_cn": "阿尔及利亚",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Austria",
@@ -872,7 +1101,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Austria",
-          "team_cn": "奥地利"
+          "team_cn": "奥地利",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Jordan",
@@ -885,7 +1116,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Jordan",
-          "team_cn": "约旦"
+          "team_cn": "约旦",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -899,6 +1132,23 @@
         "阿尔及利亚",
         "奥地利",
         "约旦"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M86",
+          "opponent": "对 H组第2名"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M84",
+          "opponent": "对 H组第1名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 L/D/G/B/K 组第1名"
+        }
       ]
     },
     {
@@ -935,7 +1185,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Portugal",
-          "team_cn": "葡萄牙"
+          "team_cn": "葡萄牙",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Congo DR",
@@ -948,7 +1200,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Congo DR",
-          "team_cn": "刚果（金）"
+          "team_cn": "刚果（金）",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "England",
@@ -961,7 +1215,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "England",
-          "team_cn": "英格兰"
+          "team_cn": "英格兰",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Croatia",
@@ -974,7 +1230,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Croatia",
-          "team_cn": "克罗地亚"
+          "team_cn": "克罗地亚",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -988,6 +1246,23 @@
         "刚果（金）",
         "英格兰",
         "克罗地亚"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M87",
+          "opponent": "对 成绩较好的 D/E/I/J/L 组第三"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M83",
+          "opponent": "对 L组第2名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 L组第1名"
+        }
       ]
     },
     {
@@ -1024,7 +1299,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Ghana",
-          "team_cn": "加纳"
+          "team_cn": "加纳",
+          "current_rank_label": "暂列第1",
+          "points_label": "0分"
         },
         {
           "team": "Panama",
@@ -1037,7 +1314,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Panama",
-          "team_cn": "巴拿马"
+          "team_cn": "巴拿马",
+          "current_rank_label": "暂列第2",
+          "points_label": "0分"
         },
         {
           "team": "Uzbekistan",
@@ -1050,7 +1329,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Uzbekistan",
-          "team_cn": "乌兹别克斯坦"
+          "team_cn": "乌兹别克斯坦",
+          "current_rank_label": "暂列第3",
+          "points_label": "0分"
         },
         {
           "team": "Colombia",
@@ -1063,7 +1344,9 @@
           "GD": 0,
           "PTS": 0,
           "team_en": "Colombia",
-          "team_cn": "哥伦比亚"
+          "team_cn": "哥伦比亚",
+          "current_rank_label": "暂列第4",
+          "points_label": "0分"
         }
       ],
       "teams_en": [
@@ -1077,6 +1360,23 @@
         "巴拿马",
         "乌兹别克斯坦",
         "哥伦比亚"
+      ],
+      "qualification_paths": [
+        {
+          "finish": "第1名",
+          "slot": "32强 M80",
+          "opponent": "对 成绩较好的 E/H/I/J/K 组第三"
+        },
+        {
+          "finish": "第2名",
+          "slot": "32强 M83",
+          "opponent": "对 K组第2名"
+        },
+        {
+          "finish": "第3名",
+          "slot": "若成为8个最佳第三之一",
+          "opponent": "可能对 K组第1名"
+        }
       ]
     }
   ],
@@ -1425,5 +1725,19 @@
     "Panama": "巴拿马",
     "Uzbekistan": "乌兹别克斯坦",
     "Colombia": "哥伦比亚"
-  }
+  },
+  "group_card_note_cn": "积分为赛前初始化，比赛后由 standings 刷新；当前不预测排名。",
+  "knockout_path_note_cn": "32强对阵按官方赛程席位展示；小组第三的具体落位需等8个最佳第三组合确定。",
+  "standings_compact_headers_cn": [
+    "球队",
+    "赛",
+    "净胜",
+    "积分"
+  ],
+  "qualification_path_headers_cn": [
+    "小组名次",
+    "32强席位",
+    "潜在对手"
+  ],
+  "knockout_slots_source": "FIFA World Cup 2026 Round of 32 schedule slots"
 }

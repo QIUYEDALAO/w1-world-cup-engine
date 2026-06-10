@@ -81,6 +81,17 @@ def assert_dashboard_data(data: dict) -> None:
             for key in ("P", "W", "D", "L", "GF", "GA", "GD", "PTS"):
                 if key not in row:
                     fail(f"Standings template missing {key}")
+            if row.get("points_label") != f"{row.get('PTS')}分":
+                fail(f"Standings points label mismatch in Group {group.get('group')}")
+        paths = group.get("qualification_paths", [])
+        if len(paths) != 3:
+            fail(f"Group {group.get('group')} must contain 3 qualification paths")
+        finishes = [path.get("finish") for path in paths]
+        if finishes != ["第1名", "第2名", "第3名"]:
+            fail(f"Group {group.get('group')} qualification paths must cover first, second, third")
+        for path in paths:
+            if not path.get("slot") or not path.get("opponent"):
+                fail(f"Group {group.get('group')} qualification path missing slot/opponent")
 
     if len(teams) != 48:
         fail(f"Expected 48 teams, found {len(teams)}")
@@ -122,6 +133,10 @@ def assert_dashboard_data(data: dict) -> None:
 
     if len(data.get("third_place_ranking_template", [])) != 12:
         fail("Third-place ranking template must contain 12 rows")
+    if data.get("standings_compact_headers_cn") != ["球队", "赛", "净胜", "积分"]:
+        fail("Compact standings headers mismatch")
+    if "小组第三的具体落位" not in data.get("knockout_path_note_cn", ""):
+        fail("Knockout path note must explain third-place uncertainty")
 
     first = data.get("first_match", {})
     if first.get("match") != "Mexico vs South Africa":
@@ -172,6 +187,13 @@ def assert_html(data: dict) -> None:
         "等待，不下结论",
         "世界杯小组总览",
         "每组前2名直接晋级",
+        "当前积分与晋级后潜在对阵",
+        "0分",
+        "32强席位",
+        "潜在对手",
+        "小组第三的具体落位",
+        "对 B组第2名",
+        "若成为8个最佳第三之一",
         "12个小组，每组4队",
         "12个小组第三中成绩最好的8队晋级",
         "共32队进入淘汰赛",
