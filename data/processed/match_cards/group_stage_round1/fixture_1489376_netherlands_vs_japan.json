@@ -1,0 +1,254 @@
+{
+  "schema_version": "w1_match_card.v1",
+  "match": {
+    "match_id": "api-football:1489376",
+    "competition": "FIFA World Cup",
+    "season": 2026,
+    "round": "Group Stage - 1",
+    "kickoff_utc": "2026-06-14T20:00:00Z",
+    "generated_at_utc": "2026-06-10T06:45:00Z",
+    "venue": {
+      "name": "AT&T Stadium",
+      "city": "Dallas",
+      "country": "USA",
+      "latitude": null,
+      "longitude": null
+    },
+    "referee": {
+      "name": null,
+      "available": false
+    }
+  },
+  "teams": {
+    "home": {
+      "team_id": "fixture:1489376:home",
+      "name": "Netherlands",
+      "fifa_rank": null,
+      "elo_rating": null
+    },
+    "away": {
+      "team_id": "fixture:1489376:away",
+      "name": "Japan",
+      "fifa_rank": null,
+      "elo_rating": null
+    }
+  },
+  "data_sources": {
+    "api_football": {
+      "status": "OK",
+      "as_of_utc": "2026-06-10T06:45:00Z",
+      "note": "Fixture details loaded from local OpenClaw snapshot JSON/CSV; no external API call during card update."
+    },
+    "open_meteo": {
+      "status": "PARTIAL",
+      "as_of_utc": "2026-06-10T06:45:00Z",
+      "note": "Weather lookup is possible from venue city, but not refreshed during this local update."
+    },
+    "fifa_rank": {
+      "status": "PARTIAL",
+      "as_of_utc": "2026-06-10T06:45:00Z",
+      "note": "Not required for the initial W1_WAIT card refresh."
+    },
+    "elo": {
+      "status": "PARTIAL",
+      "as_of_utc": "2026-06-10T06:45:00Z",
+      "note": "Not required for the initial W1_WAIT card refresh."
+    },
+    "local_snapshots": {
+      "status": "OK",
+      "as_of_utc": "2026-06-10T06:45:00Z",
+      "note": "Read from data/snapshots/group_stage_round1/w1_round1_fixture_details_20260610_1445.json and data/snapshots/group_stage_round1/w1_round1_fixture_details_20260610_1445.csv."
+    }
+  },
+  "markets": {
+    "odds_snapshot_time_utc": "2026-06-10T06:45:00Z",
+    "first_seen_odds_proxy": {
+      "available": true,
+      "captured_at_utc": "2026-06-10T06:45:00Z",
+      "source": "OpenClaw fixture details snapshot 20260610_1445",
+      "note": "First observed W1 odds proxy from local fixture snapshot; not market open price."
+    },
+    "odds_1X2": {
+      "available": true,
+      "bookmakers_count": 13,
+      "lines": [
+        {
+          "status": "READY",
+          "home": 1.95,
+          "draw": 3.5,
+          "away": 3.65,
+          "raw": "Home=1.95 | Draw=3.50 | Away=3.65"
+        }
+      ]
+    },
+    "odds_AH": {
+      "available": true,
+      "bookmakers_count": 13,
+      "lines": [
+        {
+          "status": "READY",
+          "raw": "Home -0.5=1.95, Away -0.5=1.85, Home +0=1.45, Away +0=2.75",
+          "home_raw": "Home -0.5=1.95, Home +0=1.45",
+          "away_raw": "Away -0.5=1.85, Away +0=2.75",
+          "entries": [
+            {
+              "line": "Home -0.5",
+              "odds": 1.95
+            },
+            {
+              "line": "Away -0.5",
+              "odds": 1.85
+            },
+            {
+              "line": "Home +0",
+              "odds": 1.45
+            },
+            {
+              "line": "Away +0",
+              "odds": 2.75
+            }
+          ]
+        }
+      ]
+    },
+    "odds_OU": {
+      "available": true,
+      "bookmakers_count": 13,
+      "lines": [
+        {
+          "status": "READY",
+          "raw": "Over 1.5=1.30, Under 1.5=3.45, Over 2.5=1.93, Under 2.5=1.85, Over 3.5=3.40, Under 3.5=1.30",
+          "over_raw": "Over 1.5=1.30, Over 2.5=1.93, Over 3.5=3.40",
+          "under_raw": "Under 1.5=3.45, Under 2.5=1.85, Under 3.5=1.30",
+          "entries": [
+            {
+              "line": "Over 1.5",
+              "odds": 1.3
+            },
+            {
+              "line": "Under 1.5",
+              "odds": 3.45
+            },
+            {
+              "line": "Over 2.5",
+              "odds": 1.93
+            },
+            {
+              "line": "Under 2.5",
+              "odds": 1.85
+            },
+            {
+              "line": "Over 3.5",
+              "odds": 3.4
+            },
+            {
+              "line": "Under 3.5",
+              "odds": 1.3
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "squad": {
+    "home": {
+      "available": true,
+      "players_count": 26,
+      "source": "OpenClaw fixture details snapshot: squad_status=AVAILABLE",
+      "missing_fields": []
+    },
+    "away": {
+      "available": true,
+      "players_count": 26,
+      "source": "OpenClaw fixture details snapshot: squad_status=AVAILABLE",
+      "missing_fields": []
+    }
+  },
+  "lineups": {
+    "confirmed_lineup_available": false,
+    "status": "MISSING",
+    "home_starting_xi": [],
+    "away_starting_xi": []
+  },
+  "context": {
+    "standings": {
+      "status": "OK",
+      "summary": "READY (48/48 teams)"
+    },
+    "recent_form": {
+      "status": "PARTIAL",
+      "summary": "Not refreshed in this local fixture-detail replacement pass."
+    },
+    "h2h": {
+      "status": "OK",
+      "summary": "ENDPOINT_READY"
+    },
+    "injuries": {
+      "status": "OK",
+      "summary": "ENDPOINT_AVAILABLE (current=0)"
+    },
+    "suspensions": {
+      "status": "PARTIAL",
+      "summary": "Partial by W1 policy; non-blocking until confirmed lineup refresh."
+    },
+    "weather": {
+      "status": "PARTIAL",
+      "summary": "YES (open-meteo, free, no key needed)"
+    },
+    "travel_distance": {
+      "status": "PARTIAL",
+      "summary": "Not computed in this local fixture-detail replacement pass."
+    }
+  },
+  "risk_flags": [
+    {
+      "code": "CONFIRMED_LINEUP_MISSING",
+      "severity": "HIGH",
+      "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+    },
+    {
+      "code": "LINEUP_WAIT_EVENT",
+      "severity": "HIGH",
+      "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+    },
+    {
+      "code": "REFEREE_MISSING",
+      "severity": "LOW",
+      "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+    },
+    {
+      "code": "SUSPENSIONS_PARTIAL",
+      "severity": "MEDIUM",
+      "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+    },
+    {
+      "code": "TRAVEL_DISTANCE_PARTIAL",
+      "severity": "LOW",
+      "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+    }
+  ],
+  "data_gaps": [
+    {
+      "field": "lineups.confirmed_lineup",
+      "severity": "HIGH",
+      "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+      "blocks_play": true
+    },
+    {
+      "field": "match.referee",
+      "severity": "LOW",
+      "message": "referee_status=MISSING; keep as a non-blocking gap.",
+      "blocks_play": false
+    }
+  ],
+  "decision": {
+    "label": "W1_WAIT",
+    "ledger_required": true,
+    "reasons": [
+      "confirmed_lineup missing for this fixture; W1 hard rule forces W1_WAIT.",
+      "odds/AH/OU/squad/standings/H2H are READY in the local fixture detail snapshot.",
+      "lineup_status=WAIT_EVENT; referee_status=MISSING."
+    ],
+    "no_betting_commitment": true
+  }
+}
