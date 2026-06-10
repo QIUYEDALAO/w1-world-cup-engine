@@ -1,108 +1,53 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>W1 Visual Dashboard V1</title>
+  <title>W1 世界杯赛前总控台</title>
   <style>
-    :root {
-      --bg: #f6f7f9;
-      --panel: #ffffff;
-      --ink: #1c2430;
-      --muted: #657084;
-      --line: #d9dee7;
-      --accent: #0f766e;
-      --wait: #b45309;
-      --watch: #2563eb;
-      --play: #15803d;
-      --pass: #6b7280;
-      --danger: #b91c1c;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
-    header { padding: 28px 32px 18px; background: #101820; color: white; }
-    header h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: 0; }
-    header p { margin: 0; color: #cbd5e1; }
-    main { padding: 24px 32px 40px; max-width: 1480px; margin: 0 auto; }
-    .status-grid { display: grid; grid-template-columns: repeat(8, minmax(120px, 1fr)); gap: 12px; margin-bottom: 22px; }
-    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; box-shadow: 0 1px 2px rgba(16,24,32,.04); }
-    .metric .label { color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 700; }
-    .metric .value { font-size: 28px; font-weight: 800; margin-top: 5px; }
-    .wait { color: var(--wait); } .watch { color: var(--watch); } .play { color: var(--play); } .pass { color: var(--pass); }
-    .wide { grid-column: span 2; }
-    h2 { margin: 28px 0 12px; font-size: 20px; }
-    h3 { margin: 0 0 10px; font-size: 15px; }
-    .layout { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; align-items: start; }
-    .groups { display: grid; grid-template-columns: repeat(4, minmax(210px, 1fr)); gap: 12px; }
-    .group-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-    .badge { display:inline-flex; align-items:center; justify-content:center; min-width:32px; height:24px; border-radius: 999px; background:#e6f4f1; color:var(--accent); font-weight:800; }
-    .team { display:flex; align-items:center; gap:8px; padding:7px 0; border-top:1px solid #eef1f5; }
-    .seed { width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:#eef2f7; color:#475569; font-size:12px; font-weight:700; }
-    .flow { display:grid; grid-template-columns: 1fr 50px 1fr 50px 1fr; gap: 8px; align-items:center; }
-    .flow-box { min-height:84px; display:flex; flex-direction:column; justify-content:center; text-align:center; border:1px solid var(--line); background:white; border-radius:8px; padding:12px; }
-    .flow-num { font-size:34px; font-weight:900; color:var(--accent); }
-    .arrow { text-align:center; font-size:26px; color:#64748b; }
-    table { width:100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 8px 9px; border-bottom: 1px solid #edf0f4; text-align:left; }
-    th { color: #475569; background:#f8fafc; font-weight:800; }
-    .two-col { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-    .first-match { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
-    .kv .k { color:var(--muted); font-size:12px; font-weight:700; }
-    .kv .v { margin-top:4px; font-size:15px; font-weight:750; }
-    .guard-no { color:var(--danger); }
-    .links { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; }
-    a { color:#075985; text-decoration:none; font-weight:750; }
-    a:hover { text-decoration:underline; }
-    @media (max-width: 1100px) { .status-grid { grid-template-columns: repeat(4,1fr); } .groups { grid-template-columns: repeat(2,1fr); } .layout,.two-col { grid-template-columns:1fr; } }
-    @media (max-width: 720px) { main, header { padding-left:16px; padding-right:16px; } .status-grid,.groups,.first-match,.links { grid-template-columns:1fr; } .flow { grid-template-columns:1fr; } .arrow { transform: rotate(90deg); } }
+    :root { --bg:#f3f5f8; --panel:#fff; --ink:#16202f; --muted:#5d687a; --line:#dbe1ea; --wait:#b45309; --watch:#1d4ed8; --play:#15803d; --pass:#64748b; --accent:#0f766e; --danger:#b91c1c; --soft:#eef7f5; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",sans-serif; }
+    header { background:#0f172a; color:#fff; padding:30px 34px 24px; }
+    header h1 { margin:0 0 10px; font-size:34px; line-height:1.18; letter-spacing:0; }
+    header p { margin:0; color:#d7dee9; font-size:17px; line-height:1.6; }
+    main { max-width:1500px; margin:0 auto; padding:24px 32px 44px; }
+    h2 { margin:30px 0 14px; font-size:23px; line-height:1.25; } h3 { margin:0 0 10px; font-size:17px; }
+    .grid-status { display:grid; grid-template-columns:repeat(4,minmax(180px,1fr)); gap:14px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px; box-shadow:0 1px 3px rgba(15,23,42,.06); }
+    .status-card { min-height:132px; display:flex; flex-direction:column; justify-content:space-between; }
+    .status-label { font-size:17px; font-weight:800; } .status-count { font-size:38px; font-weight:900; line-height:1; margin:10px 0; } .status-hint { color:var(--muted); font-size:14px; line-height:1.45; }
+    .wait { color:var(--wait); } .watch { color:var(--watch); } .play { color:var(--play); } .pass { color:var(--pass); }
+    .meta-row { display:grid; grid-template-columns:repeat(3,minmax(220px,1fr)); gap:14px; margin-top:14px; }
+    .meta-label { color:var(--muted); font-size:14px; font-weight:750; } .meta-value { margin-top:8px; font-size:20px; font-weight:850; overflow-wrap:anywhere; word-break:normal; }
+    .boss { display:grid; grid-template-columns:1.35fr .85fr; gap:16px; margin-top:20px; } .boss-main { border-left:6px solid var(--wait); background:#fffaf3; }
+    .boss-title { font-size:25px; font-weight:900; margin-bottom:14px; } .boss-conclusion { font-size:28px; font-weight:950; color:var(--wait); line-height:1.28; }
+    .boss-list { display:grid; gap:10px; margin-top:16px; } .pill { display:inline-flex; align-items:center; width:fit-content; border-radius:999px; padding:7px 12px; background:var(--soft); color:var(--accent); font-weight:850; }
+    .kv-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } .kv { padding:12px; border:1px solid #edf1f6; border-radius:8px; background:#fbfcfe; } .k { color:var(--muted); font-size:13px; font-weight:800; } .v { margin-top:6px; font-size:17px; font-weight:850; line-height:1.35; overflow-wrap:anywhere; }
+    .layout { display:grid; grid-template-columns:1.1fr .9fr; gap:18px; align-items:start; } .groups { display:grid; grid-template-columns:repeat(3,minmax(230px,1fr)); gap:14px; }
+    .group-title { display:flex; justify-content:space-between; align-items:center; gap:10px; } .group-note { color:var(--muted); font-size:13px; margin:4px 0 10px; }
+    .team { display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid #edf1f6; font-size:15px; } .seed { width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#edf2f7; color:#475569; font-weight:850; font-size:12px; flex:0 0 auto; }
+    .rule-list { display:grid; gap:10px; margin:0; padding:0; list-style:none; } .rule-list li { padding:12px 14px; background:#f8fafc; border:1px solid #edf1f6; border-radius:8px; font-weight:750; line-height:1.45; }
+    .flow { display:grid; grid-template-columns:1fr 42px 1fr 42px 1fr; gap:8px; align-items:center; margin-top:14px; } .flow-box { min-height:110px; text-align:center; display:flex; flex-direction:column; justify-content:center; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; } .flow-num { font-size:38px; font-weight:950; color:var(--accent); } .flow-text { color:var(--muted); font-weight:750; line-height:1.45; } .arrow { text-align:center; color:#64748b; font-size:26px; font-weight:900; }
+    table { width:100%; border-collapse:collapse; font-size:14px; } th,td { padding:10px; border-bottom:1px solid #edf1f6; text-align:left; white-space:normal; } th { background:#f8fafc; color:#475569; font-weight:900; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; } .legend { display:grid; grid-template-columns:repeat(4,minmax(160px,1fr)); gap:12px; } .legend-item { border-top:5px solid var(--line); } .legend-item.wait-border { border-color:var(--wait); } .legend-item.watch-border { border-color:var(--watch); } .legend-item.play-border { border-color:var(--play); } .legend-item.pass-border { border-color:var(--pass); }
+    .links { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; } a { color:#075985; text-decoration:none; font-weight:850; overflow-wrap:anywhere; } a:hover { text-decoration:underline; } .small { color:var(--muted); font-size:13px; line-height:1.5; }
+    @media (max-width:1180px) { .grid-status { grid-template-columns:repeat(2,1fr); } .layout,.boss,.two-col { grid-template-columns:1fr; } .groups { grid-template-columns:repeat(2,1fr); } .legend { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:720px) { header,main { padding-left:16px; padding-right:16px; } header h1 { font-size:28px; } .grid-status,.meta-row,.groups,.kv-grid,.legend,.links { grid-template-columns:1fr; } .flow { grid-template-columns:1fr; } .arrow { transform:rotate(90deg); } .boss-conclusion { font-size:23px; } }
   </style>
 </head>
 <body>
-<header>
-  <h1>W1 Visual Dashboard V1</h1>
-  <p>World Cup 2026 pre-match control view. Static HTML, local data, no prediction output.</p>
-</header>
+<header><h1>W1 世界杯赛前总控台</h1><p>小组赛程、晋级规则、赛前状态与风险提醒。当前不输出投注建议。</p></header>
 <main>
-  <section id="status" class="status-grid"></section>
-  <section class="layout">
-    <div>
-      <h2>World Cup Group Overview</h2>
-      <div id="groups" class="groups"></div>
-    </div>
-    <div>
-      <h2>Advancement Rules</h2>
-      <div class="card">
-        <div class="flow">
-          <div class="flow-box"><div class="flow-num" id="directQ">24</div><div>direct qualifiers<br>top 2 from each group</div></div>
-          <div class="arrow">+</div>
-          <div class="flow-box"><div class="flow-num" id="thirdQ">8</div><div>best third-place qualifiers<br>from 12 groups</div></div>
-          <div class="arrow">=</div>
-          <div class="flow-box"><div class="flow-num" id="r32">32</div><div>Round of 32<br>bracket placeholder</div></div>
-        </div>
-      </div>
-      <h2>First Match Card</h2>
-      <div id="firstMatch" class="card first-match"></div>
-      <h2>Unresolved Data Gaps</h2>
-      <div class="card"><table id="gaps"></table></div>
-    </div>
-  </section>
-  <section class="two-col">
-    <div>
-      <h2>Group Standings Template</h2>
-      <div class="card"><table id="standingsTemplate"></table></div>
-    </div>
-    <div>
-      <h2>Third-Place Ranking Template</h2>
-      <div class="card"><table id="thirdTemplate"></table></div>
-    </div>
-  </section>
-  <section>
-    <h2>Report Entrypoints</h2>
-    <div id="links" class="links"></div>
-  </section>
+  <section class="grid-status" id="statusCards"></section>
+  <section class="meta-row" id="metaCards"></section>
+  <section class="boss"><div class="card boss-main"><div class="boss-title">当前你只需要看这里</div><div class="boss-conclusion" id="bossConclusion"></div><div class="boss-list" id="bossList"></div></div><div class="card"><h3>首场比赛卡</h3><div class="kv-grid" id="firstMatch"></div></div></section>
+  <section class="layout"><div><h2>世界杯小组总览</h2><div class="groups" id="groups"></div></div><div><h2>晋级规则</h2><div class="card"><ul class="rule-list" id="rules"></ul><div class="flow"><div class="flow-box"><div class="flow-num" id="directQ">24</div><div class="flow-text">直接晋级<br>每组前2名</div></div><div class="arrow">+</div><div class="flow-box"><div class="flow-num" id="thirdQ">8</div><div class="flow-text">成绩最好的<br>小组第三</div></div><div class="arrow">=</div><div class="flow-box"><div class="flow-num" id="r32">32</div><div class="flow-text">进入32强<br>淘汰赛占位</div></div></div></div><h2>颜色 / 标签解释</h2><div class="legend" id="legend"></div></div></section>
+  <section class="two-col"><div><h2>小组积分榜模板</h2><div class="card"><table id="standingsTemplate"></table></div></div><div><h2>小组第三排名模板</h2><div class="card"><table id="thirdTemplate"></table></div></div></section>
+  <section><h2>报告入口</h2><div class="links" id="links"></div></section>
 </main>
 <script id="w1-data" type="application/json">{
-  "schema_version": "W1_VISUAL_DASHBOARD_V1",
+  "schema_version": "W1_VISUAL_DASHBOARD_V2_CN",
   "generated_from": "local W1 fixtures/cards/ledger/state only",
   "status_cards": {
     "W1_WAIT": 24,
@@ -1131,34 +1076,133 @@
       "blocks_play": false,
       "status": "PARTIAL"
     }
+  ],
+  "display_language": "zh-CN",
+  "title_cn": "W1 世界杯赛前总控台",
+  "subtitle_cn": "小组赛程、晋级规则、赛前状态与风险提醒。当前不输出投注建议。",
+  "status_cards_cn": [
+    {
+      "label": "等待数据",
+      "count": 24,
+      "hint": "关键数据没齐",
+      "class": "wait"
+    },
+    {
+      "label": "观察中",
+      "count": 0,
+      "hint": "有信号但风险较高",
+      "class": "watch"
+    },
+    {
+      "label": "可正式分析",
+      "count": 0,
+      "hint": "通过量化风控",
+      "class": "play"
+    },
+    {
+      "label": "跳过",
+      "count": 0,
+      "hint": "风险过高或数据冲突",
+      "class": "pass"
+    }
+  ],
+  "boss_view": {
+    "headline": "当前你只需要看这里",
+    "current_conclusion": "全部等待首发/裁判等关键数据",
+    "first_match_cn": "墨西哥 vs 南非",
+    "formal_review_time_cst": "2026-06-12 02:00 / 02:30 CST",
+    "current_action": "等待，不下结论"
+  },
+  "first_match_cn": {
+    "fixture_id": "1489369",
+    "match": "墨西哥 vs 南非",
+    "kickoff": "2026-06-12 03:00 CST / 2026-06-11T19:00:00Z",
+    "decision": "等待",
+    "lineup": "未公布",
+    "referee": "未公布",
+    "odds": "已准备",
+    "play_guard": "否",
+    "next_refresh": "2026-06-10 18:00 CST"
+  },
+  "label_explain_cn": [
+    {
+      "label": "等待数据",
+      "meaning": "关键数据没齐"
+    },
+    {
+      "label": "观察中",
+      "meaning": "有信号但风险较高"
+    },
+    {
+      "label": "可正式分析",
+      "meaning": "通过量化风控"
+    },
+    {
+      "label": "跳过",
+      "meaning": "风险过高或数据冲突"
+    }
+  ],
+  "advancement_rules_cn": [
+    "12个小组，每组4队",
+    "每组前2名直接晋级32强",
+    "12个小组第三中成绩最好的8队晋级",
+    "共32队进入淘汰赛"
+  ],
+  "standings_headers_cn": [
+    "球队",
+    "赛",
+    "胜",
+    "平",
+    "负",
+    "进球",
+    "失球",
+    "净胜球",
+    "积分"
+  ],
+  "third_place_headers_cn": [
+    "排名",
+    "小组",
+    "球队",
+    "积分",
+    "净胜球",
+    "进球",
+    "公平竞赛",
+    "抽签"
+  ],
+  "report_entrypoints_cn": [
+    {
+      "label": "实时状态 Markdown",
+      "path": "W1_LIVE_DASHBOARD.md"
+    },
+    {
+      "label": "报告模板",
+      "path": "../../docs/W1_REPORT_TEMPLATES.md"
+    },
+    {
+      "label": "专家评审报告",
+      "path": "../../docs/W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md"
+    }
   ]
 }</script>
 <script>
 const data = JSON.parse(document.getElementById('w1-data').textContent);
-const status = data.status_cards;
-function metric(label, value, cls='') { return `<div class="card metric"><div class="label">${label}</div><div class="value ${cls}">${value}</div></div>`; }
-document.getElementById('status').innerHTML = [
-  metric('W1_WAIT', status.W1_WAIT, 'wait'), metric('W1_WATCH', status.W1_WATCH, 'watch'),
-  metric('W1_PLAY', status.W1_PLAY, 'play'), metric('W1_PASS', status.W1_PASS, 'pass'),
-  metric('watcher_version', status.watcher_version), metric('play_guard_version', status.play_guard_version),
-  `<div class="card metric wide"><div class="label">next_refresh</div><div class="value" style="font-size:18px">${status.next_refresh}</div></div>`
-].join('');
-document.getElementById('groups').innerHTML = data.groups.map(g => `
-  <div class="card"><div class="group-title"><h3>Group ${g.group}</h3><span class="badge">4</span></div>
-  ${g.teams.map((t,i)=>`<div class="team"><span class="seed">${i+1}</span><span>${t}</span></div>`).join('')}</div>`).join('');
+const s = data.status_cards;
+document.getElementById('statusCards').innerHTML = data.status_cards_cn.map(item => `<div class="card status-card"><div class="status-label">${item.label}</div><div class="status-count ${item.class}">${item.count} 场</div><div class="status-hint">${item.hint}</div></div>`).join('');
+document.getElementById('metaCards').innerHTML = [['刷新器版本',s.watcher_version],['风控规则',s.play_guard_version],['下次刷新',s.next_refresh]].map(([k,v]) => `<div class="card"><div class="meta-label">${k}</div><div class="meta-value">${v}</div></div>`).join('');
+document.getElementById('bossConclusion').textContent = data.boss_view.current_conclusion;
+document.getElementById('bossList').innerHTML = [['第一场',data.boss_view.first_match_cn],['正式判断时间',data.boss_view.formal_review_time_cst],['现在动作',data.boss_view.current_action]].map(([k,v]) => `<div><span class="pill">${k}</span> <strong>${v}</strong></div>`).join('');
+const fm = data.first_match_cn;
+document.getElementById('firstMatch').innerHTML = [['比赛',fm.match],['开赛时间',fm.kickoff],['当前状态',fm.decision],['首发',fm.lineup],['裁判',fm.referee],['赔率',fm.odds],['风控是否通过',fm.play_guard],['下一次刷新',fm.next_refresh]].map(([k,v]) => `<div class="kv"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+document.getElementById('groups').innerHTML = data.groups.map(g => `<div class="card"><div class="group-title"><h3>${g.group}组</h3><span class="pill">4队</span></div><div class="group-note">每组前2名直接晋级</div>${g.teams.map((t,i)=>`<div class="team"><span class="seed">${i+1}</span><span>${t}</span></div>`).join('')}</div>`).join('');
+document.getElementById('rules').innerHTML = data.advancement_rules_cn.map(x => `<li>${x}</li>`).join('');
 document.getElementById('directQ').textContent = data.advancement_rules.direct_qualifiers;
 document.getElementById('thirdQ').textContent = data.advancement_rules.best_third_qualifiers;
 document.getElementById('r32').textContent = data.advancement_rules.round_of_32_total;
-const fm = data.first_match;
-document.getElementById('firstMatch').innerHTML = [
-  ['match', fm.match], ['kickoff', fm.kickoff_utc], ['decision', fm.decision], ['lineup', fm.lineup_status],
-  ['referee', fm.referee_status], ['odds', fm.odds_status], ['play_guard_pass', fm.play_guard_pass ? 'YES' : 'NO'], ['next_refresh', fm.next_refresh]
-].map(([k,v]) => `<div class="kv"><div class="k">${k}</div><div class="v ${k==='play_guard_pass'&&!fm.play_guard_pass?'guard-no':''}">${v}</div></div>`).join('');
-function table(headers, rows) { return `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${headers.map(h=>`<td>${r[h] ?? ''}</td>`).join('')}</tr>`).join('')}</tbody>`; }
-document.getElementById('gaps').innerHTML = table(['gap','scope','blocks_play','status'], data.unresolved_data_gaps.map(g=>({...g, blocks_play: g.blocks_play ? 'yes' : 'no'})));
-document.getElementById('standingsTemplate').innerHTML = table(['team','P','W','D','L','GF','GA','GD','PTS'], data.groups[0].standings_template);
-document.getElementById('thirdTemplate').innerHTML = table(['rank','group','team','points','goal_diff','goals_for','fair_play','drawing_of_lots'], data.third_place_ranking_template);
-document.getElementById('links').innerHTML = data.report_entrypoints.map(l => `<div class="card"><a href="${l.path}">${l.label}</a></div>`).join('');
+document.getElementById('legend').innerHTML = data.label_explain_cn.map((x,i) => `<div class="card legend-item ${['wait-border','watch-border','play-border','pass-border'][i]}"><h3>${x.label}</h3><div class="small">${x.meaning}</div></div>`).join('');
+function table(headers, rows, mapper) { return `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${mapper(row).map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')}</tbody>`; }
+document.getElementById('standingsTemplate').innerHTML = table(data.standings_headers_cn, data.groups[0].standings_template, r => [r.team,r.P,r.W,r.D,r.L,r.GF,r.GA,r.GD,r.PTS]);
+document.getElementById('thirdTemplate').innerHTML = table(data.third_place_headers_cn, data.third_place_ranking_template, r => [r.rank,r.group,r.team,r.points,r.goal_diff,r.goals_for,r.fair_play,r.drawing_of_lots]);
+document.getElementById('links').innerHTML = data.report_entrypoints_cn.map(l => `<div class="card"><a href="${l.path}">${l.label}</a></div>`).join('');
 </script>
 </body>
 </html>

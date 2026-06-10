@@ -1,5 +1,5 @@
 {
-  "schema_version": "W1_VISUAL_DASHBOARD_V1",
+  "schema_version": "W1_VISUAL_DASHBOARD_V2_CN",
   "generated_from": "local W1 fixtures/cards/ledger/state only",
   "status_cards": {
     "W1_WAIT": 24,
@@ -1027,6 +1027,112 @@
       "scope": "system-level",
       "blocks_play": false,
       "status": "PARTIAL"
+    }
+  ],
+  "display_language": "zh-CN",
+  "title_cn": "W1 世界杯赛前总控台",
+  "subtitle_cn": "小组赛程、晋级规则、赛前状态与风险提醒。当前不输出投注建议。",
+  "status_cards_cn": [
+    {
+      "label": "等待数据",
+      "count": 24,
+      "hint": "关键数据没齐",
+      "class": "wait"
+    },
+    {
+      "label": "观察中",
+      "count": 0,
+      "hint": "有信号但风险较高",
+      "class": "watch"
+    },
+    {
+      "label": "可正式分析",
+      "count": 0,
+      "hint": "通过量化风控",
+      "class": "play"
+    },
+    {
+      "label": "跳过",
+      "count": 0,
+      "hint": "风险过高或数据冲突",
+      "class": "pass"
+    }
+  ],
+  "boss_view": {
+    "headline": "当前你只需要看这里",
+    "current_conclusion": "全部等待首发/裁判等关键数据",
+    "first_match_cn": "墨西哥 vs 南非",
+    "formal_review_time_cst": "2026-06-12 02:00 / 02:30 CST",
+    "current_action": "等待，不下结论"
+  },
+  "first_match_cn": {
+    "fixture_id": "1489369",
+    "match": "墨西哥 vs 南非",
+    "kickoff": "2026-06-12 03:00 CST / 2026-06-11T19:00:00Z",
+    "decision": "等待",
+    "lineup": "未公布",
+    "referee": "未公布",
+    "odds": "已准备",
+    "play_guard": "否",
+    "next_refresh": "2026-06-10 18:00 CST"
+  },
+  "label_explain_cn": [
+    {
+      "label": "等待数据",
+      "meaning": "关键数据没齐"
+    },
+    {
+      "label": "观察中",
+      "meaning": "有信号但风险较高"
+    },
+    {
+      "label": "可正式分析",
+      "meaning": "通过量化风控"
+    },
+    {
+      "label": "跳过",
+      "meaning": "风险过高或数据冲突"
+    }
+  ],
+  "advancement_rules_cn": [
+    "12个小组，每组4队",
+    "每组前2名直接晋级32强",
+    "12个小组第三中成绩最好的8队晋级",
+    "共32队进入淘汰赛"
+  ],
+  "standings_headers_cn": [
+    "球队",
+    "赛",
+    "胜",
+    "平",
+    "负",
+    "进球",
+    "失球",
+    "净胜球",
+    "积分"
+  ],
+  "third_place_headers_cn": [
+    "排名",
+    "小组",
+    "球队",
+    "积分",
+    "净胜球",
+    "进球",
+    "公平竞赛",
+    "抽签"
+  ],
+  "report_entrypoints_cn": [
+    {
+      "label": "实时状态 Markdown",
+      "path": "W1_LIVE_DASHBOARD.md"
+    },
+    {
+      "label": "报告模板",
+      "path": "../../docs/W1_REPORT_TEMPLATES.md"
+    },
+    {
+      "label": "专家评审报告",
+      "path": "../../docs/W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md"
     }
   ]
 }

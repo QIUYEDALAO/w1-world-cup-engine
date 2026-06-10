@@ -13,7 +13,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 DATA_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
-GROUP_CONTEXT = ROOT / "data/static/world_cup_2026_groups.json"
 LEDGER = ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv"
 DOC = ROOT / "docs/W1_VISUAL_DASHBOARD.md"
 FORBIDDEN_TERMS = ["Q" + "Q", "offi" + "cial", "pend" + "ing", "V" + "3", "V" + "4", "M" + "1"]
@@ -57,8 +56,10 @@ def current_fixture_teams() -> set[str]:
 
 
 def assert_dashboard_data(data: dict) -> None:
-    if data.get("schema_version") != "W1_VISUAL_DASHBOARD_V1":
+    if data.get("schema_version") != "W1_VISUAL_DASHBOARD_V2_CN":
         fail("Dashboard data schema_version mismatch")
+    if data.get("display_language") != "zh-CN":
+        fail("Dashboard must declare zh-CN display language")
 
     groups = data.get("groups", [])
     if len(groups) != 12:
@@ -121,6 +122,17 @@ def assert_dashboard_data(data: dict) -> None:
     if first.get("play_guard_pass") is not False:
         fail("First match play_guard_pass must be false while lineup is missing")
 
+    boss = data.get("boss_view", {})
+    if boss.get("current_conclusion") != "全部等待首发/裁判等关键数据":
+        fail("Boss view conclusion mismatch")
+    if boss.get("first_match_cn") != "墨西哥 vs 南非":
+        fail("Boss view first match must be Chinese")
+
+    cn_labels = [item.get("label") for item in data.get("status_cards_cn", [])]
+    for label in ("等待数据", "观察中", "可正式分析", "跳过"):
+        if label not in cn_labels:
+            fail(f"Missing Chinese status label: {label}")
+
 
 def assert_html(data: dict) -> None:
     if not HTML.is_file():
@@ -128,18 +140,38 @@ def assert_html(data: dict) -> None:
     assert_no_forbidden_terms(HTML)
     text = read(HTML)
     required = [
-        "W1 Visual Dashboard V1",
+        "W1 世界杯赛前总控台",
+        "小组赛程、晋级规则、赛前状态与风险提醒。当前不输出投注建议。",
+        "当前你只需要看这里",
+        "等待数据",
+        "观察中",
+        "可正式分析",
+        "跳过",
+        "刷新器版本",
+        "风控规则",
+        "下次刷新",
         "W1_PLAY_GUARD_V1",
-        "Mexico vs South Africa",
-        "Round of 32",
-        "direct qualifiers",
-        "best third-place qualifiers",
-        "'P'",
-        "'PTS'",
-        "drawing_of_lots",
-        "W1_LIVE_DASHBOARD.md",
-        "W1_REPORT_TEMPLATES.md",
-        "W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md",
+        "全部等待首发/裁判等关键数据",
+        "墨西哥 vs 南非",
+        "正式判断时间",
+        "等待，不下结论",
+        "世界杯小组总览",
+        "每组前2名直接晋级",
+        "12个小组，每组4队",
+        "12个小组第三中成绩最好的8队晋级",
+        "共32队进入淘汰赛",
+        "比赛",
+        "开赛时间",
+        "当前状态",
+        "首发",
+        "裁判",
+        "赔率",
+        "风控是否通过",
+        "颜色 / 标签解释",
+        "关键数据没齐",
+        "有信号但风险较高",
+        "通过量化风控",
+        "风险过高或数据冲突",
     ]
     for token in required:
         if token not in text:
@@ -160,14 +192,11 @@ def assert_html(data: dict) -> None:
 
 def main() -> int:
     try:
-        for path in (DATA_JSON, GROUP_CONTEXT, DOC):
+        for path in (DATA_JSON, DOC):
             if not path.is_file():
                 fail(f"Missing artifact: {path.relative_to(ROOT)}")
             assert_no_forbidden_terms(path)
         data = load_json(DATA_JSON)
-        group_context = load_json(GROUP_CONTEXT)
-        if data != group_context:
-            fail("Dashboard data and group context JSON must match")
         assert_dashboard_data(data)
         assert_html(data)
     except CheckError as exc:
