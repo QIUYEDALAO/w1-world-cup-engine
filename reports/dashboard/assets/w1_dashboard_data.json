@@ -43,7 +43,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Mexico",
+          "team_cn": "墨西哥"
         },
         {
           "team": "South Africa",
@@ -54,7 +56,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "South Africa",
+          "team_cn": "南非"
         },
         {
           "team": "South Korea",
@@ -65,7 +69,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "South Korea",
+          "team_cn": "韩国"
         },
         {
           "team": "Czech Republic",
@@ -76,8 +82,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Czech Republic",
+          "team_cn": "捷克"
         }
+      ],
+      "teams_en": [
+        "Mexico",
+        "South Africa",
+        "South Korea",
+        "Czech Republic"
+      ],
+      "teams_cn": [
+        "墨西哥",
+        "南非",
+        "韩国",
+        "捷克"
       ]
     },
     {
@@ -112,7 +132,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Canada",
+          "team_cn": "加拿大"
         },
         {
           "team": "Bosnia & Herzegovina",
@@ -123,7 +145,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Bosnia & Herzegovina",
+          "team_cn": "波黑"
         },
         {
           "team": "USA",
@@ -134,7 +158,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "USA",
+          "team_cn": "美国"
         },
         {
           "team": "Paraguay",
@@ -145,8 +171,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Paraguay",
+          "team_cn": "巴拉圭"
         }
+      ],
+      "teams_en": [
+        "Canada",
+        "Bosnia & Herzegovina",
+        "USA",
+        "Paraguay"
+      ],
+      "teams_cn": [
+        "加拿大",
+        "波黑",
+        "美国",
+        "巴拉圭"
       ]
     },
     {
@@ -181,7 +221,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Qatar",
+          "team_cn": "卡塔尔"
         },
         {
           "team": "Switzerland",
@@ -192,7 +234,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Switzerland",
+          "team_cn": "瑞士"
         },
         {
           "team": "Brazil",
@@ -203,7 +247,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Brazil",
+          "team_cn": "巴西"
         },
         {
           "team": "Morocco",
@@ -214,8 +260,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Morocco",
+          "team_cn": "摩洛哥"
         }
+      ],
+      "teams_en": [
+        "Qatar",
+        "Switzerland",
+        "Brazil",
+        "Morocco"
+      ],
+      "teams_cn": [
+        "卡塔尔",
+        "瑞士",
+        "巴西",
+        "摩洛哥"
       ]
     },
     {
@@ -250,7 +310,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Haiti",
+          "team_cn": "海地"
         },
         {
           "team": "Scotland",
@@ -261,7 +323,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Scotland",
+          "team_cn": "苏格兰"
         },
         {
           "team": "Australia",
@@ -272,7 +336,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Australia",
+          "team_cn": "澳大利亚"
         },
         {
           "team": "Türkiye",
@@ -283,8 +349,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Türkiye",
+          "team_cn": "土耳其"
         }
+      ],
+      "teams_en": [
+        "Haiti",
+        "Scotland",
+        "Australia",
+        "Türkiye"
+      ],
+      "teams_cn": [
+        "海地",
+        "苏格兰",
+        "澳大利亚",
+        "土耳其"
       ]
     },
     {
@@ -319,7 +399,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Germany",
+          "team_cn": "德国"
         },
         {
           "team": "Curaçao",
@@ -330,7 +412,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Curaçao",
+          "team_cn": "库拉索"
         },
         {
           "team": "Netherlands",
@@ -341,7 +425,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Netherlands",
+          "team_cn": "荷兰"
         },
         {
           "team": "Japan",
@@ -352,8 +438,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Japan",
+          "team_cn": "日本"
         }
+      ],
+      "teams_en": [
+        "Germany",
+        "Curaçao",
+        "Netherlands",
+        "Japan"
+      ],
+      "teams_cn": [
+        "德国",
+        "库拉索",
+        "荷兰",
+        "日本"
       ]
     },
     {
@@ -388,7 +488,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Ivory Coast",
+          "team_cn": "科特迪瓦"
         },
         {
           "team": "Ecuador",
@@ -399,7 +501,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Ecuador",
+          "team_cn": "厄瓜多尔"
         },
         {
           "team": "Sweden",
@@ -410,7 +514,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Sweden",
+          "team_cn": "瑞典"
         },
         {
           "team": "Tunisia",
@@ -421,8 +527,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Tunisia",
+          "team_cn": "突尼斯"
         }
+      ],
+      "teams_en": [
+        "Ivory Coast",
+        "Ecuador",
+        "Sweden",
+        "Tunisia"
+      ],
+      "teams_cn": [
+        "科特迪瓦",
+        "厄瓜多尔",
+        "瑞典",
+        "突尼斯"
       ]
     },
     {
@@ -457,7 +577,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Spain",
+          "team_cn": "西班牙"
         },
         {
           "team": "Cape Verde Islands",
@@ -468,7 +590,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Cape Verde Islands",
+          "team_cn": "佛得角"
         },
         {
           "team": "Belgium",
@@ -479,7 +603,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Belgium",
+          "team_cn": "比利时"
         },
         {
           "team": "Egypt",
@@ -490,8 +616,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Egypt",
+          "team_cn": "埃及"
         }
+      ],
+      "teams_en": [
+        "Spain",
+        "Cape Verde Islands",
+        "Belgium",
+        "Egypt"
+      ],
+      "teams_cn": [
+        "西班牙",
+        "佛得角",
+        "比利时",
+        "埃及"
       ]
     },
     {
@@ -526,7 +666,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Saudi Arabia",
+          "team_cn": "沙特阿拉伯"
         },
         {
           "team": "Uruguay",
@@ -537,7 +679,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Uruguay",
+          "team_cn": "乌拉圭"
         },
         {
           "team": "Iran",
@@ -548,7 +692,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Iran",
+          "team_cn": "伊朗"
         },
         {
           "team": "New Zealand",
@@ -559,8 +705,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "New Zealand",
+          "team_cn": "新西兰"
         }
+      ],
+      "teams_en": [
+        "Saudi Arabia",
+        "Uruguay",
+        "Iran",
+        "New Zealand"
+      ],
+      "teams_cn": [
+        "沙特阿拉伯",
+        "乌拉圭",
+        "伊朗",
+        "新西兰"
       ]
     },
     {
@@ -595,7 +755,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "France",
+          "team_cn": "法国"
         },
         {
           "team": "Senegal",
@@ -606,7 +768,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Senegal",
+          "team_cn": "塞内加尔"
         },
         {
           "team": "Iraq",
@@ -617,7 +781,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Iraq",
+          "team_cn": "伊拉克"
         },
         {
           "team": "Norway",
@@ -628,8 +794,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Norway",
+          "team_cn": "挪威"
         }
+      ],
+      "teams_en": [
+        "France",
+        "Senegal",
+        "Iraq",
+        "Norway"
+      ],
+      "teams_cn": [
+        "法国",
+        "塞内加尔",
+        "伊拉克",
+        "挪威"
       ]
     },
     {
@@ -664,7 +844,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Argentina",
+          "team_cn": "阿根廷"
         },
         {
           "team": "Algeria",
@@ -675,7 +857,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Algeria",
+          "team_cn": "阿尔及利亚"
         },
         {
           "team": "Austria",
@@ -686,7 +870,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Austria",
+          "team_cn": "奥地利"
         },
         {
           "team": "Jordan",
@@ -697,8 +883,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Jordan",
+          "team_cn": "约旦"
         }
+      ],
+      "teams_en": [
+        "Argentina",
+        "Algeria",
+        "Austria",
+        "Jordan"
+      ],
+      "teams_cn": [
+        "阿根廷",
+        "阿尔及利亚",
+        "奥地利",
+        "约旦"
       ]
     },
     {
@@ -733,7 +933,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Portugal",
+          "team_cn": "葡萄牙"
         },
         {
           "team": "Congo DR",
@@ -744,7 +946,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Congo DR",
+          "team_cn": "刚果（金）"
         },
         {
           "team": "England",
@@ -755,7 +959,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "England",
+          "team_cn": "英格兰"
         },
         {
           "team": "Croatia",
@@ -766,8 +972,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Croatia",
+          "team_cn": "克罗地亚"
         }
+      ],
+      "teams_en": [
+        "Portugal",
+        "Congo DR",
+        "England",
+        "Croatia"
+      ],
+      "teams_cn": [
+        "葡萄牙",
+        "刚果（金）",
+        "英格兰",
+        "克罗地亚"
       ]
     },
     {
@@ -802,7 +1022,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Ghana",
+          "team_cn": "加纳"
         },
         {
           "team": "Panama",
@@ -813,7 +1035,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Panama",
+          "team_cn": "巴拿马"
         },
         {
           "team": "Uzbekistan",
@@ -824,7 +1048,9 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Uzbekistan",
+          "team_cn": "乌兹别克斯坦"
         },
         {
           "team": "Colombia",
@@ -835,8 +1061,22 @@
           "GF": 0,
           "GA": 0,
           "GD": 0,
-          "PTS": 0
+          "PTS": 0,
+          "team_en": "Colombia",
+          "team_cn": "哥伦比亚"
         }
+      ],
+      "teams_en": [
+        "Ghana",
+        "Panama",
+        "Uzbekistan",
+        "Colombia"
+      ],
+      "teams_cn": [
+        "加纳",
+        "巴拿马",
+        "乌兹别克斯坦",
+        "哥伦比亚"
       ]
     }
   ],
@@ -1134,5 +1374,56 @@
       "label": "专家评审报告",
       "path": "../../docs/W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md"
     }
-  ]
+  ],
+  "team_display_language": "zh-CN",
+  "team_name_map_cn": {
+    "Mexico": "墨西哥",
+    "South Africa": "南非",
+    "South Korea": "韩国",
+    "Czech Republic": "捷克",
+    "Canada": "加拿大",
+    "Bosnia & Herzegovina": "波黑",
+    "USA": "美国",
+    "Paraguay": "巴拉圭",
+    "Qatar": "卡塔尔",
+    "Switzerland": "瑞士",
+    "Brazil": "巴西",
+    "Morocco": "摩洛哥",
+    "Haiti": "海地",
+    "Scotland": "苏格兰",
+    "Australia": "澳大利亚",
+    "Türkiye": "土耳其",
+    "Germany": "德国",
+    "Curaçao": "库拉索",
+    "Netherlands": "荷兰",
+    "Japan": "日本",
+    "Ivory Coast": "科特迪瓦",
+    "Ecuador": "厄瓜多尔",
+    "Sweden": "瑞典",
+    "Tunisia": "突尼斯",
+    "Spain": "西班牙",
+    "Cape Verde Islands": "佛得角",
+    "Belgium": "比利时",
+    "Egypt": "埃及",
+    "Saudi Arabia": "沙特阿拉伯",
+    "Uruguay": "乌拉圭",
+    "Iran": "伊朗",
+    "New Zealand": "新西兰",
+    "France": "法国",
+    "Senegal": "塞内加尔",
+    "Iraq": "伊拉克",
+    "Norway": "挪威",
+    "Argentina": "阿根廷",
+    "Algeria": "阿尔及利亚",
+    "Austria": "奥地利",
+    "Jordan": "约旦",
+    "Portugal": "葡萄牙",
+    "Congo DR": "刚果（金）",
+    "England": "英格兰",
+    "Croatia": "克罗地亚",
+    "Ghana": "加纳",
+    "Panama": "巴拿马",
+    "Uzbekistan": "乌兹别克斯坦",
+    "Colombia": "哥伦比亚"
+  }
 }

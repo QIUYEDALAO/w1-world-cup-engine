@@ -86,6 +86,17 @@ def assert_dashboard_data(data: dict) -> None:
         fail(f"Expected 48 teams, found {len(teams)}")
     if len(set(teams)) != 48:
         fail("Duplicate team found in group context")
+    if data.get("team_display_language") != "zh-CN":
+        fail("Team display language must be zh-CN")
+    team_map = data.get("team_name_map_cn", {})
+    if len(team_map) != 48:
+        fail("Chinese team name map must contain 48 teams")
+    for group in groups:
+        if len(group.get("teams_cn", [])) != 4:
+            fail(f"Group {group.get('group')} must contain 4 Chinese team names")
+    for required_team in ("墨西哥", "南非", "巴西", "阿根廷", "英格兰", "日本"):
+        if required_team not in team_map.values():
+            fail(f"Chinese team name missing: {required_team}")
 
     fixture_teams = current_fixture_teams()
     missing = sorted(fixture_teams - set(teams))
@@ -153,6 +164,10 @@ def assert_html(data: dict) -> None:
         "W1_PLAY_GUARD_V1",
         "全部等待首发/裁判等关键数据",
         "墨西哥 vs 南非",
+        "巴西",
+        "阿根廷",
+        "英格兰",
+        "日本",
         "正式判断时间",
         "等待，不下结论",
         "世界杯小组总览",
