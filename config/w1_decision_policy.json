@@ -1,6 +1,6 @@
 {
   "policy_id": "W1_PRODUCTION_LITE_DECISION_POLICY",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "decision_labels": [
     "W1_PLAY",
     "W1_WATCH",
@@ -65,17 +65,25 @@
       "id": "play_requires_ledger",
       "if": "decision.label == W1_PLAY",
       "then": "decision.ledger_required == true"
+    },
+    {
+      "id": "play_guard_v1_required_for_play",
+      "if": "decision.label == W1_PLAY",
+      "then": "all W1_PLAY_GUARD_V1 rules must pass",
+      "play_guard_version": "W1_PLAY_GUARD_V1"
     }
   ],
   "label_policy": {
     "W1_PLAY": {
       "ledger_required": true,
       "allowed_when": [
-        "confirmed lineup is available",
+        "confirmed lineup exists",
         "1X2, AH, and OU odds are available",
         "both squads are available",
-        "risk flags are explicit and accepted"
-      ]
+        "all W1_PLAY_GUARD_V1 quantitative rules pass",
+        "ledger_required is true"
+      ],
+      "play_guard_version": "W1_PLAY_GUARD_V1"
     },
     "W1_WATCH": {
       "ledger_required": false,
@@ -100,6 +108,67 @@
         "price or context does not support analysis continuation"
       ]
     }
+  },
+  "play_guard_version": "W1_PLAY_GUARD_V1",
+  "play_guard_v1": {
+    "description": "W1_PLAY is allowed only when all quantitative guard rules pass. Data completeness alone is not sufficient.",
+    "applies_to": "W1_PLAY",
+    "all_required": true,
+    "rules": [
+      {
+        "id": "risk_flags_count_max_2",
+        "field": "risk_flags.count",
+        "operator": "<=",
+        "value": 2
+      },
+      {
+        "id": "blocking_data_gaps_zero",
+        "field": "blocking_data_gaps",
+        "operator": "==",
+        "value": 0
+      },
+      {
+        "id": "odds_snapshot_age_under_60m",
+        "field": "odds_snapshot_age_minutes",
+        "operator": "<",
+        "value": 60
+      },
+      {
+        "id": "confirmed_lineup_exists",
+        "field": "confirmed_lineup_exists",
+        "operator": "==",
+        "value": true
+      },
+      {
+        "id": "odds_1X2_overround_under_1_12",
+        "field": "odds_1X2_overround",
+        "operator": "<",
+        "value": 1.12
+      },
+      {
+        "id": "ah_direction_consistent_with_elo",
+        "field": "AH_direction_consistent_with_elo",
+        "operator": "==",
+        "value": true
+      },
+      {
+        "id": "supporting_factors_min_2",
+        "field": "supporting_factors.count",
+        "operator": ">=",
+        "value": 2
+      },
+      {
+        "id": "counter_factors_min_1",
+        "field": "counter_factors.count",
+        "operator": ">=",
+        "value": 1
+      },
+      {
+        "id": "ledger_required_true",
+        "field": "ledger_required",
+        "operator": "==",
+        "value": true
+      }
+    ]
   }
 }
-

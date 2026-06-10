@@ -21,6 +21,7 @@ The sample still includes required market coverage:
 | Code | Severity | Meaning |
 |---|---:|---|
 | `REFEREE_MISSING` | LOW | Referee not yet assigned in source snapshot |
+| `REFEREE_UNASSIGNED` | LOW | Referee assignment is unavailable in the source snapshot |
 | `SUSPENSIONS_PARTIAL` | MEDIUM | Suspensions are partial and require manual review |
 | `TRAVEL_DISTANCE_PARTIAL` | LOW | Travel distance is estimated from partial assumptions |
 
@@ -37,7 +38,17 @@ The sample still includes required market coverage:
 
 For any future `W1_PLAY`, `ledger_required` must be `true` and a ledger entry must validate against `config/w1_ledger_schema.json`.
 
+## PLAY_GUARD_V1
+
+This sample remains `W1_WAIT`, so `W1_PLAY_GUARD_V1` cannot pass. The sample still includes the new guard inputs:
+
+- `odds_movement`
+- `market_signal`
+- `decision.reasons.supporting_factors`
+- `decision.reasons.counter_factors`
+
+`W1_PLAY` is allowed only when all quantitative guard rules pass; data completeness alone is not enough.
+
 ## Boundary
 
 This sample does not call external APIs, does not connect QQ, does not write old official/pending status, and does not make any betting commitment.
-

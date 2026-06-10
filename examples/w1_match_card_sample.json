@@ -157,6 +157,11 @@
   },
   "risk_flags": [
     {
+      "code": "REFEREE_UNASSIGNED",
+      "severity": "LOW",
+      "message": "Referee is not assigned in the source snapshot."
+    },
+    {
       "code": "REFEREE_MISSING",
       "severity": "LOW",
       "message": "Referee not yet assigned in source snapshot."
@@ -189,12 +194,44 @@
   "decision": {
     "label": "W1_WAIT",
     "ledger_required": false,
-    "reasons": [
-      "Confirmed lineup is missing, so hard rule forces W1_WAIT.",
-      "Required 1X2, AH, and OU markets are present.",
-      "Suspensions and travel distance are partial but non-blocking risk flags."
+    "reasons": {
+      "summary": [
+        "Confirmed lineup is missing, so hard rule forces W1_WAIT.",
+        "Required 1X2, AH, and OU markets are present.",
+        "W1_PLAY_GUARD_V1 cannot pass until confirmed lineup exists."
+      ],
+      "supporting_factors": [
+        "1X2/AH/OU markets are present",
+        "Squads are available"
+      ],
+      "counter_factors": [
+        "Confirmed lineup is missing"
+      ]
+    },
+    "no_betting_commitment": true,
+    "play_guard_version": "W1_PLAY_GUARD_V1"
+  },
+  "odds_movement": {
+    "status": "READY",
+    "first_seen_at_utc": "2026-06-10T02:28:22Z",
+    "latest_seen_at_utc": "2026-06-10T02:28:22Z",
+    "movement_summary": "Initial sample snapshot only; no material movement detected.",
+    "material_change": false,
+    "odds_1X2_delta": null,
+    "odds_AH_delta": null,
+    "odds_OU_delta": null
+  },
+  "market_signal": {
+    "status": "PARTIAL",
+    "odds_snapshot_age_minutes": 31,
+    "odds_1X2_overround": 1.094,
+    "AH_direction_consistent_with_elo": true,
+    "supporting_factors": [
+      "1X2/AH/OU markets are present",
+      "Squads are available"
     ],
-    "no_betting_commitment": true
+    "counter_factors": [
+      "Confirmed lineup is missing"
+    ]
   }
 }
-

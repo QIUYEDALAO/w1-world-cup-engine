@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://w1.local/schemas/w1_match_card_schema.json",
-  "title": "W1 Production Lite Match Card",
+  "title": "W1 Production Lite Match Card with PLAY_GUARD_V1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -13,6 +13,8 @@
     "squad",
     "lineups",
     "context",
+    "odds_movement",
+    "market_signal",
     "risk_flags",
     "data_gaps",
     "decision"
@@ -315,6 +317,7 @@
         "label",
         "ledger_required",
         "reasons",
+        "play_guard_version",
         "no_betting_commitment"
       ],
       "properties": {
@@ -331,15 +334,157 @@
           "type": "boolean"
         },
         "reasons": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string"
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "summary",
+            "supporting_factors",
+            "counter_factors"
+          ],
+          "properties": {
+            "summary": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            "supporting_factors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "counter_factors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         },
         "no_betting_commitment": {
           "type": "boolean",
           "const": true
+        },
+        "play_guard_version": {
+          "type": "string",
+          "enum": [
+            "W1_PLAY_GUARD_V1"
+          ]
+        }
+      }
+    },
+    "odds_movement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "first_seen_at_utc",
+        "latest_seen_at_utc",
+        "movement_summary",
+        "material_change"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "READY",
+            "PARTIAL",
+            "MISSING"
+          ]
+        },
+        "first_seen_at_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "latest_seen_at_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "movement_summary": {
+          "type": "string"
+        },
+        "material_change": {
+          "type": "boolean"
+        },
+        "odds_1X2_delta": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "odds_AH_delta": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "odds_OU_delta": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "market_signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "odds_snapshot_age_minutes",
+        "odds_1X2_overround",
+        "AH_direction_consistent_with_elo",
+        "supporting_factors",
+        "counter_factors"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "READY",
+            "PARTIAL",
+            "MISSING"
+          ]
+        },
+        "odds_snapshot_age_minutes": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "odds_1X2_overround": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "AH_direction_consistent_with_elo": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "supporting_factors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "counter_factors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }
@@ -487,7 +632,8 @@
       ],
       "properties": {
         "code": {
-          "type": "string"
+          "type": "string",
+          "description": "Risk flag code. REFEREE_UNASSIGNED is required when referee is not assigned."
         },
         "severity": {
           "type": "string",
@@ -533,4 +679,3 @@
     }
   }
 }
-
