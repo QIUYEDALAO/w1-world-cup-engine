@@ -1,5 +1,5 @@
 {
-  "schema_version": "W1_VISUAL_DASHBOARD_CN_REUSE",
+  "schema_version": "W1_VISUAL_DASHBOARD_ORIGINAL_UI_CN",
   "generated_from": "local W1 fixtures/cards/ledger/state only",
   "status_cards": {
     "W1_WAIT": 24,
@@ -124,7 +124,14 @@
           "opponent": "可能对 E组第1名 或 G组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇲🇽 墨西哥",
+        "🇿🇦 南非",
+        "🇰🇷 韩国",
+        "🇨🇿 捷克"
+      ],
+      "group_label_cn": "A组"
     },
     {
       "group": "B",
@@ -239,7 +246,14 @@
           "opponent": "可能对 E组第1名 或 D组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇨🇦 加拿大",
+        "🇧🇦 波黑",
+        "🇺🇸 美国",
+        "🇵🇾 巴拉圭"
+      ],
+      "group_label_cn": "B组"
     },
     {
       "group": "C",
@@ -354,7 +368,14 @@
           "opponent": "可能对 E组第1名 / I组第1名 / A组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇶🇦 卡塔尔",
+        "🇨🇭 瑞士",
+        "🇧🇷 巴西",
+        "🇲🇦 摩洛哥"
+      ],
+      "group_label_cn": "C组"
     },
     {
       "group": "D",
@@ -469,7 +490,14 @@
           "opponent": "可能对 E组第1名 / I组第1名 / K组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇭🇹 海地",
+        "🏴 苏格兰",
+        "🇦🇺 澳大利亚",
+        "🇹🇷 土耳其"
+      ],
+      "group_label_cn": "D组"
     },
     {
       "group": "E",
@@ -584,7 +612,14 @@
           "opponent": "可能对 A/B/D/G/K/L 组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇩🇪 德国",
+        "🇨🇼 库拉索",
+        "🇳🇱 荷兰",
+        "🇯🇵 日本"
+      ],
+      "group_label_cn": "E组"
     },
     {
       "group": "F",
@@ -699,7 +734,14 @@
           "opponent": "可能对 E/I/A/B 组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇨🇮 科特迪瓦",
+        "🇪🇨 厄瓜多尔",
+        "🇸🇪 瑞典",
+        "🇹🇳 突尼斯"
+      ],
+      "group_label_cn": "F组"
     },
     {
       "group": "G",
@@ -814,7 +856,14 @@
           "opponent": "可能对 I组第1名 或 B组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇪🇸 西班牙",
+        "🇨🇻 佛得角",
+        "🇧🇪 比利时",
+        "🇪🇬 埃及"
+      ],
+      "group_label_cn": "G组"
     },
     {
       "group": "H",
@@ -929,7 +978,14 @@
           "opponent": "可能对 I/A/L/G 组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇸🇦 沙特阿拉伯",
+        "🇺🇾 乌拉圭",
+        "🇮🇷 伊朗",
+        "🇳🇿 新西兰"
+      ],
+      "group_label_cn": "H组"
     },
     {
       "group": "I",
@@ -1044,7 +1100,14 @@
           "opponent": "可能对 A/L/D/G/B/K 组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇫🇷 法国",
+        "🇸🇳 塞内加尔",
+        "🇮🇶 伊拉克",
+        "🇳🇴 挪威"
+      ],
+      "group_label_cn": "I组"
     },
     {
       "group": "J",
@@ -1159,7 +1222,14 @@
           "opponent": "可能对 L/D/G/B/K 组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇦🇷 阿根廷",
+        "🇩🇿 阿尔及利亚",
+        "🇦🇹 奥地利",
+        "🇯🇴 约旦"
+      ],
+      "group_label_cn": "J组"
     },
     {
       "group": "K",
@@ -1274,7 +1344,14 @@
           "opponent": "可能对 L组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇵🇹 葡萄牙",
+        "🇨🇩 刚果（金）",
+        "🏴 英格兰",
+        "🇭🇷 克罗地亚"
+      ],
+      "group_label_cn": "K组"
     },
     {
       "group": "L",
@@ -1389,7 +1466,14 @@
           "opponent": "可能对 K组第1名"
         }
       ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇬🇭 加纳",
+        "🇵🇦 巴拿马",
+        "🇺🇿 乌兹别克斯坦",
+        "🇨🇴 哥伦比亚"
+      ],
+      "group_label_cn": "L组"
     }
   ],
   "advancement_rules": {
@@ -1583,7 +1667,7 @@
   ],
   "display_language": "zh-CN",
   "title_cn": "W1 世界杯赛前预测总控台",
-  "subtitle_cn": "用普通人能看懂的中文，看小组赛程、参考倾向、风险缺口和现在该干嘛。当前不输出投注建议。",
+  "subtitle_cn": "外观复刻绿茵神算风格，底层仍由 W1 数据、风控和 ledger 驱动。",
   "status_cards_cn": [
     {
       "label": "等待数据",
@@ -1618,14 +1702,15 @@
     "reference_score": "2-0 / 2-1",
     "current_action": "等待正式首发，不下最终结论",
     "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
-    "explanation": "参考比分只作为外部参考，不绕过 W1 风控",
-    "w1_guard_summary": "W1_PLAY_GUARD_V1 未通过：confirmed_lineup 缺失，保持等待。"
+    "explanation": "参考比分是外部参考信号，不能变成正式 W1_PLAY，也不绕过 W1 风控。"
   },
   "first_match_cn": {
     "fixture_id": "1489369",
     "match": "墨西哥 vs 南非",
-    "kickoff": "2026-06-12 03:00 CST / 2026-06-11T19:00:00Z",
-    "current_conclusion": "等待关键数据，暂不下最终结论",
+    "home": "🇲🇽 墨西哥",
+    "away": "🇿🇦 南非",
+    "kickoff": "北京时间 6/12 03:00",
+    "current_conclusion": "等待正式首发，不下最终结论",
     "reference_lean": "墨西哥不败",
     "reference_score": "2-0 / 2-1",
     "risk_level": "高",
@@ -1640,22 +1725,37 @@
       "suspensions 与 travel_distance 仍为部分数据"
     ],
     "key_gaps": [
-      "confirmed_lineup 缺失",
-      "referee 未公布"
+      "confirmed lineup 缺失",
+      "裁判未公布"
     ],
     "current_action": "等待正式首发，不下最终结论",
-    "play_guard_result": "否，未通过 W1_PLAY_GUARD_V1",
-    "w1_label_cn": "等待数据",
-    "technical_details": {
-      "raw_decision": "W1_WAIT",
-      "play_guard_pass": false,
-      "lineup_status": "MISSING",
-      "referee_status": "MISSING",
-      "odds_snapshot_age_minutes": null,
-      "odds_movement": "待下一次快照比较",
-      "ledger_required": true,
-      "first_seen_odds_proxy": true
-    }
+    "play_guard_result": "未通过 W1_PLAY_GUARD_V1，保持等待数据",
+    "public_technical_details": [
+      {
+        "label": "W1 风控",
+        "value": "未通过"
+      },
+      {
+        "label": "首发状态",
+        "value": "未公布"
+      },
+      {
+        "label": "裁判状态",
+        "value": "未公布"
+      },
+      {
+        "label": "赔率变化",
+        "value": "待下一次快照比较"
+      },
+      {
+        "label": "ledger",
+        "value": "需要记录"
+      },
+      {
+        "label": "first_seen_odds_proxy",
+        "value": "已捕获，仅代表首次观察快照"
+      }
+    ]
   },
   "label_explain_cn": [
     {
@@ -1806,5 +1906,53 @@
     "supporting_factors / counter_factors",
     "dashboard_data.json"
   ],
-  "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘。不构成投注、下注、资金或收益建议。"
+  "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。",
+  "original_site_capture": {
+    "url": "https://worldcup.youliaoyun.com/",
+    "captured_to": "/tmp/w1_original_site_capture",
+    "visual_notes": [
+      "深绿球场背景与中线圆弧",
+      "大号 WHO WINS 式主标题",
+      "编号区块 01/02/03",
+      "霓虹绿边框卡片与黄色行动按钮",
+      "焦点赛程横向卡片",
+      "左右主客队对阵预测台"
+    ]
+  },
+  "brand_cn": "W1 世界杯赛前预测总控台",
+  "hero": {
+    "top_label": "FIFA WORLD CUP 26 · W1 ENGINE",
+    "phase": "GROUP STAGE · DAY 1",
+    "date_range": "2026.06.11 — 07.19",
+    "huge_title_top": "WHO",
+    "huge_title_bottom": "WINS?",
+    "yellow_tag": "当前你只需要看这里",
+    "intro": "第一场先看参考倾向、参考比分、风险提示和现在该干嘛。W1 风控没过，不下最终结论。"
+  },
+  "focus_fixtures_cn": [
+    {
+      "badge": "● TODAY",
+      "note": "揭幕战 · 北京时间 6/12 03:00",
+      "home": "🇲🇽 墨西哥",
+      "away": "🇿🇦 南非"
+    },
+    {
+      "badge": "● TODAY",
+      "note": "A组 · 北京时间 6/12 10:00",
+      "home": "🇰🇷 韩国",
+      "away": "🇨🇿 捷克"
+    },
+    {
+      "badge": "B组",
+      "note": "北京时间 6/13 03:00",
+      "home": "🇨🇦 加拿大",
+      "away": "🇧🇦 波黑"
+    },
+    {
+      "badge": "D组",
+      "note": "北京时间 6/13 06:00",
+      "home": "🇺🇸 美国",
+      "away": "🇵🇾 巴拉圭"
+    }
+  ]
 }

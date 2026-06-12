@@ -1,4 +1,4 @@
-# W1 可视化 Dashboard 中文预测总控台
+# W1 可视化 Dashboard 原站 UI 复刻版
 
 **入口:** `reports/dashboard/W1_VISUAL_DASHBOARD.html`  
 **数据:** `reports/dashboard/assets/w1_dashboard_data.json`
@@ -7,7 +7,9 @@
 
 W1_VISUAL_DASHBOARD 是给老板直接查看的中文静态总控台。页面可以直接双击打开，不需要 Web 服务，不调用外部 API。
 
-本版复用公开项目 `worldcup2026-prediction-skill` 的中文 UI 与解释风格，但底层仍完全使用 W1：watcher v2、W1_PLAY_GUARD_V1、match cards、ledger、odds_movement、supporting_factors / counter_factors 与 dashboard_data.json。
+本版根据 `https://worldcup.youliaoyun.com/` 真实站点截图复刻视觉风格，而不是仅参考 README / skill / TUTORIAL。临时截图保存在 `/tmp/w1_original_site_capture/`，不提交到仓库。
+
+复刻范围包括深绿球场背景、大号 WHO WINS 标题、编号区块、今日焦点赛程卡、对阵预测台、霓虹绿色边框、黄色行动按钮和结果卡片层级。底层仍完全使用 W1：watcher v2、W1_PLAY_GUARD_V1、match cards、ledger、odds_movement、supporting_factors / counter_factors 与 dashboard_data.json。
 
 ## 第一屏信息
 
@@ -21,24 +23,18 @@ W1_VISUAL_DASHBOARD 是给老板直接查看的中文静态总控台。页面可
 
 ## 页面模块
 
-- 顶部老板视角：当前状态、第一场、参考倾向、参考比分、当前动作、正式判断
-- 状态卡：等待数据、观察中、可正式分析、跳过
-- 首场比赛卡：比赛、开赛时间、当前结论、参考比分、风险等级、支持理由、反对理由、关键缺口、当前动作、是否通过 W1 风控
-- 技术详情：默认折叠，只在展开后显示 raw decision、play_guard_pass、lineup_status、referee_status、odds_movement 等字段
-- 世界杯小组总览：A组到L组，每组4队，展示当前赛前积分小表
+- 今日焦点：按原站横向赛程卡展示首轮重点比赛
+- 对阵预测台：按原站左右主客队 + 中间 VS + 阶段按钮展示
+- W1 赛前卡：比赛、倾向、参考比分、理由、风险提示、关键缺口、当前动作、W1 风控状态
+- 世界杯分组：A组到L组，每组4队，展示当前赛前积分
 - 晋级规则：每组前2名直接晋级，成绩最好的8个小组第三晋级，共32队进入淘汰赛
-- 晋级路径：每组第1名、第2名、第3名若晋级后的32强席位与潜在对手
-- 报告入口
+- 页脚声明：明确不构成投注建议、下注建议、资金建议或收益承诺
 
 ## 边界
 
-页面可以展示参考倾向和参考比分，但它们不是 W1 正式结论。W1_PLAY 仍必须通过 W1_PLAY_GUARD_V1；只要 confirmed_lineup 等关键数据缺失，页面必须保持等待数据。
+页面可以展示参考倾向和参考比分，但它们只是外部参考信号，不是 W1 正式结论。W1_PLAY 仍必须通过 W1_PLAY_GUARD_V1；只要 confirmed_lineup 等关键数据缺失，页面必须保持等待数据。
 
 页面不提供投注、下注、资金或收益建议，也不接入接口密钥教程、聊天群自动化或付费社群。
-
-## 晋级路径说明
-
-页面展示的是 32 强赛程席位，不是赛果预测。每组前2名的对阵席位可以直接列出；小组第三的具体对阵要等 12 个小组第三中哪 8 队晋级后才能确定，因此页面展示候选对手范围。
 
 ## 校验
 

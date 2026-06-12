@@ -16,6 +16,7 @@ DATA_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 LEDGER = ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv"
 DOC = ROOT / "docs/W1_VISUAL_DASHBOARD.md"
 POLICY = ROOT / "docs/W1_UI_REUSE_POLICY.md"
+CAPTURE_DIR = Path("/tmp/w1_original_site_capture")
 
 FORBIDDEN_SOURCE_TERMS = [
     "DeepSeek API Key",
@@ -124,7 +125,7 @@ def assert_groups(data: dict) -> None:
 
 
 def assert_dashboard_data(data: dict) -> None:
-    if data.get("schema_version") != "W1_VISUAL_DASHBOARD_CN_REUSE":
+    if data.get("schema_version") != "W1_VISUAL_DASHBOARD_ORIGINAL_UI_CN":
         fail("Dashboard data schema_version mismatch")
     if data.get("display_language") != "zh-CN":
         fail("Dashboard must declare zh-CN display language")
@@ -186,7 +187,7 @@ def assert_dashboard_data(data: dict) -> None:
         "key_gaps",
         "current_action",
         "play_guard_result",
-        "technical_details",
+        "public_technical_details",
     ):
         if key not in first:
             fail(f"First match card missing {key}")
@@ -194,13 +195,15 @@ def assert_dashboard_data(data: dict) -> None:
         fail("First match must be Chinese")
     if "W1_PLAY_GUARD_V1" not in first["play_guard_result"]:
         fail("First match must keep W1 guard result")
-    if not first["play_guard_result"].startswith("否"):
+    if "未通过" not in first["play_guard_result"]:
         fail("First match must not pass W1 guard while lineup is missing")
 
-    tech = first["technical_details"]
-    for key in ("raw_decision", "play_guard_pass", "lineup_status", "referee_status", "odds_snapshot_age_minutes", "odds_movement"):
-        if key not in tech:
-            fail(f"Technical detail missing {key}")
+    tech = first["public_technical_details"]
+    if len(tech) < 5:
+        fail("Public technical details must summarize W1 state without raw keys")
+    for item in tech:
+        if not item.get("label") or not item.get("value"):
+            fail("Public technical details must use Chinese label/value pairs")
 
     cn_labels = [item.get("label") for item in data.get("status_cards_cn", [])]
     for label in ("等待数据", "观察中", "可正式分析", "跳过"):
@@ -215,6 +218,14 @@ def assert_html(data: dict) -> None:
     text = read(HTML)
     required = [
         "W1 世界杯赛前预测总控台",
+        "WHO",
+        "WINS?",
+        "今日焦点",
+        "对阵预测台",
+        "W1 赛前卡",
+        "KEY FACTORS",
+        "RISK ALERT",
+        "DATA GAPS",
         "当前你只需要看这里",
         "24 场等待关键数据",
         "墨西哥 vs 南非",
@@ -226,36 +237,27 @@ def assert_html(data: dict) -> None:
         "等待正式首发，不下最终结论",
         "正式判断",
         "6月12日 02:00 / 02:30 CST",
-        "参考比分只作为外部参考，不绕过 W1 风控",
-        "比赛",
-        "开赛时间",
-        "当前结论",
-        "风险等级",
-        "支持理由",
-        "反对理由",
+        "参考比分是外部参考信号",
+        "倾向",
+        "理由",
+        "风险提示",
         "关键缺口",
-        "是否通过 W1 风控",
-        "等待数据",
-        "观察中",
-        "可正式分析",
-        "跳过",
         "A组",
         "L组",
         "每组4队",
         "每组前2名直接晋级",
         "最好8个小组第三晋级",
-        "32强席位",
-        "潜在对手",
         "W1_PLAY_GUARD_V1",
-        "展开技术详情",
-        "本页面用于世界杯赛前数据分析、风险识别和赛后复盘。",
-        "不构成投注",
+        "不构成投注建议",
     ]
     for token in required:
         if token not in text:
             fail(f"HTML missing token: {token}")
     if "fetch(" in text:
         fail("HTML should not require fetch for double-click use")
+    for raw_key in ("play_guard_pass", "lineup_status", "W1_WAIT"):
+        if raw_key in text:
+            fail(f"HTML must not expose raw key: {raw_key}")
 
     embedded = re.search(r'<script id="w1-data" type="application/json">(.*?)</script>', text, re.S)
     if not embedded:
@@ -264,8 +266,14 @@ def assert_html(data: dict) -> None:
         embedded_data = json.loads(embedded.group(1))
     except json.JSONDecodeError as exc:
         fail(f"Embedded dashboard JSON is not parseable: {exc}")
-    if embedded_data != data:
-        fail("Embedded dashboard JSON must match asset data JSON")
+    embedded_text = embedded.group(1)
+    for raw_key in ("play_guard_pass", "lineup_status", "W1_WAIT"):
+        if raw_key in embedded_text:
+            fail(f"Embedded dashboard JSON must not expose raw key: {raw_key}")
+    if embedded_data.get("schema_version") != data.get("schema_version"):
+        fail("Embedded dashboard JSON schema version mismatch")
+    if len(embedded_data.get("groups", [])) != 12:
+        fail("Embedded dashboard JSON must include 12 public groups")
 
 
 def assert_docs() -> None:
@@ -279,6 +287,21 @@ def assert_docs() -> None:
             fail(f"UI reuse policy missing token: {token}")
 
 
+def assert_original_site_capture() -> None:
+    required = [
+        "original_home_full.png",
+        "original_first_view.png",
+        "original_groups_viewport.png",
+        "original_match_card_viewport.png",
+        "original_rules_viewport.png",
+        "original_dom_summary.json",
+    ]
+    for name in required:
+        path = CAPTURE_DIR / name
+        if not path.is_file() or path.stat().st_size == 0:
+            fail(f"Original site capture missing: {path}")
+
+
 def main() -> int:
     try:
         if not DATA_JSON.is_file():
@@ -288,6 +311,7 @@ def main() -> int:
         assert_dashboard_data(data)
         assert_html(data)
         assert_docs()
+        assert_original_site_capture()
     except CheckError as exc:
         print(f"W1 visual dashboard self-test FAIL: {exc}", file=sys.stderr)
         return 1

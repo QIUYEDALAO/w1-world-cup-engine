@@ -1,1701 +1,66 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>W1 世界杯赛前预测总控台</title>
-  <style>
-    :root { --bg:#f4f6f8; --ink:#172033; --muted:#667085; --panel:#fff; --line:#d9e0ea; --brand:#0f766e; --brand2:#0f4c81; --wait:#b45309; --watch:#1d4ed8; --play:#15803d; --pass:#64748b; --risk:#b91c1c; --soft:#eef7f5; --warm:#fff7ed; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",sans-serif; }
-    header { background:linear-gradient(135deg,#0f172a 0%,#123a54 54%,#0f766e 100%); color:#fff; padding:34px 36px 30px; }
-    header h1 { margin:0 0 10px; font-size:36px; line-height:1.18; letter-spacing:0; }
-    header p { margin:0; max-width:980px; color:#e6edf6; font-size:18px; line-height:1.65; }
-    main { max-width:1540px; margin:0 auto; padding:24px 32px 44px; }
-    h2 { margin:30px 0 14px; font-size:24px; line-height:1.25; }
-    h3 { margin:0 0 10px; font-size:18px; }
-    .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px; box-shadow:0 1px 3px rgba(15,23,42,.06); }
-    .hero { display:grid; grid-template-columns:1.2fr .8fr; gap:16px; margin-top:18px; align-items:stretch; }
-    .boss-main { border-left:7px solid var(--wait); background:#fffaf3; }
-    .boss-title { font-size:26px; font-weight:950; margin-bottom:14px; }
-    .boss-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-    .boss-item { padding:13px 14px; border:1px solid #f2dcc1; border-radius:9px; background:#fff; }
-    .boss-k { color:#7c4a03; font-size:13px; font-weight:900; }
-    .boss-v { margin-top:7px; font-size:19px; font-weight:950; line-height:1.35; overflow-wrap:anywhere; }
-    .boss-note { margin-top:14px; padding:13px 14px; border-radius:9px; background:#ffedd5; color:#7c2d12; font-weight:850; line-height:1.55; }
-    .status-grid { display:grid; grid-template-columns:repeat(4,minmax(170px,1fr)); gap:14px; }
-    .status-card { min-height:128px; display:flex; flex-direction:column; justify-content:space-between; }
-    .status-label { font-size:17px; font-weight:900; }
-    .status-count { font-size:36px; font-weight:950; line-height:1; margin:10px 0; }
-    .wait { color:var(--wait); } .watch { color:var(--watch); } .play { color:var(--play); } .pass { color:var(--pass); }
-    .small { color:var(--muted); font-size:13px; line-height:1.55; }
-    .pill { display:inline-flex; align-items:center; width:fit-content; border-radius:999px; padding:7px 12px; background:var(--soft); color:var(--brand); font-weight:900; }
-    .meta-row { display:grid; grid-template-columns:repeat(3,minmax(220px,1fr)); gap:14px; margin-top:14px; }
-    .meta-label { color:var(--muted); font-size:14px; font-weight:850; }
-    .meta-value { margin-top:8px; font-size:20px; font-weight:950; overflow-wrap:anywhere; }
-    .match-card { border-top:6px solid var(--brand); }
-    .match-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
-    .match-title { font-size:24px; font-weight:950; line-height:1.25; }
-    .risk { color:#fff; background:var(--risk); border-radius:999px; padding:7px 12px; font-weight:900; white-space:nowrap; }
-    .match-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-    .kv { padding:12px; border:1px solid #edf1f6; border-radius:8px; background:#fbfcfe; }
-    .k { color:var(--muted); font-size:13px; font-weight:900; }
-    .v { margin-top:6px; font-size:17px; font-weight:900; line-height:1.38; overflow-wrap:anywhere; }
-    .list-box { margin-top:14px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-    .list-box ul { margin:8px 0 0; padding-left:18px; color:#344054; line-height:1.65; }
-    .layout { display:grid; grid-template-columns:1.12fr .88fr; gap:18px; align-items:start; }
-    .groups { display:grid; grid-template-columns:repeat(2,minmax(320px,1fr)); gap:14px; }
-    .group-title { display:flex; justify-content:space-between; align-items:center; gap:10px; }
-    table { width:100%; border-collapse:collapse; font-size:14px; }
-    th,td { padding:9px 8px; border-bottom:1px solid #edf1f6; text-align:left; white-space:normal; }
-    th { background:#f8fafc; color:#475569; font-weight:950; }
-    .points-badge { display:inline-flex; align-items:center; justify-content:center; min-width:42px; padding:4px 8px; border-radius:999px; background:var(--warm); color:var(--wait); font-weight:950; }
-    .path-list { display:grid; gap:8px; margin-top:12px; }
-    .path-head,.path-row { display:grid; grid-template-columns:72px minmax(86px,.8fr) 1.4fr; gap:8px; align-items:start; }
-    .path-head { color:#64748b; font-size:12px; font-weight:950; padding:0 10px; }
-    .path-row { padding:9px 10px; border:1px solid #edf1f6; border-radius:8px; background:#fbfcfe; font-size:13px; line-height:1.45; }
-    .path-rank { font-weight:950; } .path-slot { color:var(--brand); font-weight:950; } .path-opponent { color:var(--muted); }
-    .rule-list { display:grid; gap:10px; margin:0; padding:0; list-style:none; }
-    .rule-list li { padding:12px 14px; background:#f8fafc; border:1px solid #edf1f6; border-radius:8px; font-weight:850; line-height:1.45; }
-    .flow { display:grid; grid-template-columns:1fr 42px 1fr 42px 1fr; gap:8px; align-items:center; margin-top:14px; }
-    .flow-box { min-height:110px; text-align:center; display:flex; flex-direction:column; justify-content:center; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; }
-    .flow-num { font-size:38px; font-weight:950; color:var(--brand); } .flow-text { color:var(--muted); font-weight:850; line-height:1.45; } .arrow { text-align:center; color:#64748b; font-size:26px; font-weight:950; }
-    .legend { display:grid; grid-template-columns:repeat(4,minmax(160px,1fr)); gap:12px; }
-    .legend-item { border-top:5px solid var(--line); }
-    .legend-item.wait-border { border-color:var(--wait); } .legend-item.watch-border { border-color:var(--watch); } .legend-item.play-border { border-color:var(--play); } .legend-item.pass-border { border-color:var(--pass); }
-    details { margin-top:14px; border:1px dashed #cbd5e1; border-radius:8px; padding:12px; background:#fbfcfe; }
-    summary { cursor:pointer; color:var(--brand2); font-weight:950; }
-    pre { white-space:pre-wrap; word-break:break-word; font-size:12px; line-height:1.5; color:#344054; }
-    .links { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-    a { color:#075985; text-decoration:none; font-weight:900; overflow-wrap:anywhere; } a:hover { text-decoration:underline; }
-    footer { margin-top:30px; padding:18px; border-radius:10px; background:#0f172a; color:#e5e7eb; font-size:15px; line-height:1.65; font-weight:850; }
-    @media (max-width:1180px) { .hero,.layout { grid-template-columns:1fr; } .status-grid { grid-template-columns:repeat(2,1fr); } .groups { grid-template-columns:1fr; } .list-box { grid-template-columns:1fr; } .legend { grid-template-columns:repeat(2,1fr); } }
-    @media (max-width:720px) { header,main { padding-left:16px; padding-right:16px; } header h1 { font-size:29px; } .boss-grid,.status-grid,.meta-row,.match-grid,.legend,.links { grid-template-columns:1fr; } .flow { grid-template-columns:1fr; } .arrow { transform:rotate(90deg); } .path-head,.path-row { grid-template-columns:1fr; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>W1 世界杯赛前预测总控台</title>
+<style>
+:root{--bg:#020d08;--panel:#061b11;--panel2:#082515;--line:#145a35;--line2:#1d7a48;--green:#38ff82;--green2:#78ffa8;--yellow:#ffc83d;--orange:#ff9f2d;--text:#eefcf2;--muted:#8fb99c;--red:#ff5a52;}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",Arial,sans-serif;background:radial-gradient(circle at 50% 52%,rgba(56,255,130,.12) 0 22%,transparent 23%),radial-gradient(circle at 50% 52%,transparent 0 38%,rgba(56,255,130,.16) 39%,transparent 40%),linear-gradient(90deg,transparent calc(50% - 1px),rgba(56,255,130,.16) 50%,transparent calc(50% + 1px)),#020d08;min-height:100vh;}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(56,255,130,.65) 0 2px,transparent 3px),radial-gradient(circle,rgba(255,200,61,.55) 0 2px,transparent 3px);background-size:260px 260px,380px 380px;background-position:32px 120px,180px 80px;opacity:.42}.wrap{width:min(1120px,calc(100vw - 36px));margin:0 auto;padding:24px 0 44px;position:relative}.topbar{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(56,255,130,.25);padding-bottom:22px}.brand{display:flex;gap:14px;align-items:center}.logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#38ff82,#1bb85b);display:grid;place-items:center;color:#06210f;font-size:25px;box-shadow:0 0 30px rgba(56,255,130,.45)}.brand-name{font-size:24px;font-weight:950;letter-spacing:.04em}.brand-sub{font-size:11px;color:var(--muted);letter-spacing:.35em;margin-top:4px}.datebox{text-align:right;color:var(--muted);font-size:12px;letter-spacing:.22em;font-weight:850}.datebox strong{display:block;color:var(--yellow);letter-spacing:.12em;margin-top:5px}.hero{padding:54px 0 45px}.who{font-family:Impact,"Arial Black",sans-serif;font-size:112px;line-height:.82;font-weight:950;letter-spacing:.01em;text-transform:uppercase;color:#effaf0;text-shadow:0 12px 0 rgba(255,255,255,.06)}.who .wins{display:block;color:#baffc9;-webkit-text-stroke:6px var(--green);text-shadow:0 0 26px rgba(56,255,130,.5)}.hero-line{display:flex;align-items:center;gap:18px;margin-top:26px;flex-wrap:wrap}.yellow-tag{background:linear-gradient(135deg,#ffe071,#ffb12b);color:#111807;border-radius:5px;padding:10px 16px;font-weight:950;transform:rotate(-2deg);box-shadow:0 10px 28px rgba(255,200,61,.18)}.hero-copy{color:var(--muted);font-size:15px;line-height:1.7}.section{margin-top:28px}.section-title{display:flex;align-items:center;gap:14px;margin-bottom:18px}.num{font-size:34px;font-weight:950;color:var(--green);font-family:Impact,"Arial Black",sans-serif}.section-title h2{margin:0;font-size:24px;letter-spacing:.04em}.section-title:after{content:"";height:1px;background:rgba(56,255,130,.25);flex:1}.fixtures{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.fixture{background:rgba(8,37,21,.78);border:1px solid rgba(56,255,130,.25);border-radius:11px;padding:18px;min-height:98px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}.fixture .meta{color:var(--muted);font-size:12px;letter-spacing:.1em;font-weight:850;line-height:1.45}.fixture .meta .today{color:#ff625b}.fixture .teams{margin-top:14px;font-size:18px;font-weight:950;display:flex;align-items:center;gap:8px;white-space:nowrap}.vs-small{color:var(--yellow);font-size:13px}.arena{background:rgba(8,37,21,.84);border:1px solid rgba(56,255,130,.28);border-radius:16px;padding:42px 34px 34px;box-shadow:0 0 50px rgba(56,255,130,.08),inset 0 0 0 1px rgba(255,255,255,.02)}.arena-grid{display:grid;grid-template-columns:1fr 150px 1fr;gap:24px;align-items:center}.side{text-align:center}.side-label{color:var(--muted);font-size:12px;letter-spacing:.45em;margin-bottom:18px}.flag-card{width:112px;height:72px;border-radius:8px;margin:0 auto 16px;display:grid;place-items:center;background:#05130c;border:1px solid rgba(56,255,130,.18);font-size:46px;box-shadow:0 12px 34px rgba(0,0,0,.24)}.team-name{width:min(280px,100%);margin:0 auto;background:#030d08;border:1px solid rgba(56,255,130,.18);border-radius:9px;padding:13px 16px;font-size:18px;font-weight:950}.vs{font-family:Impact,"Arial Black",sans-serif;text-align:center;font-size:54px;color:transparent;-webkit-text-stroke:2px var(--yellow);text-shadow:0 0 35px rgba(255,200,61,.38)}.stage-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:28px}.stage-pills span{border:1px solid rgba(56,255,130,.26);color:var(--muted);border-radius:999px;padding:8px 18px;font-weight:850}.stage-pills .active{background:var(--green);color:#041109;border-color:var(--green)}.action-button{display:block;width:240px;margin:28px auto 0;border:0;border-radius:10px;background:linear-gradient(135deg,#ffd45f,#ff9f2d);color:#130f03;font-size:20px;font-weight:950;padding:18px 24px;box-shadow:0 18px 45px rgba(255,185,48,.25)}.boss-strip{margin-top:22px;border:1px dashed rgba(56,255,130,.28);border-radius:12px;padding:18px;background:rgba(3,13,8,.55);display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.boss-item{border-left:3px solid var(--green);padding-left:12px}.boss-k{font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.12em}.boss-v{margin-top:6px;font-size:17px;font-weight:950;color:#fff}.result{background:rgba(6,27,17,.9);border:1px solid rgba(56,255,130,.28);border-radius:16px;padding:22px}.result-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;border-bottom:1px solid rgba(56,255,130,.16);padding-bottom:18px;margin-bottom:18px}.result-title{font-size:28px;font-weight:950}.lean{color:var(--green);font-size:24px;font-weight:950;margin-top:8px}.score{background:#03120b;border:1px solid rgba(255,200,61,.55);border-radius:12px;padding:14px 18px;text-align:center;min-width:180px}.score-label{color:var(--muted);font-size:12px;letter-spacing:.16em;font-weight:900}.score-value{font-size:26px;color:var(--yellow);font-weight:950;margin-top:6px}.detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}.info-card{background:rgba(3,13,8,.72);border:1px solid rgba(56,255,130,.18);border-radius:12px;padding:17px}.info-card h3{margin:0 0 12px;color:#fff;font-size:16px;letter-spacing:.08em}.info-card ul{margin:0;padding-left:18px;color:#c9e6d0;line-height:1.72;font-size:14px}.analysis{margin-top:14px;background:rgba(3,13,8,.72);border:1px solid rgba(255,200,61,.28);border-radius:12px;padding:17px;color:#e8f7eb;line-height:1.75}.groups{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.group{background:rgba(8,37,21,.76);border:1px solid rgba(56,255,130,.24);border-radius:12px;padding:16px}.group-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.group-name{font-size:22px;color:var(--green);font-weight:950}.group-note{color:var(--muted);font-size:12px}.team-list{display:grid;gap:8px}.team-row{display:flex;justify-content:space-between;gap:10px;background:rgba(3,13,8,.62);border:1px solid rgba(255,255,255,.04);border-radius:8px;padding:9px 10px;font-weight:850}.pts{color:var(--yellow)}.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.rule{background:rgba(8,37,21,.76);border:1px solid rgba(56,255,130,.24);border-radius:12px;padding:18px;text-align:center}.rule strong{display:block;color:var(--green);font-size:34px}.rule span{color:var(--muted);font-weight:850}.footer{margin-top:40px;border-top:1px solid rgba(56,255,130,.22);padding-top:24px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:13px}.footer b{color:var(--yellow)}
+@media(max-width:980px){.who{font-size:82px}.fixtures,.groups,.rules{grid-template-columns:1fr 1fr}.arena-grid{grid-template-columns:1fr}.vs{font-size:44px}.detail-grid,.boss-strip{grid-template-columns:1fr}.footer{flex-direction:column}.datebox{text-align:left}.topbar{align-items:flex-start;gap:18px;flex-direction:column}}
+@media(max-width:640px){.wrap{width:min(100vw - 26px,1120px)}.who{font-size:58px}.fixtures,.groups,.rules{grid-template-columns:1fr}.arena{padding:28px 18px}.hero{padding-top:34px}.brand-name{font-size:20px}}
+</style>
 </head>
 <body>
-<header><h1>W1 世界杯赛前预测总控台</h1><p>用普通人能看懂的中文，看小组赛程、参考倾向、风险缺口和现在该干嘛。当前不输出投注建议。</p></header>
-<main>
-  <section class="hero">
-    <div class="card boss-main"><div class="boss-title">当前你只需要看这里</div><div class="boss-grid" id="bossGrid"></div><div class="boss-note" id="bossNote"></div></div>
-    <div class="card"><h3>W1 后台仍然在管什么</h3><div id="backendList"></div></div>
-  </section>
-  <section><h2>当前状态</h2><div class="status-grid" id="statusCards"></div><div class="meta-row" id="metaCards"></div></section>
-  <section><h2>首场比赛卡</h2><div class="card match-card" id="firstMatchCard"></div></section>
-  <section class="layout"><div><h2>世界杯小组总览</h2><p class="small" id="groupNote"></p><div class="groups" id="groups"></div></div><div><h2>晋级规则</h2><div class="card"><ul class="rule-list" id="rules"></ul><div class="flow"><div class="flow-box"><div class="flow-num" id="directQ">24</div><div class="flow-text">直接晋级<br>每组前2名</div></div><div class="arrow">+</div><div class="flow-box"><div class="flow-num" id="thirdQ">8</div><div class="flow-text">成绩最好的<br>小组第三</div></div><div class="arrow">=</div><div class="flow-box"><div class="flow-num" id="r32">32</div><div class="flow-text">进入32强<br>淘汰赛席位</div></div></div><p class="small" id="pathNote"></p></div><h2>颜色 / 标签解释</h2><div class="legend" id="legend"></div></div></section>
-  <section><h2>报告入口</h2><div class="links" id="links"></div></section>
-  <footer id="footerStatement"></footer>
-</main>
+<div class="wrap">
+  <div class="topbar"><div class="brand"><div class="logo">⚽</div><div><div class="brand-name">W1 世界杯赛前预测总控台</div><div class="brand-sub">FIFA WORLD CUP 26 · W1 ENGINE</div></div></div><div class="datebox">GROUP STAGE · DAY 1<strong>2026.06.11 — 07.19</strong></div></div>
+  <section class="hero"><div class="who">WHO<span class="wins">WINS?</span></div><div class="hero-line"><span class="yellow-tag">当前你只需要看这里</span><span class="hero-copy">第一场先看参考倾向、参考比分、风险提示和现在该干嘛。W1 风控没过，不下最终结论。</span></div></section>
+  <section class="section"><div class="section-title"><span class="num">01</span><h2>今日焦点</h2></div><div class="fixtures" id="fixtures"></div></section>
+  <section class="section"><div class="section-title"><span class="num">02</span><h2>对阵预测台</h2></div><div class="arena"><div class="arena-grid"><div class="side"><div class="side-label">HOME · 主队</div><div class="flag-card">🇲🇽</div><div class="team-name">🇲🇽 墨西哥</div></div><div class="vs">VS</div><div class="side"><div class="side-label">AWAY · 客队</div><div class="flag-card">🇿🇦</div><div class="team-name">🇿🇦 南非</div></div></div><div class="stage-pills"><span class="active">小组赛</span><span>32强</span><span>16强</span><span>8强</span><span>半决赛</span><span>决赛</span></div><button class="action-button" type="button">查看 W1 卡</button><div class="boss-strip" id="bossStrip"></div></div></section>
+  <section class="section"><div class="section-title"><span class="num">03</span><h2>W1 赛前卡</h2></div><div class="result" id="resultCard"></div></section>
+  <section class="section"><div class="section-title"><span class="num">04</span><h2>世界杯分组</h2></div><p class="hero-copy">A组-L组，每组4队；每组前2名直接晋级，最好8个小组第三晋级。</p><div class="groups" id="groups"></div></section>
+  <section class="section"><div class="section-title"><span class="num">05</span><h2>晋级规则</h2></div><div class="rules" id="rules"></div></section>
+  <footer class="footer"><span>W1 赛前神算 · watcher v2 · W1_PLAY_GUARD_V1 · ledger · match cards · odds_movement</span><b>本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。</b></footer>
+</div>
 <script id="w1-data" type="application/json">{
-  "schema_version": "W1_VISUAL_DASHBOARD_CN_REUSE",
-  "generated_from": "local W1 fixtures/cards/ledger/state only",
-  "status_cards": {
-    "W1_WAIT": 24,
-    "W1_WATCH": 0,
-    "W1_PLAY": 0,
-    "W1_PASS": 0,
-    "watcher_version": "v2",
-    "play_guard_version": "W1_PLAY_GUARD_V1",
-    "next_refresh": "2026-06-10 18:00 CST"
-  },
-  "groups": [
-    {
-      "group": "A",
-      "teams": [
-        "Mexico",
-        "South Africa",
-        "South Korea",
-        "Czech Republic"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489369",
-          "match": "Mexico vs South Africa",
-          "kickoff_utc": "2026-06-11T19:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1538999",
-          "match": "South Korea vs Czech Republic",
-          "kickoff_utc": "2026-06-12T02:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Mexico",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Mexico",
-          "team_cn": "墨西哥",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "South Africa",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "South Africa",
-          "team_cn": "南非",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "South Korea",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "South Korea",
-          "team_cn": "韩国",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Czech Republic",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Czech Republic",
-          "team_cn": "捷克",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Mexico",
-        "South Africa",
-        "South Korea",
-        "Czech Republic"
-      ],
-      "teams_cn": [
-        "墨西哥",
-        "南非",
-        "韩国",
-        "捷克"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M79",
-          "opponent": "对 成绩较好的 C/E/F/H/I 组第三"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M73",
-          "opponent": "对 B组第2名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 E组第1名 或 G组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "B",
-      "teams": [
-        "Canada",
-        "Bosnia & Herzegovina",
-        "USA",
-        "Paraguay"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1539000",
-          "match": "Canada vs Bosnia & Herzegovina",
-          "kickoff_utc": "2026-06-12T19:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1489370",
-          "match": "USA vs Paraguay",
-          "kickoff_utc": "2026-06-13T01:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Canada",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Canada",
-          "team_cn": "加拿大",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Bosnia & Herzegovina",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Bosnia & Herzegovina",
-          "team_cn": "波黑",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "USA",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "USA",
-          "team_cn": "美国",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Paraguay",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Paraguay",
-          "team_cn": "巴拉圭",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Canada",
-        "Bosnia & Herzegovina",
-        "USA",
-        "Paraguay"
-      ],
-      "teams_cn": [
-        "加拿大",
-        "波黑",
-        "美国",
-        "巴拉圭"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M85",
-          "opponent": "对 成绩较好的 E/F/G/I/J 组第三"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M73",
-          "opponent": "对 A组第2名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 E组第1名 或 D组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "C",
-      "teams": [
-        "Qatar",
-        "Switzerland",
-        "Brazil",
-        "Morocco"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489373",
-          "match": "Qatar vs Switzerland",
-          "kickoff_utc": "2026-06-13T19:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1489371",
-          "match": "Brazil vs Morocco",
-          "kickoff_utc": "2026-06-13T22:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Qatar",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Qatar",
-          "team_cn": "卡塔尔",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Switzerland",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Switzerland",
-          "team_cn": "瑞士",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Brazil",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Brazil",
-          "team_cn": "巴西",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Morocco",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Morocco",
-          "team_cn": "摩洛哥",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Qatar",
-        "Switzerland",
-        "Brazil",
-        "Morocco"
-      ],
-      "teams_cn": [
-        "卡塔尔",
-        "瑞士",
-        "巴西",
-        "摩洛哥"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M76",
-          "opponent": "对 F组第2名"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M75",
-          "opponent": "对 F组第1名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 E组第1名 / I组第1名 / A组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "D",
-      "teams": [
-        "Haiti",
-        "Scotland",
-        "Australia",
-        "Türkiye"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489372",
-          "match": "Haiti vs Scotland",
-          "kickoff_utc": "2026-06-14T01:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1539001",
-          "match": "Australia vs Türkiye",
-          "kickoff_utc": "2026-06-14T04:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Haiti",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Haiti",
-          "team_cn": "海地",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Scotland",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Scotland",
-          "team_cn": "苏格兰",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Australia",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Australia",
-          "team_cn": "澳大利亚",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Türkiye",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Türkiye",
-          "team_cn": "土耳其",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Haiti",
-        "Scotland",
-        "Australia",
-        "Türkiye"
-      ],
-      "teams_cn": [
-        "海地",
-        "苏格兰",
-        "澳大利亚",
-        "土耳其"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M81",
-          "opponent": "对 成绩较好的 B/E/F/I/J 组第三"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M88",
-          "opponent": "对 G组第2名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 E组第1名 / I组第1名 / K组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "E",
-      "teams": [
-        "Germany",
-        "Curaçao",
-        "Netherlands",
-        "Japan"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489374",
-          "match": "Germany vs Curaçao",
-          "kickoff_utc": "2026-06-14T17:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1489376",
-          "match": "Netherlands vs Japan",
-          "kickoff_utc": "2026-06-14T20:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Germany",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Germany",
-          "team_cn": "德国",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Curaçao",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Curaçao",
-          "team_cn": "库拉索",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Netherlands",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Netherlands",
-          "team_cn": "荷兰",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Japan",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Japan",
-          "team_cn": "日本",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Germany",
-        "Curaçao",
-        "Netherlands",
-        "Japan"
-      ],
-      "teams_cn": [
-        "德国",
-        "库拉索",
-        "荷兰",
-        "日本"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M74",
-          "opponent": "对 成绩较好的 A/B/C/D/F 组第三"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M78",
-          "opponent": "对 I组第2名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 A/B/D/G/K/L 组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "F",
-      "teams": [
-        "Ivory Coast",
-        "Ecuador",
-        "Sweden",
-        "Tunisia"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489375",
-          "match": "Ivory Coast vs Ecuador",
-          "kickoff_utc": "2026-06-14T23:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1539002",
-          "match": "Sweden vs Tunisia",
-          "kickoff_utc": "2026-06-15T02:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Ivory Coast",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Ivory Coast",
-          "team_cn": "科特迪瓦",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Ecuador",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Ecuador",
-          "team_cn": "厄瓜多尔",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Sweden",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Sweden",
-          "team_cn": "瑞典",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Tunisia",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Tunisia",
-          "team_cn": "突尼斯",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Ivory Coast",
-        "Ecuador",
-        "Sweden",
-        "Tunisia"
-      ],
-      "teams_cn": [
-        "科特迪瓦",
-        "厄瓜多尔",
-        "瑞典",
-        "突尼斯"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M75",
-          "opponent": "对 C组第2名"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M76",
-          "opponent": "对 C组第1名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 E/I/A/B 组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "G",
-      "teams": [
-        "Spain",
-        "Cape Verde Islands",
-        "Belgium",
-        "Egypt"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489380",
-          "match": "Spain vs Cape Verde Islands",
-          "kickoff_utc": "2026-06-15T16:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1489377",
-          "match": "Belgium vs Egypt",
-          "kickoff_utc": "2026-06-15T19:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Spain",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Spain",
-          "team_cn": "西班牙",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Cape Verde Islands",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Cape Verde Islands",
-          "team_cn": "佛得角",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Belgium",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Belgium",
-          "team_cn": "比利时",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Egypt",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Egypt",
-          "team_cn": "埃及",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Spain",
-        "Cape Verde Islands",
-        "Belgium",
-        "Egypt"
-      ],
-      "teams_cn": [
-        "西班牙",
-        "佛得角",
-        "比利时",
-        "埃及"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M82",
-          "opponent": "对 成绩较好的 A/E/H/I/J 组第三"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M88",
-          "opponent": "对 D组第2名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 I组第1名 或 B组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "H",
-      "teams": [
-        "Saudi Arabia",
-        "Uruguay",
-        "Iran",
-        "New Zealand"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489379",
-          "match": "Saudi Arabia vs Uruguay",
-          "kickoff_utc": "2026-06-15T22:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1489378",
-          "match": "Iran vs New Zealand",
-          "kickoff_utc": "2026-06-16T01:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Saudi Arabia",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Saudi Arabia",
-          "team_cn": "沙特阿拉伯",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Uruguay",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Uruguay",
-          "team_cn": "乌拉圭",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Iran",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Iran",
-          "team_cn": "伊朗",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "New Zealand",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "New Zealand",
-          "team_cn": "新西兰",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Saudi Arabia",
-        "Uruguay",
-        "Iran",
-        "New Zealand"
-      ],
-      "teams_cn": [
-        "沙特阿拉伯",
-        "乌拉圭",
-        "伊朗",
-        "新西兰"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M84",
-          "opponent": "对 J组第2名"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M86",
-          "opponent": "对 J组第1名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 I/A/L/G 组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "I",
-      "teams": [
-        "France",
-        "Senegal",
-        "Iraq",
-        "Norway"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489383",
-          "match": "France vs Senegal",
-          "kickoff_utc": "2026-06-16T19:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1539016",
-          "match": "Iraq vs Norway",
-          "kickoff_utc": "2026-06-16T22:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "France",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "France",
-          "team_cn": "法国",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Senegal",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Senegal",
-          "team_cn": "塞内加尔",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Iraq",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Iraq",
-          "team_cn": "伊拉克",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Norway",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Norway",
-          "team_cn": "挪威",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "France",
-        "Senegal",
-        "Iraq",
-        "Norway"
-      ],
-      "teams_cn": [
-        "法国",
-        "塞内加尔",
-        "伊拉克",
-        "挪威"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M77",
-          "opponent": "对 成绩较好的 C/D/F/G/H 组第三"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M78",
-          "opponent": "对 E组第2名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 A/L/D/G/B/K 组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "J",
-      "teams": [
-        "Argentina",
-        "Algeria",
-        "Austria",
-        "Jordan"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489381",
-          "match": "Argentina vs Algeria",
-          "kickoff_utc": "2026-06-17T01:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1489382",
-          "match": "Austria vs Jordan",
-          "kickoff_utc": "2026-06-17T04:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Argentina",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Argentina",
-          "team_cn": "阿根廷",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Algeria",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Algeria",
-          "team_cn": "阿尔及利亚",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Austria",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Austria",
-          "team_cn": "奥地利",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Jordan",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Jordan",
-          "team_cn": "约旦",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Argentina",
-        "Algeria",
-        "Austria",
-        "Jordan"
-      ],
-      "teams_cn": [
-        "阿根廷",
-        "阿尔及利亚",
-        "奥地利",
-        "约旦"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M86",
-          "opponent": "对 H组第2名"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M84",
-          "opponent": "对 H组第1名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 L/D/G/B/K 组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "K",
-      "teams": [
-        "Portugal",
-        "Congo DR",
-        "England",
-        "Croatia"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1539003",
-          "match": "Portugal vs Congo DR",
-          "kickoff_utc": "2026-06-17T17:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1489384",
-          "match": "England vs Croatia",
-          "kickoff_utc": "2026-06-17T20:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Portugal",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Portugal",
-          "team_cn": "葡萄牙",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Congo DR",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Congo DR",
-          "team_cn": "刚果（金）",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "England",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "England",
-          "team_cn": "英格兰",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Croatia",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Croatia",
-          "team_cn": "克罗地亚",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Portugal",
-        "Congo DR",
-        "England",
-        "Croatia"
-      ],
-      "teams_cn": [
-        "葡萄牙",
-        "刚果（金）",
-        "英格兰",
-        "克罗地亚"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M87",
-          "opponent": "对 成绩较好的 D/E/I/J/L 组第三"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M83",
-          "opponent": "对 L组第2名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 L组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    },
-    {
-      "group": "L",
-      "teams": [
-        "Ghana",
-        "Panama",
-        "Uzbekistan",
-        "Colombia"
-      ],
-      "round1_fixtures": [
-        {
-          "fixture_id": "1489385",
-          "match": "Ghana vs Panama",
-          "kickoff_utc": "2026-06-17T23:00:00Z",
-          "decision": "W1_WAIT"
-        },
-        {
-          "fixture_id": "1489386",
-          "match": "Uzbekistan vs Colombia",
-          "kickoff_utc": "2026-06-18T02:00:00Z",
-          "decision": "W1_WAIT"
-        }
-      ],
-      "standings_template": [
-        {
-          "team": "Ghana",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Ghana",
-          "team_cn": "加纳",
-          "current_rank_label": "暂列第1",
-          "points_label": "0分"
-        },
-        {
-          "team": "Panama",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Panama",
-          "team_cn": "巴拿马",
-          "current_rank_label": "暂列第2",
-          "points_label": "0分"
-        },
-        {
-          "team": "Uzbekistan",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Uzbekistan",
-          "team_cn": "乌兹别克斯坦",
-          "current_rank_label": "暂列第3",
-          "points_label": "0分"
-        },
-        {
-          "team": "Colombia",
-          "P": 0,
-          "W": 0,
-          "D": 0,
-          "L": 0,
-          "GF": 0,
-          "GA": 0,
-          "GD": 0,
-          "PTS": 0,
-          "team_en": "Colombia",
-          "team_cn": "哥伦比亚",
-          "current_rank_label": "暂列第4",
-          "points_label": "0分"
-        }
-      ],
-      "teams_en": [
-        "Ghana",
-        "Panama",
-        "Uzbekistan",
-        "Colombia"
-      ],
-      "teams_cn": [
-        "加纳",
-        "巴拿马",
-        "乌兹别克斯坦",
-        "哥伦比亚"
-      ],
-      "qualification_paths": [
-        {
-          "finish": "第1名",
-          "slot": "32强 M80",
-          "opponent": "对 成绩较好的 E/H/I/J/K 组第三"
-        },
-        {
-          "finish": "第2名",
-          "slot": "32强 M83",
-          "opponent": "对 K组第2名"
-        },
-        {
-          "finish": "第3名",
-          "slot": "若成为8个最佳第三之一",
-          "opponent": "可能对 K组第1名"
-        }
-      ],
-      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
-    }
-  ],
-  "advancement_rules": {
-    "groups_total": 12,
-    "teams_per_group": 4,
-    "direct_qualifiers_per_group": 2,
-    "direct_qualifiers": 24,
-    "best_third_qualifiers": 8,
-    "round_of_32_total": 32,
-    "third_place_tiebreakers": [
-      "points",
-      "goal_diff",
-      "goals_for",
-      "fair_play",
-      "drawing_of_lots"
-    ]
-  },
-  "third_place_ranking_template": [
-    {
-      "rank": 1,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 2,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 3,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 4,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 5,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 6,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 7,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 8,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 9,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 10,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 11,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    },
-    {
-      "rank": 12,
-      "group": "",
-      "team": "",
-      "points": 0,
-      "goal_diff": 0,
-      "goals_for": 0,
-      "fair_play": 0,
-      "drawing_of_lots": ""
-    }
-  ],
-  "first_match": {
-    "fixture_id": "1489369",
-    "match": "Mexico vs South Africa",
-    "kickoff_utc": "2026-06-11T19:00:00Z",
-    "kickoff_cst": "2026-06-12 03:00",
-    "decision": "W1_WAIT",
-    "lineup_status": "WAIT_EVENT",
-    "referee_status": "MISSING",
-    "odds_status": "READY",
-    "play_guard_pass": false,
-    "next_refresh": "2026-06-10 18:00 CST"
-  },
-  "report_entrypoints": [
-    {
-      "label": "W1_LIVE_DASHBOARD.md",
-      "path": "W1_LIVE_DASHBOARD.md"
-    },
-    {
-      "label": "W1_REPORT_TEMPLATES.md",
-      "path": "../../docs/W1_REPORT_TEMPLATES.md"
-    },
-    {
-      "label": "W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md",
-      "path": "../../docs/W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md"
-    }
-  ],
-  "unresolved_data_gaps": [
-    {
-      "gap": "confirmed_lineup",
-      "scope": "24/24 first-round cards",
-      "blocks_play": true,
-      "status": "WAIT_EVENT"
-    },
-    {
-      "gap": "referee assignment",
-      "scope": "first-round cards",
-      "blocks_play": false,
-      "status": "MISSING"
-    },
-    {
-      "gap": "suspensions",
-      "scope": "system-level",
-      "blocks_play": false,
-      "status": "PARTIAL"
-    },
-    {
-      "gap": "travel_distance",
-      "scope": "system-level",
-      "blocks_play": false,
-      "status": "PARTIAL"
-    }
-  ],
-  "display_language": "zh-CN",
+  "schema_version": "W1_VISUAL_DASHBOARD_ORIGINAL_UI_CN",
   "title_cn": "W1 世界杯赛前预测总控台",
-  "subtitle_cn": "用普通人能看懂的中文，看小组赛程、参考倾向、风险缺口和现在该干嘛。当前不输出投注建议。",
-  "status_cards_cn": [
+  "subtitle_cn": "外观复刻绿茵神算风格，底层仍由 W1 数据、风控和 ledger 驱动。",
+  "brand_cn": "W1 世界杯赛前预测总控台",
+  "hero": {
+    "top_label": "FIFA WORLD CUP 26 · W1 ENGINE",
+    "phase": "GROUP STAGE · DAY 1",
+    "date_range": "2026.06.11 — 07.19",
+    "huge_title_top": "WHO",
+    "huge_title_bottom": "WINS?",
+    "yellow_tag": "当前你只需要看这里",
+    "intro": "第一场先看参考倾向、参考比分、风险提示和现在该干嘛。W1 风控没过，不下最终结论。"
+  },
+  "focus_fixtures_cn": [
     {
-      "label": "等待数据",
-      "count": 24,
-      "class": "wait",
-      "hint": "关键数据没齐，不能进入正式分析。"
+      "badge": "● TODAY",
+      "note": "揭幕战 · 北京时间 6/12 03:00",
+      "home": "🇲🇽 墨西哥",
+      "away": "🇿🇦 南非"
     },
     {
-      "label": "观察中",
-      "count": 0,
-      "class": "watch",
-      "hint": "有信号但风险较高，需要继续观察。"
+      "badge": "● TODAY",
+      "note": "A组 · 北京时间 6/12 10:00",
+      "home": "🇰🇷 韩国",
+      "away": "🇨🇿 捷克"
     },
     {
-      "label": "可正式分析",
-      "count": 0,
-      "class": "play",
-      "hint": "通过量化风控后才进入正式赛前分析。"
+      "badge": "B组",
+      "note": "北京时间 6/13 03:00",
+      "home": "🇨🇦 加拿大",
+      "away": "🇧🇦 波黑"
     },
     {
-      "label": "跳过",
-      "count": 0,
-      "class": "pass",
-      "hint": "风险过高或数据冲突，直接跳过。"
+      "badge": "D组",
+      "note": "北京时间 6/13 06:00",
+      "home": "🇺🇸 美国",
+      "away": "🇵🇾 巴拉圭"
     }
   ],
   "boss_view": {
@@ -1706,14 +71,15 @@
     "reference_score": "2-0 / 2-1",
     "current_action": "等待正式首发，不下最终结论",
     "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
-    "explanation": "参考比分只作为外部参考，不绕过 W1 风控",
-    "w1_guard_summary": "W1_PLAY_GUARD_V1 未通过：confirmed_lineup 缺失，保持等待。"
+    "explanation": "参考比分是外部参考信号，不能变成正式 W1_PLAY，也不绕过 W1 风控。"
   },
   "first_match_cn": {
     "fixture_id": "1489369",
     "match": "墨西哥 vs 南非",
-    "kickoff": "2026-06-12 03:00 CST / 2026-06-11T19:00:00Z",
-    "current_conclusion": "等待关键数据，暂不下最终结论",
+    "home": "🇲🇽 墨西哥",
+    "away": "🇿🇦 南非",
+    "kickoff": "北京时间 6/12 03:00",
+    "current_conclusion": "等待正式首发，不下最终结论",
     "reference_lean": "墨西哥不败",
     "reference_score": "2-0 / 2-1",
     "risk_level": "高",
@@ -1728,163 +94,394 @@
       "suspensions 与 travel_distance 仍为部分数据"
     ],
     "key_gaps": [
-      "confirmed_lineup 缺失",
-      "referee 未公布"
+      "confirmed lineup 缺失",
+      "裁判未公布"
     ],
     "current_action": "等待正式首发，不下最终结论",
-    "play_guard_result": "否，未通过 W1_PLAY_GUARD_V1",
-    "w1_label_cn": "等待数据",
-    "technical_details": {
-      "raw_decision": "W1_WAIT",
-      "play_guard_pass": false,
-      "lineup_status": "MISSING",
-      "referee_status": "MISSING",
-      "odds_snapshot_age_minutes": null,
-      "odds_movement": "待下一次快照比较",
-      "ledger_required": true,
-      "first_seen_odds_proxy": true
-    }
+    "play_guard_result": "未通过 W1_PLAY_GUARD_V1，保持等待数据",
+    "public_technical_details": [
+      {
+        "label": "W1 风控",
+        "value": "未通过"
+      },
+      {
+        "label": "首发状态",
+        "value": "未公布"
+      },
+      {
+        "label": "裁判状态",
+        "value": "未公布"
+      },
+      {
+        "label": "赔率变化",
+        "value": "待下一次快照比较"
+      },
+      {
+        "label": "ledger",
+        "value": "需要记录"
+      },
+      {
+        "label": "first_seen_odds_proxy",
+        "value": "已捕获，仅代表首次观察快照"
+      }
+    ]
   },
-  "label_explain_cn": [
+  "groups": [
     {
-      "label": "等待数据",
-      "meaning": "关键数据没齐，例如首发或裁判缺失。"
+      "group": "A",
+      "group_label_cn": "A组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇲🇽 墨西哥",
+        "🇿🇦 南非",
+        "🇰🇷 韩国",
+        "🇨🇿 捷克"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "墨西哥",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "南非",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "韩国",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "捷克",
+          "points_label": "0分"
+        }
+      ]
     },
     {
-      "label": "观察中",
-      "meaning": "有信号但风险较高，不能急着下结论。"
+      "group": "B",
+      "group_label_cn": "B组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇨🇦 加拿大",
+        "🇧🇦 波黑",
+        "🇺🇸 美国",
+        "🇵🇾 巴拉圭"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "加拿大",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "波黑",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "美国",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "巴拉圭",
+          "points_label": "0分"
+        }
+      ]
     },
     {
-      "label": "可正式分析",
-      "meaning": "通过量化风控，且 ledger_required=true。"
+      "group": "C",
+      "group_label_cn": "C组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇶🇦 卡塔尔",
+        "🇨🇭 瑞士",
+        "🇧🇷 巴西",
+        "🇲🇦 摩洛哥"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "卡塔尔",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "瑞士",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "巴西",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "摩洛哥",
+          "points_label": "0分"
+        }
+      ]
     },
     {
-      "label": "跳过",
-      "meaning": "风险过高或数据冲突，不进入正式分析。"
+      "group": "D",
+      "group_label_cn": "D组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇭🇹 海地",
+        "🏴 苏格兰",
+        "🇦🇺 澳大利亚",
+        "🇹🇷 土耳其"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "海地",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "苏格兰",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "澳大利亚",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "土耳其",
+          "points_label": "0分"
+        }
+      ]
+    },
+    {
+      "group": "E",
+      "group_label_cn": "E组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇩🇪 德国",
+        "🇨🇼 库拉索",
+        "🇳🇱 荷兰",
+        "🇯🇵 日本"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "德国",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "库拉索",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "荷兰",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "日本",
+          "points_label": "0分"
+        }
+      ]
+    },
+    {
+      "group": "F",
+      "group_label_cn": "F组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇨🇮 科特迪瓦",
+        "🇪🇨 厄瓜多尔",
+        "🇸🇪 瑞典",
+        "🇹🇳 突尼斯"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "科特迪瓦",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "厄瓜多尔",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "瑞典",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "突尼斯",
+          "points_label": "0分"
+        }
+      ]
+    },
+    {
+      "group": "G",
+      "group_label_cn": "G组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇪🇸 西班牙",
+        "🇨🇻 佛得角",
+        "🇧🇪 比利时",
+        "🇪🇬 埃及"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "西班牙",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "佛得角",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "比利时",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "埃及",
+          "points_label": "0分"
+        }
+      ]
+    },
+    {
+      "group": "H",
+      "group_label_cn": "H组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇸🇦 沙特阿拉伯",
+        "🇺🇾 乌拉圭",
+        "🇮🇷 伊朗",
+        "🇳🇿 新西兰"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "沙特阿拉伯",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "乌拉圭",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "伊朗",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "新西兰",
+          "points_label": "0分"
+        }
+      ]
+    },
+    {
+      "group": "I",
+      "group_label_cn": "I组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇫🇷 法国",
+        "🇸🇳 塞内加尔",
+        "🇮🇶 伊拉克",
+        "🇳🇴 挪威"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "法国",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "塞内加尔",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "伊拉克",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "挪威",
+          "points_label": "0分"
+        }
+      ]
+    },
+    {
+      "group": "J",
+      "group_label_cn": "J组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇦🇷 阿根廷",
+        "🇩🇿 阿尔及利亚",
+        "🇦🇹 奥地利",
+        "🇯🇴 约旦"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "阿根廷",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "阿尔及利亚",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "奥地利",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "约旦",
+          "points_label": "0分"
+        }
+      ]
+    },
+    {
+      "group": "K",
+      "group_label_cn": "K组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇵🇹 葡萄牙",
+        "🇨🇩 刚果（金）",
+        "🏴 英格兰",
+        "🇭🇷 克罗地亚"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "葡萄牙",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "刚果（金）",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "英格兰",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "克罗地亚",
+          "points_label": "0分"
+        }
+      ]
+    },
+    {
+      "group": "L",
+      "group_label_cn": "L组",
+      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
+      "teams_display_cn": [
+        "🇬🇭 加纳",
+        "🇵🇦 巴拿马",
+        "🇺🇿 乌兹别克斯坦",
+        "🇨🇴 哥伦比亚"
+      ],
+      "standings_template": [
+        {
+          "team_cn": "加纳",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "巴拿马",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "乌兹别克斯坦",
+          "points_label": "0分"
+        },
+        {
+          "team_cn": "哥伦比亚",
+          "points_label": "0分"
+        }
+      ]
     }
   ],
-  "advancement_rules_cn": [
-    "12个小组，每组4队",
-    "每组前2名直接晋级32强",
-    "12个小组第三中成绩最好的8队晋级",
-    "共32队进入淘汰赛"
-  ],
-  "standings_headers_cn": [
-    "球队",
-    "赛",
-    "胜",
-    "平",
-    "负",
-    "进球",
-    "失球",
-    "净胜球",
-    "积分"
-  ],
-  "third_place_headers_cn": [
-    "排名",
-    "小组",
-    "球队",
-    "积分",
-    "净胜球",
-    "进球",
-    "公平竞赛",
-    "抽签"
-  ],
-  "report_entrypoints_cn": [
-    {
-      "label": "实时状态 Markdown",
-      "path": "W1_LIVE_DASHBOARD.md"
-    },
-    {
-      "label": "报告模板",
-      "path": "../../docs/W1_REPORT_TEMPLATES.md"
-    },
-    {
-      "label": "专家评审报告",
-      "path": "../../docs/W1_PROJECT_REPORT_FOR_EXPERT_REVIEW.md"
-    }
-  ],
-  "team_display_language": "zh-CN",
-  "team_name_map_cn": {
-    "Mexico": "墨西哥",
-    "South Africa": "南非",
-    "South Korea": "韩国",
-    "Czech Republic": "捷克",
-    "Canada": "加拿大",
-    "Bosnia & Herzegovina": "波黑",
-    "USA": "美国",
-    "Paraguay": "巴拉圭",
-    "Qatar": "卡塔尔",
-    "Switzerland": "瑞士",
-    "Brazil": "巴西",
-    "Morocco": "摩洛哥",
-    "Haiti": "海地",
-    "Scotland": "苏格兰",
-    "Australia": "澳大利亚",
-    "Türkiye": "土耳其",
-    "Germany": "德国",
-    "Curaçao": "库拉索",
-    "Netherlands": "荷兰",
-    "Japan": "日本",
-    "Ivory Coast": "科特迪瓦",
-    "Ecuador": "厄瓜多尔",
-    "Sweden": "瑞典",
-    "Tunisia": "突尼斯",
-    "Spain": "西班牙",
-    "Cape Verde Islands": "佛得角",
-    "Belgium": "比利时",
-    "Egypt": "埃及",
-    "Saudi Arabia": "沙特阿拉伯",
-    "Uruguay": "乌拉圭",
-    "Iran": "伊朗",
-    "New Zealand": "新西兰",
-    "France": "法国",
-    "Senegal": "塞内加尔",
-    "Iraq": "伊拉克",
-    "Norway": "挪威",
-    "Argentina": "阿根廷",
-    "Algeria": "阿尔及利亚",
-    "Austria": "奥地利",
-    "Jordan": "约旦",
-    "Portugal": "葡萄牙",
-    "Congo DR": "刚果（金）",
-    "England": "英格兰",
-    "Croatia": "克罗地亚",
-    "Ghana": "加纳",
-    "Panama": "巴拿马",
-    "Uzbekistan": "乌兹别克斯坦",
-    "Colombia": "哥伦比亚"
+  "advancement_rules": {
+    "direct_qualifiers": 24,
+    "best_third_qualifiers": 8,
+    "round_of_32_total": 32
   },
-  "group_card_note_cn": "积分为赛前初始化，比赛后由 standings 刷新；当前不预测排名。",
-  "knockout_path_note_cn": "32强对阵按官方赛程席位展示；小组第三的具体落位需等8个最佳第三组合确定。",
-  "standings_compact_headers_cn": [
-    "球队",
-    "赛",
-    "净胜",
-    "积分"
-  ],
-  "qualification_path_headers_cn": [
-    "小组名次",
-    "32强席位",
-    "潜在对手"
-  ],
-  "knockout_slots_source": "FIFA World Cup 2026 Round of 32 schedule slots",
-  "ui_style_source": {
-    "name": "worldcup2026-prediction-skill",
-    "reuse_scope": "仅复用中文 UI/交互风格、卡片组织和教程式解释口吻",
-    "blocked_scope": [
-      "不复用 prompt 预测逻辑",
-      "不把胜平负概率作为 W1 结论",
-      "不把外部参考比分作为正式结论",
-      "不把外部口径作为正式置信度",
-      "不复用接口密钥教程、聊天群自动化、付费社群或资金建议"
-    ],
-    "license_note": "参考项目为 MIT License；W1 页面仅做风格借鉴与独立实现。"
-  },
-  "match_card_headers_cn": [
-    "字段",
-    "内容"
-  ],
+  "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。",
   "w1_backend_kept": [
     "watcher v2",
     "W1_PLAY_GUARD_V1",
@@ -1894,41 +491,26 @@
     "supporting_factors / counter_factors",
     "dashboard_data.json"
   ],
-  "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘。不构成投注、下注、资金或收益建议。"
+  "original_site_capture": {
+    "url": "https://worldcup.youliaoyun.com/",
+    "captured_to": "/tmp/w1_original_site_capture",
+    "visual_notes": [
+      "深绿球场背景与中线圆弧",
+      "大号 WHO WINS 式主标题",
+      "编号区块 01/02/03",
+      "霓虹绿边框卡片与黄色行动按钮",
+      "焦点赛程横向卡片",
+      "左右主客队对阵预测台"
+    ]
+  }
 }</script>
 <script>
-const data = JSON.parse(document.getElementById('w1-data').textContent);
-const s = data.status_cards;
-const boss = data.boss_view;
-const fm = data.first_match_cn;
-function escapeHtml(value) { return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
-function li(items) { return '<ul>' + items.map(x => '<li>' + escapeHtml(x) + '</li>').join('') + '</ul>'; }
-function table(headers, rows, mapper) { return '<table><thead><tr>' + headers.map(h=>'<th>'+escapeHtml(h)+'</th>').join('') + '</tr></thead><tbody>' + rows.map(row=>'<tr>' + mapper(row).map(v=>'<td>'+v+'</td>').join('') + '</tr>').join('') + '</tbody></table>'; }
-document.getElementById('bossGrid').innerHTML = [
-  ['当前状态', boss.current_status], ['第一场', boss.first_match_cn], ['参考倾向', boss.reference_lean], ['参考比分', boss.reference_score], ['当前动作', boss.current_action], ['正式判断', boss.formal_review_time_cst]
-].map(([k,v]) => '<div class="boss-item"><div class="boss-k">'+escapeHtml(k)+'</div><div class="boss-v">'+escapeHtml(v)+'</div></div>').join('');
-document.getElementById('bossNote').textContent = boss.explanation + '。' + boss.w1_guard_summary;
-document.getElementById('backendList').innerHTML = li(data.w1_backend_kept);
-document.getElementById('statusCards').innerHTML = data.status_cards_cn.map(item => '<div class="card status-card"><div class="status-label">'+escapeHtml(item.label)+'</div><div class="status-count '+item.class+'">'+item.count+' 场</div><div class="small">'+escapeHtml(item.hint)+'</div></div>').join('');
-document.getElementById('metaCards').innerHTML = [['刷新器版本',s.watcher_version],['风控规则',s.play_guard_version],['下次刷新',s.next_refresh]].map(([k,v]) => '<div class="card"><div class="meta-label">'+escapeHtml(k)+'</div><div class="meta-value">'+escapeHtml(v)+'</div></div>').join('');
-document.getElementById('firstMatchCard').innerHTML = '<div class="match-head"><div><div class="match-title">'+escapeHtml(fm.match)+'</div><div class="small">'+escapeHtml(fm.kickoff)+'</div></div><div class="risk">风险等级：'+escapeHtml(fm.risk_level)+'</div></div>' +
-  '<div class="match-grid">' + [
-    ['比赛', fm.match], ['开赛时间', fm.kickoff], ['当前结论', fm.current_conclusion], ['参考比分', fm.reference_score], ['当前动作', fm.current_action], ['是否通过 W1 风控', fm.play_guard_result]
-  ].map(([k,v]) => '<div class="kv"><div class="k">'+escapeHtml(k)+'</div><div class="v">'+escapeHtml(v)+'</div></div>').join('') + '</div>' +
-  '<div class="list-box"><div class="kv"><div class="k">支持理由</div>'+li(fm.supporting_factors)+'</div><div class="kv"><div class="k">反对理由</div>'+li(fm.counter_factors)+'</div><div class="kv"><div class="k">关键缺口</div>'+li(fm.key_gaps)+'</div></div>' +
-  '<details><summary>展开技术详情</summary><pre>'+escapeHtml(JSON.stringify(fm.technical_details, null, 2))+'</pre></details>';
-document.getElementById('groupNote').textContent = data.group_card_note_cn;
-function miniStandings(rows) { return table(data.standings_compact_headers_cn, rows, r => [escapeHtml(r.team_cn), escapeHtml(r.P), escapeHtml(r.GD), '<span class="points-badge">'+escapeHtml(r.points_label)+'</span>']); }
-function pathRows(paths) { const head = '<div class="path-head">'+data.qualification_path_headers_cn.map(h=>'<div>'+escapeHtml(h)+'</div>').join('')+'</div>'; return '<div class="path-list">'+head+paths.map(p=>'<div class="path-row"><div class="path-rank">'+escapeHtml(p.finish)+'</div><div class="path-slot">'+escapeHtml(p.slot)+'</div><div class="path-opponent">'+escapeHtml(p.opponent)+'</div></div>').join('')+'</div>'; }
-document.getElementById('groups').innerHTML = data.groups.map(g => '<div class="card"><div class="group-title"><h3>'+escapeHtml(g.group)+'组</h3><span class="pill">前2直通</span></div><p class="small">'+escapeHtml(g.group_note_cn)+'</p>'+miniStandings(g.standings_template)+pathRows(g.qualification_paths)+'</div>').join('');
-document.getElementById('rules').innerHTML = data.advancement_rules_cn.map(x => '<li>'+escapeHtml(x)+'</li>').join('');
-document.getElementById('directQ').textContent = data.advancement_rules.direct_qualifiers;
-document.getElementById('thirdQ').textContent = data.advancement_rules.best_third_qualifiers;
-document.getElementById('r32').textContent = data.advancement_rules.round_of_32_total;
-document.getElementById('pathNote').textContent = data.knockout_path_note_cn;
-document.getElementById('legend').innerHTML = data.label_explain_cn.map((x,i) => '<div class="card legend-item '+['wait-border','watch-border','play-border','pass-border'][i]+'"><h3>'+escapeHtml(x.label)+'</h3><div class="small">'+escapeHtml(x.meaning)+'</div></div>').join('');
-document.getElementById('links').innerHTML = data.report_entrypoints_cn.map(l => '<div class="card"><a href="'+escapeHtml(l.path)+'">'+escapeHtml(l.label)+'</a></div>').join('');
-document.getElementById('footerStatement').textContent = data.page_footer_statement_cn;
+const data=JSON.parse(document.getElementById('w1-data').textContent);const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+document.getElementById('fixtures').innerHTML=data.focus_fixtures_cn.map(f=>'<div class="fixture"><div class="meta"><span class="today">'+esc(f.badge)+'</span> · '+esc(f.note)+'</div><div class="teams"><span>'+esc(f.home)+'</span><span class="vs-small">VS</span><span>'+esc(f.away)+'</span></div></div>').join('');
+const boss=data.boss_view;document.getElementById('bossStrip').innerHTML=[['第一场',boss.first_match_cn],['参考倾向',boss.reference_lean],['参考比分',boss.reference_score],['当前动作',boss.current_action],['正式判断',boss.formal_review_time_cst],['说明',boss.explanation]].map(([k,v])=>'<div class="boss-item"><div class="boss-k">'+esc(k)+'</div><div class="boss-v">'+esc(v)+'</div></div>').join('');
+const m=data.first_match_cn;const list=a=>'<ul>'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';document.getElementById('resultCard').innerHTML='<div class="result-head"><div><div class="result-title">'+esc(m.match)+'</div><div class="lean">倾向：'+esc(m.reference_lean)+'</div><div class="small">'+esc(m.current_conclusion)+' · '+esc(m.kickoff)+'</div></div><div class="score"><div class="score-label">参考比分</div><div class="score-value">'+esc(m.reference_score)+'</div><div class="small">外部参考信号</div></div></div><div class="detail-grid"><div class="info-card"><h3>KEY FACTORS · 理由</h3>'+list(m.supporting_factors)+'</div><div class="info-card"><h3>RISK ALERT · 风险提示</h3>'+list(m.counter_factors)+'</div><div class="info-card"><h3>DATA GAPS · 关键缺口</h3>'+list(m.key_gaps)+'</div></div><div class="analysis"><b>现在该干嘛：</b>'+esc(m.current_action)+'。<br><b>W1 风控：</b>'+esc(m.play_guard_result)+'。参考比分只能作为外部参考信号，不能变成正式 W1_PLAY。</div>';
+document.getElementById('groups').innerHTML=data.groups.map(g=>'<div class="group"><div class="group-head"><span class="group-name">'+esc(g.group)+'组</span><span class="group-note">前2直通</span></div><div class="team-list">'+g.teams_display_cn.map((t,i)=>'<div class="team-row"><span>'+esc(t)+'</span><span class="pts">'+esc(g.standings_template[i].points_label)+'</span></div>').join('')+'</div><p class="group-note">'+esc(g.group_note_cn)+'</p></div>').join('');
+document.getElementById('rules').innerHTML=[['24','每组前2名直接晋级'],['8','最好8个小组第三晋级'],['32','共32队进入淘汰赛']].map(([n,t])=>'<div class="rule"><strong>'+n+'</strong><span>'+esc(t)+'</span></div>').join('');
 </script>
 </body>
 </html>
