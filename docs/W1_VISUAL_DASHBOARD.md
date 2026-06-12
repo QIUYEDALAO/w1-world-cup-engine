@@ -11,6 +11,8 @@ W1_VISUAL_DASHBOARD 是给老板直接查看的中文静态总控台。页面可
 
 复刻范围包括深绿球场背景、大号 WHO WINS 标题、编号区块、今日焦点赛程卡、对阵预测台、霓虹绿色边框、黄色行动按钮和结果卡片层级。底层仍完全使用 W1：watcher v2、W1_PLAY_GUARD_V1、match cards、ledger、odds_movement、supporting_factors / counter_factors 与 dashboard_data.json。
 
+交互结构也按原站复刻：今日焦点卡可点击并带入主客队，下拉框可选择 48 支球队，阶段按钮可切换，点击“开始预测”后动态展开结果区。W1 版不调用原站 `/api/predict`，而是用本地 W1 数据生成等待状态、参考倾向、参考比分、理由和风险提示。
+
 ## 第一屏信息
 
 - 当前状态：24 场等待关键数据

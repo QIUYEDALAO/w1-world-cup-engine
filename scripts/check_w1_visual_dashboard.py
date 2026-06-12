@@ -222,6 +222,13 @@ def assert_html(data: dict) -> None:
         "WINS?",
         "今日焦点",
         "对阵预测台",
+        "teamA",
+        "teamB",
+        "stageRow",
+        "goBtn",
+        "开始预测",
+        "result",
+        "fix-card",
         "W1 赛前卡",
         "KEY FACTORS",
         "RISK ALERT",
@@ -254,7 +261,10 @@ def assert_html(data: dict) -> None:
         if token not in text:
             fail(f"HTML missing token: {token}")
     if "fetch(" in text:
-        fail("HTML should not require fetch for double-click use")
+        fail("HTML must not call the original site prediction API")
+    for token in ("buildW1Card", "render(", "addEventListener('click'", "两支球队不能相同"):
+        if token not in text:
+            fail(f"HTML missing local interaction token: {token}")
     for raw_key in ("play_guard_pass", "lineup_status", "W1_WAIT"):
         if raw_key in text:
             fail(f"HTML must not expose raw key: {raw_key}")
