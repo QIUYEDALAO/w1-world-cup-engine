@@ -229,7 +229,6 @@ def assert_html(data: dict) -> None:
         "开始预测",
         "result",
         "fix-card",
-        "W1 赛前卡",
         "KEY FACTORS",
         "RISK ALERT",
         "DATA GAPS",
@@ -249,11 +248,8 @@ def assert_html(data: dict) -> None:
         "理由",
         "风险提示",
         "关键缺口",
-        "A组",
-        "L组",
-        "每组4队",
-        "每组前2名直接晋级",
-        "最好8个小组第三晋级",
+        "神算战绩",
+        "ledger 做赛后复盘",
         "W1_PLAY_GUARD_V1",
         "不构成投注建议",
     ]
@@ -262,6 +258,9 @@ def assert_html(data: dict) -> None:
             fail(f"HTML missing token: {token}")
     if "fetch(" in text:
         fail("HTML must not call the original site prediction API")
+    for extra_section in ("世界杯分组", "晋级规则"):
+        if extra_section in text:
+            fail(f"HTML must not include extra dashboard section: {extra_section}")
     for token in ("buildW1Card", "render(", "addEventListener('click'", "两支球队不能相同"):
         if token not in text:
             fail(f"HTML missing local interaction token: {token}")
