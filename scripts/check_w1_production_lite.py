@@ -26,6 +26,8 @@ REQUIRED_FILES = [
 
 EXPECTED_LABELS = ["W1_PLAY", "W1_WATCH", "W1_WAIT", "W1_PASS"]
 EXPECTED_PLAY_GUARD_VERSION = "W1_PLAY_GUARD_V1"
+EXPECTED_PREDICTION_VERSION = "W1_EARLY_PREDICTION_MODE_V1"
+EXPECTED_PREDICTION_STAGES = ["EARLY_REFERENCE", "PREMATCH_WATCH", "FORMAL_DECISION", "FINAL_CHECK"]
 FORBIDDEN_KEY = "opening_odds"
 FORBIDDEN_COMMITMENT_TEXT = ["稳赚", "命中率"]
 EXPECTED_PLAY_GUARD_RULES = {
@@ -123,6 +125,39 @@ def assert_play_guard_policy(policy: dict[str, Any]) -> None:
         fail("Hard rules must require PLAY_GUARD_V1 for W1_PLAY")
 
 
+def assert_prediction_stage_policy(policy: dict[str, Any]) -> None:
+    stages = policy.get("prediction_stage")
+    if not isinstance(stages, dict):
+        fail("Policy must include prediction_stage")
+    if stages.get("version") != EXPECTED_PREDICTION_VERSION:
+        fail("prediction_stage version mismatch")
+    if stages.get("allowed_stages") != EXPECTED_PREDICTION_STAGES:
+        fail("prediction_stage allowed_stages mismatch")
+
+    stage_defs = stages.get("stages", {})
+    early = stage_defs.get("EARLY_REFERENCE", {})
+    formal = stage_defs.get("FORMAL_DECISION", {})
+    final = stage_defs.get("FINAL_CHECK", {})
+    if early.get("ledger_required") is not False:
+        fail("EARLY_REFERENCE must not require ledger")
+    if early.get("w1_play_allowed") is not False:
+        fail("EARLY_REFERENCE must not allow W1_PLAY")
+    if formal.get("requires_confirmed_lineup") is not True or formal.get("requires_play_guard") is not True:
+        fail("FORMAL_DECISION must require confirmed lineup and PLAY_GUARD")
+    if final.get("requires_confirmed_lineup") is not True or final.get("requires_play_guard") is not True:
+        fail("FINAL_CHECK must require confirmed lineup and PLAY_GUARD")
+
+    hard_rule_ids = {rule.get("id") for rule in stages.get("hard_rules", [])}
+    for rule_id in (
+        "early_reference_no_ledger_required",
+        "early_reference_no_w1_play",
+        "formal_decision_only_stage_for_w1_play",
+        "reference_score_non_final",
+    ):
+        if rule_id not in hard_rule_ids:
+            fail(f"prediction_stage hard rule missing: {rule_id}")
+
+
 def require_gap(card: dict[str, Any], field_prefix: str) -> None:
     gaps = card.get("data_gaps", [])
     if not any(str(gap.get("field", "")).startswith(field_prefix) for gap in gaps):
@@ -217,7 +252,17 @@ def assert_required_schema_shape(schema: dict[str, Any]) -> None:
 
 def assert_ledger_play_guard_shape(schema: dict[str, Any]) -> None:
     required = schema.get("required", [])
-    for key in ("calibration_cycle", "override_reason", "play_guard_version"):
+    for key in (
+        "calibration_cycle",
+        "override_reason",
+        "play_guard_version",
+        "prediction_stage",
+        "prediction_version",
+        "reference_score",
+        "final_decision_time",
+        "early_prediction_hit",
+        "final_prediction_hit",
+    ):
         if key not in required:
             fail(f"Ledger schema must require {key}")
         if key not in schema.get("properties", {}):
@@ -225,6 +270,10 @@ def assert_ledger_play_guard_shape(schema: dict[str, Any]) -> None:
     enum = schema["properties"]["play_guard_version"].get("enum")
     if enum != [EXPECTED_PLAY_GUARD_VERSION]:
         fail("Ledger schema play_guard_version enum mismatch")
+    if schema["properties"]["prediction_stage"].get("enum") != EXPECTED_PREDICTION_STAGES:
+        fail("Ledger schema prediction_stage enum mismatch")
+    if schema["properties"]["prediction_version"].get("const") != EXPECTED_PREDICTION_VERSION:
+        fail("Ledger schema prediction_version mismatch")
 
 
 def assert_docs_boundary() -> None:
@@ -253,6 +302,7 @@ def main() -> int:
 
         assert_labels(policy, match_schema, ledger_schema)
         assert_play_guard_policy(policy)
+        assert_prediction_stage_policy(policy)
         assert_required_schema_shape(match_schema)
         assert_ledger_play_guard_shape(ledger_schema)
         assert_sample_hard_rules(sample)

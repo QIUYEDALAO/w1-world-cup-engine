@@ -19,6 +19,12 @@
     "calibration_cycle",
     "override_reason",
     "play_guard_version",
+    "prediction_stage",
+    "prediction_version",
+    "reference_score",
+    "final_decision_time",
+    "early_prediction_hit",
+    "final_prediction_hit",
     "no_betting_commitment"
   ],
   "properties": {
@@ -106,6 +112,49 @@
       "enum": [
         "W1_PLAY_GUARD_V1"
       ]
+    },
+    "prediction_stage": {
+      "type": "string",
+      "enum": [
+        "EARLY_REFERENCE",
+        "PREMATCH_WATCH",
+        "FORMAL_DECISION",
+        "FINAL_CHECK"
+      ],
+      "description": "Stage at which the ledger entry or review row was produced."
+    },
+    "prediction_version": {
+      "type": "string",
+      "const": "W1_EARLY_PREDICTION_MODE_V1"
+    },
+    "reference_score": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Non-final reference score for early/watch stages, null when no reference score was produced."
+    },
+    "final_decision_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "Timestamp for FORMAL_DECISION or FINAL_CHECK; null for non-final stages."
+    },
+    "early_prediction_hit": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Post-match review flag for early reference output; null before review."
+    },
+    "final_prediction_hit": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Post-match review flag for formal/final decision output; null before review."
     }
   }
 }

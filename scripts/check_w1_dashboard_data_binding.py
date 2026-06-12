@@ -99,6 +99,12 @@ def main() -> int:
             "actual_score",
             "decision",
             "w1_state",
+            "prediction_stage",
+            "reference_direction",
+            "reference_score",
+            "risk_level_cn",
+            "next_update_reason_cn",
+            "is_final_decision",
             "play_guard_pass",
             "lineup_status",
             "referee_status",
@@ -117,6 +123,18 @@ def main() -> int:
             missing = [key for key in required_fields if key not in row]
             if missing:
                 fail(f"{row.get('fixture_id')}: missing fields {missing}")
+            if row["prediction_stage"] == "EARLY_REFERENCE":
+                if row.get("ledger_required") is True:
+                    fail(f"{row.get('fixture_id')}: EARLY_REFERENCE must not set ledger_required=true")
+                if row.get("decision") == "W1_PLAY":
+                    fail(f"{row.get('fixture_id')}: EARLY_REFERENCE must not produce W1_PLAY")
+                if row.get("is_final_decision") is not False:
+                    fail(f"{row.get('fixture_id')}: EARLY_REFERENCE must not be final")
+            if row.get("decision") == "W1_PLAY" and row["prediction_stage"] not in ("FORMAL_DECISION", "FINAL_CHECK"):
+                fail(f"{row.get('fixture_id')}: W1_PLAY only allowed in formal/final stages")
+            if row.get("reference_score") and row.get("is_final_decision") is False:
+                if "不是最终结论" not in row.get("non_final_disclaimer_cn", ""):
+                    fail(f"{row.get('fixture_id')}: reference_score must carry non-final disclaimer")
 
         if data.get("status_cards", {}).get("play_guard_version") != "W1_PLAY_GUARD_V1":
             fail("PLAY_GUARD_V1 must remain in status_cards")

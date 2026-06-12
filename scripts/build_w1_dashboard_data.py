@@ -6,7 +6,7 @@ from __future__ import annotations
 import csv
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +19,19 @@ STATE_JSON = ROOT / "state/w1_refresh_state.json"
 SNAPSHOT_DIR = ROOT / "data/snapshots/group_stage_round1"
 LEDGER_CANDIDATES = [
     ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv",
+]
+PREDICTION_VERSION = "W1_EARLY_PREDICTION_MODE_V1"
+STAGE_LABEL_CN = {
+    "EARLY_REFERENCE": "早盘参考",
+    "PREMATCH_WATCH": "赛前观察",
+    "FORMAL_DECISION": "正式判断",
+    "FINAL_CHECK": "最终版",
+}
+STAGE_FLOW_CN = [
+    {"stage": "EARLY_REFERENCE", "label_cn": "早盘参考", "window_cn": "T-48h / T-24h", "description_cn": "可输出参考倾向和参考比分，非最终结论。"},
+    {"stage": "PREMATCH_WATCH", "label_cn": "赛前观察", "window_cn": "T-12h / T-6h / T-2h", "description_cn": "可输出观察结论，等待关键数据继续更新。"},
+    {"stage": "FORMAL_DECISION", "label_cn": "正式判断", "window_cn": "T-1h", "description_cn": "必须 confirmed_lineup + W1_PLAY_GUARD_V1。"},
+    {"stage": "FINAL_CHECK", "label_cn": "最终版", "window_cn": "T-30m", "description_cn": "最终确认风险、缺口和 ledger 写入条件。"},
 ]
 
 TEAM_CN = {
@@ -157,6 +170,16 @@ def snapshot_matches(path: Path | None) -> dict[str, dict[str, Any]]:
     return {str(row["fixture_id"]): row for row in data.get("matches", [])}
 
 
+def snapshot_time_cst(path: Path | None) -> datetime | None:
+    if not path:
+        return None
+    raw = read_json(path).get("snapshot_time")
+    if not raw:
+        return None
+    raw = str(raw).replace(" CST", "")
+    return datetime.strptime(raw, "%Y-%m-%d %H:%M").replace(tzinfo=timezone(timedelta(hours=8)))
+
+
 def read_ledger() -> dict[str, dict[str, str]]:
     for path in LEDGER_CANDIDATES:
         if path.is_file():
@@ -226,6 +249,77 @@ def cst_label(kickoff: str | None) -> str:
     return f"{kickoff} CST"
 
 
+def parse_kickoff_cst(kickoff: str | None) -> datetime | None:
+    if not kickoff:
+        return None
+    raw = kickoff.replace(" CST", "")
+    try:
+        return datetime.strptime(raw, "%Y-%m-%d %H:%M").replace(tzinfo=timezone(timedelta(hours=8)))
+    except ValueError:
+        return None
+
+
+def prediction_stage(kickoff: str | None, snapshot_at: datetime | None, play_guard_pass: bool) -> dict[str, Any]:
+    kickoff_at = parse_kickoff_cst(kickoff)
+    if not kickoff_at or not snapshot_at:
+        stage = "EARLY_REFERENCE"
+        hours_to_kickoff = None
+    else:
+        hours_to_kickoff = (kickoff_at - snapshot_at).total_seconds() / 3600
+        if hours_to_kickoff <= 0.5:
+            stage = "FINAL_CHECK"
+        elif hours_to_kickoff <= 1.25:
+            stage = "FORMAL_DECISION"
+        elif hours_to_kickoff <= 12:
+            stage = "PREMATCH_WATCH"
+        else:
+            stage = "EARLY_REFERENCE"
+
+    is_final_decision = stage in {"FORMAL_DECISION", "FINAL_CHECK"} and play_guard_pass
+    if stage == "EARLY_REFERENCE":
+        action = "早盘参考可看方向和比分，但等待赛前观察刷新"
+        next_reason = "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态"
+    elif stage == "PREMATCH_WATCH":
+        action = "进入赛前观察，继续等首发/裁判等关键数据"
+        next_reason = "下一阶段是 T-1h 正式判断，必须 confirmed_lineup + W1_PLAY_GUARD_V1"
+    elif stage == "FORMAL_DECISION":
+        action = "到达正式判断窗口，只有风控通过才允许 W1_PLAY"
+        next_reason = "等待 T-30m 最终版复核"
+    else:
+        action = "进入最终版复核，确认风险和 ledger 写入条件"
+        next_reason = "赛后需要 ledger 复盘 early/final 命中情况"
+
+    return {
+        "prediction_stage": stage,
+        "prediction_stage_cn": STAGE_LABEL_CN[stage],
+        "prediction_version": PREDICTION_VERSION,
+        "hours_to_kickoff": round(hours_to_kickoff, 2) if hours_to_kickoff is not None else None,
+        "is_final_decision": is_final_decision,
+        "stage_current_action_cn": action,
+        "next_update_reason_cn": next_reason,
+        "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+    }
+
+
+def reference_from_market(market_signal: dict[str, Any], home_cn: str, away_cn: str, fid: str) -> dict[str, str]:
+    if fid == "1489369":
+        return {"reference_direction": "墨西哥不败", "reference_score": "2-0"}
+    direction = market_signal.get("direction")
+    if direction == "home_strong":
+        return {"reference_direction": f"{home_cn}不败", "reference_score": "2-0 / 2-1"}
+    if direction == "home_slight":
+        return {"reference_direction": f"{home_cn}不败", "reference_score": "1-0 / 1-1"}
+    return {"reference_direction": "谨慎观察", "reference_score": "1-1"}
+
+
+def risk_level_cn(play_guard_pass: bool, gaps: list[dict[str, Any]], risks: list[dict[str, Any]]) -> str:
+    if play_guard_pass:
+        return "中"
+    if any(gap.get("blocks_play") for gap in gaps) or len(risks) >= 4:
+        return "高"
+    return "中高"
+
+
 def format_score(home_cn: str, away_cn: str, score: dict[str, Any]) -> str | None:
     if score.get("home") is None or score.get("away") is None:
         return None
@@ -238,6 +332,7 @@ def build_record(
     previous: dict[str, Any] | None,
     ledger: dict[str, str] | None,
     next_refresh: str,
+    snapshot_at: datetime | None,
 ) -> dict[str, Any]:
     card = read_json(card_path)
     fid = fixture_id_from_card(card)
@@ -269,8 +364,11 @@ def build_record(
         counter = ["等待 W1 风控信号补齐"]
 
     score_display = format_score(home_cn, away_cn, score)
+    stage_info = prediction_stage(cst_label(latest.get("kickoff_cst") or (ledger or {}).get("kickoff_cst")), snapshot_at, play_guard_pass)
+    reference = reference_from_market(market_signal, home_cn, away_cn, fid)
+    risk_cn = risk_level_cn(play_guard_pass, gaps, risks)
     is_first = fid == "1489369"
-    reference_score = "2-0" if is_first else None
+    reference_score = reference["reference_score"]
     hit_status = "比分命中" if is_first and status == "finished" else None
     w1_state = "赛前未放行/未形成正式 W1_PLAY" if not play_guard_pass else "已通过 W1_PLAY_GUARD_V1"
 
@@ -278,8 +376,8 @@ def build_record(
         current_action = "需要写入 ledger 做赛后验证"
         boss_summary = f"已完赛：{score_display}；W1 状态：{w1_state}；复盘动作：{current_action}"
     elif not play_guard_pass:
-        current_action = "等待正式首发/裁判等关键数据，不下最终结论"
-        boss_summary = f"{home_cn} vs {away_cn}：等待关键数据，未形成正式 W1_PLAY"
+        current_action = stage_info["stage_current_action_cn"]
+        boss_summary = f"{home_cn} vs {away_cn}：{stage_info['prediction_stage_cn']}，参考倾向 {reference['reference_direction']}，参考比分 {reference_score}；非最终结论"
     else:
         current_action = "可进入正式赛前分析，并写入 ledger"
         boss_summary = f"{home_cn} vs {away_cn}：通过 W1 风控，可正式分析"
@@ -304,6 +402,11 @@ def build_record(
         "result_note": overlay.get("result_note"),
         "decision": decision.get("label", (ledger or {}).get("final_decision", "UNKNOWN")),
         "w1_state": w1_state,
+        **stage_info,
+        "reference_direction": reference["reference_direction"],
+        "reference_score": reference_score,
+        "risk_level_cn": risk_cn,
+        "ledger_required": bool(play_guard_pass),
         "play_guard_version": "W1_PLAY_GUARD_V1",
         "play_guard_pass": play_guard_pass,
         "lineup_status": (ledger or {}).get("lineup_status") or latest.get("lineup_status") or lineups.get("status"),
@@ -319,9 +422,8 @@ def build_record(
         "boss_summary_cn": boss_summary,
         "next_refresh": next_refresh,
         "external_result_overlay": overlay or None,
-        "reference_score_external": reference_score,
+        "reference_score_external": reference_score if is_first else None,
         "hit_status_cn": hit_status,
-        "ledger_required": decision.get("ledger_required", True),
         "ledger_row_found": ledger is not None,
         "card_json": str(card_path.relative_to(ROOT)),
     }
@@ -367,6 +469,15 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "result_source": row["result_source"],
             "result_note": row["result_note"],
             "w1_state": row["w1_state"],
+            "prediction_stage": row["prediction_stage"],
+            "prediction_stage_cn": row["prediction_stage_cn"],
+            "prediction_version": row["prediction_version"],
+            "reference_direction": row["reference_direction"],
+            "reference_score": row["reference_score"],
+            "risk_level_cn": row["risk_level_cn"],
+            "next_update_reason_cn": row["next_update_reason_cn"],
+            "is_final_decision": row["is_final_decision"],
+            "non_final_disclaimer_cn": row["non_final_disclaimer_cn"],
             "odds_movement": row["odds_movement"],
             "market_signal": row["market_signal"],
             "supporting_factors": clean_supporting,
@@ -390,6 +501,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         "hero": data["hero"],
         "focus_fixtures_cn": data["focus_fixtures_cn"],
         "boss_view": data["boss_view"],
+        "prediction_stage_flow_cn": data["prediction_stage_flow_cn"],
         "first_match_cn": first_match,
         "groups": [
             {
@@ -434,6 +546,7 @@ def main() -> int:
     previous_path = snapshots[-2] if len(snapshots) > 1 else None
     latest = snapshot_matches(latest_path)
     previous = snapshot_matches(previous_path)
+    snapshot_at = snapshot_time_cst(latest_path)
     ledger_rows = read_ledger()
     next_refresh = state.get("next_run_cst") or ""
 
@@ -448,6 +561,7 @@ def main() -> int:
                 previous=previous.get(fid),
                 ledger=ledger_rows.get(fid),
                 next_refresh=next_refresh,
+                snapshot_at=snapshot_at,
             )
         )
     records.sort(key=lambda row: (row.get("kickoff") or "", row["fixture_id"]))
@@ -457,6 +571,12 @@ def main() -> int:
     data["generated_from"] = "local W1 cards, ledger, state, latest snapshot, and manual result overlay"
     data["generated_at_utc"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     data["match_records"] = records
+    data["prediction_stage_flow_cn"] = STAGE_FLOW_CN
+    data["early_prediction_mode"] = {
+        "version": PREDICTION_VERSION,
+        "enabled": True,
+        "principle_cn": "早盘参考和赛前观察可以输出参考倾向/参考比分，但只有 FORMAL_DECISION 或 FINAL_CHECK 且通过 W1_PLAY_GUARD_V1 才可能成为正式判断。",
+    }
     data["dashboard_binding"] = {
         "version": "W1_DATA_BINDING_V1",
         "cards_dir": str(CARDS_DIR.relative_to(ROOT)),
@@ -473,8 +593,9 @@ def main() -> int:
         **data.get("boss_view", {}),
         "current_status": "24 场 W1 数据已绑定",
         "first_match_cn": first["match"],
-        "reference_lean": "墨西哥不败",
-        "reference_score": first.get("reference_score_external") or "2-0",
+        "reference_lean": first["reference_direction"],
+        "reference_score": first["reference_score"],
+        "prediction_stage_cn": first["prediction_stage_cn"],
         "current_action": first["current_action_cn"],
         "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
         "explanation": "参考比分是外部参考信号，不能变成正式 W1_PLAY，也不绕过 W1 风控。",
@@ -488,9 +609,14 @@ def main() -> int:
         "away": f"{first['away_flag']} {first['away_team_cn']}",
         "kickoff": first["kickoff"],
         "current_conclusion": first["w1_state"],
-        "reference_lean": "墨西哥不败",
-        "reference_score": first.get("reference_score_external") or "2-0",
-        "risk_level": "高" if not first["play_guard_pass"] else "中",
+        "prediction_stage": first["prediction_stage"],
+        "prediction_stage_cn": first["prediction_stage_cn"],
+        "prediction_version": PREDICTION_VERSION,
+        "reference_lean": first["reference_direction"],
+        "reference_score": first["reference_score"],
+        "risk_level": first["risk_level_cn"],
+        "is_final_decision": first["is_final_decision"],
+        "next_update_reason_cn": first["next_update_reason_cn"],
         "supporting_factors": first["supporting_factors"],
         "counter_factors": first["counter_factors"],
         "key_gaps": [gap.get("message", str(gap)) for gap in first["data_gaps"]],

@@ -1,6 +1,6 @@
 {
   "policy_id": "W1_PRODUCTION_LITE_DECISION_POLICY",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "decision_labels": [
     "W1_PLAY",
     "W1_WATCH",
@@ -12,7 +12,6 @@
     "old official",
     "pending",
     "QQ",
-    "稳赚",
     "命中率"
   ],
   "hard_rules": [
@@ -108,6 +107,109 @@
         "price or context does not support analysis continuation"
       ]
     }
+  },
+  "prediction_stage": {
+    "version": "W1_EARLY_PREDICTION_MODE_V1",
+    "allowed_stages": [
+      "EARLY_REFERENCE",
+      "PREMATCH_WATCH",
+      "FORMAL_DECISION",
+      "FINAL_CHECK"
+    ],
+    "stages": {
+      "EARLY_REFERENCE": {
+        "time_windows": [
+          "T-48h",
+          "T-24h"
+        ],
+        "label_cn": "早盘参考",
+        "allowed_outputs": [
+          "reference_direction",
+          "reference_score",
+          "risk_level_cn",
+          "current_action_cn",
+          "next_update_reason_cn"
+        ],
+        "ledger_required": false,
+        "w1_play_allowed": false,
+        "is_final_decision": false,
+        "required_disclaimer": "参考比分/参考倾向不是最终结论，不绕过 W1_PLAY_GUARD_V1。"
+      },
+      "PREMATCH_WATCH": {
+        "time_windows": [
+          "T-12h",
+          "T-6h",
+          "T-2h"
+        ],
+        "label_cn": "赛前观察",
+        "allowed_outputs": [
+          "reference_direction",
+          "reference_score",
+          "watch_conclusion",
+          "risk_level_cn",
+          "current_action_cn",
+          "next_update_reason_cn"
+        ],
+        "ledger_required": false,
+        "w1_play_allowed": false,
+        "is_final_decision": false,
+        "required_disclaimer": "观察结论不是正式 W1_PLAY。"
+      },
+      "FORMAL_DECISION": {
+        "time_windows": [
+          "T-1h"
+        ],
+        "label_cn": "正式判断",
+        "allowed_outputs": [
+          "final_decision",
+          "risk_flags",
+          "data_gaps",
+          "ledger_required"
+        ],
+        "requires_confirmed_lineup": true,
+        "requires_play_guard": true,
+        "w1_play_allowed": true,
+        "is_final_decision": true
+      },
+      "FINAL_CHECK": {
+        "time_windows": [
+          "T-30m"
+        ],
+        "label_cn": "最终版",
+        "allowed_outputs": [
+          "final_check",
+          "risk_flags",
+          "data_gaps",
+          "ledger_required"
+        ],
+        "requires_confirmed_lineup": true,
+        "requires_play_guard": true,
+        "w1_play_allowed": true,
+        "is_final_decision": true
+      }
+    },
+    "hard_rules": [
+      {
+        "id": "early_reference_no_ledger_required",
+        "if": "prediction_stage == EARLY_REFERENCE",
+        "then": "ledger_required == false"
+      },
+      {
+        "id": "early_reference_no_w1_play",
+        "if": "prediction_stage == EARLY_REFERENCE",
+        "then": "decision.label != W1_PLAY"
+      },
+      {
+        "id": "formal_decision_only_stage_for_w1_play",
+        "if": "decision.label == W1_PLAY",
+        "then": "prediction_stage in [FORMAL_DECISION, FINAL_CHECK] and W1_PLAY_GUARD_V1 passes"
+      },
+      {
+        "id": "reference_score_non_final",
+        "if": "reference_score exists and prediction_stage in [EARLY_REFERENCE, PREMATCH_WATCH]",
+        "then": "is_final_decision == false and non_final_disclaimer is present"
+      }
+    ]
   },
   "play_guard_version": "W1_PLAY_GUARD_V1",
   "play_guard_v1": {
