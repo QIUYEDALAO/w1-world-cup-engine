@@ -35,6 +35,13 @@ FORBIDDEN_SOURCE_TERMS = [
     "V" + "4",
     "M" + "1",
 ]
+FORBIDDEN_DASHBOARD_DISPLAY_TERMS = [
+    "missing",
+    "latest snapshot",
+    "fixture detail snapshot",
+    "non-WAIT final_decision",
+    "lineup=WAIT",
+]
 
 
 class CheckError(Exception):
@@ -193,8 +200,8 @@ def assert_dashboard_data(data: dict) -> None:
             fail(f"First match card missing {key}")
     if first["match"] != "墨西哥 vs 南非":
         fail("First match must be Chinese")
-    if "W1_PLAY_GUARD_V1" not in first["play_guard_result"]:
-        fail("First match must keep W1 guard result")
+    if "正式风控规则" not in first["play_guard_result"]:
+        fail("First match must keep formal guard result in Chinese")
     if "未通过" not in first["play_guard_result"]:
         fail("First match must not pass W1 guard")
     if first.get("actual_score_display_cn") != "墨西哥 2-0 南非":
@@ -256,7 +263,11 @@ def assert_html(data: dict) -> None:
         "关键缺口",
         "神算战绩",
         "ledger 做赛后复盘",
-        "W1_PLAY_GUARD_V1",
+        "正式风控规则",
+        "首发未确认",
+        "裁判未公布",
+        "早盘参考",
+        "不是最终结论",
         "不构成投注建议",
     ]
     for token in required:
@@ -273,6 +284,9 @@ def assert_html(data: dict) -> None:
     for raw_key in ("play_guard_pass", "lineup_status", "W1_WAIT"):
         if raw_key in text:
             fail(f"HTML must not expose raw key: {raw_key}")
+    for token in FORBIDDEN_DASHBOARD_DISPLAY_TERMS:
+        if re.search(re.escape(token), text, re.I):
+            fail(f"HTML must not expose English/raw display text: {token}")
 
     embedded = re.search(r'<script id="w1-data" type="application/json">(.*?)</script>', text, re.S)
     if not embedded:
@@ -285,6 +299,9 @@ def assert_html(data: dict) -> None:
     for raw_key in ("play_guard_pass", "lineup_status", "W1_WAIT"):
         if raw_key in embedded_text:
             fail(f"Embedded dashboard JSON must not expose raw key: {raw_key}")
+    for token in FORBIDDEN_DASHBOARD_DISPLAY_TERMS:
+        if re.search(re.escape(token), embedded_text, re.I):
+            fail(f"Embedded dashboard JSON must not expose English/raw display text: {token}")
     if embedded_data.get("schema_version") != data.get("schema_version"):
         fail("Embedded dashboard JSON schema version mismatch")
     if len(embedded_data.get("groups", [])) != 12:

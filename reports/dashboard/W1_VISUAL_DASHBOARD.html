@@ -15,7 +15,7 @@
 <section class="result" id="result"><div class="score-stage"><div class="score-line"><div class="score-team"><span class="f" id="rFlagA"></span><span id="rNameA"></span></div><div class="big-score" id="rScore">-</div><div class="score-team"><span class="f" id="rFlagB"></span><span id="rNameB"></span></div></div><div class="conf-badge" id="rConf"></div><div class="prob-wrap"><div class="prob-labels"><span id="lblA"></span><span id="lblD"></span><span id="lblB"></span></div><div class="prob-bar"><div class="pa" id="barA"></div><div class="pd" id="barD"></div><div class="pb" id="barB"></div></div></div></div><div class="detail-grid"><div class="card"><h3>KEY FACTORS · 理由</h3><div class="chips" id="rFactors"></div><h3 style="margin-top:22px">RISK ALERT · 风险提示</h3><div class="pw-row" id="rRisks"></div><h3 style="margin-top:22px">DATA GAPS · 关键缺口</h3><div class="pw-row" id="rGaps"></div></div><div class="card"><h3>AI ANALYSIS · W1 解读</h3><p class="analysis-text" id="rAnalysis"></p></div></div></section></section>
 <div class="sec-title"><span class="num">03</span><h2>神算战绩</h2><div class="ln"></div></div>
 <section class="scoreboard" id="scoreboard">🎯 已锁定 <b>24</b> 场 W1 赛前卡，等待真实比分揭晓后，这里会按 ledger 做赛后复盘。</section>
-<footer class="footer"><span>W1 · watcher v2 · W1_PLAY_GUARD_V1 · ledger · match cards · odds_movement</span><b>本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。</b></footer>
+<footer class="footer"><span>W1 · watcher v2 · 正式风控规则 · ledger · match cards · odds_movement</span><b>本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。</b></footer>
 </div><script id="w1-data" type="application/json">{
   "schema_version": "W1_VISUAL_DASHBOARD_DATA_BOUND_V1",
   "title_cn": "W1 世界杯赛前预测总控台",
@@ -85,7 +85,7 @@
       "stage": "FORMAL_DECISION",
       "label_cn": "正式判断",
       "window_cn": "T-1h",
-      "description_cn": "必须 confirmed_lineup + W1_PLAY_GUARD_V1。"
+      "description_cn": "必须正式首发 + 正式风控规则。"
     },
     {
       "stage": "FINAL_CHECK",
@@ -107,19 +107,19 @@
     "supporting_factors": [
       "市场初始信号偏主队，1X2 Home=1.40；AH=Home -1=1.70",
       "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-      "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      "最新快照：首发未确认（赛前 T-1h）"
     ],
     "counter_factors": [
-      "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-      "首发仍未公布; refresh near team sheet release.",
-      "裁判仍未公布; referee not available in fixture detail snapshot."
+      "首发未公布；W1硬风控：当前保持等待。",
+      "首发未确认；等待赛前名单刷新。",
+      "裁判未公布; 裁判未公布 in 比赛详情快照."
     ],
     "key_gaps": [
-      "正式首发 missing; this blocks any non-WAIT final_decision.",
-      "裁判仍未公布; keep as a non-blocking gap."
+      "首发未公布；阻止非等待最终结论。",
+      "裁判未公布; keep as a non-blocking gap."
     ],
     "current_action": "需要写入 ledger 做赛后验证",
-    "play_guard_result": "未通过 W1_PLAY_GUARD_V1；赛前未放行/未形成正式 W1_PLAY",
+    "play_guard_result": "未通过正式风控规则；赛前未放行/未形成正式 W1_PLAY",
     "public_technical_details": [
       {
         "label": "W1 风控",
@@ -519,7 +519,7 @@
       "risk_level_cn": "高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -532,19 +532,19 @@
       "supporting_factors": [
         "市场初始信号偏主队，1X2 Home=1.40；AH=Home -1=1.70",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "需要写入 ledger 做赛后验证",
@@ -574,10 +574,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "谨慎观察",
       "reference_score": "1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -590,19 +590,19 @@
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home -0.5=2.55",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -632,10 +632,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "加拿大不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -648,19 +648,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.78；AH=Home -1=2.45",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -690,10 +690,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "美国不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -706,19 +706,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.98；AH=Home -0.5=1.95",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -748,10 +748,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "谨慎观察",
       "reference_score": "1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -764,19 +764,19 @@
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home +1=3.00",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -806,10 +806,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "巴西不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -822,19 +822,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.62；AH=Home -1=2.15",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -864,10 +864,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "谨慎观察",
       "reference_score": "1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -880,19 +880,19 @@
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home +0.5=2.50",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -922,10 +922,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "谨慎观察",
       "reference_score": "1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -938,19 +938,19 @@
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home +0.5=2.15",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -980,10 +980,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "德国不败",
       "reference_score": "2-0 / 2-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -996,19 +996,19 @@
       "supporting_factors": [
         "市场初始信号偏主队，1X2 Home=1.03；AH=Home -3=1.53",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1038,10 +1038,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "荷兰不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1054,19 +1054,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.95；AH=Home -0.5=1.95",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1096,10 +1096,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "谨慎观察",
       "reference_score": "1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1112,19 +1112,19 @@
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home +0=2.35",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1154,10 +1154,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "瑞典不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1170,19 +1170,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.88；AH=Home -0.5=1.85",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1212,10 +1212,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "西班牙不败",
       "reference_score": "2-0 / 2-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1228,19 +1228,19 @@
       "supporting_factors": [
         "市场初始信号偏主队，1X2 Home=1.09；AH=Home -3=2.25",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1270,10 +1270,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "比利时不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1286,19 +1286,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.65；AH=Home -1=2.20",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1328,10 +1328,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "谨慎观察",
       "reference_score": "1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1344,19 +1344,19 @@
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home +0.5=2.65",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1386,10 +1386,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "伊朗不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1402,19 +1402,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.89；AH=Home -0.5=1.90",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1444,10 +1444,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "法国不败",
       "reference_score": "2-0 / 2-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1460,19 +1460,19 @@
       "supporting_factors": [
         "市场初始信号偏主队，1X2 Home=1.43；AH=Home -1=1.73",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1502,10 +1502,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "谨慎观察",
       "reference_score": "1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1518,19 +1518,19 @@
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home +2=1.73",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1560,10 +1560,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "阿根廷不败",
       "reference_score": "2-0 / 2-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1576,19 +1576,19 @@
       "supporting_factors": [
         "市场初始信号偏主队，1X2 Home=1.38；AH=Home -1=1.62",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1618,10 +1618,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "奥地利不败",
       "reference_score": "2-0 / 2-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1634,19 +1634,19 @@
       "supporting_factors": [
         "市场初始信号偏主队，1X2 Home=1.30；AH=Home -1=1.45",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1676,10 +1676,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "葡萄牙不败",
       "reference_score": "2-0 / 2-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1692,19 +1692,19 @@
       "supporting_factors": [
         "市场初始信号偏主队，1X2 Home=1.25；AH=Home -2=2.25",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1734,10 +1734,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "英格兰不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1750,19 +1750,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.71；AH=Home -1=2.30",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1792,10 +1792,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "加纳不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1808,19 +1808,19 @@
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=2.00；AH=Home -0.5=2.00",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1850,10 +1850,10 @@
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "谨慎观察",
       "reference_score": "1-1",
-      "risk_level_cn": "高",
+      "risk_level_cn": "中高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
-      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+      "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -1866,19 +1866,19 @@
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home +1=2.30",
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
-        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+        "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
-        "首发仍未公布; refresh near team sheet release.",
-        "裁判仍未公布; referee not available in fixture detail snapshot."
+        "首发未公布；W1硬风控：当前保持等待。",
+        "首发未确认；等待赛前名单刷新。",
+        "裁判未公布; 裁判未公布 in 比赛详情快照."
       ],
       "data_gaps": [
         {
-          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+          "message": "首发未公布；阻止非等待最终结论。"
         },
         {
-          "message": "裁判仍未公布; keep as a non-blocking gap."
+          "message": "裁判未公布; keep as a non-blocking gap."
         }
       ],
       "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
@@ -1890,7 +1890,7 @@
   "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。",
   "w1_backend_kept": [
     "watcher v2",
-    "W1_PLAY_GUARD_V1",
+    "正式风控规则",
     "match cards",
     "ledger",
     "odds_movement",
@@ -1918,7 +1918,7 @@ let stage='早盘参考';$('stageRow').addEventListener('click',e=>{if(!e.target
 const boss=data.boss_view;$('bossStrip').innerHTML=[['第一场',boss.first_match_cn],['当前阶段',boss.prediction_stage_cn||'早盘参考'],['参考倾向',boss.reference_lean],['参考比分',boss.reference_score],['当前动作',boss.current_action],['说明',boss.boss_summary_cn||boss.explanation]].map(([k,v])=>'<div class="boss-item"><div class="boss-k">'+esc(k)+'</div><div class="boss-v">'+esc(v)+'</div></div>').join('');
 function findRecord(teamA,teamB){return (data.match_records||[]).find(r=>r.home_team_cn===teamA&&r.away_team_cn===teamB)||(data.match_records||[]).find(r=>r.home_team_cn===teamB&&r.away_team_cn===teamA)}
 function shareFor(record,side){if(record.status==='finished'&&record.actual_score&&record.actual_score.home!==null){const homeWin=record.actual_score.home>record.actual_score.away;const awayWin=record.actual_score.away>record.actual_score.home;if(side==='home')return homeWin?60:awayWin?20:34;if(side==='away')return awayWin?60:homeWin?20:33;return homeWin||awayWin?20:34}return side==='home'?34:side==='away'?33:33}
-function buildW1Card(teamA,teamB){const r=findRecord(teamA,teamB);if(!r){return{teamA:{name:teamA,share:34},draw:33,teamB:{name:teamB,share:33},referenceScore:'W1 数据未绑定',confidence:'未找到本地 match record · '+stage,keyFactors:['未找到对应 fixture_id','需要检查 match_cards 与 latest snapshot','不形成正式 W1 结论'],risks:['本地记录缺失'],gaps:['match_records 缺少该对阵'],analysis:'该对阵没有绑定到本地 W1 match record，不能给出赛前结论。'}}const homeName=r.home_team_cn,awayName=r.away_team_cn;const reference=r.reference_score||r.reference_score_external||r.actual_score_display_cn||'参考比分待补齐';const title=r.status==='finished'&&r.actual_score_display_cn?'已完赛：'+r.actual_score_display_cn:r.boss_summary_cn;const keyFactors=(r.supporting_factors||[]).filter(Boolean);const risks=(r.counter_factors||[]).filter(Boolean);const gaps=(r.data_gaps||[]).map(g=>g.message||g.field||String(g));const stageText=r.prediction_stage_cn||stage;const finalText=r.is_final_decision?'最终结论':'非最终结论';const analysis=[title,'当前阶段：'+stageText,'参考倾向：'+(r.reference_direction||'谨慎观察'),'参考比分：'+reference+'（'+finalText+'）','W1 状态：'+r.w1_state,'当前动作：'+r.current_action_cn,'下一次更新：'+(r.next_update_reason_cn||'等待 watcher 刷新'),'赔率变化：'+(r.odds_movement&&r.odds_movement.summary_cn?r.odds_movement.summary_cn:'未记录'),'市场信号：'+(r.market_signal&&r.market_signal.summary_cn?r.market_signal.summary_cn:'未记录'),r.non_final_disclaimer_cn||'参考内容不绕过 W1 风控'].join('。');return{teamA:{name:homeName,share:shareFor(r,'home')},draw:shareFor(r,'draw'),teamB:{name:awayName,share:shareFor(r,'away')},referenceScore:reference,confidence:(r.hit_status_cn? r.hit_status_cn+' · ':'')+stageText+' · '+finalText+' · '+r.w1_state,keyFactors:keyFactors,risks:risks,gaps:gaps,analysis:analysis}}
+function buildW1Card(teamA,teamB){const r=findRecord(teamA,teamB);if(!r){return{teamA:{name:teamA,share:34},draw:33,teamB:{name:teamB,share:33},referenceScore:'W1 数据未绑定',confidence:'未找到本地比赛记录 · '+stage,keyFactors:['未找到对应比赛编号','需要检查赛前卡与最新快照','不形成正式 W1 结论'],risks:['本地记录缺失'],gaps:['比赛记录缺少该对阵'],analysis:'该对阵没有绑定到本地 W1 比赛记录，不能给出赛前结论。'}}const homeName=r.home_team_cn,awayName=r.away_team_cn;const reference=r.reference_score||r.reference_score_external||r.actual_score_display_cn||'参考比分待补齐';const title=r.status==='finished'&&r.actual_score_display_cn?'已完赛：'+r.actual_score_display_cn:r.boss_summary_cn;const keyFactors=(r.supporting_factors||[]).filter(Boolean);const risks=(r.counter_factors||[]).filter(Boolean);const gaps=(r.data_gaps||[]).map(g=>g.message||g.field||String(g));const stageText=r.prediction_stage_cn||stage;const finalText=r.is_final_decision?'最终结论':'不是最终结论';const actionText=r.current_action_cn==='早盘参考可看方向和比分，但等待赛前观察刷新'?'等待赛前观察刷新':r.current_action_cn;const analysis=[title,'当前阶段：'+stageText,'参考倾向：'+(r.reference_direction||'谨慎观察'),'参考比分：'+reference,'当前结论：'+finalText,'风险等级：'+(r.risk_level_cn||'中高'),'W1 状态：'+r.w1_state,'当前动作：'+actionText,'下一次更新：'+(r.next_update_reason_cn||'等待 watcher 刷新'),'赔率变化：'+(r.odds_movement&&r.odds_movement.summary_cn?r.odds_movement.summary_cn:'未记录'),'市场信号：'+(r.market_signal&&r.market_signal.summary_cn?r.market_signal.summary_cn:'未记录'),r.non_final_disclaimer_cn||'参考内容不绕过正式风控规则'].join('。');return{teamA:{name:homeName,share:shareFor(r,'home')},draw:shareFor(r,'draw'),teamB:{name:awayName,share:shareFor(r,'away')},referenceScore:reference,confidence:(r.hit_status_cn? r.hit_status_cn+' · ':'')+stageText+' · '+finalText+' · 风险等级 '+(r.risk_level_cn||'中高'),keyFactors:keyFactors,risks:risks,gaps:gaps,analysis:analysis}}
 function render(d){$('rFlagA').textContent=flagOf(d.teamA.name);$('rFlagB').textContent=flagOf(d.teamB.name);$('rNameA').textContent=d.teamA.name;$('rNameB').textContent=d.teamB.name;$('rScore').textContent=String(d.referenceScore).replace('/',' / ');$('rConf').textContent=d.confidence;$('lblA').textContent=d.teamA.name+'参考 '+d.teamA.share+'%';$('lblD').textContent='等待/平 '+d.draw+'%';$('lblB').textContent=d.teamB.name+'参考 '+d.teamB.share+'%';$('rFactors').innerHTML=d.keyFactors.map(f=>'<span class="chip">'+esc(f)+'</span>').join('');$('rRisks').innerHTML=d.risks.map(r=>'<div class="pw"><span>⚠</span><div>'+esc(r)+'</div></div>').join('');$('rGaps').innerHTML=(d.gaps||[]).map(r=>'<div class="pw"><span>◇</span><div>'+esc(r)+'</div></div>').join('');$('rAnalysis').textContent=d.analysis;$('result').classList.add('show');requestAnimationFrame(()=>{$('barA').style.width=d.teamA.share+'%';$('barD').style.width=d.draw+'%';$('barB').style.width=d.teamB.share+'%'});$('result').scrollIntoView({behavior:'smooth',block:'start'})}
 $('goBtn').addEventListener('click',()=>{const a=$('teamA').value,b=$('teamB').value;$('err').classList.remove('show');if(a===b){$('err').textContent='两支球队不能相同，换一个对手吧';$('err').classList.add('show');return}$('loading').classList.add('show');$('goBtn').disabled=true;setTimeout(()=>{render(buildW1Card(a,b));$('loading').classList.remove('show');$('goBtn').disabled=false},260)});
 </script></body></html>

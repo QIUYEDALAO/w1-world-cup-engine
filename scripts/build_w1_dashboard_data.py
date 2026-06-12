@@ -30,7 +30,7 @@ STAGE_LABEL_CN = {
 STAGE_FLOW_CN = [
     {"stage": "EARLY_REFERENCE", "label_cn": "早盘参考", "window_cn": "T-48h / T-24h", "description_cn": "可输出参考倾向和参考比分，非最终结论。"},
     {"stage": "PREMATCH_WATCH", "label_cn": "赛前观察", "window_cn": "T-12h / T-6h / T-2h", "description_cn": "可输出观察结论，等待关键数据继续更新。"},
-    {"stage": "FORMAL_DECISION", "label_cn": "正式判断", "window_cn": "T-1h", "description_cn": "必须 confirmed_lineup + W1_PLAY_GUARD_V1。"},
+    {"stage": "FORMAL_DECISION", "label_cn": "正式判断", "window_cn": "T-1h", "description_cn": "必须正式首发 + 正式风控规则。"},
     {"stage": "FINAL_CHECK", "label_cn": "最终版", "window_cn": "T-30m", "description_cn": "最终确认风险、缺口和 ledger 写入条件。"},
 ]
 
@@ -152,6 +152,41 @@ def read_json(path: Path) -> dict[str, Any]:
 
 def write_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def cn_display_text(value: Any) -> str:
+    text = str(value)
+    replacements = {
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.": "首发未公布；W1硬风控：当前保持等待。",
+        "confirmed_lineup missing; W1 hard rule keeps 当前保持等待.": "首发未公布；W1硬风控：当前保持等待。",
+        "W1 hard rule keeps 当前保持等待": "W1硬风控：当前保持等待",
+        "W1 hard rule keeps final_decision at W1_WAIT": "W1硬风控：当前保持等待",
+        "confirmed_lineup missing; this blocks any non-WAIT final_decision.": "首发未公布；阻止非等待最终结论。",
+        "this blocks any non-WAIT final_decision": "阻止非等待最终结论",
+        "non-WAIT final_decision": "非等待最终结论",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.": "首发未确认；等待赛前名单刷新。",
+        "lineup=WAIT_EVENT": "首发未确认",
+        "lineup=WAIT": "首发未确认",
+        "lineup_status=WAIT_EVENT": "首发未确认",
+        "latest snapshot:": "最新快照：",
+        "latest snapshot": "最新快照",
+        "pre-match": "赛前",
+        "fixture detail snapshot": "比赛详情快照",
+        "referee_status=MISSING; referee not available in fixture detail snapshot.": "裁判未公布；比赛详情快照暂未提供。",
+        "referee_status=MISSING": "裁判未公布",
+        "referee not available": "裁判未公布",
+        "match.referee": "裁判信息",
+        "lineups.confirmed_lineup": "正式首发",
+        "confirmed_lineup": "正式首发",
+        "missing": "缺失",
+        "MISSING": "缺失",
+        "W1_PLAY_GUARD_V1": "正式风控规则",
+    }
+    for source, target in replacements.items():
+        text = text.replace(source, target)
+    text = text.replace("lineup=WAIT (赛前, T-1h)", "首发未确认（赛前 T-1h）")
+    text = text.replace("lineup=WAIT", "首发未确认")
+    return text
 
 
 def fixture_id_from_card(card: dict[str, Any]) -> str:
@@ -281,7 +316,7 @@ def prediction_stage(kickoff: str | None, snapshot_at: datetime | None, play_gua
         next_reason = "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态"
     elif stage == "PREMATCH_WATCH":
         action = "进入赛前观察，继续等首发/裁判等关键数据"
-        next_reason = "下一阶段是 T-1h 正式判断，必须 confirmed_lineup + W1_PLAY_GUARD_V1"
+        next_reason = "下一阶段是 T-1h 正式判断，必须正式首发 + 正式风控规则"
     elif stage == "FORMAL_DECISION":
         action = "到达正式判断窗口，只有风控通过才允许 W1_PLAY"
         next_reason = "等待 T-30m 最终版复核"
@@ -297,7 +332,7 @@ def prediction_stage(kickoff: str | None, snapshot_at: datetime | None, play_gua
         "is_final_decision": is_final_decision,
         "stage_current_action_cn": action,
         "next_update_reason_cn": next_reason,
-        "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过 W1_PLAY_GUARD_V1。",
+        "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
     }
 
 
@@ -357,9 +392,9 @@ def build_record(
     supporting = [
         market_signal["summary_cn"],
         "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪" if odds_ok else "赔率数据未齐",
-        f"latest snapshot: lineup={latest.get('lineup_status', lineups.get('status', 'UNKNOWN'))}",
+        f"最新快照：首发未确认（赛前 T-1h）",
     ]
-    counter = [risk.get("message", str(risk)) for risk in risks[:3]]
+    counter = [cn_display_text(risk.get("message", str(risk))) for risk in risks[:3]]
     if not counter:
         counter = ["等待 W1 风控信号补齐"]
 
@@ -370,7 +405,9 @@ def build_record(
     is_first = fid == "1489369"
     reference_score = reference["reference_score"]
     hit_status = "比分命中" if is_first and status == "finished" else None
-    w1_state = "赛前未放行/未形成正式 W1_PLAY" if not play_guard_pass else "已通过 W1_PLAY_GUARD_V1"
+    w1_state = "赛前未放行/未形成正式 W1_PLAY" if not play_guard_pass else "已通过正式风控规则"
+    if stage_info["prediction_stage"] == "EARLY_REFERENCE" and status != "finished" and not play_guard_pass:
+        risk_cn = "中高"
 
     if status == "finished":
         current_action = "需要写入 ledger 做赛后验证"
@@ -414,10 +451,10 @@ def build_record(
         "odds_status": "READY" if odds_ok else "WAIT",
         "odds_movement": movement,
         "market_signal": market_signal,
-        "supporting_factors": supporting,
+        "supporting_factors": [cn_display_text(item) for item in supporting],
         "counter_factors": counter,
-        "risk_flags": risks,
-        "data_gaps": gaps,
+        "risk_flags": [{**risk, "message": cn_display_text(risk.get("message", ""))} for risk in risks],
+        "data_gaps": [{**gap, "message": cn_display_text(gap.get("message") or gap.get("field") or gap)} for gap in gaps],
         "current_action_cn": current_action,
         "boss_summary_cn": boss_summary,
         "next_refresh": next_refresh,
@@ -431,20 +468,7 @@ def build_record(
 
 def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
     def clean_public_text(value: Any) -> str:
-        text = str(value)
-        replacements = {
-            "lineup_status=WAIT_EVENT": "首发仍未公布",
-            "lineup=WAIT_EVENT": "首发仍未公布",
-            "referee_status=MISSING": "裁判仍未公布",
-            "final_decision at W1_WAIT": "当前保持等待",
-            "W1_WAIT": "等待数据",
-            "confirmed_lineup": "正式首发",
-            "lineups.confirmed_lineup": "正式首发",
-            "match.referee": "裁判信息",
-        }
-        for source, target in replacements.items():
-            text = text.replace(source, target)
-        return text
+        return cn_display_text(value).replace("W1_WAIT", "等待数据")
 
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
@@ -517,7 +541,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         ],
         "match_records": [public_record(row) for row in data["match_records"]],
         "page_footer_statement_cn": data["page_footer_statement_cn"],
-        "w1_backend_kept": data["w1_backend_kept"],
+        "w1_backend_kept": [cn_display_text(item) for item in data["w1_backend_kept"]],
         "dashboard_binding": data["dashboard_binding"],
     }
 
@@ -568,14 +592,14 @@ def main() -> int:
 
     first = next(row for row in records if row["fixture_id"] == "1489369")
     data["schema_version"] = "W1_VISUAL_DASHBOARD_DATA_BOUND_V1"
-    data["generated_from"] = "local W1 cards, ledger, state, latest snapshot, and manual result overlay"
+    data["generated_from"] = "本地 W1 赛前卡、ledger、状态文件、最新快照和人工核验赛果覆盖"
     data["generated_at_utc"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     data["match_records"] = records
     data["prediction_stage_flow_cn"] = STAGE_FLOW_CN
     data["early_prediction_mode"] = {
         "version": PREDICTION_VERSION,
         "enabled": True,
-        "principle_cn": "早盘参考和赛前观察可以输出参考倾向/参考比分，但只有 FORMAL_DECISION 或 FINAL_CHECK 且通过 W1_PLAY_GUARD_V1 才可能成为正式判断。",
+        "principle_cn": "早盘参考和赛前观察可以输出参考倾向/参考比分，但只有正式判断或最终版且通过正式风控规则才可能成为正式判断。",
     }
     data["dashboard_binding"] = {
         "version": "W1_DATA_BINDING_V1",
@@ -621,7 +645,7 @@ def main() -> int:
         "counter_factors": first["counter_factors"],
         "key_gaps": [gap.get("message", str(gap)) for gap in first["data_gaps"]],
         "current_action": first["current_action_cn"],
-        "play_guard_result": "未通过 W1_PLAY_GUARD_V1；赛前未放行/未形成正式 W1_PLAY",
+        "play_guard_result": "未通过正式风控规则；赛前未放行/未形成正式 W1_PLAY",
         "actual_score_display_cn": first["actual_score_display_cn"],
         "hit_status_cn": first["hit_status_cn"],
         "boss_summary_cn": first["boss_summary_cn"],
