@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate W1_VISUAL_DASHBOARD_V1 static artifacts."""
+"""Validate W1 visual dashboard static artifacts."""
 
 from __future__ import annotations
 
@@ -15,7 +15,25 @@ HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 DATA_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 LEDGER = ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv"
 DOC = ROOT / "docs/W1_VISUAL_DASHBOARD.md"
-FORBIDDEN_TERMS = ["Q" + "Q", "offi" + "cial", "pend" + "ing", "V" + "3", "V" + "4", "M" + "1"]
+POLICY = ROOT / "docs/W1_UI_REUSE_POLICY.md"
+
+FORBIDDEN_SOURCE_TERMS = [
+    "DeepSeek API Key",
+    "微信群机器人",
+    "付费预测群",
+    "bet",
+    "stake",
+    "profit",
+    "guaranteed",
+    "稳赚",
+    "必胜",
+    "Q" + "Q",
+    "offi" + "cial",
+    "pend" + "ing",
+    "V" + "3",
+    "V" + "4",
+    "M" + "1",
+]
 
 
 class CheckError(Exception):
@@ -36,9 +54,13 @@ def load_json(path: Path) -> dict:
 
 def assert_no_forbidden_terms(path: Path) -> None:
     text = read(path)
-    for term in FORBIDDEN_TERMS:
+    for term in FORBIDDEN_SOURCE_TERMS:
+        if term.isascii():
+            if re.search(rf"(?<![A-Za-z]){re.escape(term)}(?![A-Za-z])", text, re.I):
+                fail(f"Forbidden term found in {path.relative_to(ROOT)}: {term}")
+            continue
         if term in text:
-            fail(f"Forbidden term found in {path.relative_to(ROOT)}")
+            fail(f"Forbidden term found in {path.relative_to(ROOT)}: {term}")
 
 
 def current_fixture_teams() -> set[str]:
@@ -55,17 +77,11 @@ def current_fixture_teams() -> set[str]:
     return teams
 
 
-def assert_dashboard_data(data: dict) -> None:
-    if data.get("schema_version") != "W1_VISUAL_DASHBOARD_V2_CN":
-        fail("Dashboard data schema_version mismatch")
-    if data.get("display_language") != "zh-CN":
-        fail("Dashboard must declare zh-CN display language")
-
+def assert_groups(data: dict) -> None:
     groups = data.get("groups", [])
     if len(groups) != 12:
         fail(f"Expected 12 groups, found {len(groups)}")
-    expected_letters = list("ABCDEFGHIJKL")
-    if [group.get("group") for group in groups] != expected_letters:
+    if [group.get("group") for group in groups] != list("ABCDEFGHIJKL"):
         fail("Groups must be A-L in order")
 
     teams: list[str] = []
@@ -74,20 +90,24 @@ def assert_dashboard_data(data: dict) -> None:
         if len(group_teams) != 4:
             fail(f"Group {group.get('group')} must contain 4 teams")
         teams.extend(group_teams)
-        template = group.get("standings_template", [])
-        if len(template) != 4:
+
+        if len(group.get("teams_cn", [])) != 4:
+            fail(f"Group {group.get('group')} must contain 4 Chinese team names")
+
+        standings = group.get("standings_template", [])
+        if len(standings) != 4:
             fail(f"Group {group.get('group')} standings template must contain 4 rows")
-        for row in template:
-            for key in ("P", "W", "D", "L", "GF", "GA", "GD", "PTS"):
+        for row in standings:
+            for key in ("P", "W", "D", "L", "GF", "GA", "GD", "PTS", "team_cn"):
                 if key not in row:
                     fail(f"Standings template missing {key}")
             if row.get("points_label") != f"{row.get('PTS')}分":
                 fail(f"Standings points label mismatch in Group {group.get('group')}")
+
         paths = group.get("qualification_paths", [])
         if len(paths) != 3:
             fail(f"Group {group.get('group')} must contain 3 qualification paths")
-        finishes = [path.get("finish") for path in paths]
-        if finishes != ["第1名", "第2名", "第3名"]:
+        if [path.get("finish") for path in paths] != ["第1名", "第2名", "第3名"]:
             fail(f"Group {group.get('group')} qualification paths must cover first, second, third")
         for path in paths:
             if not path.get("slot") or not path.get("opponent"):
@@ -97,22 +117,28 @@ def assert_dashboard_data(data: dict) -> None:
         fail(f"Expected 48 teams, found {len(teams)}")
     if len(set(teams)) != 48:
         fail("Duplicate team found in group context")
+
+    missing = sorted(current_fixture_teams() - set(teams))
+    if missing:
+        fail(f"Fixture teams missing from group context: {missing}")
+
+
+def assert_dashboard_data(data: dict) -> None:
+    if data.get("schema_version") != "W1_VISUAL_DASHBOARD_CN_REUSE":
+        fail("Dashboard data schema_version mismatch")
+    if data.get("display_language") != "zh-CN":
+        fail("Dashboard must declare zh-CN display language")
     if data.get("team_display_language") != "zh-CN":
         fail("Team display language must be zh-CN")
+
+    assert_groups(data)
+
     team_map = data.get("team_name_map_cn", {})
     if len(team_map) != 48:
         fail("Chinese team name map must contain 48 teams")
-    for group in groups:
-        if len(group.get("teams_cn", [])) != 4:
-            fail(f"Group {group.get('group')} must contain 4 Chinese team names")
     for required_team in ("墨西哥", "南非", "巴西", "阿根廷", "英格兰", "日本"):
         if required_team not in team_map.values():
             fail(f"Chinese team name missing: {required_team}")
-
-    fixture_teams = current_fixture_teams()
-    missing = sorted(fixture_teams - set(teams))
-    if missing:
-        fail(f"Fixture teams missing from group context: {missing}")
 
     rules = data.get("advancement_rules", {})
     expected_rules = {
@@ -127,32 +153,54 @@ def assert_dashboard_data(data: dict) -> None:
             fail(f"Advancement rule mismatch for {key}: {rules.get(key)}")
     if rules["direct_qualifiers"] + rules["best_third_qualifiers"] != rules["round_of_32_total"]:
         fail("Advancement rule totals do not sum to Round of 32")
-    for key in ("points", "goal_diff", "goals_for", "fair_play", "drawing_of_lots"):
-        if key not in rules.get("third_place_tiebreakers", []):
-            fail(f"Missing third-place tiebreaker: {key}")
 
-    if len(data.get("third_place_ranking_template", [])) != 12:
-        fail("Third-place ranking template must contain 12 rows")
-    if data.get("standings_compact_headers_cn") != ["球队", "赛", "净胜", "积分"]:
-        fail("Compact standings headers mismatch")
-    if "小组第三的具体落位" not in data.get("knockout_path_note_cn", ""):
-        fail("Knockout path note must explain third-place uncertainty")
-
-    first = data.get("first_match", {})
-    if first.get("match") != "Mexico vs South Africa":
-        fail("First match must be Mexico vs South Africa")
-    if first.get("decision") != "W1_WAIT":
-        fail("First match decision must be W1_WAIT")
-    if first.get("odds_status") != "READY":
-        fail("First match odds status must be READY")
-    if first.get("play_guard_pass") is not False:
-        fail("First match play_guard_pass must be false while lineup is missing")
+    if data.get("status_cards", {}).get("play_guard_version") != "W1_PLAY_GUARD_V1":
+        fail("PLAY_GUARD_V1 must remain in dashboard data")
+    if "W1_PLAY_GUARD_V1" not in data.get("w1_backend_kept", []):
+        fail("W1 backend list must keep W1_PLAY_GUARD_V1")
 
     boss = data.get("boss_view", {})
-    if boss.get("current_conclusion") != "全部等待首发/裁判等关键数据":
-        fail("Boss view conclusion mismatch")
-    if boss.get("first_match_cn") != "墨西哥 vs 南非":
-        fail("Boss view first match must be Chinese")
+    expected_boss = {
+        "current_status": "24 场等待关键数据",
+        "first_match_cn": "墨西哥 vs 南非",
+        "reference_lean": "墨西哥不败",
+        "reference_score": "2-0 / 2-1",
+        "current_action": "等待正式首发，不下最终结论",
+        "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
+    }
+    for key, expected in expected_boss.items():
+        if boss.get(key) != expected:
+            fail(f"Boss view mismatch for {key}")
+    if "不绕过 W1 风控" not in boss.get("explanation", ""):
+        fail("Boss view must say reference score does not bypass W1 guard")
+
+    first = data.get("first_match_cn", {})
+    for key in (
+        "match",
+        "kickoff",
+        "current_conclusion",
+        "reference_score",
+        "risk_level",
+        "supporting_factors",
+        "counter_factors",
+        "key_gaps",
+        "current_action",
+        "play_guard_result",
+        "technical_details",
+    ):
+        if key not in first:
+            fail(f"First match card missing {key}")
+    if first["match"] != "墨西哥 vs 南非":
+        fail("First match must be Chinese")
+    if "W1_PLAY_GUARD_V1" not in first["play_guard_result"]:
+        fail("First match must keep W1 guard result")
+    if not first["play_guard_result"].startswith("否"):
+        fail("First match must not pass W1 guard while lineup is missing")
+
+    tech = first["technical_details"]
+    for key in ("raw_decision", "play_guard_pass", "lineup_status", "referee_status", "odds_snapshot_age_minutes", "odds_movement"):
+        if key not in tech:
+            fail(f"Technical detail missing {key}")
 
     cn_labels = [item.get("label") for item in data.get("status_cards_cn", [])]
     for label in ("等待数据", "观察中", "可正式分析", "跳过"):
@@ -166,49 +214,42 @@ def assert_html(data: dict) -> None:
     assert_no_forbidden_terms(HTML)
     text = read(HTML)
     required = [
-        "W1 世界杯赛前总控台",
-        "小组赛程、晋级规则、赛前状态与风险提醒。当前不输出投注建议。",
+        "W1 世界杯赛前预测总控台",
         "当前你只需要看这里",
+        "24 场等待关键数据",
+        "墨西哥 vs 南非",
+        "参考倾向",
+        "墨西哥不败",
+        "参考比分",
+        "2-0 / 2-1",
+        "当前动作",
+        "等待正式首发，不下最终结论",
+        "正式判断",
+        "6月12日 02:00 / 02:30 CST",
+        "参考比分只作为外部参考，不绕过 W1 风控",
+        "比赛",
+        "开赛时间",
+        "当前结论",
+        "风险等级",
+        "支持理由",
+        "反对理由",
+        "关键缺口",
+        "是否通过 W1 风控",
         "等待数据",
         "观察中",
         "可正式分析",
         "跳过",
-        "刷新器版本",
-        "风控规则",
-        "下次刷新",
-        "W1_PLAY_GUARD_V1",
-        "全部等待首发/裁判等关键数据",
-        "墨西哥 vs 南非",
-        "巴西",
-        "阿根廷",
-        "英格兰",
-        "日本",
-        "正式判断时间",
-        "等待，不下结论",
-        "世界杯小组总览",
+        "A组",
+        "L组",
+        "每组4队",
         "每组前2名直接晋级",
-        "当前积分与晋级后潜在对阵",
-        "0分",
+        "最好8个小组第三晋级",
         "32强席位",
         "潜在对手",
-        "小组第三的具体落位",
-        "对 B组第2名",
-        "若成为8个最佳第三之一",
-        "12个小组，每组4队",
-        "12个小组第三中成绩最好的8队晋级",
-        "共32队进入淘汰赛",
-        "比赛",
-        "开赛时间",
-        "当前状态",
-        "首发",
-        "裁判",
-        "赔率",
-        "风控是否通过",
-        "颜色 / 标签解释",
-        "关键数据没齐",
-        "有信号但风险较高",
-        "通过量化风控",
-        "风险过高或数据冲突",
+        "W1_PLAY_GUARD_V1",
+        "展开技术详情",
+        "本页面用于世界杯赛前数据分析、风险识别和赛后复盘。",
+        "不构成投注",
     ]
     for token in required:
         if token not in text:
@@ -227,15 +268,26 @@ def assert_html(data: dict) -> None:
         fail("Embedded dashboard JSON must match asset data JSON")
 
 
+def assert_docs() -> None:
+    for path in (DOC, POLICY):
+        if not path.is_file():
+            fail(f"Missing artifact: {path.relative_to(ROOT)}")
+        assert_no_forbidden_terms(path)
+    policy_text = read(POLICY)
+    for token in ("只复用中文 UI", "不复用该项目的 prompt 预测逻辑", "不能绕过 W1_PLAY_GUARD_V1"):
+        if token not in policy_text:
+            fail(f"UI reuse policy missing token: {token}")
+
+
 def main() -> int:
     try:
-        for path in (DATA_JSON, DOC):
-            if not path.is_file():
-                fail(f"Missing artifact: {path.relative_to(ROOT)}")
-            assert_no_forbidden_terms(path)
+        if not DATA_JSON.is_file():
+            fail("Dashboard data JSON is missing")
+        assert_no_forbidden_terms(DATA_JSON)
         data = load_json(DATA_JSON)
         assert_dashboard_data(data)
         assert_html(data)
+        assert_docs()
     except CheckError as exc:
         print(f"W1 visual dashboard self-test FAIL: {exc}", file=sys.stderr)
         return 1

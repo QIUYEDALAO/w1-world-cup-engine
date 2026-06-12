@@ -1,5 +1,5 @@
 {
-  "schema_version": "W1_VISUAL_DASHBOARD_V2_CN",
+  "schema_version": "W1_VISUAL_DASHBOARD_CN_REUSE",
   "generated_from": "local W1 fixtures/cards/ledger/state only",
   "status_cards": {
     "W1_WAIT": 24,
@@ -123,7 +123,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 E组第1名 或 G组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "B",
@@ -237,7 +238,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 E组第1名 或 D组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "C",
@@ -351,7 +353,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 E组第1名 / I组第1名 / A组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "D",
@@ -465,7 +468,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 E组第1名 / I组第1名 / K组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "E",
@@ -579,7 +583,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 A/B/D/G/K/L 组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "F",
@@ -693,7 +698,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 E/I/A/B 组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "G",
@@ -807,7 +813,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 I组第1名 或 B组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "H",
@@ -921,7 +928,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 I/A/L/G 组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "I",
@@ -1035,7 +1043,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 A/L/D/G/B/K 组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "J",
@@ -1149,7 +1158,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 L/D/G/B/K 组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "K",
@@ -1263,7 +1273,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 L组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     },
     {
       "group": "L",
@@ -1377,7 +1388,8 @@
           "slot": "若成为8个最佳第三之一",
           "opponent": "可能对 K组第1名"
         }
-      ]
+      ],
+      "group_note_cn": "每组4队，前2名直接晋级；最好8个小组第三晋级。"
     }
   ],
   "advancement_rules": {
@@ -1570,68 +1582,97 @@
     }
   ],
   "display_language": "zh-CN",
-  "title_cn": "W1 世界杯赛前总控台",
-  "subtitle_cn": "小组赛程、晋级规则、赛前状态与风险提醒。当前不输出投注建议。",
+  "title_cn": "W1 世界杯赛前预测总控台",
+  "subtitle_cn": "用普通人能看懂的中文，看小组赛程、参考倾向、风险缺口和现在该干嘛。当前不输出投注建议。",
   "status_cards_cn": [
     {
       "label": "等待数据",
       "count": 24,
-      "hint": "关键数据没齐",
-      "class": "wait"
+      "class": "wait",
+      "hint": "关键数据没齐，不能进入正式分析。"
     },
     {
       "label": "观察中",
       "count": 0,
-      "hint": "有信号但风险较高",
-      "class": "watch"
+      "class": "watch",
+      "hint": "有信号但风险较高，需要继续观察。"
     },
     {
       "label": "可正式分析",
       "count": 0,
-      "hint": "通过量化风控",
-      "class": "play"
+      "class": "play",
+      "hint": "通过量化风控后才进入正式赛前分析。"
     },
     {
       "label": "跳过",
       "count": 0,
-      "hint": "风险过高或数据冲突",
-      "class": "pass"
+      "class": "pass",
+      "hint": "风险过高或数据冲突，直接跳过。"
     }
   ],
   "boss_view": {
-    "headline": "当前你只需要看这里",
-    "current_conclusion": "全部等待首发/裁判等关键数据",
+    "title": "当前你只需要看这里",
+    "current_status": "24 场等待关键数据",
     "first_match_cn": "墨西哥 vs 南非",
-    "formal_review_time_cst": "2026-06-12 02:00 / 02:30 CST",
-    "current_action": "等待，不下结论"
+    "reference_lean": "墨西哥不败",
+    "reference_score": "2-0 / 2-1",
+    "current_action": "等待正式首发，不下最终结论",
+    "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
+    "explanation": "参考比分只作为外部参考，不绕过 W1 风控",
+    "w1_guard_summary": "W1_PLAY_GUARD_V1 未通过：confirmed_lineup 缺失，保持等待。"
   },
   "first_match_cn": {
     "fixture_id": "1489369",
     "match": "墨西哥 vs 南非",
     "kickoff": "2026-06-12 03:00 CST / 2026-06-11T19:00:00Z",
-    "decision": "等待",
-    "lineup": "未公布",
-    "referee": "未公布",
-    "odds": "已准备",
-    "play_guard": "否",
-    "next_refresh": "2026-06-10 18:00 CST"
+    "current_conclusion": "等待关键数据，暂不下最终结论",
+    "reference_lean": "墨西哥不败",
+    "reference_score": "2-0 / 2-1",
+    "risk_level": "高",
+    "supporting_factors": [
+      "1X2 与让球数据已准备，市场初始信号偏向墨西哥方向",
+      "墨西哥为揭幕战主队，比赛地在墨西哥城",
+      "双方 squad、standings、H2H、injuries 端点已就绪"
+    ],
+    "counter_factors": [
+      "正式首发未公布，W1 硬规则要求等待",
+      "裁判尚未公布，判罚尺度无法评估",
+      "suspensions 与 travel_distance 仍为部分数据"
+    ],
+    "key_gaps": [
+      "confirmed_lineup 缺失",
+      "referee 未公布"
+    ],
+    "current_action": "等待正式首发，不下最终结论",
+    "play_guard_result": "否，未通过 W1_PLAY_GUARD_V1",
+    "w1_label_cn": "等待数据",
+    "technical_details": {
+      "raw_decision": "W1_WAIT",
+      "play_guard_pass": false,
+      "lineup_status": "MISSING",
+      "referee_status": "MISSING",
+      "odds_snapshot_age_minutes": null,
+      "odds_movement": "待下一次快照比较",
+      "ledger_required": true,
+      "first_seen_odds_proxy": true
+    }
   },
   "label_explain_cn": [
     {
       "label": "等待数据",
-      "meaning": "关键数据没齐"
+      "meaning": "关键数据没齐，例如首发或裁判缺失。"
     },
     {
       "label": "观察中",
-      "meaning": "有信号但风险较高"
+      "meaning": "有信号但风险较高，不能急着下结论。"
     },
     {
       "label": "可正式分析",
-      "meaning": "通过量化风控"
+      "meaning": "通过量化风控，且 ledger_required=true。"
     },
     {
       "label": "跳过",
-      "meaning": "风险过高或数据冲突"
+      "meaning": "风险过高或数据冲突，不进入正式分析。"
     }
   ],
   "advancement_rules_cn": [
@@ -1739,5 +1780,31 @@
     "32强席位",
     "潜在对手"
   ],
-  "knockout_slots_source": "FIFA World Cup 2026 Round of 32 schedule slots"
+  "knockout_slots_source": "FIFA World Cup 2026 Round of 32 schedule slots",
+  "ui_style_source": {
+    "name": "worldcup2026-prediction-skill",
+    "reuse_scope": "仅复用中文 UI/交互风格、卡片组织和教程式解释口吻",
+    "blocked_scope": [
+      "不复用 prompt 预测逻辑",
+      "不把胜平负概率作为 W1 结论",
+      "不把外部参考比分作为正式结论",
+      "不把外部口径作为正式置信度",
+      "不复用接口密钥教程、聊天群自动化、付费社群或资金建议"
+    ],
+    "license_note": "参考项目为 MIT License；W1 页面仅做风格借鉴与独立实现。"
+  },
+  "match_card_headers_cn": [
+    "字段",
+    "内容"
+  ],
+  "w1_backend_kept": [
+    "watcher v2",
+    "W1_PLAY_GUARD_V1",
+    "match cards",
+    "ledger",
+    "odds_movement",
+    "supporting_factors / counter_factors",
+    "dashboard_data.json"
+  ],
+  "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘。不构成投注、下注、资金或收益建议。"
 }
