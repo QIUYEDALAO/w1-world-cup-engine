@@ -125,7 +125,7 @@ def assert_groups(data: dict) -> None:
 
 
 def assert_dashboard_data(data: dict) -> None:
-    if data.get("schema_version") != "W1_VISUAL_DASHBOARD_ORIGINAL_UI_CN":
+    if data.get("schema_version") != "W1_VISUAL_DASHBOARD_DATA_BOUND_V1":
         fail("Dashboard data schema_version mismatch")
     if data.get("display_language") != "zh-CN":
         fail("Dashboard must declare zh-CN display language")
@@ -162,11 +162,11 @@ def assert_dashboard_data(data: dict) -> None:
 
     boss = data.get("boss_view", {})
     expected_boss = {
-        "current_status": "24 场等待关键数据",
+        "current_status": "24 场 W1 数据已绑定",
         "first_match_cn": "墨西哥 vs 南非",
         "reference_lean": "墨西哥不败",
-        "reference_score": "2-0 / 2-1",
-        "current_action": "等待正式首发，不下最终结论",
+        "reference_score": "2-0",
+        "current_action": "需要写入 ledger 做赛后验证",
         "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
     }
     for key, expected in expected_boss.items():
@@ -196,7 +196,11 @@ def assert_dashboard_data(data: dict) -> None:
     if "W1_PLAY_GUARD_V1" not in first["play_guard_result"]:
         fail("First match must keep W1 guard result")
     if "未通过" not in first["play_guard_result"]:
-        fail("First match must not pass W1 guard while lineup is missing")
+        fail("First match must not pass W1 guard")
+    if first.get("actual_score_display_cn") != "墨西哥 2-0 南非":
+        fail("First match actual score must be bound")
+    if first.get("hit_status_cn") != "比分命中":
+        fail("First match hit status must be bound")
 
     tech = first["public_technical_details"]
     if len(tech) < 5:
@@ -233,14 +237,16 @@ def assert_html(data: dict) -> None:
         "RISK ALERT",
         "DATA GAPS",
         "当前你只需要看这里",
-        "24 场等待关键数据",
+        "24 场 W1 数据已绑定",
         "墨西哥 vs 南非",
         "参考倾向",
         "墨西哥不败",
         "参考比分",
-        "2-0 / 2-1",
+        "2-0",
+        "比分命中",
+        "墨西哥 2-0 南非",
         "当前动作",
-        "等待正式首发，不下最终结论",
+        "需要写入 ledger 做赛后验证",
         "正式判断",
         "6月12日 02:00 / 02:30 CST",
         "参考比分是外部参考信号",

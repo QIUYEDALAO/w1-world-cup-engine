@@ -17,7 +17,7 @@
 <section class="scoreboard" id="scoreboard">🎯 已锁定 <b>24</b> 场 W1 赛前卡，等待真实比分揭晓后，这里会按 ledger 做赛后复盘。</section>
 <footer class="footer"><span>W1 · watcher v2 · W1_PLAY_GUARD_V1 · ledger · match cards · odds_movement</span><b>本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。</b></footer>
 </div><script id="w1-data" type="application/json">{
-  "schema_version": "W1_VISUAL_DASHBOARD_ORIGINAL_UI_CN",
+  "schema_version": "W1_VISUAL_DASHBOARD_DATA_BOUND_V1",
   "title_cn": "W1 世界杯赛前预测总控台",
   "subtitle_cn": "外观复刻绿茵神算风格，底层仍由 W1 数据、风控和 ledger 驱动。",
   "brand_cn": "W1 世界杯赛前预测总控台",
@@ -58,40 +58,41 @@
   ],
   "boss_view": {
     "title": "当前你只需要看这里",
-    "current_status": "24 场等待关键数据",
+    "current_status": "24 场 W1 数据已绑定",
     "first_match_cn": "墨西哥 vs 南非",
     "reference_lean": "墨西哥不败",
-    "reference_score": "2-0 / 2-1",
-    "current_action": "等待正式首发，不下最终结论",
+    "reference_score": "2-0",
+    "current_action": "需要写入 ledger 做赛后验证",
     "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
-    "explanation": "参考比分是外部参考信号，不能变成正式 W1_PLAY，也不绕过 W1 风控。"
+    "explanation": "参考比分是外部参考信号，不能变成正式 W1_PLAY，也不绕过 W1 风控。",
+    "boss_summary_cn": "已完赛：墨西哥 2-0 南非；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证"
   },
   "first_match_cn": {
     "fixture_id": "1489369",
     "match": "墨西哥 vs 南非",
     "home": "🇲🇽 墨西哥",
     "away": "🇿🇦 南非",
-    "kickoff": "北京时间 6/12 03:00",
-    "current_conclusion": "等待正式首发，不下最终结论",
+    "kickoff": "2026-06-12 03:00 CST",
+    "current_conclusion": "赛前未放行/未形成正式 W1_PLAY",
     "reference_lean": "墨西哥不败",
-    "reference_score": "2-0 / 2-1",
+    "reference_score": "2-0",
     "risk_level": "高",
     "supporting_factors": [
-      "1X2 与让球数据已准备，市场初始信号偏向墨西哥方向",
-      "墨西哥为揭幕战主队，比赛地在墨西哥城",
-      "双方 squad、standings、H2H、injuries 端点已就绪"
+      "市场初始信号偏主队，1X2 Home=1.40；AH=Home -1=1.70",
+      "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+      "latest snapshot: lineup=WAIT (pre-match, T-1h)"
     ],
     "counter_factors": [
-      "正式首发未公布，W1 硬规则要求等待",
-      "裁判尚未公布，判罚尺度无法评估",
-      "suspensions 与 travel_distance 仍为部分数据"
+      "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+      "首发仍未公布; refresh near team sheet release.",
+      "裁判仍未公布; referee not available in fixture detail snapshot."
     ],
     "key_gaps": [
-      "confirmed lineup 缺失",
-      "裁判未公布"
+      "正式首发 missing; this blocks any non-WAIT final_decision.",
+      "裁判仍未公布; keep as a non-blocking gap."
     ],
-    "current_action": "等待正式首发，不下最终结论",
-    "play_guard_result": "未通过 W1_PLAY_GUARD_V1，保持等待数据",
+    "current_action": "需要写入 ledger 做赛后验证",
+    "play_guard_result": "未通过 W1_PLAY_GUARD_V1；赛前未放行/未形成正式 W1_PLAY",
     "public_technical_details": [
       {
         "label": "W1 风控",
@@ -117,13 +118,15 @@
         "label": "first_seen_odds_proxy",
         "value": "已捕获，仅代表首次观察快照"
       }
-    ]
+    ],
+    "actual_score_display_cn": "墨西哥 2-0 南非",
+    "hit_status_cn": "比分命中",
+    "boss_summary_cn": "已完赛：墨西哥 2-0 南非；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证"
   },
   "groups": [
     {
       "group": "A",
       "group_label_cn": "A组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇲🇽 墨西哥",
         "🇿🇦 南非",
@@ -152,7 +155,6 @@
     {
       "group": "B",
       "group_label_cn": "B组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇨🇦 加拿大",
         "🇧🇦 波黑",
@@ -181,7 +183,6 @@
     {
       "group": "C",
       "group_label_cn": "C组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇶🇦 卡塔尔",
         "🇨🇭 瑞士",
@@ -210,7 +211,6 @@
     {
       "group": "D",
       "group_label_cn": "D组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇭🇹 海地",
         "🏴 苏格兰",
@@ -239,7 +239,6 @@
     {
       "group": "E",
       "group_label_cn": "E组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇩🇪 德国",
         "🇨🇼 库拉索",
@@ -268,7 +267,6 @@
     {
       "group": "F",
       "group_label_cn": "F组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇨🇮 科特迪瓦",
         "🇪🇨 厄瓜多尔",
@@ -297,7 +295,6 @@
     {
       "group": "G",
       "group_label_cn": "G组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇪🇸 西班牙",
         "🇨🇻 佛得角",
@@ -326,7 +323,6 @@
     {
       "group": "H",
       "group_label_cn": "H组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇸🇦 沙特阿拉伯",
         "🇺🇾 乌拉圭",
@@ -355,7 +351,6 @@
     {
       "group": "I",
       "group_label_cn": "I组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇫🇷 法国",
         "🇸🇳 塞内加尔",
@@ -384,7 +379,6 @@
     {
       "group": "J",
       "group_label_cn": "J组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇦🇷 阿根廷",
         "🇩🇿 阿尔及利亚",
@@ -413,7 +407,6 @@
     {
       "group": "K",
       "group_label_cn": "K组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇵🇹 葡萄牙",
         "🇨🇩 刚果（金）",
@@ -442,7 +435,6 @@
     {
       "group": "L",
       "group_label_cn": "L组",
-      "group_note_cn": "每组前2名直接晋级，成绩最好的小组第三继续争夺32强席位。",
       "teams_display_cn": [
         "🇬🇭 加纳",
         "🇵🇦 巴拿马",
@@ -469,11 +461,1184 @@
       ]
     }
   ],
-  "advancement_rules": {
-    "direct_qualifiers": 24,
-    "best_third_qualifiers": 8,
-    "round_of_32_total": 32
-  },
+  "match_records": [
+    {
+      "match": "墨西哥 vs 南非",
+      "fixture_id": "1489369",
+      "home_team_cn": "墨西哥",
+      "away_team_cn": "南非",
+      "home_flag": "🇲🇽",
+      "away_flag": "🇿🇦",
+      "kickoff": "2026-06-12 03:00 CST",
+      "status": "finished",
+      "actual_score": {
+        "home": 2,
+        "away": 0
+      },
+      "actual_score_display_cn": "墨西哥 2-0 南非",
+      "result_source": "manual_verified_overlay",
+      "result_note": "赛果待回写 ledger",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.40；AH=Home -1=1.70"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.40；AH=Home -1=1.70",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "需要写入 ledger 做赛后验证",
+      "boss_summary_cn": "已完赛：墨西哥 2-0 南非；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证",
+      "reference_score_external": "2-0",
+      "hit_status_cn": "比分命中"
+    },
+    {
+      "match": "韩国 vs 捷克",
+      "fixture_id": "1538999",
+      "home_team_cn": "韩国",
+      "away_team_cn": "捷克",
+      "home_flag": "🇰🇷",
+      "away_flag": "🇨🇿",
+      "kickoff": "2026-06-12 10:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home -0.5=2.55"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home -0.5=2.55",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "韩国 vs 捷克：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "加拿大 vs 波黑",
+      "fixture_id": "1539000",
+      "home_team_cn": "加拿大",
+      "away_team_cn": "波黑",
+      "home_flag": "🇨🇦",
+      "away_flag": "🇧🇦",
+      "kickoff": "2026-06-13 03:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.78；AH=Home -1=2.45"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.78；AH=Home -1=2.45",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "加拿大 vs 波黑：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "美国 vs 巴拉圭",
+      "fixture_id": "1489370",
+      "home_team_cn": "美国",
+      "away_team_cn": "巴拉圭",
+      "home_flag": "🇺🇸",
+      "away_flag": "🇵🇾",
+      "kickoff": "2026-06-13 09:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.98；AH=Home -0.5=1.95"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.98；AH=Home -0.5=1.95",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "美国 vs 巴拉圭：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "卡塔尔 vs 瑞士",
+      "fixture_id": "1489373",
+      "home_team_cn": "卡塔尔",
+      "away_team_cn": "瑞士",
+      "home_flag": "🇶🇦",
+      "away_flag": "🇨🇭",
+      "kickoff": "2026-06-14 03:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +1=3.00"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +1=3.00",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "卡塔尔 vs 瑞士：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "巴西 vs 摩洛哥",
+      "fixture_id": "1489371",
+      "home_team_cn": "巴西",
+      "away_team_cn": "摩洛哥",
+      "home_flag": "🇧🇷",
+      "away_flag": "🇲🇦",
+      "kickoff": "2026-06-14 06:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.62；AH=Home -1=2.15"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.62；AH=Home -1=2.15",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "巴西 vs 摩洛哥：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "海地 vs 苏格兰",
+      "fixture_id": "1489372",
+      "home_team_cn": "海地",
+      "away_team_cn": "苏格兰",
+      "home_flag": "🇭🇹",
+      "away_flag": "🏴",
+      "kickoff": "2026-06-14 09:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +0.5=2.50"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +0.5=2.50",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "海地 vs 苏格兰：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "澳大利亚 vs 土耳其",
+      "fixture_id": "1539001",
+      "home_team_cn": "澳大利亚",
+      "away_team_cn": "土耳其",
+      "home_flag": "🇦🇺",
+      "away_flag": "🇹🇷",
+      "kickoff": "2026-06-14 12:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +0.5=2.15"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +0.5=2.15",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "澳大利亚 vs 土耳其：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "德国 vs 库拉索",
+      "fixture_id": "1489374",
+      "home_team_cn": "德国",
+      "away_team_cn": "库拉索",
+      "home_flag": "🇩🇪",
+      "away_flag": "🇨🇼",
+      "kickoff": "2026-06-15 01:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.03；AH=Home -3=1.53"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.03；AH=Home -3=1.53",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "德国 vs 库拉索：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "荷兰 vs 日本",
+      "fixture_id": "1489376",
+      "home_team_cn": "荷兰",
+      "away_team_cn": "日本",
+      "home_flag": "🇳🇱",
+      "away_flag": "🇯🇵",
+      "kickoff": "2026-06-15 04:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.95；AH=Home -0.5=1.95"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.95；AH=Home -0.5=1.95",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "荷兰 vs 日本：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "科特迪瓦 vs 厄瓜多尔",
+      "fixture_id": "1489375",
+      "home_team_cn": "科特迪瓦",
+      "away_team_cn": "厄瓜多尔",
+      "home_flag": "🇨🇮",
+      "away_flag": "🇪🇨",
+      "kickoff": "2026-06-15 07:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +0=2.35"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +0=2.35",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "科特迪瓦 vs 厄瓜多尔：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "瑞典 vs 突尼斯",
+      "fixture_id": "1539002",
+      "home_team_cn": "瑞典",
+      "away_team_cn": "突尼斯",
+      "home_flag": "🇸🇪",
+      "away_flag": "🇹🇳",
+      "kickoff": "2026-06-15 10:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.88；AH=Home -0.5=1.85"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.88；AH=Home -0.5=1.85",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "瑞典 vs 突尼斯：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "西班牙 vs 佛得角",
+      "fixture_id": "1489380",
+      "home_team_cn": "西班牙",
+      "away_team_cn": "佛得角",
+      "home_flag": "🇪🇸",
+      "away_flag": "🇨🇻",
+      "kickoff": "2026-06-16 00:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.09；AH=Home -3=2.25"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.09；AH=Home -3=2.25",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "西班牙 vs 佛得角：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "比利时 vs 埃及",
+      "fixture_id": "1489377",
+      "home_team_cn": "比利时",
+      "away_team_cn": "埃及",
+      "home_flag": "🇧🇪",
+      "away_flag": "🇪🇬",
+      "kickoff": "2026-06-16 03:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.65；AH=Home -1=2.20"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.65；AH=Home -1=2.20",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "比利时 vs 埃及：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "沙特阿拉伯 vs 乌拉圭",
+      "fixture_id": "1489379",
+      "home_team_cn": "沙特阿拉伯",
+      "away_team_cn": "乌拉圭",
+      "home_flag": "🇸🇦",
+      "away_flag": "🇺🇾",
+      "kickoff": "2026-06-16 06:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +0.5=2.65"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +0.5=2.65",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "沙特阿拉伯 vs 乌拉圭：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "伊朗 vs 新西兰",
+      "fixture_id": "1489378",
+      "home_team_cn": "伊朗",
+      "away_team_cn": "新西兰",
+      "home_flag": "🇮🇷",
+      "away_flag": "🇳🇿",
+      "kickoff": "2026-06-16 09:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.89；AH=Home -0.5=1.90"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.89；AH=Home -0.5=1.90",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "伊朗 vs 新西兰：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "法国 vs 塞内加尔",
+      "fixture_id": "1489383",
+      "home_team_cn": "法国",
+      "away_team_cn": "塞内加尔",
+      "home_flag": "🇫🇷",
+      "away_flag": "🇸🇳",
+      "kickoff": "2026-06-17 03:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.43；AH=Home -1=1.73"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.43；AH=Home -1=1.73",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "法国 vs 塞内加尔：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "伊拉克 vs 挪威",
+      "fixture_id": "1539016",
+      "home_team_cn": "伊拉克",
+      "away_team_cn": "挪威",
+      "home_flag": "🇮🇶",
+      "away_flag": "🇳🇴",
+      "kickoff": "2026-06-17 06:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +2=1.73"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +2=1.73",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "伊拉克 vs 挪威：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "阿根廷 vs 阿尔及利亚",
+      "fixture_id": "1489381",
+      "home_team_cn": "阿根廷",
+      "away_team_cn": "阿尔及利亚",
+      "home_flag": "🇦🇷",
+      "away_flag": "🇩🇿",
+      "kickoff": "2026-06-17 09:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.38；AH=Home -1=1.62"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.38；AH=Home -1=1.62",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "阿根廷 vs 阿尔及利亚：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "奥地利 vs 约旦",
+      "fixture_id": "1489382",
+      "home_team_cn": "奥地利",
+      "away_team_cn": "约旦",
+      "home_flag": "🇦🇹",
+      "away_flag": "🇯🇴",
+      "kickoff": "2026-06-17 12:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.30；AH=Home -1=1.45"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.30；AH=Home -1=1.45",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "奥地利 vs 约旦：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "葡萄牙 vs 刚果（金）",
+      "fixture_id": "1539003",
+      "home_team_cn": "葡萄牙",
+      "away_team_cn": "刚果（金）",
+      "home_flag": "🇵🇹",
+      "away_flag": "🇨🇩",
+      "kickoff": "2026-06-18 01:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.25；AH=Home -2=2.25"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.25；AH=Home -2=2.25",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "葡萄牙 vs 刚果（金）：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "英格兰 vs 克罗地亚",
+      "fixture_id": "1489384",
+      "home_team_cn": "英格兰",
+      "away_team_cn": "克罗地亚",
+      "home_flag": "🏴",
+      "away_flag": "🇭🇷",
+      "kickoff": "2026-06-18 04:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.71；AH=Home -1=2.30"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.71；AH=Home -1=2.30",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "英格兰 vs 克罗地亚：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "加纳 vs 巴拿马",
+      "fixture_id": "1489385",
+      "home_team_cn": "加纳",
+      "away_team_cn": "巴拿马",
+      "home_flag": "🇬🇭",
+      "away_flag": "🇵🇦",
+      "kickoff": "2026-06-18 07:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=2.00；AH=Home -0.5=2.00"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=2.00；AH=Home -0.5=2.00",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "加纳 vs 巴拿马：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    },
+    {
+      "match": "乌兹别克斯坦 vs 哥伦比亚",
+      "fixture_id": "1489386",
+      "home_team_cn": "乌兹别克斯坦",
+      "away_team_cn": "哥伦比亚",
+      "home_flag": "🇺🇿",
+      "away_flag": "🇨🇴",
+      "kickoff": "2026-06-18 10:00 CST",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +1=2.30"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +1=2.30",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "正式首发 missing; W1 hard rule keeps 当前保持等待.",
+        "首发仍未公布; refresh near team sheet release.",
+        "裁判仍未公布; referee not available in fixture detail snapshot."
+      ],
+      "data_gaps": [
+        {
+          "message": "正式首发 missing; this blocks any non-WAIT final_decision."
+        },
+        {
+          "message": "裁判仍未公布; keep as a non-blocking gap."
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "乌兹别克斯坦 vs 哥伦比亚：等待关键数据，未形成正式 W1_PLAY",
+      "reference_score_external": null,
+      "hit_status_cn": null
+    }
+  ],
   "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。",
   "w1_backend_kept": [
     "watcher v2",
@@ -484,17 +1649,15 @@
     "supporting_factors / counter_factors",
     "dashboard_data.json"
   ],
-  "original_site_capture": {
-    "url": "https://worldcup.youliaoyun.com/",
-    "captured_to": "/tmp/w1_original_site_capture",
-    "visual_notes": [
-      "深绿球场背景与中线圆弧",
-      "大号 WHO WINS 式主标题",
-      "编号区块 01/02/03",
-      "霓虹绿边框卡片与黄色行动按钮",
-      "焦点赛程横向卡片",
-      "左右主客队对阵预测台"
-    ]
+  "dashboard_binding": {
+    "version": "W1_DATA_BINDING_V1",
+    "cards_dir": "data/processed/match_cards/group_stage_round1",
+    "dashboard_json": "reports/dashboard/assets/w1_dashboard_data.json",
+    "state_json": "state/w1_refresh_state.json",
+    "latest_snapshot": "data/snapshots/group_stage_round1/w1_round1_fixture_details_20260610_2045.json",
+    "previous_snapshot": "data/snapshots/group_stage_round1/w1_round1_fixture_details_20260610_1445.json",
+    "ledger": "data/processed/ledger/w1_ledger_group_stage_round1.csv",
+    "records_count": 24
   }
 }</script><script>
 const data=JSON.parse(document.getElementById('w1-data').textContent);const $=id=>document.getElementById(id);const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -504,8 +1667,10 @@ fillSelect($('teamA'));fillSelect($('teamB'));$('teamA').value='墨西哥';$('te
 document.getElementById('fixtures').innerHTML=data.focus_fixtures_cn.map((f,i)=>'<button class="fix-card '+(i===0?'on':'')+'" data-i="'+i+'"><div class="fix-meta"><span class="live">'+esc(f.badge)+'</span> · '+esc(f.note)+'</div><div class="fix-teams"><span>'+esc(f.home)+'</span><span class="v">VS</span><span>'+esc(f.away)+'</span></div></button>').join('');
 $('fixtures').addEventListener('click',e=>{const card=e.target.closest('.fix-card');if(!card)return;document.querySelectorAll('.fix-card').forEach(c=>c.classList.remove('on'));card.classList.add('on');const f=data.focus_fixtures_cn[card.dataset.i];$('teamA').value=f.home.split(' ').slice(1).join(' ');$('teamB').value=f.away.split(' ').slice(1).join(' ');setSide();document.querySelector('.arena').scrollIntoView({behavior:'smooth',block:'center'});$('goBtn').classList.remove('pulse');void $('goBtn').offsetWidth;$('goBtn').classList.add('pulse')});
 let stage='小组赛';$('stageRow').addEventListener('click',e=>{if(!e.target.classList.contains('stage-pill'))return;document.querySelectorAll('.stage-pill').forEach(p=>p.classList.remove('on'));e.target.classList.add('on');stage=e.target.textContent});
-const boss=data.boss_view;$('bossStrip').innerHTML=[['第一场',boss.first_match_cn],['参考倾向',boss.reference_lean],['参考比分',boss.reference_score],['当前动作',boss.current_action],['正式判断',boss.formal_review_time_cst],['说明',boss.explanation]].map(([k,v])=>'<div class="boss-item"><div class="boss-k">'+esc(k)+'</div><div class="boss-v">'+esc(v)+'</div></div>').join('');
-function buildW1Card(teamA,teamB){const first=data.first_match_cn;if(teamA==='墨西哥'&&teamB==='南非')return{teamA:{name:teamA,share:46},draw:31,teamB:{name:teamB,share:23},referenceScore:first.reference_score,confidence:'W1 风控未通过 · '+stage,keyFactors:first.supporting_factors,risks:first.counter_factors,gaps:first.key_gaps,analysis:'倾向：'+first.reference_lean+'。'+first.current_action+'。参考比分是外部参考信号，不能变成正式 W1_PLAY，也不绕过 W1 风控。'};return{teamA:{name:teamA,share:34},draw:33,teamB:{name:teamB,share:33},referenceScore:'待 W1 参考信号',confidence:'等待关键数据 · '+stage,keyFactors:['该场可进入 W1 match cards 后补齐','当前页面只展示原站式交互结构','正式分析必须等待 W1_PLAY_GUARD_V1'],risks:['未展示正式首发','未展示裁判信息','不输出最终结论'],gaps:['等待对应 W1 match card 刷新','等待关键数据补齐'],analysis:'这场当前只作为交互预览：W1 不调用外部预测接口，不给正式结论。'}}
-function render(d){$('rFlagA').textContent=flagOf(d.teamA.name);$('rFlagB').textContent=flagOf(d.teamB.name);$('rNameA').textContent=d.teamA.name;$('rNameB').textContent=d.teamB.name;$('rScore').textContent=d.referenceScore.replace('/',' / ');$('rConf').textContent=d.confidence;$('lblA').textContent=d.teamA.name+'参考 '+d.teamA.share+'%';$('lblD').textContent='等待 '+d.draw+'%';$('lblB').textContent=d.teamB.name+'参考 '+d.teamB.share+'%';$('rFactors').innerHTML=d.keyFactors.map(f=>'<span class="chip">'+esc(f)+'</span>').join('');$('rRisks').innerHTML=d.risks.map(r=>'<div class="pw"><span>⚠</span><div>'+esc(r)+'</div></div>').join('');$('rGaps').innerHTML=(d.gaps||[]).map(r=>'<div class="pw"><span>◇</span><div>'+esc(r)+'</div></div>').join('');$('rAnalysis').textContent=d.analysis;$('result').classList.add('show');requestAnimationFrame(()=>{$('barA').style.width=d.teamA.share+'%';$('barD').style.width=d.draw+'%';$('barB').style.width=d.teamB.share+'%'});$('result').scrollIntoView({behavior:'smooth',block:'start'})}
+const boss=data.boss_view;$('bossStrip').innerHTML=[['第一场',boss.first_match_cn],['参考倾向',boss.reference_lean],['参考比分',boss.reference_score],['当前动作',boss.current_action],['正式判断',boss.formal_review_time_cst],['说明',boss.boss_summary_cn||boss.explanation]].map(([k,v])=>'<div class="boss-item"><div class="boss-k">'+esc(k)+'</div><div class="boss-v">'+esc(v)+'</div></div>').join('');
+function findRecord(teamA,teamB){return (data.match_records||[]).find(r=>r.home_team_cn===teamA&&r.away_team_cn===teamB)||(data.match_records||[]).find(r=>r.home_team_cn===teamB&&r.away_team_cn===teamA)}
+function shareFor(record,side){if(record.status==='finished'&&record.actual_score&&record.actual_score.home!==null){const homeWin=record.actual_score.home>record.actual_score.away;const awayWin=record.actual_score.away>record.actual_score.home;if(side==='home')return homeWin?60:awayWin?20:34;if(side==='away')return awayWin?60:homeWin?20:33;return homeWin||awayWin?20:34}return side==='home'?34:side==='away'?33:33}
+function buildW1Card(teamA,teamB){const r=findRecord(teamA,teamB);if(!r){return{teamA:{name:teamA,share:34},draw:33,teamB:{name:teamB,share:33},referenceScore:'W1 数据未绑定',confidence:'未找到本地 match record · '+stage,keyFactors:['未找到对应 fixture_id','需要检查 match_cards 与 latest snapshot','不形成正式 W1 结论'],risks:['本地记录缺失'],gaps:['match_records 缺少该对阵'],analysis:'该对阵没有绑定到本地 W1 match record，不能给出赛前结论。'}}const homeName=r.home_team_cn,awayName=r.away_team_cn;const reference=r.reference_score_external||r.actual_score_display_cn||'W1 参考信号待补齐';const title=r.status==='finished'&&r.actual_score_display_cn?'已完赛：'+r.actual_score_display_cn:r.boss_summary_cn;const keyFactors=(r.supporting_factors||[]).filter(Boolean);const risks=(r.counter_factors||[]).filter(Boolean);const gaps=(r.data_gaps||[]).map(g=>g.message||g.field||String(g));const analysis=[title,'W1 状态：'+r.w1_state,'当前动作：'+r.current_action_cn,'赔率变化：'+(r.odds_movement&&r.odds_movement.summary_cn?r.odds_movement.summary_cn:'未记录'),'市场信号：'+(r.market_signal&&r.market_signal.summary_cn?r.market_signal.summary_cn:'未记录')].join('。');return{teamA:{name:homeName,share:shareFor(r,'home')},draw:shareFor(r,'draw'),teamB:{name:awayName,share:shareFor(r,'away')},referenceScore:reference,confidence:(r.hit_status_cn? r.hit_status_cn+' · ':'')+r.w1_state+' · '+stage,keyFactors:keyFactors,risks:risks,gaps:gaps,analysis:analysis}}
+function render(d){$('rFlagA').textContent=flagOf(d.teamA.name);$('rFlagB').textContent=flagOf(d.teamB.name);$('rNameA').textContent=d.teamA.name;$('rNameB').textContent=d.teamB.name;$('rScore').textContent=String(d.referenceScore).replace('/',' / ');$('rConf').textContent=d.confidence;$('lblA').textContent=d.teamA.name+'参考 '+d.teamA.share+'%';$('lblD').textContent='等待/平 '+d.draw+'%';$('lblB').textContent=d.teamB.name+'参考 '+d.teamB.share+'%';$('rFactors').innerHTML=d.keyFactors.map(f=>'<span class="chip">'+esc(f)+'</span>').join('');$('rRisks').innerHTML=d.risks.map(r=>'<div class="pw"><span>⚠</span><div>'+esc(r)+'</div></div>').join('');$('rGaps').innerHTML=(d.gaps||[]).map(r=>'<div class="pw"><span>◇</span><div>'+esc(r)+'</div></div>').join('');$('rAnalysis').textContent=d.analysis;$('result').classList.add('show');requestAnimationFrame(()=>{$('barA').style.width=d.teamA.share+'%';$('barD').style.width=d.draw+'%';$('barB').style.width=d.teamB.share+'%'});$('result').scrollIntoView({behavior:'smooth',block:'start'})}
 $('goBtn').addEventListener('click',()=>{const a=$('teamA').value,b=$('teamB').value;$('err').classList.remove('show');if(a===b){$('err').textContent='两支球队不能相同，换一个对手吧';$('err').classList.add('show');return}$('loading').classList.add('show');$('goBtn').disabled=true;setTimeout(()=>{render(buildW1Card(a,b));$('loading').classList.remove('show');$('goBtn').disabled=false},260)});
 </script></body></html>

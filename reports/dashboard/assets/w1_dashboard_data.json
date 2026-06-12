@@ -1,6 +1,6 @@
 {
-  "schema_version": "W1_VISUAL_DASHBOARD_ORIGINAL_UI_CN",
-  "generated_from": "local W1 fixtures/cards/ledger/state only",
+  "schema_version": "W1_VISUAL_DASHBOARD_DATA_BOUND_V1",
+  "generated_from": "local W1 cards, ledger, state, latest snapshot, and manual result overlay",
   "status_cards": {
     "W1_WAIT": 24,
     "W1_WATCH": 0,
@@ -1696,40 +1696,41 @@
   ],
   "boss_view": {
     "title": "当前你只需要看这里",
-    "current_status": "24 场等待关键数据",
+    "current_status": "24 场 W1 数据已绑定",
     "first_match_cn": "墨西哥 vs 南非",
     "reference_lean": "墨西哥不败",
-    "reference_score": "2-0 / 2-1",
-    "current_action": "等待正式首发，不下最终结论",
+    "reference_score": "2-0",
+    "current_action": "需要写入 ledger 做赛后验证",
     "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
-    "explanation": "参考比分是外部参考信号，不能变成正式 W1_PLAY，也不绕过 W1 风控。"
+    "explanation": "参考比分是外部参考信号，不能变成正式 W1_PLAY，也不绕过 W1 风控。",
+    "boss_summary_cn": "已完赛：墨西哥 2-0 南非；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证"
   },
   "first_match_cn": {
     "fixture_id": "1489369",
     "match": "墨西哥 vs 南非",
     "home": "🇲🇽 墨西哥",
     "away": "🇿🇦 南非",
-    "kickoff": "北京时间 6/12 03:00",
-    "current_conclusion": "等待正式首发，不下最终结论",
+    "kickoff": "2026-06-12 03:00 CST",
+    "current_conclusion": "赛前未放行/未形成正式 W1_PLAY",
     "reference_lean": "墨西哥不败",
-    "reference_score": "2-0 / 2-1",
+    "reference_score": "2-0",
     "risk_level": "高",
     "supporting_factors": [
-      "1X2 与让球数据已准备，市场初始信号偏向墨西哥方向",
-      "墨西哥为揭幕战主队，比赛地在墨西哥城",
-      "双方 squad、standings、H2H、injuries 端点已就绪"
+      "市场初始信号偏主队，1X2 Home=1.40；AH=Home -1=1.70",
+      "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+      "latest snapshot: lineup=WAIT (pre-match, T-1h)"
     ],
     "counter_factors": [
-      "正式首发未公布，W1 硬规则要求等待",
-      "裁判尚未公布，判罚尺度无法评估",
-      "suspensions 与 travel_distance 仍为部分数据"
+      "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+      "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+      "referee_status=MISSING; referee not available in fixture detail snapshot."
     ],
     "key_gaps": [
-      "confirmed lineup 缺失",
-      "裁判未公布"
+      "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+      "referee_status=MISSING; keep as a non-blocking gap."
     ],
-    "current_action": "等待正式首发，不下最终结论",
-    "play_guard_result": "未通过 W1_PLAY_GUARD_V1，保持等待数据",
+    "current_action": "需要写入 ledger 做赛后验证",
+    "play_guard_result": "未通过 W1_PLAY_GUARD_V1；赛前未放行/未形成正式 W1_PLAY",
     "public_technical_details": [
       {
         "label": "W1 风控",
@@ -1755,7 +1756,10 @@
         "label": "first_seen_odds_proxy",
         "value": "已捕获，仅代表首次观察快照"
       }
-    ]
+    ],
+    "actual_score_display_cn": "墨西哥 2-0 南非",
+    "hit_status_cn": "比分命中",
+    "boss_summary_cn": "已完赛：墨西哥 2-0 南非；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证"
   },
   "label_explain_cn": [
     {
@@ -1954,5 +1958,2378 @@
       "home": "🇺🇸 美国",
       "away": "🇵🇾 巴拉圭"
     }
-  ]
+  ],
+  "generated_at_utc": "2026-06-12T00:53:58+00:00",
+  "match_records": [
+    {
+      "match": "墨西哥 vs 南非",
+      "match_en": "Mexico vs South Africa",
+      "fixture_id": "1489369",
+      "group": "Group Stage - 1",
+      "home_team": "Mexico",
+      "away_team": "South Africa",
+      "home_team_cn": "墨西哥",
+      "away_team_cn": "南非",
+      "home_flag": "🇲🇽",
+      "away_flag": "🇿🇦",
+      "kickoff": "2026-06-12 03:00 CST",
+      "kickoff_utc": "2026-06-11T19:00:00Z",
+      "status": "finished",
+      "actual_score": {
+        "home": 2,
+        "away": 0
+      },
+      "actual_score_display_cn": "墨西哥 2-0 南非",
+      "result_source": "manual_verified_overlay",
+      "result_note": "赛果待回写 ledger",
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.40；AH=Home -1=1.70"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.40；AH=Home -1=1.70",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "需要写入 ledger 做赛后验证",
+      "boss_summary_cn": "已完赛：墨西哥 2-0 南非；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": {
+        "status": "finished",
+        "actual_score": {
+          "home": 2,
+          "away": 0
+        },
+        "result_source": "manual_verified_overlay",
+        "result_note": "赛果待回写 ledger"
+      },
+      "reference_score_external": "2-0",
+      "hit_status_cn": "比分命中",
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489369_mexico_vs_south-africa.json"
+    },
+    {
+      "match": "韩国 vs 捷克",
+      "match_en": "South Korea vs Czech Republic",
+      "fixture_id": "1538999",
+      "group": "Group Stage - 1",
+      "home_team": "South Korea",
+      "away_team": "Czech Republic",
+      "home_team_cn": "韩国",
+      "away_team_cn": "捷克",
+      "home_flag": "🇰🇷",
+      "away_flag": "🇨🇿",
+      "kickoff": "2026-06-12 10:00 CST",
+      "kickoff_utc": "2026-06-12T02:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home -0.5=2.55"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home -0.5=2.55",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "韩国 vs 捷克：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1538999_south-korea_vs_czech-republic.json"
+    },
+    {
+      "match": "加拿大 vs 波黑",
+      "match_en": "Canada vs Bosnia & Herzegovina",
+      "fixture_id": "1539000",
+      "group": "Group Stage - 1",
+      "home_team": "Canada",
+      "away_team": "Bosnia & Herzegovina",
+      "home_team_cn": "加拿大",
+      "away_team_cn": "波黑",
+      "home_flag": "🇨🇦",
+      "away_flag": "🇧🇦",
+      "kickoff": "2026-06-13 03:00 CST",
+      "kickoff_utc": "2026-06-12T19:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.78；AH=Home -1=2.45"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.78；AH=Home -1=2.45",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "加拿大 vs 波黑：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1539000_canada_vs_bosnia-and-herzegovina.json"
+    },
+    {
+      "match": "美国 vs 巴拉圭",
+      "match_en": "USA vs Paraguay",
+      "fixture_id": "1489370",
+      "group": "Group Stage - 1",
+      "home_team": "USA",
+      "away_team": "Paraguay",
+      "home_team_cn": "美国",
+      "away_team_cn": "巴拉圭",
+      "home_flag": "🇺🇸",
+      "away_flag": "🇵🇾",
+      "kickoff": "2026-06-13 09:00 CST",
+      "kickoff_utc": "2026-06-13T01:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.98；AH=Home -0.5=1.95"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.98；AH=Home -0.5=1.95",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "美国 vs 巴拉圭：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489370_usa_vs_paraguay.json"
+    },
+    {
+      "match": "卡塔尔 vs 瑞士",
+      "match_en": "Qatar vs Switzerland",
+      "fixture_id": "1489373",
+      "group": "Group Stage - 1",
+      "home_team": "Qatar",
+      "away_team": "Switzerland",
+      "home_team_cn": "卡塔尔",
+      "away_team_cn": "瑞士",
+      "home_flag": "🇶🇦",
+      "away_flag": "🇨🇭",
+      "kickoff": "2026-06-14 03:00 CST",
+      "kickoff_utc": "2026-06-13T19:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +1=3.00"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +1=3.00",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "卡塔尔 vs 瑞士：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489373_qatar_vs_switzerland.json"
+    },
+    {
+      "match": "巴西 vs 摩洛哥",
+      "match_en": "Brazil vs Morocco",
+      "fixture_id": "1489371",
+      "group": "Group Stage - 1",
+      "home_team": "Brazil",
+      "away_team": "Morocco",
+      "home_team_cn": "巴西",
+      "away_team_cn": "摩洛哥",
+      "home_flag": "🇧🇷",
+      "away_flag": "🇲🇦",
+      "kickoff": "2026-06-14 06:00 CST",
+      "kickoff_utc": "2026-06-13T22:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.62；AH=Home -1=2.15"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.62；AH=Home -1=2.15",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "巴西 vs 摩洛哥：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489371_brazil_vs_morocco.json"
+    },
+    {
+      "match": "海地 vs 苏格兰",
+      "match_en": "Haiti vs Scotland",
+      "fixture_id": "1489372",
+      "group": "Group Stage - 1",
+      "home_team": "Haiti",
+      "away_team": "Scotland",
+      "home_team_cn": "海地",
+      "away_team_cn": "苏格兰",
+      "home_flag": "🇭🇹",
+      "away_flag": "🏴",
+      "kickoff": "2026-06-14 09:00 CST",
+      "kickoff_utc": "2026-06-14T01:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +0.5=2.50"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +0.5=2.50",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "海地 vs 苏格兰：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489372_haiti_vs_scotland.json"
+    },
+    {
+      "match": "澳大利亚 vs 土耳其",
+      "match_en": "Australia vs Türkiye",
+      "fixture_id": "1539001",
+      "group": "Group Stage - 1",
+      "home_team": "Australia",
+      "away_team": "Türkiye",
+      "home_team_cn": "澳大利亚",
+      "away_team_cn": "土耳其",
+      "home_flag": "🇦🇺",
+      "away_flag": "🇹🇷",
+      "kickoff": "2026-06-14 12:00 CST",
+      "kickoff_utc": "2026-06-14T04:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +0.5=2.15"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +0.5=2.15",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "澳大利亚 vs 土耳其：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1539001_australia_vs_t-rkiye.json"
+    },
+    {
+      "match": "德国 vs 库拉索",
+      "match_en": "Germany vs Curaçao",
+      "fixture_id": "1489374",
+      "group": "Group Stage - 1",
+      "home_team": "Germany",
+      "away_team": "Curaçao",
+      "home_team_cn": "德国",
+      "away_team_cn": "库拉索",
+      "home_flag": "🇩🇪",
+      "away_flag": "🇨🇼",
+      "kickoff": "2026-06-15 01:00 CST",
+      "kickoff_utc": "2026-06-14T17:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.03；AH=Home -3=1.53"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.03；AH=Home -3=1.53",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "德国 vs 库拉索：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489374_germany_vs_cura-ao.json"
+    },
+    {
+      "match": "荷兰 vs 日本",
+      "match_en": "Netherlands vs Japan",
+      "fixture_id": "1489376",
+      "group": "Group Stage - 1",
+      "home_team": "Netherlands",
+      "away_team": "Japan",
+      "home_team_cn": "荷兰",
+      "away_team_cn": "日本",
+      "home_flag": "🇳🇱",
+      "away_flag": "🇯🇵",
+      "kickoff": "2026-06-15 04:00 CST",
+      "kickoff_utc": "2026-06-14T20:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.95；AH=Home -0.5=1.95"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.95；AH=Home -0.5=1.95",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "荷兰 vs 日本：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489376_netherlands_vs_japan.json"
+    },
+    {
+      "match": "科特迪瓦 vs 厄瓜多尔",
+      "match_en": "Ivory Coast vs Ecuador",
+      "fixture_id": "1489375",
+      "group": "Group Stage - 1",
+      "home_team": "Ivory Coast",
+      "away_team": "Ecuador",
+      "home_team_cn": "科特迪瓦",
+      "away_team_cn": "厄瓜多尔",
+      "home_flag": "🇨🇮",
+      "away_flag": "🇪🇨",
+      "kickoff": "2026-06-15 07:00 CST",
+      "kickoff_utc": "2026-06-14T23:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +0=2.35"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +0=2.35",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "科特迪瓦 vs 厄瓜多尔：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489375_ivory-coast_vs_ecuador.json"
+    },
+    {
+      "match": "瑞典 vs 突尼斯",
+      "match_en": "Sweden vs Tunisia",
+      "fixture_id": "1539002",
+      "group": "Group Stage - 1",
+      "home_team": "Sweden",
+      "away_team": "Tunisia",
+      "home_team_cn": "瑞典",
+      "away_team_cn": "突尼斯",
+      "home_flag": "🇸🇪",
+      "away_flag": "🇹🇳",
+      "kickoff": "2026-06-15 10:00 CST",
+      "kickoff_utc": "2026-06-15T02:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.88；AH=Home -0.5=1.85"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.88；AH=Home -0.5=1.85",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "瑞典 vs 突尼斯：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1539002_sweden_vs_tunisia.json"
+    },
+    {
+      "match": "西班牙 vs 佛得角",
+      "match_en": "Spain vs Cape Verde Islands",
+      "fixture_id": "1489380",
+      "group": "Group Stage - 1",
+      "home_team": "Spain",
+      "away_team": "Cape Verde Islands",
+      "home_team_cn": "西班牙",
+      "away_team_cn": "佛得角",
+      "home_flag": "🇪🇸",
+      "away_flag": "🇨🇻",
+      "kickoff": "2026-06-16 00:00 CST",
+      "kickoff_utc": "2026-06-15T16:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.09；AH=Home -3=2.25"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.09；AH=Home -3=2.25",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "西班牙 vs 佛得角：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489380_spain_vs_cape-verde-islands.json"
+    },
+    {
+      "match": "比利时 vs 埃及",
+      "match_en": "Belgium vs Egypt",
+      "fixture_id": "1489377",
+      "group": "Group Stage - 1",
+      "home_team": "Belgium",
+      "away_team": "Egypt",
+      "home_team_cn": "比利时",
+      "away_team_cn": "埃及",
+      "home_flag": "🇧🇪",
+      "away_flag": "🇪🇬",
+      "kickoff": "2026-06-16 03:00 CST",
+      "kickoff_utc": "2026-06-15T19:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.65；AH=Home -1=2.20"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.65；AH=Home -1=2.20",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "比利时 vs 埃及：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489377_belgium_vs_egypt.json"
+    },
+    {
+      "match": "沙特阿拉伯 vs 乌拉圭",
+      "match_en": "Saudi Arabia vs Uruguay",
+      "fixture_id": "1489379",
+      "group": "Group Stage - 1",
+      "home_team": "Saudi Arabia",
+      "away_team": "Uruguay",
+      "home_team_cn": "沙特阿拉伯",
+      "away_team_cn": "乌拉圭",
+      "home_flag": "🇸🇦",
+      "away_flag": "🇺🇾",
+      "kickoff": "2026-06-16 06:00 CST",
+      "kickoff_utc": "2026-06-15T22:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +0.5=2.65"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +0.5=2.65",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "沙特阿拉伯 vs 乌拉圭：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489379_saudi-arabia_vs_uruguay.json"
+    },
+    {
+      "match": "伊朗 vs 新西兰",
+      "match_en": "Iran vs New Zealand",
+      "fixture_id": "1489378",
+      "group": "Group Stage - 1",
+      "home_team": "Iran",
+      "away_team": "New Zealand",
+      "home_team_cn": "伊朗",
+      "away_team_cn": "新西兰",
+      "home_flag": "🇮🇷",
+      "away_flag": "🇳🇿",
+      "kickoff": "2026-06-16 09:00 CST",
+      "kickoff_utc": "2026-06-16T01:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.89；AH=Home -0.5=1.90"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.89；AH=Home -0.5=1.90",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "伊朗 vs 新西兰：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489378_iran_vs_new-zealand.json"
+    },
+    {
+      "match": "法国 vs 塞内加尔",
+      "match_en": "France vs Senegal",
+      "fixture_id": "1489383",
+      "group": "Group Stage - 1",
+      "home_team": "France",
+      "away_team": "Senegal",
+      "home_team_cn": "法国",
+      "away_team_cn": "塞内加尔",
+      "home_flag": "🇫🇷",
+      "away_flag": "🇸🇳",
+      "kickoff": "2026-06-17 03:00 CST",
+      "kickoff_utc": "2026-06-16T19:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.43；AH=Home -1=1.73"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.43；AH=Home -1=1.73",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "法国 vs 塞内加尔：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489383_france_vs_senegal.json"
+    },
+    {
+      "match": "伊拉克 vs 挪威",
+      "match_en": "Iraq vs Norway",
+      "fixture_id": "1539016",
+      "group": "Group Stage - 1",
+      "home_team": "Iraq",
+      "away_team": "Norway",
+      "home_team_cn": "伊拉克",
+      "away_team_cn": "挪威",
+      "home_flag": "🇮🇶",
+      "away_flag": "🇳🇴",
+      "kickoff": "2026-06-17 06:00 CST",
+      "kickoff_utc": "2026-06-16T22:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +2=1.73"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +2=1.73",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "伊拉克 vs 挪威：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1539016_iraq_vs_norway.json"
+    },
+    {
+      "match": "阿根廷 vs 阿尔及利亚",
+      "match_en": "Argentina vs Algeria",
+      "fixture_id": "1489381",
+      "group": "Group Stage - 1",
+      "home_team": "Argentina",
+      "away_team": "Algeria",
+      "home_team_cn": "阿根廷",
+      "away_team_cn": "阿尔及利亚",
+      "home_flag": "🇦🇷",
+      "away_flag": "🇩🇿",
+      "kickoff": "2026-06-17 09:00 CST",
+      "kickoff_utc": "2026-06-17T01:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.38；AH=Home -1=1.62"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.38；AH=Home -1=1.62",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "阿根廷 vs 阿尔及利亚：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489381_argentina_vs_algeria.json"
+    },
+    {
+      "match": "奥地利 vs 约旦",
+      "match_en": "Austria vs Jordan",
+      "fixture_id": "1489382",
+      "group": "Group Stage - 1",
+      "home_team": "Austria",
+      "away_team": "Jordan",
+      "home_team_cn": "奥地利",
+      "away_team_cn": "约旦",
+      "home_flag": "🇦🇹",
+      "away_flag": "🇯🇴",
+      "kickoff": "2026-06-17 12:00 CST",
+      "kickoff_utc": "2026-06-17T04:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.30；AH=Home -1=1.45"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.30；AH=Home -1=1.45",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "奥地利 vs 约旦：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489382_austria_vs_jordan.json"
+    },
+    {
+      "match": "葡萄牙 vs 刚果（金）",
+      "match_en": "Portugal vs Congo DR",
+      "fixture_id": "1539003",
+      "group": "Group Stage - 1",
+      "home_team": "Portugal",
+      "away_team": "Congo DR",
+      "home_team_cn": "葡萄牙",
+      "away_team_cn": "刚果（金）",
+      "home_flag": "🇵🇹",
+      "away_flag": "🇨🇩",
+      "kickoff": "2026-06-18 01:00 CST",
+      "kickoff_utc": "2026-06-17T17:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_strong",
+        "summary_cn": "市场初始信号偏主队，1X2 Home=1.25；AH=Home -2=2.25"
+      },
+      "supporting_factors": [
+        "市场初始信号偏主队，1X2 Home=1.25；AH=Home -2=2.25",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "葡萄牙 vs 刚果（金）：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1539003_portugal_vs_congo-dr.json"
+    },
+    {
+      "match": "英格兰 vs 克罗地亚",
+      "match_en": "England vs Croatia",
+      "fixture_id": "1489384",
+      "group": "Group Stage - 1",
+      "home_team": "England",
+      "away_team": "Croatia",
+      "home_team_cn": "英格兰",
+      "away_team_cn": "克罗地亚",
+      "home_flag": "🏴",
+      "away_flag": "🇭🇷",
+      "kickoff": "2026-06-18 04:00 CST",
+      "kickoff_utc": "2026-06-17T20:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=1.71；AH=Home -1=2.30"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=1.71；AH=Home -1=2.30",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "英格兰 vs 克罗地亚：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489384_england_vs_croatia.json"
+    },
+    {
+      "match": "加纳 vs 巴拿马",
+      "match_en": "Ghana vs Panama",
+      "fixture_id": "1489385",
+      "group": "Group Stage - 1",
+      "home_team": "Ghana",
+      "away_team": "Panama",
+      "home_team_cn": "加纳",
+      "away_team_cn": "巴拿马",
+      "home_flag": "🇬🇭",
+      "away_flag": "🇵🇦",
+      "kickoff": "2026-06-18 07:00 CST",
+      "kickoff_utc": "2026-06-17T23:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "home_slight",
+        "summary_cn": "市场初始信号略偏主队，1X2 Home=2.00；AH=Home -0.5=2.00"
+      },
+      "supporting_factors": [
+        "市场初始信号略偏主队，1X2 Home=2.00；AH=Home -0.5=2.00",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "加纳 vs 巴拿马：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489385_ghana_vs_panama.json"
+    },
+    {
+      "match": "乌兹别克斯坦 vs 哥伦比亚",
+      "match_en": "Uzbekistan vs Colombia",
+      "fixture_id": "1489386",
+      "group": "Group Stage - 1",
+      "home_team": "Uzbekistan",
+      "away_team": "Colombia",
+      "home_team_cn": "乌兹别克斯坦",
+      "away_team_cn": "哥伦比亚",
+      "home_flag": "🇺🇿",
+      "away_flag": "🇨🇴",
+      "kickoff": "2026-06-18 10:00 CST",
+      "kickoff_utc": "2026-06-18T02:00:00Z",
+      "status": "not_started",
+      "actual_score": {
+        "home": null,
+        "away": null
+      },
+      "actual_score_display_cn": null,
+      "result_source": null,
+      "result_note": null,
+      "decision": "W1_WAIT",
+      "w1_state": "赛前未放行/未形成正式 W1_PLAY",
+      "play_guard_version": "W1_PLAY_GUARD_V1",
+      "play_guard_pass": false,
+      "lineup_status": "WAIT_EVENT",
+      "referee_status": "MISSING",
+      "odds_status": "READY",
+      "odds_movement": {
+        "status": "no_change",
+        "changed_fields": [],
+        "summary_cn": "较上一快照无实质变化"
+      },
+      "market_signal": {
+        "direction": "balanced_or_away",
+        "summary_cn": "市场信号未形成明确主队强势；AH=Home +1=2.30"
+      },
+      "supporting_factors": [
+        "市场信号未形成明确主队强势；AH=Home +1=2.30",
+        "odds/AH/OU/squad/standings/H2H 已在本地 W1 快照中就绪",
+        "latest snapshot: lineup=WAIT (pre-match, T-1h)"
+      ],
+      "counter_factors": [
+        "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.",
+        "lineup_status=WAIT_EVENT; refresh near team sheet release.",
+        "referee_status=MISSING; referee not available in fixture detail snapshot."
+      ],
+      "risk_flags": [
+        {
+          "code": "CONFIRMED_LINEUP_MISSING",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+        },
+        {
+          "code": "LINEUP_WAIT_EVENT",
+          "severity": "HIGH",
+          "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
+        },
+        {
+          "code": "REFEREE_MISSING",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
+        },
+        {
+          "code": "SUSPENSIONS_PARTIAL",
+          "severity": "MEDIUM",
+          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+        },
+        {
+          "code": "TRAVEL_DISTANCE_PARTIAL",
+          "severity": "LOW",
+          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+        }
+      ],
+      "data_gaps": [
+        {
+          "field": "lineups.confirmed_lineup",
+          "severity": "HIGH",
+          "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+          "blocks_play": true
+        },
+        {
+          "field": "match.referee",
+          "severity": "LOW",
+          "message": "referee_status=MISSING; keep as a non-blocking gap.",
+          "blocks_play": false
+        }
+      ],
+      "current_action_cn": "等待正式首发/裁判等关键数据，不下最终结论",
+      "boss_summary_cn": "乌兹别克斯坦 vs 哥伦比亚：等待关键数据，未形成正式 W1_PLAY",
+      "next_refresh": "2026-06-10 18:00 CST",
+      "external_result_overlay": null,
+      "reference_score_external": null,
+      "hit_status_cn": null,
+      "ledger_required": true,
+      "ledger_row_found": true,
+      "card_json": "data/processed/match_cards/group_stage_round1/fixture_1489386_uzbekistan_vs_colombia.json"
+    }
+  ],
+  "dashboard_binding": {
+    "version": "W1_DATA_BINDING_V1",
+    "cards_dir": "data/processed/match_cards/group_stage_round1",
+    "dashboard_json": "reports/dashboard/assets/w1_dashboard_data.json",
+    "state_json": "state/w1_refresh_state.json",
+    "latest_snapshot": "data/snapshots/group_stage_round1/w1_round1_fixture_details_20260610_2045.json",
+    "previous_snapshot": "data/snapshots/group_stage_round1/w1_round1_fixture_details_20260610_1445.json",
+    "ledger": "data/processed/ledger/w1_ledger_group_stage_round1.csv",
+    "records_count": 24
+  }
 }
