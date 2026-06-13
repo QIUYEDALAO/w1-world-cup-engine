@@ -273,8 +273,9 @@ def assert_html(data: dict) -> None:
     for token in required:
         if token not in text:
             fail(f"HTML missing token: {token}")
-    if "fetch(" in text:
-        fail("HTML must not call the original site prediction API")
+    for original_api in ("fetch('/api/predict", 'fetch("/api/predict', "worldcup.youliaoyun.com/api"):
+        if original_api in text:
+            fail("HTML must not call the original site prediction API")
     for extra_section in ("世界杯分组", "晋级规则"):
         if extra_section in text:
             fail(f"HTML must not include extra dashboard section: {extra_section}")

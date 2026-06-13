@@ -470,6 +470,17 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
     def clean_public_text(value: Any) -> str:
         return cn_display_text(value).replace("W1_WAIT", "等待数据")
 
+    def clean_odds_movement_text(value: str) -> str:
+        replacements = {
+            "odds_1x2": "赔率变化",
+            "lineup_status": "首发状态",
+            "referee_status": "裁判信息",
+            "injury_status": "伤停信息",
+        }
+        for src, dst in replacements.items():
+            value = value.replace(src, dst)
+        return value
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -479,6 +490,12 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             message = clean_public_text(gap.get("message") or gap.get("field") or gap)
             clean_gaps.append({"message": message})
         clean_supporting = [clean_public_text(item) for item in row.get("supporting_factors", [])]
+        clean_movement = row.get("odds_movement", {})
+        if "summary_cn" in clean_movement:
+            clean_movement = {**clean_movement, "summary_cn": clean_odds_movement_text(clean_movement["summary_cn"])}
+        if "changed_fields" in clean_movement and isinstance(clean_movement["changed_fields"], list):
+            field_map = {"odds_1x2": "赔率", "lineup_status": "首发", "referee_status": "裁判", "injury_status": "伤停"}
+            clean_movement["changed_fields"] = [field_map.get(f, f) for f in clean_movement["changed_fields"]]
         return {
             "match": row["match"],
             "fixture_id": row["fixture_id"],
@@ -502,7 +519,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "next_update_reason_cn": row["next_update_reason_cn"],
             "is_final_decision": row["is_final_decision"],
             "non_final_disclaimer_cn": row["non_final_disclaimer_cn"],
-            "odds_movement": row["odds_movement"],
+            "odds_movement": clean_movement,
             "market_signal": row["market_signal"],
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,

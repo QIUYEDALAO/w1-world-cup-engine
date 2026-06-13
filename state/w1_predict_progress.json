@@ -1,0 +1,54 @@
+{
+  "schema_version": "w1_predict_progress.v1",
+  "job_id": "none",
+  "status": "idle",
+  "step_index": 1,
+  "step_label": "初始化比赛",
+  "message_cn": "等待开始预测。",
+  "match": {},
+  "steps": [
+    {
+      "index": 1,
+      "label": "初始化比赛",
+      "state": "waiting"
+    },
+    {
+      "index": 2,
+      "label": "读取本地 match card",
+      "state": "waiting"
+    },
+    {
+      "index": 3,
+      "label": "查询赔率",
+      "state": "waiting"
+    },
+    {
+      "index": 4,
+      "label": "查询阵容/首发",
+      "state": "waiting"
+    },
+    {
+      "index": 5,
+      "label": "查询裁判",
+      "state": "waiting"
+    },
+    {
+      "index": 6,
+      "label": "计算参考倾向",
+      "state": "waiting"
+    },
+    {
+      "index": 7,
+      "label": "检查 W1 风控",
+      "state": "waiting"
+    },
+    {
+      "index": 8,
+      "label": "更新 dashboard",
+      "state": "waiting"
+    }
+  ],
+  "error_cn": null,
+  "dashboard_data_path": "reports/dashboard/assets/w1_dashboard_data.json",
+  "updated_at": "2026-06-13 00:00:00 CST"
+}
