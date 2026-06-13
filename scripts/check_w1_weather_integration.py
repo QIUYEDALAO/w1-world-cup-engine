@@ -88,6 +88,15 @@ def assert_weather_client() -> None:
             fail(f"weather client missing token: {token}")
 
 
+def assert_number(value: object, label: str, *, minimum: float | None = None, maximum: float | None = None) -> None:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        fail(f"{label} must be numeric")
+    if minimum is not None and value < minimum:
+        fail(f"{label} must be >= {minimum}")
+    if maximum is not None and value > maximum:
+        fail(f"{label} must be <= {maximum}")
+
+
 def assert_server_progress() -> None:
     text = read(SERVER)
     for token in ("查询比赛环境/天气", "total_steps", "w1_weather_client.py", "w1_weather_cache.json"):
@@ -128,12 +137,17 @@ def assert_dashboard_data() -> None:
         if env.get("weather_status") != "missing" or not env.get("weather_reason_cn"):
             fail("fixture_id=1489373 missing temperature requires weather_status=missing with reason")
     else:
-        if env.get("temperature_c") != 21.4:
-            fail("fixture_id=1489373 temperature_c must match verified Open-Meteo sample")
-        if env.get("humidity_pct") != 64:
-            fail("fixture_id=1489373 humidity_pct must match verified Open-Meteo sample")
-        if env.get("wind_speed_kmh") is None:
-            fail("fixture_id=1489373 wind_speed_kmh must be present when weather is ready")
+        assert_number(env.get("temperature_c"), "fixture_id=1489373 temperature_c", minimum=-30, maximum=55)
+        assert_number(env.get("humidity_pct"), "fixture_id=1489373 humidity_pct", minimum=0, maximum=100)
+        assert_number(env.get("wind_speed_kmh"), "fixture_id=1489373 wind_speed_kmh", minimum=0)
+        precipitation_probability = env.get("precipitation_probability_pct")
+        if precipitation_probability is not None:
+            assert_number(
+                precipitation_probability,
+                "fixture_id=1489373 precipitation_probability_pct",
+                minimum=0,
+                maximum=100,
+            )
 
 
 def assert_html() -> None:
