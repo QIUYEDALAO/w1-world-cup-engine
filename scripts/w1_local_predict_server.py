@@ -27,6 +27,7 @@ HOST = "127.0.0.1"
 PORT = int(os.environ.get("W1_DASHBOARD_PORT", "8765"))
 PROGRESS = ROOT / "state/w1_predict_progress.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
+LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
 WEATHER_CLIENT = ROOT / "scripts/w1_weather_client.py"
@@ -35,17 +36,19 @@ CARDS_DIR = ROOT / "data/processed/match_cards/group_stage_round1"
 WATCHER = ROOT / "scripts/w1_watcher.sh"
 ENV_KEY_NAME = "APIFOOTBALL_" + "KEY"
 API_FOOTBALL_BASE = "https://v" + "3.football.api-sports.io"
+WEATHER_STEP_DETAIL = "实时请求天气 API/Open-Meteo"
 
 STEPS = [
     "初始化比赛",
-    "读取本地 match card",
-    "查询赔率",
-    "查询阵容/首发",
-    "查询裁判",
+    "实时请求赔率 API",
+    "实时请求首发 API",
+    "实时请求裁判/fixture detail API",
+    "实时请求伤停/停赛 API",
     "查询比赛环境/天气",
-    "计算参考倾向",
-    "检查 W1 风控",
-    "更新 dashboard",
+    "写入 match card runtime",
+    "重算首发/战术/风控",
+    "重建 dashboard 数据",
+    "返回 progress",
 ]
 
 _job_lock = threading.Lock()
@@ -114,6 +117,83 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     tmp.replace(path)
+
+
+def api_football_get(endpoint: str, fixture_id: str, env: dict[str, str]) -> tuple[dict[str, Any] | None, str | None]:
+    key = env.get(ENV_KEY_NAME)
+    if not key:
+        return None, "实时 API 未配置，使用缓存/兜底数据。"
+    url = f"{API_FOOTBALL_BASE}{endpoint}?fixture={fixture_id}"
+    req = request.Request(url, headers={"x-apisports-key": key})
+    try:
+        with request.urlopen(req, timeout=20) as response:
+            return json.loads(response.read().decode("utf-8")), None
+    except Exception as exc:  # noqa: BLE001 - runtime API failures become module status
+        return None, f"实时 API 失败，使用缓存/兜底数据：{exc}"
+
+
+def live_module(
+    *,
+    source: str,
+    status: str,
+    message_cn: str,
+    requested: bool = True,
+    fetched_at: str | None = None,
+) -> dict[str, Any]:
+    return {
+        "requested": requested,
+        "source": source,
+        "status": status,
+        "fetched_at": fetched_at or now_ts(),
+        "message_cn": message_cn,
+    }
+
+
+def new_live_refresh(fixture_id: Any) -> dict[str, Any]:
+    base = live_module(source="missing", status="skipped", message_cn="尚未请求。", fetched_at=None)
+    return {
+        "requested_at": now_ts(),
+        "fixture_id": str(fixture_id or ""),
+        "overall_status": "partial",
+        "modules": {
+            "odds": dict(base),
+            "lineups": dict(base),
+            "referee": dict(base),
+            "weather": dict(base, source="live_api"),
+            "injuries": dict(base),
+        },
+    }
+
+
+def finalise_live_refresh(live_refresh: dict[str, Any]) -> dict[str, Any]:
+    modules = live_refresh.get("modules", {})
+    statuses = [str(module.get("status")) for module in modules.values() if module.get("requested")]
+    if statuses and all(status == "success" for status in statuses):
+        overall = "success"
+    elif statuses and any(status == "success" for status in statuses):
+        overall = "partial"
+    else:
+        overall = "failed"
+    live_refresh["overall_status"] = overall
+    return live_refresh
+
+
+def write_live_refresh_state(fixture_id: str, live_refresh: dict[str, Any]) -> None:
+    state = load_json(LIVE_REFRESH_STATE) if LIVE_REFRESH_STATE.is_file() else {"schema_version": "w1_live_refresh_state.v1", "fixtures": {}}
+    state.setdefault("schema_version", "w1_live_refresh_state.v1")
+    state.setdefault("fixtures", {})
+    state["fixtures"][str(fixture_id)] = live_refresh
+    write_json(LIVE_REFRESH_STATE, state)
+
+
+def write_live_refresh_to_card(fixture_id: str, live_refresh: dict[str, Any]) -> bool:
+    path = card_path_for_fixture_id(fixture_id)
+    if not path:
+        return False
+    card = load_json(path)
+    card["live_refresh"] = live_refresh
+    write_json(path, card)
+    return True
 
 
 def match_records() -> list[dict[str, Any]]:
@@ -206,26 +286,21 @@ def normalise_api_player(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def fetch_api_football_lineups(fixture_id: str, env: dict[str, str]) -> dict[str, Any] | None:
-    key = env.get(ENV_KEY_NAME)
-    if not key:
-        return None
-    url = f"{API_FOOTBALL_BASE}/fixtures/lineups?fixture={fixture_id}"
-    req = request.Request(url, headers={"x-apisports-key": key})
-    try:
-        with request.urlopen(req, timeout=20) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except Exception:
-        return None
+def fetch_live_lineups_from_api(fixture_id: str, env: dict[str, str]) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+    payload, error = api_football_get("/fixtures/lineups", fixture_id, env)
+    if error:
+        return None, live_module(source="missing", status="skipped", message_cn=error)
+    if not payload:
+        return None, live_module(source="missing", status="empty", message_cn="实时 API 暂无首发，使用缓存/兜底数据。")
     rows = payload.get("response") or []
     if len(rows) < 2:
-        return None
+        return None, live_module(source="missing", status="empty", message_cn="实时 API 暂无完整首发，使用缓存/兜底数据。")
 
     home, away = rows[0], rows[1]
     home_starting = [normalise_api_player(row) for row in home.get("startXI", [])]
     away_starting = [normalise_api_player(row) for row in away.get("startXI", [])]
     if len(home_starting) < 11 or len(away_starting) < 11:
-        return None
+        return None, live_module(source="missing", status="empty", message_cn="实时 API 首发人数不足，使用缓存/兜底数据。")
 
     return {
         "fixture_id": fixture_id,
@@ -238,7 +313,12 @@ def fetch_api_football_lineups(fixture_id: str, env: dict[str, str]) -> dict[str
         "away_starting_players": away_starting,
         "home_bench_players": [normalise_api_player(row) for row in home.get("substitutes", [])],
         "away_bench_players": [normalise_api_player(row) for row in away.get("substitutes", [])],
-    }
+    }, live_module(source="live_api", status="success", message_cn="实时 API 成功，首发已确认。")
+
+
+def fetch_api_football_lineups(fixture_id: str, env: dict[str, str]) -> dict[str, Any] | None:
+    lineups, module = fetch_live_lineups_from_api(fixture_id, env)
+    return lineups if module.get("source") == "live_api" and module.get("status") == "success" else None
 
 
 def write_lineups_to_card(fixture_id: str, lineups: dict[str, Any]) -> bool:
@@ -290,23 +370,70 @@ def write_lineups_to_card(fixture_id: str, lineups: dict[str, Any]) -> bool:
     return True
 
 
+def refresh_odds_module(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any]:
+    fixture_id = str(match.get("fixture_id") or "")
+    if not fixture_id:
+        return live_module(source="missing", status="error", message_cn="缺少 fixture_id，无法请求赔率。")
+    payload, error = api_football_get("/odds", fixture_id, env)
+    if error:
+        return live_module(source="cache", status="skipped", message_cn="实时 API 失败，使用缓存赔率。")
+    rows = (payload or {}).get("response") or []
+    if not rows:
+        return live_module(source="cache", status="empty", message_cn="实时 API 暂无赔率，使用缓存赔率。")
+    return live_module(source="live_api", status="success", message_cn=f"实时 API 成功，赔率返回 {len(rows)} 条。")
+
+
 def refresh_lineups(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any]:
     fixture_id = str(match.get("fixture_id") or "")
     if not fixture_id:
-        return {"status": "missing", "message_cn": "缺少 fixture_id，无法刷新首发。"}
-    lineups = fetch_api_football_lineups(fixture_id, env) or verified_lineup_payload(fixture_id)
+        return live_module(source="missing", status="error", message_cn="缺少 fixture_id，无法刷新首发。")
+    lineups, module = fetch_live_lineups_from_api(fixture_id, env)
     if not lineups:
-        return {"status": "missing", "message_cn": "首发未公布，保留上一版。"}
+        fallback = verified_lineup_payload(fixture_id)
+        if fallback:
+            lineups = fallback
+            module = live_module(source="verified_fallback", status=module.get("status", "skipped"), message_cn=f"{module.get('message_cn', '实时 API 暂无首发')} 使用兜底数据。")
+        else:
+            module = live_module(source="cache", status=module.get("status", "empty"), message_cn=f"{module.get('message_cn', '实时 API 暂无首发')} 使用缓存，保留上一版。")
+    if not lineups:
+        return module
     if not write_lineups_to_card(fixture_id, lineups):
-        return {"status": "missing", "message_cn": "未找到对应 match card，首发未写入。"}
-    return {
-        "status": "ready",
-        "message_cn": (
-            f"首发已确认：{lineups.get('home_team') or match.get('home_team')} "
-            f"{lineups.get('home_formation')}，{lineups.get('away_team') or match.get('away_team')} "
-            f"{lineups.get('away_formation')}。"
-        ),
-    }
+        return live_module(source=module.get("source", "missing"), status="error", message_cn="未找到对应 match card，首发未写入。")
+    module["message_cn"] = (
+        f"{module.get('message_cn', '')} 首发已写入：{lineups.get('home_team') or match.get('home_team')} "
+        f"{lineups.get('home_formation')}，{lineups.get('away_team') or match.get('away_team')} "
+        f"{lineups.get('away_formation')}。"
+    ).strip()
+    return module
+
+
+def refresh_referee_module(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any]:
+    fixture_id = str(match.get("fixture_id") or "")
+    if not fixture_id:
+        return live_module(source="missing", status="error", message_cn="缺少 fixture_id，无法请求裁判。")
+    payload, error = api_football_get("/fixtures", fixture_id, env)
+    if error:
+        return live_module(source="cache", status="skipped", message_cn="实时 API 失败，使用缓存裁判信息。")
+    rows = (payload or {}).get("response") or []
+    referee = None
+    if rows:
+        referee = (rows[0].get("fixture") or {}).get("referee")
+    if referee:
+        return live_module(source="live_api", status="success", message_cn=f"实时 API 成功，裁判：{referee}。")
+    return live_module(source="missing", status="empty", message_cn="实时 API 暂无裁判。")
+
+
+def refresh_injuries_module(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any]:
+    fixture_id = str(match.get("fixture_id") or "")
+    if not fixture_id:
+        return live_module(source="missing", status="error", message_cn="缺少 fixture_id，无法请求伤停。")
+    payload, error = api_football_get("/injuries", fixture_id, env)
+    if error:
+        return live_module(source="cache", status="skipped", message_cn="实时 API 失败，使用缓存伤停信息。")
+    rows = (payload or {}).get("response") or []
+    if rows:
+        return live_module(source="live_api", status="success", message_cn=f"实时 API 成功，伤停返回 {len(rows)} 条。")
+    return live_module(source="missing", status="empty", message_cn="实时 API 暂无伤停。")
 
 
 def resolve_predict_match(payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
@@ -379,6 +506,14 @@ def update_weather_cache(match: dict[str, Any], env: dict[str, str]) -> dict[str
     return cache["fixtures"][str(selected["fixture_id"])]
 
 
+def refresh_weather_module(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any]:
+    weather = update_weather_cache(match, env)
+    if (weather or {}).get("weather_status") == "ready":
+        return live_module(source="live_api", status="success", message_cn="实时 API 成功，天气已接入。")
+    reason = (weather or {}).get("weather_reason_cn") or "天气查询暂缺，保留上一版。"
+    return live_module(source="live_api", status="error", message_cn=reason)
+
+
 def run_command(cmd: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(cmd, cwd=ROOT, env=env, text=True, capture_output=True, timeout=180)
 
@@ -386,6 +521,8 @@ def run_command(cmd: list[str], env: dict[str, str]) -> subprocess.CompletedProc
 def run_prediction(job_id: str, match: dict[str, Any]) -> None:
     global _active_job
     env = os.environ.copy()
+    fixture_id = str(match.get("fixture_id") or "")
+    live_refresh = new_live_refresh(fixture_id)
     try:
         for idx, label in enumerate(STEPS, start=1):
             write_progress(
@@ -399,48 +536,9 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
             )
             time.sleep(0.25)
 
-            selected_for_step = find_match_by_fixture_id(match.get("fixture_id"))
-            if not selected_for_step and not match.get("fixture_id"):
-                selected_for_step = find_match_by_name(match.get("home_team_cn", ""), match.get("away_team_cn", ""))
-            if idx == 2 and not selected_for_step:
-                write_progress(
-                    progress_payload(
-                        job_id=job_id,
-                        status="running",
-                        step_index=idx,
-                        message="本地比赛记录暂缺，保留上一版。",
-                        match=match,
-                    )
-                )
-
             if idx == 3:
-                if env.get("W1_LOCAL_REAL_REFRESH") == "1" and env.get(ENV_KEY_NAME):
-                    write_progress(
-                        progress_payload(
-                            job_id=job_id,
-                            status="running",
-                            step_index=idx,
-                            message="正在通过 W1 watcher 安全入口刷新数据…",
-                            match=match,
-                        )
-                    )
-                    watcher_env = env.copy()
-                    result = run_command([str(WATCHER)], watcher_env)
-                    if result.returncode != 0:
-                        raise RuntimeError("外部数据刷新失败，数据暂缺，保留上一版。")
-                else:
-                    write_progress(
-                        progress_payload(
-                            job_id=job_id,
-                            status="running",
-                            step_index=idx,
-                            message="使用本地赔率快照，未触发外部刷新。",
-                            match=match,
-                        )
-                    )
-
-            if idx == 4:
                 lineup_result = refresh_lineups(match, env)
+                live_refresh["modules"]["lineups"] = lineup_result
                 write_progress(
                     progress_payload(
                         job_id=job_id,
@@ -451,22 +549,35 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                     )
                 )
 
+            if idx == 2:
+                live_refresh["modules"]["odds"] = refresh_odds_module(match, env)
+                write_progress(progress_payload(job_id=job_id, status="running", step_index=idx, message=live_refresh["modules"]["odds"]["message_cn"], match=match))
+
+            if idx == 4:
+                live_refresh["modules"]["referee"] = refresh_referee_module(match, env)
+                write_progress(progress_payload(job_id=job_id, status="running", step_index=idx, message=live_refresh["modules"]["referee"]["message_cn"], match=match))
+
+            if idx == 5:
+                live_refresh["modules"]["injuries"] = refresh_injuries_module(match, env)
+                write_progress(progress_payload(job_id=job_id, status="running", step_index=idx, message=live_refresh["modules"]["injuries"]["message_cn"], match=match))
+
             if idx == 6:
-                weather = update_weather_cache(match, env)
-                weather_status = (weather or {}).get("weather_status")
-                if weather_status == "ready":
-                    message = "比赛环境/天气查询完成。"
-                else:
-                    message = "比赛环境/天气暂缺，保留上一版。"
+                live_refresh["modules"]["weather"] = refresh_weather_module(match, env)
                 write_progress(
                     progress_payload(
                         job_id=job_id,
                         status="running",
                         step_index=idx,
-                        message=message,
+                        message=live_refresh["modules"]["weather"]["message_cn"],
                         match=match,
                     )
                 )
+
+            if idx == 7:
+                finalise_live_refresh(live_refresh)
+                write_live_refresh_state(fixture_id, live_refresh)
+                write_live_refresh_to_card(fixture_id, live_refresh)
+                write_progress(progress_payload(job_id=job_id, status="running", step_index=idx, message="本次实时刷新状态已写入 match card runtime。", match=match))
 
         build = run_command(["python3", str(BUILD_SCRIPT)], env)
         if build.returncode != 0:
@@ -480,7 +591,7 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                 job_id=job_id,
                 status="done",
                 step_index=len(STEPS),
-                message="查询完成，已更新 dashboard。",
+                message=f"查询完成：实时刷新 {live_refresh.get('overall_status')}，已更新 dashboard。",
                 match=progress_match(selected, match.get("stage_cn", "")) if selected else match,
             )
         )

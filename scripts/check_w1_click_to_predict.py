@@ -87,13 +87,20 @@ def assert_server() -> None:
         "未找到对应比赛 fixture_id",
         "payload.get(\"fixture_id\")",
         "current_match",
-        "fetch_api_football_lineups",
+        "fetch_live_lineups_from_api",
         "fixtures/lineups",
         "write_lineups_to_card",
         "refresh_lineups",
+        "live_refresh",
+        "verified_fallback",
+        "实时 API 未配置",
     ):
         if token not in text:
             fail(f"server missing fixture_id priority token: {token}")
+    fallback_idx = text.find("verified_lineup_payload(fixture_id)")
+    fallback_block = text[fallback_idx:fallback_idx + 700] if fallback_idx >= 0 else ""
+    if "source=\"live_api\"" in fallback_block or "source='live_api'" in fallback_block:
+        fail("verified fallback must not be marked as live_api success")
     fixture_branch = re.search(
         r"if fixture_id:.*?find_match_by_fixture_id\(fixture_id\).*?return progress_match",
         text,
@@ -127,14 +134,20 @@ def assert_dashboard() -> None:
         "fetch('/dashboard-data'",
         "查询进度",
         "初始化比赛",
-        "读取本地 match card",
-        "查询赔率",
-        "查询阵容/首发",
-        "查询裁判",
+        "实时请求赔率 API",
+        "实时请求首发 API",
+        "实时请求裁判/fixture detail API",
+        "实时请求伤停/停赛 API",
+        "实时请求天气 API/Open-Meteo",
         "查询比赛环境/天气",
-        "计算参考倾向",
-        "检查 W1 风控",
-        "更新 dashboard",
+        "写入 match card runtime",
+        "重算首发/战术/风控",
+        "重建 dashboard 数据",
+        "返回 progress",
+        "本次实时刷新",
+        "实时 API 成功",
+        "使用缓存",
+        "使用兜底数据",
         "数据暂缺，保留上一版",
         "fixture_id:fixtureId",
         "const selectedMatch=selectedRecord",
@@ -153,8 +166,8 @@ def assert_progress_schema() -> None:
         if key not in data:
             fail(f"progress missing key: {key}")
     steps = data.get("steps", [])
-    if data.get("total_steps") != 9 or len(steps) != 9:
-        fail("progress must contain 9 steps")
+    if data.get("total_steps") != 10 or len(steps) != 10:
+        fail("progress must contain 10 steps")
     if "查询比赛环境/天气" not in [step.get("label") for step in steps]:
         fail("progress must include weather/environment step")
 
@@ -246,6 +259,17 @@ def assert_fixture_id_smoke() -> None:
                         fail("fixture_id=1489373 lineup_effect.status must be ready after smoke")
                     if qatar.get("tactical_effect", {}).get("status") != "ready":
                         fail("fixture_id=1489373 tactical_effect.status must be ready after smoke")
+                    live_refresh = qatar.get("live_refresh", {})
+                    lineups = live_refresh.get("modules", {}).get("lineups", {})
+                    for key in ("source", "status", "fetched_at", "message_cn"):
+                        if key not in lineups:
+                            fail(f"fixture_id=1489373 live_refresh.modules.lineups missing {key}")
+                    if lineups.get("source") == "live_api" and lineups.get("status") == "success":
+                        fail("fixture_id=1489373 no-key smoke must not masquerade fallback as live_api success")
+                    if lineups.get("source") != "verified_fallback":
+                        fail(f"fixture_id=1489373 no-key smoke must use verified_fallback, got {lineups.get('source')}")
+                    if "使用兜底数据" not in str(lineups.get("message_cn")):
+                        fail("fixture_id=1489373 fallback module must explain 使用兜底数据")
                     return
             time.sleep(0.1)
         if saw_qatar:
@@ -269,8 +293,8 @@ def main() -> int:
         assert_server()
         assert_runner()
         assert_dashboard()
-        assert_progress_schema()
         assert_fixture_id_smoke()
+        assert_progress_schema()
     except (CheckError, json.JSONDecodeError) as exc:
         print(f"W1 click-to-predict check FAIL: {exc}", file=sys.stderr)
         return 1

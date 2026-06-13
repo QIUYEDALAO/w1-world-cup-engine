@@ -18,6 +18,7 @@ DASHBOARD_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 DASHBOARD_HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 STATE_JSON = ROOT / "state/w1_refresh_state.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
+LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
 SNAPSHOT_DIR = ROOT / "data/snapshots/group_stage_round1"
 LEDGER_CANDIDATES = [
@@ -292,6 +293,35 @@ def weather_cache() -> dict[str, dict[str, Any]]:
         return {}
     data = read_json(WEATHER_CACHE)
     return {str(fid): row for fid, row in data.get("fixtures", {}).items()}
+
+
+def live_refresh_cache() -> dict[str, dict[str, Any]]:
+    if not LIVE_REFRESH_STATE.is_file():
+        return {}
+    data = read_json(LIVE_REFRESH_STATE)
+    return {str(fid): row for fid, row in data.get("fixtures", {}).items()}
+
+
+def default_live_refresh(fid: str) -> dict[str, Any]:
+    module = {
+        "requested": False,
+        "source": "missing",
+        "status": "skipped",
+        "fetched_at": None,
+        "message_cn": "尚未点击开始预测。",
+    }
+    return {
+        "requested_at": None,
+        "fixture_id": fid,
+        "overall_status": "failed",
+        "modules": {
+            "odds": dict(module),
+            "lineups": dict(module),
+            "referee": dict(module),
+            "weather": dict(module, source="live_api"),
+            "injuries": dict(module),
+        },
+    }
 
 
 def odds_available(card: dict[str, Any]) -> bool:
@@ -851,6 +881,7 @@ def build_record(
     snapshot_at: datetime | None,
     venues: dict[str, dict[str, Any]],
     weather_by_fixture: dict[str, dict[str, Any]],
+    live_refresh_by_fixture: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     card = read_json(card_path)
     fid = fixture_id_from_card(card)
@@ -906,6 +937,7 @@ def build_record(
     environment_context = environment_context_for_card(fid, card, latest, venues, weather_by_fixture)
     lineup_effect = lineup_effect_for_card(card)
     tactical_effect = tactical_effect_for_card(card, lineup_effect)
+    live_refresh = card.get("live_refresh") or live_refresh_by_fixture.get(fid) or default_live_refresh(fid)
 
     return {
         "match": f"{home_cn} vs {away_cn}",
@@ -948,6 +980,7 @@ def build_record(
         "environment_context": environment_context,
         "lineup_effect": lineup_effect,
         "tactical_effect": tactical_effect,
+        "live_refresh": live_refresh,
         "odds_movement": movement,
         "market_signal": market_signal,
         "supporting_factors": [cn_display_text(item) for item in supporting],
@@ -1076,6 +1109,34 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         effect["set_piece_effect"] = set_piece_map.get(str(effect.get("set_piece_effect")), clean_public_text(effect.get("set_piece_effect", "暂不能判断")))
         return effect
 
+    def public_live_refresh(value: dict[str, Any]) -> dict[str, Any]:
+        refresh = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        source_map = {
+            "live_api": "实时 API 成功",
+            "cache": "使用缓存",
+            "fallback": "使用兜底数据",
+            "verified_fallback": "使用兜底数据",
+            "missing": "实时 API 暂无",
+        }
+        status_map = {
+            "success": "成功",
+            "empty": "暂无",
+            "error": "失败",
+            "skipped": "跳过",
+        }
+        modules = refresh.get("modules", {})
+        for module in modules.values():
+            source = str(module.get("source") or "missing")
+            status = str(module.get("status") or "skipped")
+            module["source_label_cn"] = source_map.get(source, clean_public_text(source))
+            module["status_label_cn"] = status_map.get(status, clean_public_text(status))
+            module["source"] = module["source_label_cn"]
+            module["status"] = module["status_label_cn"]
+            module["message_cn"] = clean_public_text(module.get("message_cn", ""))
+        overall_map = {"success": "全部实时成功", "partial": "部分实时成功", "failed": "实时刷新失败"}
+        refresh["overall_status_cn"] = overall_map.get(str(refresh.get("overall_status")), clean_public_text(refresh.get("overall_status", "")))
+        return refresh
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -1128,6 +1189,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "environment_context": public_environment(row["environment_context"]),
             "lineup_effect": public_lineup_effect(row["lineup_effect"]),
             "tactical_effect": public_tactical_effect(row["tactical_effect"]),
+            "live_refresh": public_live_refresh(row["live_refresh"]),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
             "data_gaps": clean_gaps,
@@ -1198,6 +1260,7 @@ def main() -> int:
     ledger_rows = read_ledger()
     venues = venue_context()
     weather_by_fixture = weather_cache()
+    live_refresh_by_fixture = live_refresh_cache()
     next_refresh = state.get("next_run_cst") or ""
 
     records = []
@@ -1214,6 +1277,7 @@ def main() -> int:
                 snapshot_at=snapshot_at,
                 venues=venues,
                 weather_by_fixture=weather_by_fixture,
+                live_refresh_by_fixture=live_refresh_by_fixture,
             )
         )
     records.sort(key=lambda row: (row.get("kickoff") or "", row["fixture_id"]))

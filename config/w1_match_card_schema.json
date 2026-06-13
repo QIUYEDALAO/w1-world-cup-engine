@@ -578,6 +578,63 @@
         }
       }
     },
+    "live_refresh": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested_at",
+        "fixture_id",
+        "overall_status",
+        "modules"
+      ],
+      "properties": {
+        "requested_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fixture_id": {
+          "type": "string"
+        },
+        "overall_status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "partial",
+            "failed"
+          ]
+        },
+        "modules": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "odds",
+            "lineups",
+            "referee",
+            "weather",
+            "injuries"
+          ],
+          "properties": {
+            "odds": {
+              "$ref": "#/$defs/live_refresh_module"
+            },
+            "lineups": {
+              "$ref": "#/$defs/live_refresh_module"
+            },
+            "referee": {
+              "$ref": "#/$defs/live_refresh_module"
+            },
+            "weather": {
+              "$ref": "#/$defs/live_refresh_module"
+            },
+            "injuries": {
+              "$ref": "#/$defs/live_refresh_module"
+            }
+          }
+        }
+      }
+    },
     "risk_flags": {
       "type": "array",
       "items": {
@@ -947,6 +1004,50 @@
             "string",
             "null"
           ]
+        }
+      }
+    },
+    "live_refresh_module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "source",
+        "status",
+        "fetched_at",
+        "message_cn"
+      ],
+      "properties": {
+        "requested": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "live_api",
+            "cache",
+            "fallback",
+            "verified_fallback",
+            "missing"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "empty",
+            "error",
+            "skipped"
+          ]
+        },
+        "fetched_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message_cn": {
+          "type": "string"
         }
       }
     },

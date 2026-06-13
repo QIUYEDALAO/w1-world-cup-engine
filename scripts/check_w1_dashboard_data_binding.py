@@ -189,6 +189,7 @@ def main() -> int:
             "environment_context",
             "lineup_effect",
             "tactical_effect",
+            "live_refresh",
         ]
         for row in records:
             missing = [key for key in required_fields if key not in row]
@@ -249,10 +250,29 @@ def main() -> int:
                 for key in ("status", "home_formation", "away_formation", "home_style_tags", "away_style_tags", "reference_should_recalculate", "tactical_summary_cn"):
                     if key not in tactical_effect:
                         fail(f"{row.get('fixture_id')}: tactical_effect missing {key}")
+            live_refresh = row.get("live_refresh", {})
+            if not live_refresh:
+                fail(f"{row.get('fixture_id')}: live_refresh missing")
+            modules = live_refresh.get("modules", {})
+            for module_name in ("odds", "lineups", "referee", "weather", "injuries"):
+                module = modules.get(module_name, {})
+                if not module:
+                    fail(f"{row.get('fixture_id')}: live_refresh.modules.{module_name} missing")
+                for key in ("requested", "source", "status", "fetched_at", "message_cn"):
+                    if key not in module:
+                        fail(f"{row.get('fixture_id')}: live_refresh.modules.{module_name} missing {key}")
 
         qatar = next((row for row in records if row.get("fixture_id") == "1489373"), None)
         if not qatar:
             fail("fixture_id=1489373 Qatar vs Switzerland is missing")
+        qatar_lineups = qatar.get("live_refresh", {}).get("modules", {}).get("lineups", {})
+        for key in ("source", "status", "fetched_at", "message_cn"):
+            if key not in qatar_lineups:
+                fail(f"fixture_id=1489373 live_refresh.modules.lineups missing {key}")
+        if qatar_lineups.get("source") == "live_api" and qatar_lineups.get("status") == "success" and "实时 API 成功" not in qatar_lineups.get("message_cn", ""):
+            fail("fixture_id=1489373 live_api success must be explicit")
+        if qatar_lineups.get("source") in {"verified_fallback", "cache"} and "实时 API 成功" in qatar_lineups.get("message_cn", ""):
+            fail("fixture_id=1489373 fallback/cache must not be described as live API success")
         qatar_quality = qatar.get("data_quality", {})
         if qatar_quality.get("overall") != "partial":
             fail("fixture_id=1489373 data_quality.overall must be partial")

@@ -248,6 +248,10 @@ def assert_html(data: dict) -> None:
         "首发：",
         "风控：",
         "数据部分缺失",
+        "本次实时刷新",
+        "实时 API 成功",
+        "使用缓存",
+        "使用兜底数据",
         "比赛环境",
         "球场：",
         "天气：",
@@ -365,6 +369,12 @@ def assert_html(data: dict) -> None:
         fail("Embedded match_records must expose lineup_effect for fixture_id=1489373")
     if "tactical_effect" not in qatar:
         fail("Embedded match_records must expose tactical_effect for fixture_id=1489373")
+    if "live_refresh" not in qatar:
+        fail("Embedded match_records must expose live_refresh for fixture_id=1489373")
+    lineups = qatar.get("live_refresh", {}).get("modules", {}).get("lineups", {})
+    for key in ("source", "status", "fetched_at", "message_cn"):
+        if key not in lineups:
+            fail(f"Embedded live_refresh.modules.lineups missing {key}")
 
 
 def assert_docs() -> None:

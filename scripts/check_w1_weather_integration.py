@@ -104,8 +104,8 @@ def assert_server_progress() -> None:
             fail(f"server missing weather progress token: {token}")
     if PROGRESS.is_file():
         data = load_json(PROGRESS)
-        if data.get("total_steps") is not None and data.get("total_steps") != 9:
-            fail("runtime progress total_steps must be 9")
+        if data.get("total_steps") is not None and data.get("total_steps") not in {9, 10}:
+            fail("runtime progress total_steps must be 9 or 10")
         labels = [step.get("label") for step in data.get("steps", [])]
         if labels and "查询比赛环境/天气" not in labels:
             fail("runtime progress must include 查询比赛环境/天气")
