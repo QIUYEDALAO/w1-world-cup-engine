@@ -155,8 +155,10 @@ def assert_dashboard_data() -> None:
         fail("fixture_id=1489373 venue_name mismatch")
     if env.get("city") != "San Francisco Bay Area":
         fail("fixture_id=1489373 city mismatch")
-    if env.get("weather_status") != "missing":
-        fail("fixture_id=1489373 weather_status must be missing")
+    if env.get("weather_status") not in {"ready", "missing"}:
+        fail("fixture_id=1489373 weather_status must be ready or missing")
+    if env.get("weather_status") == "ready" and env.get("temperature_c") is None:
+        fail("fixture_id=1489373 ready weather must include temperature_c")
     if env.get("altitude_m") != 2:
         fail("fixture_id=1489373 altitude_m must come from static venue context")
 

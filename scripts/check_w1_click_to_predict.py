@@ -99,6 +99,7 @@ def assert_dashboard() -> None:
         "查询赔率",
         "查询阵容/首发",
         "查询裁判",
+        "查询比赛环境/天气",
         "计算参考倾向",
         "检查 W1 风控",
         "更新 dashboard",
@@ -114,12 +115,14 @@ def assert_progress_schema() -> None:
     data = json.loads(read(PROGRESS))
     if data.get("schema_version") != "w1_predict_progress.v1":
         fail("progress schema mismatch")
-    for key in ("status", "step_index", "step_label", "message_cn", "steps", "updated_at"):
+    for key in ("status", "total_steps", "step_index", "step_label", "message_cn", "steps", "updated_at"):
         if key not in data:
             fail(f"progress missing key: {key}")
     steps = data.get("steps", [])
-    if len(steps) != 8:
-        fail("progress must contain 8 steps")
+    if data.get("total_steps") != 9 or len(steps) != 9:
+        fail("progress must contain 9 steps")
+    if "查询比赛环境/天气" not in [step.get("label") for step in steps]:
+        fail("progress must include weather/environment step")
 
 
 def main() -> int:

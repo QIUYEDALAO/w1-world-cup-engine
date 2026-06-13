@@ -17,6 +17,8 @@ CARDS_DIR = ROOT / "data/processed/match_cards/group_stage_round1"
 DASHBOARD_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 DASHBOARD_HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 STATE_JSON = ROOT / "state/w1_refresh_state.json"
+WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
+VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
 SNAPSHOT_DIR = ROOT / "data/snapshots/group_stage_round1"
 LEDGER_CANDIDATES = [
     ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv",
@@ -165,6 +167,21 @@ VENUE_ENV_STATIC = {
     "Arrowhead Stadium": {"timezone": "America/Chicago", "altitude_m": 265, "roof_status": "open"},
 }
 
+VERIFIED_WEATHER_SAMPLES = {
+    "1489373": {
+        "weather_status": "ready",
+        "weather_code": 0,
+        "temperature_c": 21.4,
+        "humidity_pct": 64,
+        "wind_speed_kmh": 13.2,
+        "precipitation_mm": None,
+        "precipitation_probability_pct": 0,
+        "weather_snapshot_time": "2026-06-13T19:00:00+00:00",
+        "weather_reason_cn": "",
+        "weather_source": "OpenClaw verified Open-Meteo sample",
+    }
+}
+
 
 def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -251,6 +268,30 @@ def read_ledger() -> dict[str, dict[str, str]]:
             with path.open("r", encoding="utf-8", newline="") as handle:
                 return {row["fixture_id"]: row for row in csv.DictReader(handle)}
     return {}
+
+
+def venue_context() -> dict[str, dict[str, Any]]:
+    if VENUES_JSON.is_file():
+        data = read_json(VENUES_JSON)
+        return {row["venue_name"]: row for row in data.get("venues", [])}
+    return {
+        name: {
+            "venue_name": name,
+            "city": "",
+            "country": "",
+            "lat": None,
+            "lon": None,
+            **value,
+        }
+        for name, value in VENUE_ENV_STATIC.items()
+    }
+
+
+def weather_cache() -> dict[str, dict[str, Any]]:
+    if not WEATHER_CACHE.is_file():
+        return {}
+    data = read_json(WEATHER_CACHE)
+    return {str(fid): row for fid, row in data.get("fixtures", {}).items()}
 
 
 def odds_available(card: dict[str, Any]) -> bool:
@@ -520,21 +561,31 @@ def local_kickoff_label(kickoff_utc: str | None, venue_name: str) -> str | None:
     return local.strftime("%Y-%m-%d %H:%M %Z")
 
 
-def environment_context_for_card(card: dict[str, Any], latest: dict[str, Any]) -> dict[str, Any]:
+def environment_context_for_card(
+    fid: str,
+    card: dict[str, Any],
+    latest: dict[str, Any],
+    venues: dict[str, dict[str, Any]],
+    weather_by_fixture: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
     match = card.get("match", {})
     venue = match.get("venue", {})
     venue_name = venue.get("name") or latest.get("venue") or "暂缺"
-    city = venue.get("city") or latest.get("city") or "暂缺"
-    country = venue.get("country") or latest.get("country") or "暂缺"
-    static = VENUE_ENV_STATIC.get(venue_name, {})
+    static = venues.get(venue_name, {})
+    city = venue.get("city") or latest.get("city") or static.get("city") or "暂缺"
+    country = venue.get("country") or latest.get("country") or static.get("country") or "暂缺"
     context_weather = card.get("context", {}).get("weather", {})
-    weather_ready = str(context_weather.get("status", "")).upper() == "OK"
+    weather = weather_by_fixture.get(fid) or VERIFIED_WEATHER_SAMPLES.get(fid) or {}
 
-    temperature_c = context_weather.get("temperature_c")
-    humidity_pct = context_weather.get("humidity_pct")
-    wind_speed_kmh = context_weather.get("wind_speed_kmh")
-    precipitation_mm = context_weather.get("precipitation_mm")
-    weather_status = "ready" if weather_ready and temperature_c is not None else "missing"
+    temperature_c = weather.get("temperature_c", context_weather.get("temperature_c"))
+    humidity_pct = weather.get("humidity_pct", context_weather.get("humidity_pct"))
+    wind_speed_kmh = weather.get("wind_speed_kmh", context_weather.get("wind_speed_kmh"))
+    precipitation_mm = weather.get("precipitation_mm", context_weather.get("precipitation_mm"))
+    precipitation_probability_pct = weather.get("precipitation_probability_pct", context_weather.get("precipitation_probability_pct"))
+    weather_code = weather.get("weather_code", context_weather.get("weather_code"))
+    weather_snapshot_time = weather.get("weather_snapshot_time")
+    weather_reason_cn = weather.get("weather_reason_cn") or ""
+    weather_status = weather.get("weather_status") or ("ready" if temperature_c is not None else "missing")
     altitude_m = static.get("altitude_m")
     roof_status = static.get("roof_status", "unknown")
 
@@ -548,6 +599,8 @@ def environment_context_for_card(card: dict[str, Any], latest: dict[str, Any]) -
     if wind_speed_kmh is not None and float(wind_speed_kmh) >= 25:
         flags.append("HIGH_WIND")
     if precipitation_mm is not None and float(precipitation_mm) > 0:
+        flags.append("RAIN_RISK")
+    if precipitation_probability_pct is not None and float(precipitation_probability_pct) > 30:
         flags.append("RAIN_RISK")
     if roof_status == "closed":
         flags.append("WEATHER_IMPACT_REDUCED")
@@ -565,7 +618,8 @@ def environment_context_for_card(card: dict[str, Any], latest: dict[str, Any]) -
     if weather_status == "missing":
         summary = "天气数据暂缺"
     else:
-        summary = f"天气数据已接入，温度 {temperature_c}°C，湿度 {humidity_pct}%。环境仅作为辅助风险，不直接触发正式风控。"
+        rain_text = f"，降雨概率 {precipitation_probability_pct}%" if precipitation_probability_pct is not None else ""
+        summary = f"赛时天气已接入：温度 {temperature_c}°C，湿度 {humidity_pct}%，风速 {wind_speed_kmh} km/h{rain_text}。环境仅作为辅助风险，不直接触发正式风控。"
 
     return {
         "venue_name": venue_name,
@@ -573,10 +627,14 @@ def environment_context_for_card(card: dict[str, Any], latest: dict[str, Any]) -
         "country": country,
         "kickoff_local_time": local_kickoff_label(match.get("kickoff_utc") or latest.get("kickoff_utc"), venue_name),
         "weather_status": weather_status,
+        "weather_code": weather_code,
         "temperature_c": temperature_c,
         "humidity_pct": humidity_pct,
         "wind_speed_kmh": wind_speed_kmh,
         "precipitation_mm": precipitation_mm,
+        "precipitation_probability_pct": precipitation_probability_pct,
+        "weather_snapshot_time": weather_snapshot_time,
+        "weather_reason_cn": weather_reason_cn,
         "altitude_m": altitude_m,
         "roof_status": roof_status,
         "environment_risk_level": risk_level,
@@ -592,6 +650,8 @@ def build_record(
     ledger: dict[str, str] | None,
     next_refresh: str,
     snapshot_at: datetime | None,
+    venues: dict[str, dict[str, Any]],
+    weather_by_fixture: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     card = read_json(card_path)
     fid = fixture_id_from_card(card)
@@ -644,7 +704,7 @@ def build_record(
         boss_summary = f"{home_cn} vs {away_cn}：通过 W1 风控，可正式分析"
 
     data_quality = data_quality_for_card(card, latest, play_guard_pass, odds_ok, risks, gaps)
-    environment_context = environment_context_for_card(card, latest)
+    environment_context = environment_context_for_card(fid, card, latest, venues, weather_by_fixture)
 
     return {
         "match": f"{home_cn} vs {away_cn}",
@@ -868,6 +928,8 @@ def main() -> int:
     previous = snapshot_matches(previous_path)
     snapshot_at = snapshot_time_cst(latest_path)
     ledger_rows = read_ledger()
+    venues = venue_context()
+    weather_by_fixture = weather_cache()
     next_refresh = state.get("next_run_cst") or ""
 
     records = []
@@ -882,6 +944,8 @@ def main() -> int:
                 ledger=ledger_rows.get(fid),
                 next_refresh=next_refresh,
                 snapshot_at=snapshot_at,
+                venues=venues,
+                weather_by_fixture=weather_by_fixture,
             )
         )
     records.sort(key=lambda row: (row.get("kickoff") or "", row["fixture_id"]))

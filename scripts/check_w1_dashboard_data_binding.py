@@ -188,10 +188,14 @@ def main() -> int:
             fail("fixture_id=1489373 venue_name must be Levi's Stadium")
         if qatar_env.get("city") != "San Francisco Bay Area":
             fail("fixture_id=1489373 city must be San Francisco Bay Area")
-        if qatar_env.get("weather_status") != "missing":
-            fail("fixture_id=1489373 weather_status must be missing until weather is refreshed")
-        if qatar_env.get("environment_summary_cn") != "天气数据暂缺":
-            fail("fixture_id=1489373 environment_summary_cn must be 天气数据暂缺")
+        if qatar_env.get("weather_status") not in {"ready", "missing"}:
+            fail("fixture_id=1489373 weather_status must be ready or missing")
+        if qatar_env.get("weather_status") == "ready":
+            for key in ("temperature_c", "humidity_pct", "wind_speed_kmh"):
+                if qatar_env.get(key) is None:
+                    fail(f"fixture_id=1489373 ready weather missing {key}")
+        if qatar_env.get("weather_status") == "missing" and qatar_env.get("environment_summary_cn") != "天气数据暂缺":
+            fail("fixture_id=1489373 environment_summary_cn must be 天气数据暂缺 when weather is missing")
 
         if data.get("status_cards", {}).get("play_guard_version") != "W1_PLAY_GUARD_V1":
             fail("PLAY_GUARD_V1 must remain in status_cards")

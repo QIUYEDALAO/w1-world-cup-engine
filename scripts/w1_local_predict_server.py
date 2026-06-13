@@ -25,8 +25,11 @@ ROOT = Path(__file__).resolve().parents[1]
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("W1_DASHBOARD_PORT", "8765"))
 PROGRESS = ROOT / "state/w1_predict_progress.json"
+WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
+WEATHER_CLIENT = ROOT / "scripts/w1_weather_client.py"
+VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
 WATCHER = ROOT / "scripts/w1_watcher.sh"
 ENV_KEY_NAME = "APIFOOTBALL_" + "KEY"
 
@@ -36,6 +39,7 @@ STEPS = [
     "查询赔率",
     "查询阵容/首发",
     "查询裁判",
+    "查询比赛环境/天气",
     "计算参考倾向",
     "检查 W1 风控",
     "更新 dashboard",
@@ -85,6 +89,7 @@ def progress_payload(
         "schema_version": "w1_predict_progress.v1",
         "job_id": job_id,
         "status": status,
+        "total_steps": len(STEPS),
         "step_index": step_index,
         "step_label": STEPS[max(0, min(step_index - 1, len(STEPS) - 1))],
         "message_cn": message,
@@ -100,6 +105,13 @@ def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(path)
+
+
 def find_match(home: str, away: str) -> dict[str, Any] | None:
     if not DASHBOARD_DATA.is_file():
         return None
@@ -110,6 +122,56 @@ def find_match(home: str, away: str) -> dict[str, Any] | None:
         if row.get("home_team_cn") == away and row.get("away_team_cn") == home:
             return row
     return None
+
+
+def venue_mapping() -> dict[str, dict[str, Any]]:
+    if not VENUES_JSON.is_file():
+        return {}
+    data = load_json(VENUES_JSON)
+    return {row["venue_name"]: row for row in data.get("venues", [])}
+
+
+def update_weather_cache(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any] | None:
+    selected = find_match(match.get("home_team_cn", ""), match.get("away_team_cn", ""))
+    if not selected:
+        return None
+    venue_name = selected.get("environment_context", {}).get("venue_name")
+    venue = venue_mapping().get(venue_name or "")
+    kickoff_utc = selected.get("kickoff_utc")
+    if not venue or not kickoff_utc:
+        return None
+    result = run_command(
+        [
+            "python3",
+            str(WEATHER_CLIENT),
+            "--lat",
+            str(venue["lat"]),
+            "--lon",
+            str(venue["lon"]),
+            "--kickoff-utc",
+            str(kickoff_utc),
+        ],
+        env,
+    )
+    try:
+        weather = json.loads(result.stdout or "{}") if result.returncode == 0 else {
+            "weather_status": "missing",
+            "weather_reason_cn": "天气查询失败，保留上一版。",
+        }
+    except json.JSONDecodeError:
+        weather = {"weather_status": "missing", "weather_reason_cn": "天气查询返回格式异常，保留上一版。"}
+    cache = load_json(WEATHER_CACHE) if WEATHER_CACHE.is_file() else {"schema_version": "w1_weather_cache.v1", "fixtures": {}}
+    cache.setdefault("schema_version", "w1_weather_cache.v1")
+    cache.setdefault("fixtures", {})
+    cache["fixtures"][str(selected["fixture_id"])] = {
+        "fixture_id": selected["fixture_id"],
+        "venue_name": venue_name,
+        "lat": venue["lat"],
+        "lon": venue["lon"],
+        **weather,
+    }
+    write_json(WEATHER_CACHE, cache)
+    return cache["fixtures"][str(selected["fixture_id"])]
 
 
 def run_command(cmd: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
@@ -168,6 +230,23 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                             match=match,
                         )
                     )
+
+            if idx == 6:
+                weather = update_weather_cache(match, env)
+                weather_status = (weather or {}).get("weather_status")
+                if weather_status == "ready":
+                    message = "比赛环境/天气查询完成。"
+                else:
+                    message = "比赛环境/天气暂缺，保留上一版。"
+                write_progress(
+                    progress_payload(
+                        job_id=job_id,
+                        status="running",
+                        step_index=idx,
+                        message=message,
+                        match=match,
+                    )
+                )
 
         build = run_command(["python3", str(BUILD_SCRIPT)], env)
         if build.returncode != 0:

@@ -1,0 +1,165 @@
+{
+  "schema_version": "world_cup_2026_venues.v1",
+  "venues": [
+    {
+      "venue_name": "Levi's Stadium",
+      "city": "San Francisco Bay Area",
+      "country": "USA",
+      "lat": 37.403,
+      "lon": -121.97,
+      "altitude_m": 2,
+      "roof_status": "open",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "venue_name": "Estadio Azteca",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "lat": 19.3029,
+      "lon": -99.1505,
+      "altitude_m": 2200,
+      "roof_status": "open",
+      "timezone": "America/Mexico_City"
+    },
+    {
+      "venue_name": "Estadio Akron",
+      "city": "Guadalajara",
+      "country": "Mexico",
+      "lat": 20.7168,
+      "lon": -103.3783,
+      "altitude_m": 1560,
+      "roof_status": "open",
+      "timezone": "America/Mexico_City"
+    },
+    {
+      "venue_name": "Estadio BBVA",
+      "city": "Monterrey",
+      "country": "Mexico",
+      "lat": 25.6698,
+      "lon": -100.2437,
+      "altitude_m": 540,
+      "roof_status": "open",
+      "timezone": "America/Monterrey"
+    },
+    {
+      "venue_name": "MetLife Stadium",
+      "city": "New York/New Jersey",
+      "country": "USA",
+      "lat": 40.8135,
+      "lon": -74.0744,
+      "altitude_m": 2,
+      "roof_status": "open",
+      "timezone": "America/New_York"
+    },
+    {
+      "venue_name": "SoFi Stadium",
+      "city": "Los Angeles",
+      "country": "USA",
+      "lat": 33.9534,
+      "lon": -118.339,
+      "altitude_m": 22,
+      "roof_status": "closed",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "venue_name": "Mercedes-Benz Stadium",
+      "city": "Atlanta",
+      "country": "USA",
+      "lat": 33.7556,
+      "lon": -84.4008,
+      "altitude_m": 320,
+      "roof_status": "closed",
+      "timezone": "America/New_York"
+    },
+    {
+      "venue_name": "AT&T Stadium",
+      "city": "Dallas",
+      "country": "USA",
+      "lat": 32.7472,
+      "lon": -97.0929,
+      "altitude_m": 173,
+      "roof_status": "closed",
+      "timezone": "America/Chicago"
+    },
+    {
+      "venue_name": "BC Place",
+      "city": "Vancouver",
+      "country": "Canada",
+      "lat": 49.2766,
+      "lon": -123.1119,
+      "altitude_m": 2,
+      "roof_status": "closed",
+      "timezone": "America/Vancouver"
+    },
+    {
+      "venue_name": "Hard Rock Stadium",
+      "city": "Miami",
+      "country": "USA",
+      "lat": 25.958,
+      "lon": -80.2389,
+      "altitude_m": 2,
+      "roof_status": "open",
+      "timezone": "America/New_York"
+    },
+    {
+      "venue_name": "NRG Stadium",
+      "city": "Houston",
+      "country": "USA",
+      "lat": 29.6848,
+      "lon": -95.4109,
+      "altitude_m": 15,
+      "roof_status": "closed",
+      "timezone": "America/Chicago"
+    },
+    {
+      "venue_name": "Lumen Field",
+      "city": "Seattle",
+      "country": "USA",
+      "lat": 47.5952,
+      "lon": -122.3316,
+      "altitude_m": 4,
+      "roof_status": "open",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "venue_name": "Gillette Stadium",
+      "city": "Boston",
+      "country": "USA",
+      "lat": 42.0909,
+      "lon": -71.264,
+      "altitude_m": 62,
+      "roof_status": "open",
+      "timezone": "America/New_York"
+    },
+    {
+      "venue_name": "Lincoln Financial Field",
+      "city": "Philadelphia",
+      "country": "USA",
+      "lat": 39.9008,
+      "lon": -75.1675,
+      "altitude_m": 3,
+      "roof_status": "open",
+      "timezone": "America/New_York"
+    },
+    {
+      "venue_name": "Arrowhead Stadium",
+      "city": "Kansas City",
+      "country": "USA",
+      "lat": 39.0489,
+      "lon": -94.4839,
+      "altitude_m": 275,
+      "roof_status": "open",
+      "timezone": "America/Chicago"
+    },
+    {
+      "venue_name": "BMO Field",
+      "city": "Toronto",
+      "country": "Canada",
+      "lat": 43.633,
+      "lon": -79.4188,
+      "altitude_m": 110,
+      "roof_status": "open",
+      "timezone": "America/Toronto"
+    }
+  ]
+}

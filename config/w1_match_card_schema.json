@@ -308,10 +308,14 @@
         "country",
         "kickoff_local_time",
         "weather_status",
+        "weather_code",
         "temperature_c",
         "humidity_pct",
         "wind_speed_kmh",
         "precipitation_mm",
+        "precipitation_probability_pct",
+        "weather_snapshot_time",
+        "weather_reason_cn",
         "altitude_m",
         "roof_status",
         "environment_risk_level",
@@ -343,6 +347,12 @@
             "error"
           ]
         },
+        "weather_code": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
         "temperature_c": {
           "type": [
             "number",
@@ -366,6 +376,21 @@
             "number",
             "null"
           ]
+        },
+        "precipitation_probability_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "weather_snapshot_time": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "weather_reason_cn": {
+          "type": "string"
         },
         "altitude_m": {
           "type": [
