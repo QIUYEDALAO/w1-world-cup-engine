@@ -282,17 +282,29 @@ def main() -> int:
         qatar = next((row for row in records if row.get("fixture_id") == "1489373"), None)
         if not qatar:
             fail("fixture_id=1489373 Qatar vs Switzerland is missing")
+        if qatar.get("status") != "finished" or qatar.get("actual_score") != {"home": 1, "away": 1}:
+            fail("fixture_id=1489373 must be finished with actual_score 1-1")
+        if qatar.get("result_source") != "post_match_auto_calibration_sample":
+            fail("fixture_id=1489373 result_source must be post_match_auto_calibration_sample")
         qatar_cal = qatar.get("post_match_calibration", {})
         if qatar_cal.get("actual_score") != "1-1":
             fail("fixture_id=1489373 post_match_calibration.actual_score must be 1-1")
+        if qatar_cal.get("prediction_hit_type") != "pool_hit":
+            fail("fixture_id=1489373 prediction_hit_type must be pool_hit")
         if "深让不等于大胜" not in qatar_cal.get("lesson_cn", ""):
             fail("fixture_id=1489373 calibration must include 深让不等于大胜")
         usa = next((row for row in records if row.get("fixture_id") == "1489370"), None)
         if not usa:
             fail("fixture_id=1489370 USA vs Paraguay is missing")
+        if usa.get("status") != "finished" or usa.get("actual_score") != {"home": 4, "away": 1}:
+            fail("fixture_id=1489370 must be finished with actual_score 4-1")
+        if usa.get("result_source") != "post_match_auto_calibration_sample":
+            fail("fixture_id=1489370 result_source must be post_match_auto_calibration_sample")
         usa_cal = usa.get("post_match_calibration", {})
         if usa_cal.get("actual_score") != "4-1":
             fail("fixture_id=1489370 post_match_calibration.actual_score must be 4-1")
+        if usa_cal.get("prediction_hit_type") != "pool_hit":
+            fail("fixture_id=1489370 prediction_hit_type must be pool_hit")
         if "平手盘也可能打开" not in usa_cal.get("lesson_cn", ""):
             fail("fixture_id=1489370 calibration must include 平手盘也可能打开")
         qatar_lineups = qatar.get("live_refresh", {}).get("modules", {}).get("lineups", {})

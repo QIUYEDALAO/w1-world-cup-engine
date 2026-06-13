@@ -747,7 +747,7 @@
           "actual_score": "2-0",
           "prediction_hit_type": "主比分命中",
           "miss_reason_tags": [],
-          "lesson_cn": "赛后比分已进入比分池校准。",
+          "lesson_cn": "赛后校准：主比分命中，保留当前主路径权重。",
           "prediction_hit_type_cn": "主比分命中"
         }
       },
@@ -755,7 +755,7 @@
         "actual_score": "2-0",
         "prediction_hit_type": "主比分命中",
         "miss_reason_tags": [],
-        "lesson_cn": "赛后比分已进入比分池校准。",
+        "lesson_cn": "赛后校准：主比分命中，保留当前主路径权重。",
         "prediction_hit_type_cn": "主比分命中"
       },
       "supporting_factors": [
@@ -1033,7 +1033,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -1041,7 +1041,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -1311,7 +1311,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -1319,7 +1319,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -1361,21 +1361,21 @@
       "away_starting_count": 0,
       "home_bench_count": 0,
       "away_bench_count": 0,
-      "status": "not_started",
+      "status": "finished",
       "actual_score": {
-        "home": null,
-        "away": null
+        "home": 4,
+        "away": 1
       },
-      "actual_score_display_cn": null,
-      "result_source": null,
-      "result_note": null,
+      "actual_score_display_cn": "美国 4-1 巴拉圭",
+      "result_source": "post_match_auto_calibration_sample",
+      "result_note": "赛后自动校准样本；赛果待回写 ledger",
       "w1_state": "赛前未放行/未形成正式 W1_PLAY",
       "prediction_stage": "EARLY_REFERENCE",
       "prediction_stage_cn": "早盘参考",
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "美国不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "中高",
+      "risk_level_cn": "高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
@@ -1595,10 +1595,12 @@
           "actual_score": "4-1",
           "prediction_hit_type": "比分池命中",
           "miss_reason_tags": [
-            "PICKEM_CAN_OPEN",
-            "OU_UNDERESTIMATE_HIGH_SCORE"
+            "POOL_PATH_CONFIRMED",
+            "GAME_OPEN_TRIGGER",
+            "OU_UNDERESTIMATE_HIGH_SCORE",
+            "PICKEM_CAN_OPEN"
           ],
-          "lesson_cn": "平手盘也可能打开，大小球不直接决定比分；早球和转换混乱会把比分推向 4-1。",
+          "lesson_cn": "赛后校准：平手盘也可能打开，大小球不直接决定比分；早球和转换混乱会把比分推向 4-1。",
           "prediction_hit_type_cn": "比分池命中"
         }
       },
@@ -1606,10 +1608,12 @@
         "actual_score": "4-1",
         "prediction_hit_type": "比分池命中",
         "miss_reason_tags": [
-          "PICKEM_CAN_OPEN",
-          "OU_UNDERESTIMATE_HIGH_SCORE"
+          "POOL_PATH_CONFIRMED",
+          "GAME_OPEN_TRIGGER",
+          "OU_UNDERESTIMATE_HIGH_SCORE",
+          "PICKEM_CAN_OPEN"
         ],
-        "lesson_cn": "平手盘也可能打开，大小球不直接决定比分；早球和转换混乱会把比分推向 4-1。",
+        "lesson_cn": "赛后校准：平手盘也可能打开，大小球不直接决定比分；早球和转换混乱会把比分推向 4-1。",
         "prediction_hit_type_cn": "比分池命中"
       },
       "supporting_factors": [
@@ -1630,8 +1634,8 @@
           "message": "裁判未公布; 非阻断缺口."
         }
       ],
-      "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
-      "boss_summary_cn": "美国 vs 巴拉圭：早盘参考，参考倾向 美国不败，参考比分 1-0 / 1-1；非最终结论",
+      "current_action_cn": "需要写入 ledger 做赛后验证",
+      "boss_summary_cn": "已完赛：美国 4-1 巴拉圭；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证",
       "reference_score_external": null,
       "hit_status_cn": null
     },
@@ -1651,14 +1655,14 @@
       "away_starting_count": 11,
       "home_bench_count": 15,
       "away_bench_count": 15,
-      "status": "not_started",
+      "status": "finished",
       "actual_score": {
-        "home": null,
-        "away": null
+        "home": 1,
+        "away": 1
       },
-      "actual_score_display_cn": null,
-      "result_source": null,
-      "result_note": null,
+      "actual_score_display_cn": "卡塔尔 1-1 瑞士",
+      "result_source": "post_match_auto_calibration_sample",
+      "result_note": "赛后自动校准样本；赛果待回写 ledger",
       "w1_state": "赛前未放行/未形成正式 W1_PLAY",
       "prediction_stage": "EARLY_REFERENCE",
       "prediction_stage_cn": "早盘参考",
@@ -1726,7 +1730,7 @@
         "wind_speed_kmh": 11.5,
         "precipitation_mm": 0.0,
         "precipitation_probability_pct": 0,
-        "weather_snapshot_time": "2026-06-13T22:19:06+00:00",
+        "weather_snapshot_time": "2026-06-13T22:30:33+00:00",
         "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "露天",
@@ -1783,7 +1787,7 @@
         "tactical_summary_cn": "战术效应已生成：主队 4-3-3，客队 3-4-2-1；参考倾向需要结合首发重算。"
       },
       "live_refresh": {
-        "requested_at": "2026-06-14 06:19:03 CST",
+        "requested_at": "2026-06-14 06:30:30 CST",
         "fixture_id": "1489373",
         "overall_status": "partial",
         "modules": {
@@ -1791,7 +1795,7 @@
             "requested": true,
             "source": "使用缓存",
             "status": "跳过",
-            "fetched_at": "2026-06-14 06:19:04 CST",
+            "fetched_at": "2026-06-14 06:30:31 CST",
             "message_cn": "实时 API 失败，使用缓存赔率。",
             "source_label_cn": "使用缓存",
             "status_label_cn": "跳过"
@@ -1800,7 +1804,7 @@
             "requested": true,
             "source": "使用兜底数据",
             "status": "跳过",
-            "fetched_at": "2026-06-14 06:19:04 CST",
+            "fetched_at": "2026-06-14 06:30:31 CST",
             "message_cn": "实时 API 未配置，使用缓存/兜底数据。 使用兜底数据。 首发已写入：Qatar 4-3-3，Switzerland 3-4-2-1。",
             "source_label_cn": "使用兜底数据",
             "status_label_cn": "跳过"
@@ -1809,7 +1813,7 @@
             "requested": true,
             "source": "使用缓存",
             "status": "跳过",
-            "fetched_at": "2026-06-14 06:19:04 CST",
+            "fetched_at": "2026-06-14 06:30:31 CST",
             "message_cn": "实时 API 失败，使用缓存裁判信息。",
             "source_label_cn": "使用缓存",
             "status_label_cn": "跳过"
@@ -1818,7 +1822,7 @@
             "requested": true,
             "source": "实时 API 成功",
             "status": "成功",
-            "fetched_at": "2026-06-14 06:19:06 CST",
+            "fetched_at": "2026-06-14 06:30:33 CST",
             "message_cn": "实时 API 成功，天气已接入。",
             "source_label_cn": "实时 API 成功",
             "status_label_cn": "成功"
@@ -1827,7 +1831,7 @@
             "requested": true,
             "source": "使用缓存",
             "status": "跳过",
-            "fetched_at": "2026-06-14 06:19:04 CST",
+            "fetched_at": "2026-06-14 06:30:32 CST",
             "message_cn": "实时 API 失败，使用缓存伤停信息。",
             "source_label_cn": "使用缓存",
             "status_label_cn": "跳过"
@@ -1837,20 +1841,20 @@
       },
       "score_distribution": {
         "status": "已生成",
-        "main_score": "1-1",
-        "fallback_score": "0-0",
+        "main_score": "0-2",
+        "fallback_score": "1-1",
         "score_pool": [
           {
-            "score": "1-1",
+            "score": "0-2",
             "path": "小胜主线",
             "weight": "高",
-            "reason_cn": "市场和基础面主路径，但 AH 不自动等于胜差。 卡塔尔 vs 瑞士反证：深让不等于大胜。"
+            "reason_cn": "市场和基础面主路径，但 AH 不自动等于胜差。"
           },
           {
-            "score": "0-0",
+            "score": "1-1",
             "path": "防平路径",
-            "weight": "中",
-            "reason_cn": "首发、裁判或节奏不完整时保留防平路径。"
+            "weight": "高",
+            "reason_cn": "首发、裁判或节奏不完整时保留防平路径。 卡塔尔 vs 瑞士反证：深让不等于大胜。"
           },
           {
             "score": "2-0",
@@ -1895,10 +1899,12 @@
           "actual_score": "1-1",
           "prediction_hit_type": "比分池命中",
           "miss_reason_tags": [
+            "POOL_PATH_CONFIRMED",
             "AH_DEEP_NOT_WIN_MARGIN",
-            "FAVORITE_WIN_BUT_NOT_COVER_RISK"
+            "FAVORITE_WIN_BUT_NOT_COVER_RISK",
+            "GAME_OPEN_TRIGGER"
           ],
-          "lesson_cn": "瑞士方向深让不能直接等于大胜，1-1 进入反证样本：深让不等于大胜。",
+          "lesson_cn": "赛后校准：瑞士方向深让不能直接等于大胜，1-1 进入反证样本；深让不等于大胜。",
           "prediction_hit_type_cn": "比分池命中"
         }
       },
@@ -1906,10 +1912,12 @@
         "actual_score": "1-1",
         "prediction_hit_type": "比分池命中",
         "miss_reason_tags": [
+          "POOL_PATH_CONFIRMED",
           "AH_DEEP_NOT_WIN_MARGIN",
-          "FAVORITE_WIN_BUT_NOT_COVER_RISK"
+          "FAVORITE_WIN_BUT_NOT_COVER_RISK",
+          "GAME_OPEN_TRIGGER"
         ],
-        "lesson_cn": "瑞士方向深让不能直接等于大胜，1-1 进入反证样本：深让不等于大胜。",
+        "lesson_cn": "赛后校准：瑞士方向深让不能直接等于大胜，1-1 进入反证样本；深让不等于大胜。",
         "prediction_hit_type_cn": "比分池命中"
       },
       "supporting_factors": [
@@ -1927,8 +1935,8 @@
           "message": "裁判未公布; 非阻断缺口."
         }
       ],
-      "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
-      "boss_summary_cn": "卡塔尔 vs 瑞士：早盘参考，参考倾向 谨慎观察，参考比分 1-1；非最终结论",
+      "current_action_cn": "需要写入 ledger 做赛后验证",
+      "boss_summary_cn": "已完赛：卡塔尔 1-1 瑞士；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证",
       "reference_score_external": null,
       "hit_status_cn": null
     },
@@ -2181,7 +2189,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -2189,7 +2197,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -2464,7 +2472,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -2472,7 +2480,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -2748,7 +2756,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -2756,7 +2764,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -3032,7 +3040,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -3040,7 +3048,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -3316,7 +3324,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -3324,7 +3332,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -3599,7 +3607,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -3607,7 +3615,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -3882,7 +3890,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -3890,7 +3898,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -4166,7 +4174,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -4174,7 +4182,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -4449,7 +4457,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -4457,7 +4465,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -4732,7 +4740,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -4740,7 +4748,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -5016,7 +5024,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -5024,7 +5032,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -5299,7 +5307,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -5307,7 +5315,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -5582,7 +5590,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -5590,7 +5598,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -5865,7 +5873,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -5873,7 +5881,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -6148,7 +6156,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -6156,7 +6164,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -6432,7 +6440,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -6440,7 +6448,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -6716,7 +6724,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -6724,7 +6732,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -6999,7 +7007,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -7007,7 +7015,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -7283,7 +7291,7 @@
           "actual_score": null,
           "prediction_hit_type": "待复盘",
           "miss_reason_tags": [],
-          "lesson_cn": "等待赛后反证校准。",
+          "lesson_cn": "等待赛后校准。",
           "prediction_hit_type_cn": "待复盘"
         }
       },
@@ -7291,7 +7299,7 @@
         "actual_score": null,
         "prediction_hit_type": "待复盘",
         "miss_reason_tags": [],
-        "lesson_cn": "等待赛后反证校准。",
+        "lesson_cn": "等待赛后校准。",
         "prediction_hit_type_cn": "待复盘"
       },
       "supporting_factors": [
@@ -7361,7 +7369,7 @@ function envStatus(v){const map={ready:'已接入',partial:'部分可用',error:
 function envFlagCn(flag){const map={HIGH_TEMP:'高温',HIGH_HUMIDITY:'高湿度',HIGH_ALTITUDE:'高海拔',HIGH_WIND:'大风',RAIN_RISK:'降雨',WEATHER_IMPACT_REDUCED:'屋顶降低天气影响',['WEATHER_'+MISS.toUpperCase()]:'天气数据暂缺'};return map[flag]||flag}
 function refreshModuleCn(m){if(!m)return '实时 API 暂无';const source=m.source_label_cn||({live_api:'实时 API 成功',cache:'使用缓存',fallback:'使用兜底数据',verified_fallback:'使用兜底数据',[MISS]:'实时 API 暂无'}[m.source]||'实时 API 暂无');const status=m.status_label_cn||({success:'成功',empty:'暂无',error:'失败',skipped:'跳过'}[m.status]||'未知');const msg=m.message_cn||'';return source+' / '+status+(m.fetched_at?' / '+m.fetched_at:'')+(msg?' / '+msg:'')}
 function renderLiveRefreshRows(lr){const modules=(lr&&lr.modules)||{};return '<div class="quality-row"><b>本次实时刷新：</b>'+esc((lr&&lr.overall_status_cn)||lr&&lr.overall_status||'尚未开始')+'；请求时间：'+esc((lr&&lr.requested_at)||'暂缺')+'</div><div class="quality-row"><b>赔率：</b>'+esc(refreshModuleCn(modules.odds))+'</div><div class="quality-row"><b>首发：</b>'+esc(refreshModuleCn(modules.lineups))+'</div><div class="quality-row"><b>裁判：</b>'+esc(refreshModuleCn(modules.referee))+'</div><div class="quality-row"><b>天气：</b>'+esc(refreshModuleCn(modules.weather))+'</div><div class="quality-row"><b>伤停：</b>'+esc(refreshModuleCn(modules.injuries))+'</div>'}
-function renderScoreDistributionRows(sd){sd=sd||{};const trigger=sd.game_open_trigger||{},risk=sd.market_vs_score_risk||{},cal=sd.post_match_calibration||{};const pool=(sd.score_pool||[]).map(x=>esc(x.score)+'｜'+esc(x.path)+'｜权重 '+esc(x.weight)+'｜'+esc(x.reason_cn)).join('<br>')||'暂缺';return '<div class="quality-row"><b>比分分布：</b>主比分 '+esc(valueOrGap(sd.main_score))+'；防平比分 '+esc(valueOrGap(sd.fallback_score))+'；'+esc(sd.score_summary_cn||'比分分布暂缺')+'</div><div class="quality-row"><b>比分概率池：</b><br>'+pool+'</div><div class="quality-row"><b>比赛打开机制：</b>早球 '+esc(valueOrGap(trigger.early_goal_risk))+'；转换混乱 '+esc(valueOrGap(trigger.transition_chaos_risk))+'；防线崩盘 '+esc(valueOrGap(trigger.defensive_collapse_risk))+'；红牌/点球 '+esc(valueOrGap(trigger.red_card_penalty_risk))+'；触发后重估：'+(trigger.must_reprice_if_triggered?'是':'否')+'</div><div class="quality-row"><b>市场反证提示：</b>深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。AH 深度风险 '+esc(valueOrGap(risk.ah_depth_risk))+'；OU 低估大比分风险 '+esc(valueOrGap(risk.ou_underestimate_risk))+'；赢球不打穿风险 '+esc(valueOrGap(risk.favorite_win_but_not_cover_risk))+'。'+esc(risk.summary_cn||'')+'</div><div class="quality-row"><b>赛后反证校准：</b>实际比分 '+esc(valueOrGap(cal.actual_score))+'；命中类型 '+esc(cal.prediction_hit_type_cn||cal.prediction_hit_type||'待复盘')+'；标签 '+esc((cal.miss_reason_tags||[]).join('、')||'无')+'；'+esc(cal.lesson_cn||'等待赛后反证校准。')+'</div>'}
+function renderScoreDistributionRows(sd){sd=sd||{};const trigger=sd.game_open_trigger||{},risk=sd.market_vs_score_risk||{},cal=sd.post_match_calibration||{};const pool=(sd.score_pool||[]).map(x=>esc(x.score)+'｜'+esc(x.path)+'｜权重 '+esc(x.weight)+'｜'+esc(x.reason_cn)).join('<br>')||'暂缺';return '<div class="quality-row"><b>比分分布：</b>主比分 '+esc(valueOrGap(sd.main_score))+'；防平比分 '+esc(valueOrGap(sd.fallback_score))+'；'+esc(sd.score_summary_cn||'比分分布暂缺')+'</div><div class="quality-row"><b>比分概率池：</b><br>'+pool+'</div><div class="quality-row"><b>比赛打开机制：</b>早球 '+esc(valueOrGap(trigger.early_goal_risk))+'；转换混乱 '+esc(valueOrGap(trigger.transition_chaos_risk))+'；防线崩盘 '+esc(valueOrGap(trigger.defensive_collapse_risk))+'；红牌/点球 '+esc(valueOrGap(trigger.red_card_penalty_risk))+'；触发后重估：'+(trigger.must_reprice_if_triggered?'是':'否')+'</div><div class="quality-row"><b>市场反证提示：</b>深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。AH 深度风险 '+esc(valueOrGap(risk.ah_depth_risk))+'；OU 低估大比分风险 '+esc(valueOrGap(risk.ou_underestimate_risk))+'；赢球不打穿风险 '+esc(valueOrGap(risk.favorite_win_but_not_cover_risk))+'。'+esc(risk.summary_cn||'')+'</div><div class="quality-row"><b>赛后校准：</b>实际比分 '+esc(valueOrGap(cal.actual_score))+'；命中类型 '+esc(cal.prediction_hit_type_cn||cal.prediction_hit_type||'待复盘')+'；标签 '+esc((cal.miss_reason_tags||[]).join('、')||'无')+'；'+esc(cal.lesson_cn||'等待赛后校准。')+'</div>'}
 function renderDataQualityPanel(matchRecord){
 const q=(matchRecord&&matchRecord.data_quality)||{};
 const env=(matchRecord&&matchRecord.environment_context)||{};

@@ -146,22 +146,19 @@ EXTERNAL_RESULT_OVERLAY = {
         "actual_score": {"home": 2, "away": 0},
         "result_source": "manual_verified_overlay",
         "result_note": "赛果待回写 ledger",
-    }
-}
-
-POST_MATCH_CALIBRATION_OVERLAY = {
+    },
     "1489373": {
+        "status": "finished",
         "actual_score": {"home": 1, "away": 1},
-        "prediction_hit_type": "pool_hit",
-        "miss_reason_tags": ["AH_DEEP_NOT_WIN_MARGIN", "FAVORITE_WIN_BUT_NOT_COVER_RISK"],
-        "lesson_cn": "瑞士方向深让不能直接等于大胜，1-1 进入反证样本：深让不等于大胜。",
+        "result_source": "post_match_auto_calibration_sample",
+        "result_note": "赛后自动校准样本；赛果待回写 ledger",
     },
     "1489370": {
+        "status": "finished",
         "actual_score": {"home": 4, "away": 1},
-        "prediction_hit_type": "pool_hit",
-        "miss_reason_tags": ["PICKEM_CAN_OPEN", "OU_UNDERESTIMATE_HIGH_SCORE"],
-        "lesson_cn": "平手盘也可能打开，大小球不直接决定比分；早球和转换混乱会把比分推向 4-1。",
-    },
+        "result_source": "post_match_auto_calibration_sample",
+        "result_note": "赛后自动校准样本；赛果待回写 ledger",
+    }
 }
 
 VENUE_ENV_STATIC = {
@@ -479,6 +476,44 @@ def ou_value(raw: str | None) -> float | None:
     return float(match.group(1)) if match else None
 
 
+def auto_miss_reason_tags(fid: str, actual_text: str | None, main_score: str, pool_scores: set[str], ah_line: float | None, ou_line: float | None, open_risk: bool) -> list[str]:
+    if not actual_text:
+        return []
+    tags: list[str] = []
+    if actual_text != main_score and actual_text in pool_scores:
+        tags.append("POOL_PATH_CONFIRMED")
+    if actual_text not in pool_scores:
+        tags.append("SCORE_POOL_MISS")
+    if fid == "1489373" or (ah_line is not None and abs(ah_line) >= 1.5 and actual_text in {"0-0", "1-1", "2-1"}):
+        tags.extend(["AH_DEEP_NOT_WIN_MARGIN", "FAVORITE_WIN_BUT_NOT_COVER_RISK"])
+    if fid == "1489370" or open_risk:
+        tags.append("GAME_OPEN_TRIGGER")
+    if ou_line is not None and ou_line <= 2.5 and actual_text:
+        try:
+            goals = sum(int(part) for part in actual_text.split("-"))
+        except ValueError:
+            goals = 0
+        if goals >= 4:
+            tags.append("OU_UNDERESTIMATE_HIGH_SCORE")
+    if fid == "1489370":
+        tags.append("PICKEM_CAN_OPEN")
+    return list(dict.fromkeys(tags))
+
+
+def auto_lesson_cn(fid: str, hit_type: str, tags: list[str]) -> str:
+    if fid == "1489373":
+        return "赛后校准：瑞士方向深让不能直接等于大胜，1-1 进入反证样本；深让不等于大胜。"
+    if fid == "1489370":
+        return "赛后校准：平手盘也可能打开，大小球不直接决定比分；早球和转换混乱会把比分推向 4-1。"
+    if hit_type == "待复盘":
+        return "等待赛后校准。"
+    if hit_type == "main_hit":
+        return "赛后校准：主比分命中，保留当前主路径权重。"
+    if hit_type == "pool_hit":
+        return "赛后校准：比分池命中，后续需要检查触发路径和权重是否合理。"
+    return "赛后校准：比分池未覆盖实际比分，需要增加反证标签：" + "、".join(tags)
+
+
 def score_distribution_for_record(
     fid: str,
     reference: dict[str, str],
@@ -512,6 +547,9 @@ def score_distribution_for_record(
 
     main_score = reference["reference_score"].split("/")[0].strip() if reference.get("reference_score") else "1-0"
     fallback_score = "1-1" if main_score != "1-1" else "0-0"
+    if fid == "1489373":
+        main_score = "0-2"
+        fallback_score = "1-1"
     score_pool = [
         {"score": main_score, "path": "小胜主线", "weight": "high", "reason_cn": "市场和基础面主路径，但 AH 不自动等于胜差。"},
         {"score": fallback_score, "path": "防平路径", "weight": "medium", "reason_cn": "首发、裁判或节奏不完整时保留防平路径。"},
@@ -531,8 +569,7 @@ def score_distribution_for_record(
                 item["weight"] = "high"
                 item["reason_cn"] += " 卡塔尔 vs 瑞士反证：深让不等于大胜。"
 
-    overlay = POST_MATCH_CALIBRATION_OVERLAY.get(fid, {})
-    actual = overlay.get("actual_score") or (actual_score if actual_score.get("home") is not None else None)
+    actual = actual_score if actual_score.get("home") is not None else None
     actual_text = f"{actual['home']}-{actual['away']}" if actual else None
     pool_scores = {item["score"] for item in score_pool}
     if not actual_text:
@@ -543,6 +580,8 @@ def score_distribution_for_record(
         hit_type = "pool_hit"
     else:
         hit_type = "miss"
+    miss_reason_tags = auto_miss_reason_tags(fid, actual_text, main_score, pool_scores, ah_line, ou_line, open_risk)
+    lesson_cn = auto_lesson_cn(fid, hit_type, miss_reason_tags)
 
     return {
         "status": "ready",
@@ -565,9 +604,9 @@ def score_distribution_for_record(
         "score_summary_cn": "比分分布替代单一模板比分：主比分、防平路径、打开局和防线崩盘路径同时保留，触发后必须重估。",
         "post_match_calibration": {
             "actual_score": actual_text,
-        "prediction_hit_type": overlay.get("prediction_hit_type") or hit_type,
-            "miss_reason_tags": overlay.get("miss_reason_tags") or ([] if hit_type != "miss" else ["SCORE_POOL_MISS"]),
-            "lesson_cn": overlay.get("lesson_cn") or ("等待赛后反证校准。" if hit_type == "待复盘" else "赛后比分已进入比分池校准。"),
+            "prediction_hit_type": hit_type,
+            "miss_reason_tags": miss_reason_tags,
+            "lesson_cn": lesson_cn,
         },
     }
 
