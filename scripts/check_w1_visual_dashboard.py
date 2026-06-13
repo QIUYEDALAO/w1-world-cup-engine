@@ -288,6 +288,11 @@ def assert_html(data: dict) -> None:
         fail("HTML must contain exactly one detail result container")
     if "selectDefaultMatch" not in text:
         fail("HTML must include default match selection logic")
+    if r"match(/(\\d" in text:
+        fail("HTML kickoff parser must use browser regex digits, not escaped literal backslash-d")
+    for token in ("isFutureKickoff", "isToday", "uniqueByFixture", "待赛果更新"):
+        if token not in text:
+            fail(f"HTML missing date-aware focus token: {token}")
     for token in ("live", "not_started", "upcoming", "finished"):
         if token not in text:
             fail(f"Default/focus logic missing priority token: {token}")
