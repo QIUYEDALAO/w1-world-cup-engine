@@ -1965,7 +1965,7 @@
       "away": "🇵🇾 巴拉圭"
     }
   ],
-  "generated_at_utc": "2026-06-13T16:25:29+00:00",
+  "generated_at_utc": "2026-06-13T16:41:54+00:00",
   "match_records": [
     {
       "match": "墨西哥 vs 南非",
@@ -2042,6 +2042,25 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "Estadio Azteca",
+        "city": "Mexico City",
+        "country": "Mexico",
+        "kickoff_local_time": "2026-06-11 13:00 CST",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 2240,
+        "roof_status": "open",
+        "environment_risk_level": "HIGH",
+        "environment_risk_flags": [
+          "HIGH_ALTITUDE",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -2194,6 +2213,25 @@
           "fail_rules": []
         }
       },
+      "environment_context": {
+        "venue_name": "Estadio Akron",
+        "city": "Guadalajara",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-11 20:00 CST",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 1566,
+        "roof_status": "open",
+        "environment_risk_level": "HIGH",
+        "environment_risk_flags": [
+          "HIGH_ALTITUDE",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "changed",
         "changed_fields": [
@@ -2314,6 +2352,24 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "BMO Field",
+        "city": "Toronto",
+        "country": "Canada",
+        "kickoff_local_time": "2026-06-12 15:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 76,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -2460,6 +2516,25 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "SoFi Stadium",
+        "city": "Los Angeles",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-12 18:00 PDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 38,
+        "roof_status": "closed",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_IMPACT_REDUCED",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2604,6 +2679,24 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "Levi's Stadium",
+        "city": "San Francisco Bay Area",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-13 12:00 PDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 2,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -2750,6 +2843,24 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "MetLife Stadium",
+        "city": "New York New Jersey",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-13 18:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 2,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2894,6 +3005,24 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "Gillette Stadium",
+        "city": "Boston",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-13 21:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 88,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -3040,6 +3169,25 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "BC Place",
+        "city": "Vancouver",
+        "country": "Canada",
+        "kickoff_local_time": "2026-06-13 21:00 PDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 2,
+        "roof_status": "closed",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_IMPACT_REDUCED",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3184,6 +3332,25 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "NRG Stadium",
+        "city": "Houston",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-14 12:00 CDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 15,
+        "roof_status": "closed",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_IMPACT_REDUCED",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -3330,6 +3497,25 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "AT&T Stadium",
+        "city": "Dallas",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-14 15:00 CDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 184,
+        "roof_status": "closed",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_IMPACT_REDUCED",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3474,6 +3660,24 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "Lincoln Financial Field",
+        "city": "Philadelphia",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-14 19:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 12,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -3620,6 +3824,24 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "Estadio BBVA",
+        "city": "Monterrey",
+        "country": "Mexico",
+        "kickoff_local_time": "2026-06-14 20:00 CST",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 540,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3764,6 +3986,25 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "Mercedes-Benz Stadium",
+        "city": "Atlanta",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-15 12:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 315,
+        "roof_status": "closed",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_IMPACT_REDUCED",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -3910,6 +4151,24 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "Lumen Field",
+        "city": "Seattle",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-15 12:00 PDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 4,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4054,6 +4313,24 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "Hard Rock Stadium",
+        "city": "Miami",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-15 18:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 2,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -4200,6 +4477,25 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "SoFi Stadium",
+        "city": "Los Angeles",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-15 18:00 PDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 38,
+        "roof_status": "closed",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_IMPACT_REDUCED",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4344,6 +4640,24 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "MetLife Stadium",
+        "city": "New York New Jersey",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-16 15:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 2,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -4490,6 +4804,24 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "Gillette Stadium",
+        "city": "Boston",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-16 18:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 88,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4634,6 +4966,24 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "Arrowhead Stadium",
+        "city": "Kansas City",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-16 20:00 CDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 265,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -4780,6 +5130,24 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "Levi's Stadium",
+        "city": "San Francisco Bay Area",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-16 21:00 PDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 2,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4924,6 +5292,25 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "NRG Stadium",
+        "city": "Houston",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-17 12:00 CDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 15,
+        "roof_status": "closed",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_IMPACT_REDUCED",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",
@@ -5070,6 +5457,25 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "AT&T Stadium",
+        "city": "Dallas",
+        "country": "USA",
+        "kickoff_local_time": "2026-06-17 15:00 CDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 184,
+        "roof_status": "closed",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_IMPACT_REDUCED",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -5215,6 +5621,24 @@
           ]
         }
       },
+      "environment_context": {
+        "venue_name": "BMO Field",
+        "city": "Toronto",
+        "country": "Canada",
+        "kickoff_local_time": "2026-06-17 19:00 EDT",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 76,
+        "roof_status": "open",
+        "environment_risk_level": "LOW",
+        "environment_risk_flags": [
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -5359,6 +5783,25 @@
             "lineups.confirmed_lineup"
           ]
         }
+      },
+      "environment_context": {
+        "venue_name": "Estadio Azteca",
+        "city": "Mexico City",
+        "country": "Mexico",
+        "kickoff_local_time": "2026-06-17 20:00 CST",
+        "weather_status": "missing",
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "altitude_m": 2240,
+        "roof_status": "open",
+        "environment_risk_level": "HIGH",
+        "environment_risk_flags": [
+          "HIGH_ALTITUDE",
+          "WEATHER_MISSING"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "odds_movement": {
         "status": "no_change",

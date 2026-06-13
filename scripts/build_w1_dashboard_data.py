@@ -9,6 +9,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -143,6 +144,25 @@ EXTERNAL_RESULT_OVERLAY = {
         "result_source": "manual_verified_overlay",
         "result_note": "赛果待回写 ledger",
     }
+}
+
+VENUE_ENV_STATIC = {
+    "Estadio Azteca": {"timezone": "America/Mexico_City", "altitude_m": 2240, "roof_status": "open"},
+    "Estadio Akron": {"timezone": "America/Mexico_City", "altitude_m": 1566, "roof_status": "open"},
+    "Estadio BBVA": {"timezone": "America/Monterrey", "altitude_m": 540, "roof_status": "open"},
+    "BMO Field": {"timezone": "America/Toronto", "altitude_m": 76, "roof_status": "open"},
+    "BC Place": {"timezone": "America/Vancouver", "altitude_m": 2, "roof_status": "closed"},
+    "SoFi Stadium": {"timezone": "America/Los_Angeles", "altitude_m": 38, "roof_status": "closed"},
+    "Levi's Stadium": {"timezone": "America/Los_Angeles", "altitude_m": 2, "roof_status": "open"},
+    "MetLife Stadium": {"timezone": "America/New_York", "altitude_m": 2, "roof_status": "open"},
+    "Gillette Stadium": {"timezone": "America/New_York", "altitude_m": 88, "roof_status": "open"},
+    "NRG Stadium": {"timezone": "America/Chicago", "altitude_m": 15, "roof_status": "closed"},
+    "AT&T Stadium": {"timezone": "America/Chicago", "altitude_m": 184, "roof_status": "closed"},
+    "Lincoln Financial Field": {"timezone": "America/New_York", "altitude_m": 12, "roof_status": "open"},
+    "Mercedes-Benz Stadium": {"timezone": "America/New_York", "altitude_m": 315, "roof_status": "closed"},
+    "Lumen Field": {"timezone": "America/Los_Angeles", "altitude_m": 4, "roof_status": "open"},
+    "Hard Rock Stadium": {"timezone": "America/New_York", "altitude_m": 2, "roof_status": "open"},
+    "Arrowhead Stadium": {"timezone": "America/Chicago", "altitude_m": 265, "roof_status": "open"},
 }
 
 
@@ -476,6 +496,95 @@ def data_quality_for_card(
     }
 
 
+def parse_utc_datetime(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    try:
+        return datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def local_kickoff_label(kickoff_utc: str | None, venue_name: str) -> str | None:
+    kickoff = parse_utc_datetime(kickoff_utc)
+    if not kickoff:
+        return None
+    tz_name = VENUE_ENV_STATIC.get(venue_name, {}).get("timezone")
+    if not tz_name:
+        return kickoff.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    try:
+        local = kickoff.astimezone(ZoneInfo(tz_name))
+    except Exception:  # noqa: BLE001 - local timezone lookup can vary by host
+        local = kickoff.astimezone(timezone.utc)
+        return local.strftime("%Y-%m-%d %H:%M UTC")
+    return local.strftime("%Y-%m-%d %H:%M %Z")
+
+
+def environment_context_for_card(card: dict[str, Any], latest: dict[str, Any]) -> dict[str, Any]:
+    match = card.get("match", {})
+    venue = match.get("venue", {})
+    venue_name = venue.get("name") or latest.get("venue") or "暂缺"
+    city = venue.get("city") or latest.get("city") or "暂缺"
+    country = venue.get("country") or latest.get("country") or "暂缺"
+    static = VENUE_ENV_STATIC.get(venue_name, {})
+    context_weather = card.get("context", {}).get("weather", {})
+    weather_ready = str(context_weather.get("status", "")).upper() == "OK"
+
+    temperature_c = context_weather.get("temperature_c")
+    humidity_pct = context_weather.get("humidity_pct")
+    wind_speed_kmh = context_weather.get("wind_speed_kmh")
+    precipitation_mm = context_weather.get("precipitation_mm")
+    weather_status = "ready" if weather_ready and temperature_c is not None else "missing"
+    altitude_m = static.get("altitude_m")
+    roof_status = static.get("roof_status", "unknown")
+
+    flags: list[str] = []
+    if temperature_c is not None and float(temperature_c) >= 30:
+        flags.append("HIGH_TEMP")
+    if humidity_pct is not None and float(humidity_pct) >= 70:
+        flags.append("HIGH_HUMIDITY")
+    if altitude_m is not None and float(altitude_m) >= 1200:
+        flags.append("HIGH_ALTITUDE")
+    if wind_speed_kmh is not None and float(wind_speed_kmh) >= 25:
+        flags.append("HIGH_WIND")
+    if precipitation_mm is not None and float(precipitation_mm) > 0:
+        flags.append("RAIN_RISK")
+    if roof_status == "closed":
+        flags.append("WEATHER_IMPACT_REDUCED")
+    if weather_status == "missing":
+        flags.append("WEATHER_MISSING")
+
+    risk_flags = [flag for flag in flags if flag not in {"WEATHER_IMPACT_REDUCED", "WEATHER_MISSING"}]
+    if any(flag in risk_flags for flag in ("HIGH_TEMP", "HIGH_ALTITUDE", "HIGH_WIND")):
+        risk_level = "HIGH"
+    elif risk_flags:
+        risk_level = "MEDIUM"
+    else:
+        risk_level = "LOW"
+
+    if weather_status == "missing":
+        summary = "天气数据暂缺"
+    else:
+        summary = f"天气数据已接入，温度 {temperature_c}°C，湿度 {humidity_pct}%。环境仅作为辅助风险，不直接触发正式风控。"
+
+    return {
+        "venue_name": venue_name,
+        "city": city,
+        "country": country,
+        "kickoff_local_time": local_kickoff_label(match.get("kickoff_utc") or latest.get("kickoff_utc"), venue_name),
+        "weather_status": weather_status,
+        "temperature_c": temperature_c,
+        "humidity_pct": humidity_pct,
+        "wind_speed_kmh": wind_speed_kmh,
+        "precipitation_mm": precipitation_mm,
+        "altitude_m": altitude_m,
+        "roof_status": roof_status,
+        "environment_risk_level": risk_level,
+        "environment_risk_flags": flags,
+        "environment_summary_cn": summary,
+    }
+
+
 def build_record(
     card_path: Path,
     latest: dict[str, Any],
@@ -535,6 +644,7 @@ def build_record(
         boss_summary = f"{home_cn} vs {away_cn}：通过 W1 风控，可正式分析"
 
     data_quality = data_quality_for_card(card, latest, play_guard_pass, odds_ok, risks, gaps)
+    environment_context = environment_context_for_card(card, latest)
 
     return {
         "match": f"{home_cn} vs {away_cn}",
@@ -567,6 +677,7 @@ def build_record(
         "referee_status": (ledger or {}).get("referee_status") or latest.get("referee_status") or ("READY" if referee.get("available") else "MISSING"),
         "odds_status": "READY" if odds_ok else "WAIT",
         "data_quality": data_quality,
+        "environment_context": environment_context,
         "odds_movement": movement,
         "market_signal": market_signal,
         "supporting_factors": [cn_display_text(item) for item in supporting],
@@ -626,6 +737,26 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         quality["play_guard"]["fail_rules"] = [rule_map.get(str(rule), clean_public_text(rule)) for rule in quality.get("play_guard", {}).get("fail_rules", [])]
         return quality
 
+    def public_environment(value: dict[str, Any]) -> dict[str, Any]:
+        env = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        weather_map = {"ready": "已接入", "missing": "暂缺", "partial": "部分可用", "error": "错误"}
+        roof_map = {"open": "露天", "closed": "闭合/可闭合", "unknown": "暂缺"}
+        risk_map = {"LOW": "低", "MEDIUM": "中", "HIGH": "高"}
+        flag_map = {
+            "HIGH_TEMP": "高温",
+            "HIGH_HUMIDITY": "高湿度",
+            "HIGH_ALTITUDE": "高海拔",
+            "HIGH_WIND": "大风",
+            "RAIN_RISK": "降雨",
+            "WEATHER_IMPACT_REDUCED": "屋顶降低天气影响",
+            "WEATHER_MISSING": "天气数据暂缺",
+        }
+        env["weather_status"] = weather_map.get(str(env.get("weather_status")), clean_public_text(env.get("weather_status", "暂缺")))
+        env["roof_status"] = roof_map.get(str(env.get("roof_status")), clean_public_text(env.get("roof_status", "暂缺")))
+        env["environment_risk_level"] = risk_map.get(str(env.get("environment_risk_level")), clean_public_text(env.get("environment_risk_level", "暂缺")))
+        env["environment_risk_flags"] = [flag_map.get(str(flag), clean_public_text(flag)) for flag in env.get("environment_risk_flags", [])]
+        return env
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -668,6 +799,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "odds_movement": clean_movement,
             "market_signal": row["market_signal"],
             "data_quality": public_quality(row["data_quality"]),
+            "environment_context": public_environment(row["environment_context"]),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
             "data_gaps": clean_gaps,

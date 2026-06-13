@@ -119,6 +119,7 @@ def main() -> int:
             "boss_summary_cn",
             "next_refresh",
             "data_quality",
+            "environment_context",
         ]
         for row in records:
             missing = [key for key in required_fields if key not in row]
@@ -144,6 +145,31 @@ def main() -> int:
                     fail(f"{row.get('fixture_id')}: data_quality missing {key}")
             if "fail_rules" not in quality.get("play_guard", {}):
                 fail(f"{row.get('fixture_id')}: data_quality.play_guard.fail_rules missing")
+            env = row.get("environment_context", {})
+            if not env:
+                fail(f"{row.get('fixture_id')}: environment_context missing")
+            for key in (
+                "venue_name",
+                "city",
+                "country",
+                "kickoff_local_time",
+                "weather_status",
+                "temperature_c",
+                "humidity_pct",
+                "wind_speed_kmh",
+                "precipitation_mm",
+                "altitude_m",
+                "roof_status",
+                "environment_risk_level",
+                "environment_risk_flags",
+                "environment_summary_cn",
+            ):
+                if key not in env:
+                    fail(f"{row.get('fixture_id')}: environment_context missing {key}")
+            if not env.get("venue_name") or not env.get("city") or not env.get("country"):
+                fail(f"{row.get('fixture_id')}: environment_context venue/city/country must not be empty")
+            if env.get("weather_status") == "missing" and env.get("environment_summary_cn") != "天气数据暂缺":
+                fail(f"{row.get('fixture_id')}: missing weather must say 天气数据暂缺")
 
         qatar = next((row for row in records if row.get("fixture_id") == "1489373"), None)
         if not qatar:
@@ -157,6 +183,15 @@ def main() -> int:
             fail("fixture_id=1489373 odds must have 1X2/AH/OU")
         if "lineups.confirmed_lineup" not in qatar_quality.get("play_guard", {}).get("fail_rules", []):
             fail("fixture_id=1489373 play_guard fail_rules must include lineups.confirmed_lineup")
+        qatar_env = qatar.get("environment_context", {})
+        if qatar_env.get("venue_name") != "Levi's Stadium":
+            fail("fixture_id=1489373 venue_name must be Levi's Stadium")
+        if qatar_env.get("city") != "San Francisco Bay Area":
+            fail("fixture_id=1489373 city must be San Francisco Bay Area")
+        if qatar_env.get("weather_status") != "missing":
+            fail("fixture_id=1489373 weather_status must be missing until weather is refreshed")
+        if qatar_env.get("environment_summary_cn") != "天气数据暂缺":
+            fail("fixture_id=1489373 environment_summary_cn must be 天气数据暂缺")
 
         if data.get("status_cards", {}).get("play_guard_version") != "W1_PLAY_GUARD_V1":
             fail("PLAY_GUARD_V1 must remain in status_cards")

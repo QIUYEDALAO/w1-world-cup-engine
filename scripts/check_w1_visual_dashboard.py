@@ -248,6 +248,15 @@ def assert_html(data: dict) -> None:
         "首发：",
         "风控：",
         "数据部分缺失",
+        "比赛环境",
+        "球场：",
+        "天气：",
+        "温度：",
+        "湿度：",
+        "风速：",
+        "海拔：",
+        "环境风险：",
+        "天气数据暂缺",
         "当前你只需要看这里",
         "24 场 W1 数据已绑定",
         "墨西哥 vs 南非",
@@ -344,6 +353,8 @@ def assert_html(data: dict) -> None:
     qatar = next((row for row in embedded_data.get("match_records", []) if row.get("fixture_id") == "1489373"), None)
     if not qatar or "data_quality" not in qatar:
         fail("Embedded match_records must expose data_quality for fixture_id=1489373")
+    if "environment_context" not in qatar:
+        fail("Embedded match_records must expose environment_context for fixture_id=1489373")
 
 
 def assert_docs() -> None:

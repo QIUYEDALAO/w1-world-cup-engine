@@ -13,6 +13,7 @@
     "squad",
     "lineups",
     "context",
+    "environment_context",
     "odds_movement",
     "market_signal",
     "risk_flags",
@@ -295,6 +296,116 @@
         },
         "travel_distance": {
           "$ref": "#/$defs/context_block"
+        }
+      }
+    },
+    "environment_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "venue_name",
+        "city",
+        "country",
+        "kickoff_local_time",
+        "weather_status",
+        "temperature_c",
+        "humidity_pct",
+        "wind_speed_kmh",
+        "precipitation_mm",
+        "altitude_m",
+        "roof_status",
+        "environment_risk_level",
+        "environment_risk_flags",
+        "environment_summary_cn"
+      ],
+      "properties": {
+        "venue_name": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "kickoff_local_time": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "weather_status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "missing",
+            "partial",
+            "error"
+          ]
+        },
+        "temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "humidity_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "wind_speed_kmh": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "precipitation_mm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "altitude_m": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "roof_status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "closed",
+            "unknown"
+          ]
+        },
+        "environment_risk_level": {
+          "type": "string",
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "environment_risk_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "HIGH_TEMP",
+              "HIGH_HUMIDITY",
+              "HIGH_ALTITUDE",
+              "HIGH_WIND",
+              "RAIN_RISK",
+              "WEATHER_IMPACT_REDUCED",
+              "WEATHER_MISSING"
+            ]
+          }
+        },
+        "environment_summary_cn": {
+          "type": "string"
         }
       }
     },
