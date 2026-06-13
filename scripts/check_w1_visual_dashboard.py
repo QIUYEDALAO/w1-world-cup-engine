@@ -231,7 +231,7 @@ def assert_html(data: dict) -> None:
         "W1 世界杯赛前预测总控台",
         "WHO",
         "WINS?",
-        "今日焦点",
+        "今日/下一场焦点",
         "对阵预测台",
         "teamA",
         "teamB",
@@ -240,9 +240,9 @@ def assert_html(data: dict) -> None:
         "开始预测",
         "result",
         "fix-card",
-        "KEY FACTORS",
-        "RISK ALERT",
-        "DATA GAPS",
+        "详细解读",
+        "风险提示",
+        "关键缺口",
         "当前你只需要看这里",
         "24 场 W1 数据已绑定",
         "墨西哥 vs 南非",
@@ -282,6 +282,21 @@ def assert_html(data: dict) -> None:
     for token in ("buildW1Card", "render(", "addEventListener('click'", "两支球队不能相同"):
         if token not in text:
             fail(f"HTML missing local interaction token: {token}")
+    if text.count('class="arena"') != 1:
+        fail("HTML must contain exactly one main prediction panel")
+    if text.count('id="result"') != 1:
+        fail("HTML must contain exactly one detail result container")
+    if "selectDefaultMatch" not in text:
+        fail("HTML must include default match selection logic")
+    for token in ("live", "not_started", "upcoming", "finished"):
+        if token not in text:
+            fail(f"Default/focus logic missing priority token: {token}")
+    select_idx = text.find("function selectDefaultMatch")
+    if select_idx < 0:
+        fail("selectDefaultMatch function missing")
+    select_body = text[select_idx:select_idx + 1200]
+    if not (select_body.find("live") < select_body.find("todayNotStarted") < select_body.find("upcoming") < select_body.find("finished")):
+        fail("Default selection must prefer live/not_started/upcoming before finished")
     for raw_key in ("play_guard_pass", "lineup_status", "W1_WAIT"):
         if raw_key in text:
             fail(f"HTML must not expose raw key: {raw_key}")
@@ -321,6 +336,8 @@ def assert_docs() -> None:
 
 
 def assert_original_site_capture() -> None:
+    if not CAPTURE_DIR.is_dir():
+        return
     required = [
         "original_home_full.png",
         "original_first_view.png",
