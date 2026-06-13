@@ -4,9 +4,15 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import socket
+import subprocess
 import sys
+import time
 from pathlib import Path
+from urllib import request
+from urllib.error import URLError
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +80,28 @@ def assert_server() -> None:
         fail("server must write runtime progress file")
     if "reports/dashboard/assets/w1_dashboard_data.json" not in text:
         fail("server must update dashboard data")
+    for token in (
+        "resolve_predict_match",
+        "find_match_by_fixture_id",
+        "find_match_by_name",
+        "未找到对应比赛 fixture_id",
+        "payload.get(\"fixture_id\")",
+        "current_match",
+    ):
+        if token not in text:
+            fail(f"server missing fixture_id priority token: {token}")
+    fixture_branch = re.search(
+        r"if fixture_id:.*?find_match_by_fixture_id\(fixture_id\).*?return progress_match",
+        text,
+        re.S,
+    )
+    if not fixture_branch:
+        fail("server must exact-match by fixture_id before any name fallback")
+    start = text.find("if fixture_id:")
+    end = text.find("home =", start)
+    fixture_only_block = text[start:end]
+    if "find_match_by_name" in fixture_only_block:
+        fail("fixture_id branch must not call name fallback")
 
 
 def assert_runner() -> None:
@@ -104,6 +132,8 @@ def assert_dashboard() -> None:
         "检查 W1 风控",
         "更新 dashboard",
         "数据暂缺，保留上一版",
+        "fixture_id:fixtureId",
+        "const selectedMatch=selectedRecord",
     ):
         if token not in text:
             fail(f"dashboard missing token: {token}")
@@ -125,6 +155,74 @@ def assert_progress_schema() -> None:
         fail("progress must include weather/environment step")
 
 
+def free_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return int(sock.getsockname()[1])
+
+
+def http_json(url: str, payload: dict[str, str] | None = None) -> dict[str, object]:
+    if payload is None:
+        with request.urlopen(url, timeout=5) as response:
+            return json.loads(response.read().decode("utf-8"))
+    body = json.dumps(payload).encode("utf-8")
+    req = request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
+    with request.urlopen(req, timeout=5) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def assert_fixture_id_smoke() -> None:
+    port = free_port()
+    env = os.environ.copy()
+    env["W1_DASHBOARD_PORT"] = str(port)
+    proc = subprocess.Popen(
+        ["python3", str(SERVER)],
+        cwd=ROOT,
+        env=env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    try:
+        base = f"http://127.0.0.1:{port}"
+        for _ in range(30):
+            try:
+                if http_json(f"{base}/health").get("ok"):
+                    break
+            except (URLError, TimeoutError, ConnectionError):
+                time.sleep(0.1)
+        else:
+            fail("smoke server did not start")
+
+        started = http_json(f"{base}/predict", {"fixture_id": "1489373"})
+        if not started.get("ok"):
+            fail("fixture_id smoke predict did not start")
+        for _ in range(15):
+            progress = http_json(f"{base}/progress")
+            current = progress.get("current_match") or progress.get("match") or {}
+            if current.get("fixture_id") == "1489373":
+                match = current.get("match") or ""
+                home_en = current.get("home_team") or ""
+                away_en = current.get("away_team") or ""
+                home = current.get("home_team_cn") or ""
+                away = current.get("away_team_cn") or ""
+                text = f"{match} {home_en} {away_en} {home} {away}"
+                if "Qatar" not in text or "Switzerland" not in text:
+                    fail("fixture_id=1489373 smoke resolved to wrong match")
+                if "Brazil" in text or "Morocco" in text:
+                    fail("fixture_id=1489373 smoke must not resolve to Brazil vs Morocco")
+                return
+            time.sleep(0.1)
+        fail("fixture_id=1489373 smoke did not reach progress/current_match")
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=3)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=3)
+
+
 def main() -> int:
     try:
         for path in (SERVER, RUNNER, HTML):
@@ -135,6 +233,7 @@ def main() -> int:
         assert_runner()
         assert_dashboard()
         assert_progress_schema()
+        assert_fixture_id_smoke()
     except (CheckError, json.JSONDecodeError) as exc:
         print(f"W1 click-to-predict check FAIL: {exc}", file=sys.stderr)
         return 1

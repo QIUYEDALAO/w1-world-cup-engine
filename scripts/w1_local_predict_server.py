@@ -79,7 +79,7 @@ def progress_payload(
             state = "running"
         elif status == "done":
             state = "done"
-        elif status == "failed" and index == step_index:
+        elif status in {"failed", "error"} and index == step_index:
             state = "failed"
         else:
             state = "waiting"
@@ -94,6 +94,7 @@ def progress_payload(
         "step_label": STEPS[max(0, min(step_index - 1, len(STEPS) - 1))],
         "message_cn": message,
         "match": match,
+        "current_match": match,
         "steps": steps,
         "error_cn": error,
         "dashboard_data_path": str(DASHBOARD_DATA.relative_to(ROOT)),
@@ -112,16 +113,60 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp.replace(path)
 
 
-def find_match(home: str, away: str) -> dict[str, Any] | None:
+def match_records() -> list[dict[str, Any]]:
     if not DASHBOARD_DATA.is_file():
-        return None
+        return []
     data = load_json(DASHBOARD_DATA)
-    for row in data.get("match_records", []):
+    return data.get("match_records", [])
+
+
+def find_match_by_fixture_id(fixture_id: Any) -> dict[str, Any] | None:
+    if fixture_id in (None, ""):
+        return None
+    wanted = str(fixture_id)
+    for row in match_records():
+        if str(row.get("fixture_id")) == wanted:
+            return row
+    return None
+
+
+def find_match_by_name(home: str, away: str) -> dict[str, Any] | None:
+    for row in match_records():
         if row.get("home_team_cn") == home and row.get("away_team_cn") == away:
             return row
         if row.get("home_team_cn") == away and row.get("away_team_cn") == home:
             return row
     return None
+
+
+def progress_match(row: dict[str, Any], stage_cn: str = "") -> dict[str, Any]:
+    return {
+        "fixture_id": str(row.get("fixture_id") or ""),
+        "match": row.get("match") or f"{row.get('home_team_cn', '')} vs {row.get('away_team_cn', '')}",
+        "home_team": row.get("home_team") or "",
+        "away_team": row.get("away_team") or "",
+        "home_team_cn": row.get("home_team_cn") or "",
+        "away_team_cn": row.get("away_team_cn") or "",
+        "stage_cn": stage_cn or row.get("prediction_stage_cn") or "",
+    }
+
+
+def resolve_predict_match(payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
+    fixture_id = str(payload.get("fixture_id") or "").strip()
+    if fixture_id:
+        row = find_match_by_fixture_id(fixture_id)
+        if not row:
+            return None, f"未找到对应比赛 fixture_id: {fixture_id}"
+        return progress_match(row, str(payload.get("stage_cn") or "")), None
+
+    home = str(payload.get("home_team_cn") or payload.get("home") or "")
+    away = str(payload.get("away_team_cn") or payload.get("away") or "")
+    if not home or not away:
+        return None, "请选择主队和客队。"
+    row = find_match_by_name(home, away)
+    if row:
+        return progress_match(row, str(payload.get("stage_cn") or "")), None
+    return {"home_team_cn": home, "away_team_cn": away, "stage_cn": str(payload.get("stage_cn") or "")}, None
 
 
 def venue_mapping() -> dict[str, dict[str, Any]]:
@@ -132,7 +177,9 @@ def venue_mapping() -> dict[str, dict[str, Any]]:
 
 
 def update_weather_cache(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any] | None:
-    selected = find_match(match.get("home_team_cn", ""), match.get("away_team_cn", ""))
+    selected = find_match_by_fixture_id(match.get("fixture_id"))
+    if not selected:
+        selected = find_match_by_name(match.get("home_team_cn", ""), match.get("away_team_cn", ""))
     if not selected:
         return None
     venue_name = selected.get("environment_context", {}).get("venue_name")
@@ -194,7 +241,10 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
             )
             time.sleep(0.25)
 
-            if idx == 2 and not find_match(match.get("home_team_cn", ""), match.get("away_team_cn", "")):
+            selected_for_step = find_match_by_fixture_id(match.get("fixture_id"))
+            if not selected_for_step and not match.get("fixture_id"):
+                selected_for_step = find_match_by_name(match.get("home_team_cn", ""), match.get("away_team_cn", ""))
+            if idx == 2 and not selected_for_step:
                 write_progress(
                     progress_payload(
                         job_id=job_id,
@@ -252,14 +302,16 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
         if build.returncode != 0:
             raise RuntimeError("dashboard 数据更新失败，数据暂缺，保留上一版。")
 
-        selected = find_match(match.get("home_team_cn", ""), match.get("away_team_cn", ""))
+        selected = find_match_by_fixture_id(match.get("fixture_id"))
+        if not selected and not match.get("fixture_id"):
+            selected = find_match_by_name(match.get("home_team_cn", ""), match.get("away_team_cn", ""))
         write_progress(
             progress_payload(
                 job_id=job_id,
                 status="done",
                 step_index=len(STEPS),
                 message="查询完成，已更新 dashboard。",
-                match=selected or match,
+                match=progress_match(selected, match.get("stage_cn", "")) if selected else match,
             )
         )
     except Exception as exc:  # noqa: BLE001 - convert all runtime failures to progress JSON
@@ -335,13 +387,18 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_json({"ok": False, "error_cn": "请求格式错误。"}, HTTPStatus.BAD_REQUEST)
             return
 
-        match = {
-            "home_team_cn": str(payload.get("home_team_cn") or payload.get("home") or ""),
-            "away_team_cn": str(payload.get("away_team_cn") or payload.get("away") or ""),
-            "stage_cn": str(payload.get("stage_cn") or ""),
-        }
-        if not match["home_team_cn"] or not match["away_team_cn"]:
-            self.send_json({"ok": False, "error_cn": "请选择主队和客队。"}, HTTPStatus.BAD_REQUEST)
+        match, error = resolve_predict_match(payload)
+        if error:
+            error_match = {
+                "fixture_id": str(payload.get("fixture_id") or ""),
+                "match": str(payload.get("match") or ""),
+                "home_team_cn": str(payload.get("home_team_cn") or payload.get("home") or ""),
+                "away_team_cn": str(payload.get("away_team_cn") or payload.get("away") or ""),
+                "stage_cn": str(payload.get("stage_cn") or ""),
+            }
+            write_progress(progress_payload(job_id="error", status="error", step_index=1, message=error, match=error_match, error=error))
+            status = HTTPStatus.NOT_FOUND if payload.get("fixture_id") else HTTPStatus.BAD_REQUEST
+            self.send_json({"ok": False, "error_cn": error}, status)
             return
 
         with _job_lock:
@@ -351,7 +408,8 @@ class Handler(SimpleHTTPRequestHandler):
             job_id = uuid.uuid4().hex[:12]
             _active_job = job_id
 
-        write_progress(progress_payload(job_id=job_id, status="running", step_index=1, message="初始化比赛中…", match=match))
+        init_message = f"初始化比赛中：fixture_id={match.get('fixture_id', '未提供')}，{match.get('match') or ''}"
+        write_progress(progress_payload(job_id=job_id, status="running", step_index=1, message=init_message, match=match))
         thread = threading.Thread(target=run_prediction, args=(job_id, match), daemon=True)
         thread.start()
         self.send_json({"ok": True, "job_id": job_id, "message_cn": "已开始查询。"})
