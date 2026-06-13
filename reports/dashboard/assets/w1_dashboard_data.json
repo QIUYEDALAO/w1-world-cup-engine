@@ -1724,11 +1724,11 @@
     "counter_factors": [
       "首发未公布；W1硬风控：当前保持等待。",
       "首发未确认；等待赛前名单刷新。",
-      "裁判未公布; 裁判未公布 in 比赛详情快照."
+      "裁判未公布；比赛详情快照暂未提供。"
     ],
     "key_gaps": [
       "首发未公布；阻止非等待最终结论。",
-      "裁判未公布; keep as a non-blocking gap."
+      "裁判未公布; 非阻断缺口."
     ],
     "current_action": "需要写入 ledger 做赛后验证",
     "play_guard_result": "未通过正式风控规则；赛前未放行/未形成正式 W1_PLAY",
@@ -1965,7 +1965,7 @@
       "away": "🇵🇾 巴拉圭"
     }
   ],
-  "generated_at_utc": "2026-06-13T15:08:37+00:00",
+  "generated_at_utc": "2026-06-13T16:25:29+00:00",
   "match_records": [
     {
       "match": "墨西哥 vs 南非",
@@ -2007,6 +2007,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 14,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2024,7 +2060,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -2040,17 +2076,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -2063,7 +2099,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2124,6 +2160,40 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 14,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-12T01:53:08Z"
+        },
+        "lineup": {
+          "status": "confirmed",
+          "home_count": 11,
+          "away_count": 11
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "missing",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": true,
+          "fail_rules": []
+        }
+      },
       "odds_movement": {
         "status": "changed",
         "changed_fields": [
@@ -2156,7 +2226,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2209,6 +2279,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 14,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2226,7 +2332,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -2242,17 +2348,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -2265,7 +2371,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2318,6 +2424,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 14,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2335,7 +2477,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -2351,17 +2493,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -2374,7 +2516,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2427,6 +2569,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2444,7 +2622,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -2460,17 +2638,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -2483,7 +2661,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2536,6 +2714,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2553,7 +2767,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -2569,17 +2783,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -2592,7 +2806,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2645,6 +2859,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2662,7 +2912,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -2678,17 +2928,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -2701,7 +2951,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2754,6 +3004,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2771,7 +3057,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -2787,17 +3073,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -2810,7 +3096,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2863,6 +3149,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2880,7 +3202,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -2896,17 +3218,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -2919,7 +3241,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -2972,6 +3294,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -2989,7 +3347,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3005,17 +3363,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3028,7 +3386,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3081,6 +3439,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3098,7 +3492,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3114,17 +3508,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3137,7 +3531,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3190,6 +3584,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3207,7 +3637,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3223,17 +3653,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3246,7 +3676,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3299,6 +3729,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3316,7 +3782,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3332,17 +3798,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3355,7 +3821,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3408,6 +3874,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3425,7 +3927,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3441,17 +3943,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3464,7 +3966,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3517,6 +4019,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3534,7 +4072,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3550,17 +4088,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3573,7 +4111,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3626,6 +4164,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3643,7 +4217,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3659,17 +4233,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3682,7 +4256,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3735,6 +4309,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3752,7 +4362,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3768,17 +4378,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3791,7 +4401,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3844,6 +4454,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3861,7 +4507,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3877,17 +4523,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -3900,7 +4546,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -3953,6 +4599,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -3970,7 +4652,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -3986,17 +4668,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -4009,7 +4691,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -4062,6 +4744,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4079,7 +4797,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -4095,17 +4813,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -4118,7 +4836,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -4171,6 +4889,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4188,7 +4942,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -4204,17 +4958,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -4227,7 +4981,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -4280,6 +5034,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4297,7 +5087,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -4313,17 +5103,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -4336,7 +5126,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -4389,6 +5179,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4406,7 +5232,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -4422,17 +5248,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -4445,7 +5271,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],
@@ -4498,6 +5324,42 @@
       "lineup_status": "WAIT_EVENT",
       "referee_status": "MISSING",
       "odds_status": "READY",
+      "data_quality": {
+        "overall": "partial",
+        "reason_cn": "数据部分缺失，当前只能早盘参考。",
+        "odds": {
+          "status": "success",
+          "bookmakers_count": 13,
+          "has_1x2": true,
+          "has_ah": true,
+          "has_ou": true,
+          "snapshot_time": "2026-06-10T06:45:00Z"
+        },
+        "lineup": {
+          "status": "missing",
+          "home_count": 0,
+          "away_count": 0
+        },
+        "referee": {
+          "status": "missing",
+          "name": null
+        },
+        "injuries": {
+          "status": "empty",
+          "count": 0
+        },
+        "local_context": {
+          "standings": "available",
+          "h2h": "available",
+          "squad": "available"
+        },
+        "play_guard": {
+          "pass": false,
+          "fail_rules": [
+            "lineups.confirmed_lineup"
+          ]
+        }
+      },
       "odds_movement": {
         "status": "no_change",
         "changed_fields": [],
@@ -4515,7 +5377,7 @@
       "counter_factors": [
         "首发未公布；W1硬风控：当前保持等待。",
         "首发未确认；等待赛前名单刷新。",
-        "裁判未公布; 裁判未公布 in 比赛详情快照."
+        "裁判未公布；比赛详情快照暂未提供。"
       ],
       "risk_flags": [
         {
@@ -4531,17 +5393,17 @@
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
-          "message": "裁判未公布; 裁判未公布 in 比赛详情快照."
+          "message": "裁判未公布；比赛详情快照暂未提供。"
         },
         {
           "code": "SUSPENSIONS_PARTIAL",
           "severity": "MEDIUM",
-          "message": "Suspension data remains partial and non-blocking for W1_WAIT."
+          "message": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         },
         {
           "code": "TRAVEL_DISTANCE_PARTIAL",
           "severity": "LOW",
-          "message": "Travel distance remains partial and non-blocking for W1_WAIT."
+          "message": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
         }
       ],
       "data_gaps": [
@@ -4554,7 +5416,7 @@
         {
           "field": "match.referee",
           "severity": "LOW",
-          "message": "裁判未公布; keep as a non-blocking gap.",
+          "message": "裁判未公布; 非阻断缺口.",
           "blocks_play": false
         }
       ],

@@ -158,6 +158,8 @@ def cn_display_text(value: Any) -> str:
     text = str(value)
     replacements = {
         "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT.": "首发未公布；W1硬风控：当前保持等待。",
+        "Suspension data remains partial and non-blocking for W1_WAIT.": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。",
+        "Travel distance remains partial and non-blocking for W1_WAIT.": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。",
         "confirmed_lineup missing; W1 hard rule keeps 当前保持等待.": "首发未公布；W1硬风控：当前保持等待。",
         "W1 hard rule keeps 当前保持等待": "W1硬风控：当前保持等待",
         "W1 hard rule keeps final_decision at W1_WAIT": "W1硬风控：当前保持等待",
@@ -175,6 +177,14 @@ def cn_display_text(value: Any) -> str:
         "referee_status=MISSING; referee not available in fixture detail snapshot.": "裁判未公布；比赛详情快照暂未提供。",
         "referee_status=MISSING": "裁判未公布",
         "referee not available": "裁判未公布",
+        "裁判未公布; 裁判未公布 in 比赛详情快照.": "裁判未公布；比赛详情快照暂未提供。",
+        "裁判未公布 in 比赛详情快照": "比赛详情快照暂未提供裁判信息",
+        " in 比赛详情快照": "；比赛详情快照",
+        "keep as a non-blocking gap": "非阻断缺口",
+        "non-blocking": "非阻断",
+        "final_decision": "最终判断",
+        "Suspension data remains partial and 非阻断 for W1_WAIT.": "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。",
+        "Travel distance remains partial and 非阻断 for W1_WAIT.": "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。",
         "match.referee": "裁判信息",
         "lineups.confirmed_lineup": "正式首发",
         "confirmed_lineup": "正式首发",
@@ -361,6 +371,111 @@ def format_score(home_cn: str, away_cn: str, score: dict[str, Any]) -> str | Non
     return f"{home_cn} {score['home']}-{score['away']} {away_cn}"
 
 
+def data_quality_for_card(
+    card: dict[str, Any],
+    latest: dict[str, Any],
+    play_guard_pass: bool,
+    odds_ok: bool,
+    risks: list[dict[str, Any]],
+    gaps: list[dict[str, Any]],
+) -> dict[str, Any]:
+    markets = card.get("markets", {})
+    lineups = card.get("lineups", {})
+    referee = card.get("match", {}).get("referee", {})
+    context = card.get("context", {})
+    squad = card.get("squad", {})
+
+    odds_1x2 = markets.get("odds_1X2", {})
+    odds_ah = markets.get("odds_AH", {})
+    odds_ou = markets.get("odds_OU", {})
+    bookmakers = max(
+        int(odds_1x2.get("bookmakers_count") or 0),
+        int(odds_ah.get("bookmakers_count") or 0),
+        int(odds_ou.get("bookmakers_count") or 0),
+    )
+    has_1x2 = bool(odds_1x2.get("available"))
+    has_ah = bool(odds_ah.get("available"))
+    has_ou = bool(odds_ou.get("available"))
+    odds_status = "success" if odds_ok and has_1x2 and has_ah and has_ou else "missing"
+
+    lineup_confirmed = bool(lineups.get("confirmed_lineup_available"))
+    lineup_status = "confirmed" if lineup_confirmed else "missing"
+    home_count = len(lineups.get("home_starting_xi") or [])
+    away_count = len(lineups.get("away_starting_xi") or [])
+
+    referee_status = "success" if referee.get("available") or referee.get("name") else "missing"
+    injuries_context = context.get("injuries", {})
+    injuries_summary = str(injuries_context.get("summary", ""))
+    injury_count_match = re.search(r"current=(\d+)", injuries_summary)
+    injury_count = int(injury_count_match.group(1)) if injury_count_match else 0
+    injuries_status = "empty" if injuries_context.get("status") == "OK" and injury_count == 0 else ("success" if injuries_context.get("status") == "OK" else "missing")
+
+    def availability(name: str) -> str:
+        status = str(context.get(name, {}).get("status", "")).upper()
+        return "available" if status == "OK" else "missing"
+
+    home_squad = squad.get("home", {})
+    away_squad = squad.get("away", {})
+    squad_available = bool(home_squad.get("available")) and bool(away_squad.get("available"))
+    squad_state = "available" if squad_available else ("partial" if home_squad or away_squad else "missing")
+    fail_rules = [str(gap.get("field")) for gap in gaps if gap.get("blocks_play")]
+    if not play_guard_pass and not fail_rules:
+        fail_rules = ["lineups.confirmed_lineup"]
+
+    missing_parts = []
+    if not lineup_confirmed:
+        missing_parts.append("首发未公布")
+    if referee_status == "missing":
+        missing_parts.append("裁判未公布")
+    if not odds_ok:
+        missing_parts.append("赔率/AH/OU 未齐")
+    if not squad_available:
+        missing_parts.append("squad 不完整")
+    blocking_gaps = [gap for gap in gaps if gap.get("blocks_play")]
+    overall = "complete" if not missing_parts and not blocking_gaps and play_guard_pass else ("partial" if odds_ok else "poor")
+    if overall == "complete":
+        reason = "数据完整，可进入正式判断。"
+    elif overall == "partial":
+        reason = "数据部分缺失，当前只能早盘参考。"
+    else:
+        reason = "关键数据缺失，暂不支持正式判断。"
+
+    return {
+        "overall": overall,
+        "reason_cn": reason,
+        "odds": {
+            "status": odds_status,
+            "bookmakers_count": bookmakers,
+            "has_1x2": has_1x2,
+            "has_ah": has_ah,
+            "has_ou": has_ou,
+            "snapshot_time": markets.get("odds_snapshot_time_utc") or latest.get("odds_snapshot_time_utc") or latest.get("snapshot_time"),
+        },
+        "lineup": {
+            "status": lineup_status,
+            "home_count": home_count,
+            "away_count": away_count,
+        },
+        "referee": {
+            "status": referee_status,
+            "name": referee.get("name"),
+        },
+        "injuries": {
+            "status": injuries_status,
+            "count": injury_count,
+        },
+        "local_context": {
+            "standings": availability("standings"),
+            "h2h": availability("h2h"),
+            "squad": squad_state,
+        },
+        "play_guard": {
+            "pass": play_guard_pass,
+            "fail_rules": fail_rules,
+        },
+    }
+
+
 def build_record(
     card_path: Path,
     latest: dict[str, Any],
@@ -419,6 +534,8 @@ def build_record(
         current_action = "可进入正式赛前分析，并写入 ledger"
         boss_summary = f"{home_cn} vs {away_cn}：通过 W1 风控，可正式分析"
 
+    data_quality = data_quality_for_card(card, latest, play_guard_pass, odds_ok, risks, gaps)
+
     return {
         "match": f"{home_cn} vs {away_cn}",
         "match_en": f"{home} vs {away}",
@@ -449,6 +566,7 @@ def build_record(
         "lineup_status": (ledger or {}).get("lineup_status") or latest.get("lineup_status") or lineups.get("status"),
         "referee_status": (ledger or {}).get("referee_status") or latest.get("referee_status") or ("READY" if referee.get("available") else "MISSING"),
         "odds_status": "READY" if odds_ok else "WAIT",
+        "data_quality": data_quality,
         "odds_movement": movement,
         "market_signal": market_signal,
         "supporting_factors": [cn_display_text(item) for item in supporting],
@@ -481,6 +599,33 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             value = value.replace(src, dst)
         return value
 
+    def public_quality(value: dict[str, Any]) -> dict[str, Any]:
+        if not value:
+            return {}
+
+        def status_cn(kind: str, status: Any) -> str:
+            mapping = {
+                "overall": {"complete": "数据完整", "partial": "数据部分缺失", "poor": "数据质量较差"},
+                "odds": {"success": "成功", "missing": "缺失", "stale": "过期", "error": "错误"},
+                "lineup": {"confirmed": "已确认", "probable": "预计", "missing": "未公布", "error": "错误"},
+                "referee": {"success": "已公布", "missing": "未公布", "error": "错误"},
+                "injuries": {"success": "有记录", "empty": "无记录 / 暂无", "missing": "缺失", "error": "错误"},
+                "context": {"available": "可用", "partial": "部分可用", "missing": "缺失"},
+            }
+            return mapping.get(kind, {}).get(str(status), clean_public_text(status))
+
+        quality = json.loads(json.dumps(value, ensure_ascii=False))
+        quality["overall"] = status_cn("overall", quality.get("overall"))
+        quality["odds"]["status"] = status_cn("odds", quality.get("odds", {}).get("status"))
+        quality["lineup"]["status"] = status_cn("lineup", quality.get("lineup", {}).get("status"))
+        quality["referee"]["status"] = status_cn("referee", quality.get("referee", {}).get("status"))
+        quality["injuries"]["status"] = status_cn("injuries", quality.get("injuries", {}).get("status"))
+        for key in ("standings", "h2h", "squad"):
+            quality["local_context"][key] = status_cn("context", quality.get("local_context", {}).get(key))
+        rule_map = {"lineups.confirmed_lineup": "首发未确认", "match.referee": "裁判未公布"}
+        quality["play_guard"]["fail_rules"] = [rule_map.get(str(rule), clean_public_text(rule)) for rule in quality.get("play_guard", {}).get("fail_rules", [])]
+        return quality
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -499,6 +644,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         return {
             "match": row["match"],
             "fixture_id": row["fixture_id"],
+            "group": row["group"],
             "home_team_cn": row["home_team_cn"],
             "away_team_cn": row["away_team_cn"],
             "home_flag": row["home_flag"],
@@ -521,6 +667,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "non_final_disclaimer_cn": row["non_final_disclaimer_cn"],
             "odds_movement": clean_movement,
             "market_signal": row["market_signal"],
+            "data_quality": public_quality(row["data_quality"]),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
             "data_gaps": clean_gaps,

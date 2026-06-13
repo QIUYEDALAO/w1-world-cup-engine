@@ -118,6 +118,7 @@ def main() -> int:
             "current_action_cn",
             "boss_summary_cn",
             "next_refresh",
+            "data_quality",
         ]
         for row in records:
             missing = [key for key in required_fields if key not in row]
@@ -135,6 +136,27 @@ def main() -> int:
             if row.get("reference_score") and row.get("is_final_decision") is False:
                 if "不是最终结论" not in row.get("non_final_disclaimer_cn", ""):
                     fail(f"{row.get('fixture_id')}: reference_score must carry non-final disclaimer")
+            quality = row.get("data_quality", {})
+            if not quality:
+                fail(f"{row.get('fixture_id')}: data_quality missing")
+            for key in ("overall", "reason_cn", "odds", "lineup", "referee", "injuries", "local_context", "play_guard"):
+                if key not in quality:
+                    fail(f"{row.get('fixture_id')}: data_quality missing {key}")
+            if "fail_rules" not in quality.get("play_guard", {}):
+                fail(f"{row.get('fixture_id')}: data_quality.play_guard.fail_rules missing")
+
+        qatar = next((row for row in records if row.get("fixture_id") == "1489373"), None)
+        if not qatar:
+            fail("fixture_id=1489373 Qatar vs Switzerland is missing")
+        qatar_quality = qatar.get("data_quality", {})
+        if qatar_quality.get("overall") != "partial":
+            fail("fixture_id=1489373 data_quality.overall must be partial")
+        if qatar_quality.get("odds", {}).get("bookmakers_count") != 13:
+            fail("fixture_id=1489373 odds bookmakers_count must be 13")
+        if not all(qatar_quality.get("odds", {}).get(key) is True for key in ("has_1x2", "has_ah", "has_ou")):
+            fail("fixture_id=1489373 odds must have 1X2/AH/OU")
+        if "lineups.confirmed_lineup" not in qatar_quality.get("play_guard", {}).get("fail_rules", []):
+            fail("fixture_id=1489373 play_guard fail_rules must include lineups.confirmed_lineup")
 
         if data.get("status_cards", {}).get("play_guard_version") != "W1_PLAY_GUARD_V1":
             fail("PLAY_GUARD_V1 must remain in status_cards")

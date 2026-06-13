@@ -243,6 +243,11 @@ def assert_html(data: dict) -> None:
         "详细解读",
         "风险提示",
         "关键缺口",
+        "数据质量",
+        "赔率：",
+        "首发：",
+        "风控：",
+        "数据部分缺失",
         "当前你只需要看这里",
         "24 场 W1 数据已绑定",
         "墨西哥 vs 南非",
@@ -282,6 +287,13 @@ def assert_html(data: dict) -> None:
     for token in ("buildW1Card", "render(", "addEventListener('click'", "两支球队不能相同"):
         if token not in text:
             fail(f"HTML missing local interaction token: {token}")
+    for token in ("getFullMatchRecord", "renderDataQualityPanel", "renderQueryResultSummary", "selectDefaultMatch"):
+        if token not in text:
+            fail(f"HTML missing data-binding function: {token}")
+    if "groups.round1_fixtures" in text:
+        fail("HTML must not use groups.round1_fixtures as the main display data source")
+    if "data.match_records" not in text:
+        fail("HTML main panel must reference match_records")
     if text.count('class="arena"') != 1:
         fail("HTML must contain exactly one main prediction panel")
     if text.count('id="result"') != 1:
@@ -308,6 +320,8 @@ def assert_html(data: dict) -> None:
     for token in FORBIDDEN_DASHBOARD_DISPLAY_TERMS:
         if re.search(re.escape(token), text, re.I):
             fail(f"HTML must not expose English/raw display text: {token}")
+    if "keep as a non-blocking gap" in text:
+        fail("HTML must not expose old non-blocking English copy")
 
     embedded = re.search(r'<script id="w1-data" type="application/json">(.*?)</script>', text, re.S)
     if not embedded:
@@ -327,6 +341,9 @@ def assert_html(data: dict) -> None:
         fail("Embedded dashboard JSON schema version mismatch")
     if len(embedded_data.get("groups", [])) != 12:
         fail("Embedded dashboard JSON must include 12 public groups")
+    qatar = next((row for row in embedded_data.get("match_records", []) if row.get("fixture_id") == "1489373"), None)
+    if not qatar or "data_quality" not in qatar:
+        fail("Embedded match_records must expose data_quality for fixture_id=1489373")
 
 
 def assert_docs() -> None:
