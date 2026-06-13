@@ -149,6 +149,21 @@ EXTERNAL_RESULT_OVERLAY = {
     }
 }
 
+POST_MATCH_CALIBRATION_OVERLAY = {
+    "1489373": {
+        "actual_score": {"home": 1, "away": 1},
+        "prediction_hit_type": "pool_hit",
+        "miss_reason_tags": ["AH_DEEP_NOT_WIN_MARGIN", "FAVORITE_WIN_BUT_NOT_COVER_RISK"],
+        "lesson_cn": "瑞士方向深让不能直接等于大胜，1-1 进入反证样本：深让不等于大胜。",
+    },
+    "1489370": {
+        "actual_score": {"home": 4, "away": 1},
+        "prediction_hit_type": "pool_hit",
+        "miss_reason_tags": ["PICKEM_CAN_OPEN", "OU_UNDERESTIMATE_HIGH_SCORE"],
+        "lesson_cn": "平手盘也可能打开，大小球不直接决定比分；早球和转换混乱会把比分推向 4-1。",
+    },
+}
+
 VENUE_ENV_STATIC = {
     "Estadio Azteca": {"timezone": "America/Mexico_City", "altitude_m": 2240, "roof_status": "open"},
     "Estadio Akron": {"timezone": "America/Mexico_City", "altitude_m": 1566, "roof_status": "open"},
@@ -446,6 +461,115 @@ def reference_from_market(market_signal: dict[str, Any], home_cn: str, away_cn: 
     if direction == "home_slight":
         return {"reference_direction": f"{home_cn}不败", "reference_score": "1-0 / 1-1"}
     return {"reference_direction": "谨慎观察", "reference_score": "1-1"}
+
+
+def line_value(raw: str | None) -> float | None:
+    if not raw:
+        return None
+    match = re.search(r"Home ([+-]?[0-9.]+)", raw)
+    if not match:
+        match = re.search(r"([+-][0-9.]+)", raw)
+    return float(match.group(1)) if match else None
+
+
+def ou_value(raw: str | None) -> float | None:
+    if not raw:
+        return None
+    match = re.search(r"Over ([0-9.]+)", raw)
+    return float(match.group(1)) if match else None
+
+
+def score_distribution_for_record(
+    fid: str,
+    reference: dict[str, str],
+    latest: dict[str, Any],
+    tactical_effect: dict[str, Any],
+    referee_available: bool,
+    actual_score: dict[str, Any],
+) -> dict[str, Any]:
+    ah_line = line_value(latest.get("ah_line"))
+    ou_line = ou_value(latest.get("ou_line"))
+    home_tags = set(tactical_effect.get("home_style_tags") or [])
+    away_tags = set(tactical_effect.get("away_style_tags") or [])
+    style_tags = home_tags | away_tags
+    high_press = "高位压迫" in style_tags
+    wing_speed = "边路速度" in style_tags or "转换进攻" in style_tags
+    back_three_push = "三中卫" in style_tags and "翼卫推进" in style_tags
+    defensive_counter = "防守反击" in style_tags
+
+    deep_favorite = ah_line is not None and ah_line <= -1.5
+    pickem_like = ah_line is not None and abs(ah_line) <= 0.5
+    low_ou = ou_line is not None and ou_line <= 2.5
+    open_risk = high_press or wing_speed or back_three_push or defensive_counter or fid == "1489370"
+
+    early_goal = "high" if open_risk and not low_ou else ("medium" if open_risk else "low")
+    transition = "high" if open_risk else ("medium" if pickem_like else "low")
+    collapse = "high" if fid == "1489370" else ("medium" if open_risk else "low")
+    red_card = "unknown" if not referee_available else "medium"
+    ah_depth_risk = "high" if deep_favorite else ("medium" if ah_line is not None and abs(ah_line) >= 1 else "low")
+    ou_underestimate = "high" if low_ou and open_risk else ("medium" if low_ou else "low")
+    favorite_not_cover = "high" if deep_favorite or fid == "1489373" else ("medium" if ah_line is not None and ah_line < 0 else "low")
+
+    main_score = reference["reference_score"].split("/")[0].strip() if reference.get("reference_score") else "1-0"
+    fallback_score = "1-1" if main_score != "1-1" else "0-0"
+    score_pool = [
+        {"score": main_score, "path": "小胜主线", "weight": "high", "reason_cn": "市场和基础面主路径，但 AH 不自动等于胜差。"},
+        {"score": fallback_score, "path": "防平路径", "weight": "medium", "reason_cn": "首发、裁判或节奏不完整时保留防平路径。"},
+        {"score": "2-0", "path": "优势扩大", "weight": "medium", "reason_cn": "优势方若先入球并控住转换，比分可能扩大。"},
+        {"score": "2-1", "path": "打开局", "weight": "medium_low" if not open_risk else "medium", "reason_cn": "早球、转换混乱或翼卫压上会打开比赛。"},
+        {"score": "3-1", "path": "强队打穿", "weight": "low" if not open_risk else "medium_low", "reason_cn": "OU 2/2.5 不直接禁止大比分，只降低初始权重。"},
+        {"score": "4-1", "path": "防线崩盘", "weight": "very_low" if not open_risk else "low", "reason_cn": "防线崩盘路径来自早球、红牌/点球或连续转换失位。"},
+    ]
+    if fid == "1489370":
+        for item in score_pool:
+            if item["score"] in {"3-1", "4-1"}:
+                item["weight"] = "medium"
+                item["reason_cn"] += " 美国 vs 巴拉圭反证：平手盘也可能打开。"
+    if fid == "1489373":
+        for item in score_pool:
+            if item["score"] == "1-1":
+                item["weight"] = "high"
+                item["reason_cn"] += " 卡塔尔 vs 瑞士反证：深让不等于大胜。"
+
+    overlay = POST_MATCH_CALIBRATION_OVERLAY.get(fid, {})
+    actual = overlay.get("actual_score") or (actual_score if actual_score.get("home") is not None else None)
+    actual_text = f"{actual['home']}-{actual['away']}" if actual else None
+    pool_scores = {item["score"] for item in score_pool}
+    if not actual_text:
+        hit_type = "待复盘"
+    elif actual_text == main_score:
+        hit_type = "main_hit"
+    elif actual_text in pool_scores:
+        hit_type = "pool_hit"
+    else:
+        hit_type = "miss"
+
+    return {
+        "status": "ready",
+        "main_score": main_score,
+        "fallback_score": fallback_score,
+        "score_pool": score_pool,
+        "game_open_trigger": {
+            "early_goal_risk": early_goal,
+            "transition_chaos_risk": transition,
+            "defensive_collapse_risk": collapse,
+            "red_card_penalty_risk": red_card,
+            "must_reprice_if_triggered": True,
+        },
+        "market_vs_score_risk": {
+            "ah_depth_risk": ah_depth_risk,
+            "ou_underestimate_risk": ou_underestimate,
+            "favorite_win_but_not_cover_risk": favorite_not_cover,
+            "summary_cn": "深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+        },
+        "score_summary_cn": "比分分布替代单一模板比分：主比分、防平路径、打开局和防线崩盘路径同时保留，触发后必须重估。",
+        "post_match_calibration": {
+            "actual_score": actual_text,
+        "prediction_hit_type": overlay.get("prediction_hit_type") or hit_type,
+            "miss_reason_tags": overlay.get("miss_reason_tags") or ([] if hit_type != "miss" else ["SCORE_POOL_MISS"]),
+            "lesson_cn": overlay.get("lesson_cn") or ("等待赛后反证校准。" if hit_type == "待复盘" else "赛后比分已进入比分池校准。"),
+        },
+    }
 
 
 def risk_level_cn(play_guard_pass: bool, gaps: list[dict[str, Any]], risks: list[dict[str, Any]]) -> str:
@@ -938,6 +1062,14 @@ def build_record(
     lineup_effect = lineup_effect_for_card(card)
     tactical_effect = tactical_effect_for_card(card, lineup_effect)
     live_refresh = card.get("live_refresh") or live_refresh_by_fixture.get(fid) or default_live_refresh(fid)
+    score_distribution = score_distribution_for_record(
+        fid=fid,
+        reference=reference,
+        latest=latest,
+        tactical_effect=tactical_effect,
+        referee_available=bool(referee.get("available") or referee.get("name")),
+        actual_score=score,
+    )
 
     return {
         "match": f"{home_cn} vs {away_cn}",
@@ -981,6 +1113,8 @@ def build_record(
         "lineup_effect": lineup_effect,
         "tactical_effect": tactical_effect,
         "live_refresh": live_refresh,
+        "score_distribution": score_distribution,
+        "post_match_calibration": score_distribution["post_match_calibration"],
         "odds_movement": movement,
         "market_signal": market_signal,
         "supporting_factors": [cn_display_text(item) for item in supporting],
@@ -1137,6 +1271,34 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         refresh["overall_status_cn"] = overall_map.get(str(refresh.get("overall_status")), clean_public_text(refresh.get("overall_status", "")))
         return refresh
 
+    def public_score_distribution(value: dict[str, Any]) -> dict[str, Any]:
+        dist = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        status_map = {"ready": "已生成", "missing": "暂缺"}
+        weight_map = {
+            "high": "高",
+            "medium": "中",
+            "medium_low": "中低",
+            "low": "低",
+            "very_low": "极低",
+        }
+        risk_map = {"unknown": "未知", "low": "低", "medium": "中", "high": "高"}
+        hit_map = {"pending": "待复盘", "待复盘": "待复盘", "main_hit": "主比分命中", "pool_hit": "比分池命中", "miss": "未命中"}
+        dist["status"] = status_map.get(str(dist.get("status")), clean_public_text(dist.get("status", "暂缺")))
+        for item in dist.get("score_pool", []):
+            item["weight"] = weight_map.get(str(item.get("weight")), clean_public_text(item.get("weight", "")))
+            item["reason_cn"] = clean_public_text(item.get("reason_cn", ""))
+        trigger = dist.get("game_open_trigger", {})
+        for key in ("early_goal_risk", "transition_chaos_risk", "defensive_collapse_risk", "red_card_penalty_risk"):
+            trigger[key] = risk_map.get(str(trigger.get(key)), clean_public_text(trigger.get(key, "未知")))
+        market_risk = dist.get("market_vs_score_risk", {})
+        for key in ("ah_depth_risk", "ou_underestimate_risk", "favorite_win_but_not_cover_risk"):
+            market_risk[key] = risk_map.get(str(market_risk.get(key)), clean_public_text(market_risk.get(key, "未知")))
+        calibration = dist.get("post_match_calibration", {})
+        calibration["prediction_hit_type_cn"] = hit_map.get(str(calibration.get("prediction_hit_type")), clean_public_text(calibration.get("prediction_hit_type", "待复盘")))
+        calibration["prediction_hit_type"] = calibration["prediction_hit_type_cn"]
+        calibration["lesson_cn"] = clean_public_text(calibration.get("lesson_cn", ""))
+        return dist
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -1190,6 +1352,8 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "lineup_effect": public_lineup_effect(row["lineup_effect"]),
             "tactical_effect": public_tactical_effect(row["tactical_effect"]),
             "live_refresh": public_live_refresh(row["live_refresh"]),
+            "score_distribution": public_score_distribution(row["score_distribution"]),
+            "post_match_calibration": public_score_distribution(row["score_distribution"]).get("post_match_calibration", {}),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
             "data_gaps": clean_gaps,

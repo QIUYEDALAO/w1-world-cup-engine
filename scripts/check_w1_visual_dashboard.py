@@ -252,6 +252,14 @@ def assert_html(data: dict) -> None:
         "实时 API 成功",
         "使用缓存",
         "使用兜底数据",
+        "比分分布",
+        "比分概率池",
+        "比赛打开机制",
+        "防线崩盘",
+        "深让不等于大胜",
+        "平手盘也可能打开",
+        "大小球不直接决定比分",
+        "赛后反证校准",
         "比赛环境",
         "球场：",
         "天气：",
@@ -375,6 +383,12 @@ def assert_html(data: dict) -> None:
     for key in ("source", "status", "fetched_at", "message_cn"):
         if key not in lineups:
             fail(f"Embedded live_refresh.modules.lineups missing {key}")
+    if "score_distribution" not in qatar:
+        fail("Embedded match_records must expose score_distribution for fixture_id=1489373")
+    qatar_score = qatar.get("score_distribution", {})
+    for key in ("score_pool", "game_open_trigger", "market_vs_score_risk", "post_match_calibration"):
+        if key not in qatar_score:
+            fail(f"Embedded score_distribution missing {key}")
 
 
 def assert_docs() -> None:

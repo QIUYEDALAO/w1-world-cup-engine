@@ -190,6 +190,8 @@ def main() -> int:
             "lineup_effect",
             "tactical_effect",
             "live_refresh",
+            "score_distribution",
+            "post_match_calibration",
         ]
         for row in records:
             missing = [key for key in required_fields if key not in row]
@@ -261,10 +263,38 @@ def main() -> int:
                 for key in ("requested", "source", "status", "fetched_at", "message_cn"):
                     if key not in module:
                         fail(f"{row.get('fixture_id')}: live_refresh.modules.{module_name} missing {key}")
+            score_distribution = row.get("score_distribution", {})
+            if not score_distribution:
+                fail(f"{row.get('fixture_id')}: score_distribution missing")
+            for key in ("status", "main_score", "fallback_score", "score_pool", "game_open_trigger", "market_vs_score_risk", "score_summary_cn", "post_match_calibration"):
+                if key not in score_distribution:
+                    fail(f"{row.get('fixture_id')}: score_distribution missing {key}")
+            if len(score_distribution.get("score_pool", [])) < 6:
+                fail(f"{row.get('fixture_id')}: score_distribution.score_pool must contain at least 6 paths")
+            pool_text = " ".join(item.get("path", "") for item in score_distribution.get("score_pool", []))
+            if "防线崩盘" not in pool_text:
+                fail(f"{row.get('fixture_id')}: score pool must include 防线崩盘")
+            market_summary = score_distribution.get("market_vs_score_risk", {}).get("summary_cn", "")
+            for token in ("深让不等于大胜", "平手盘也可能打开", "大小球不直接决定比分"):
+                if token not in market_summary:
+                    fail(f"{row.get('fixture_id')}: market_vs_score_risk.summary_cn missing {token}")
 
         qatar = next((row for row in records if row.get("fixture_id") == "1489373"), None)
         if not qatar:
             fail("fixture_id=1489373 Qatar vs Switzerland is missing")
+        qatar_cal = qatar.get("post_match_calibration", {})
+        if qatar_cal.get("actual_score") != "1-1":
+            fail("fixture_id=1489373 post_match_calibration.actual_score must be 1-1")
+        if "深让不等于大胜" not in qatar_cal.get("lesson_cn", ""):
+            fail("fixture_id=1489373 calibration must include 深让不等于大胜")
+        usa = next((row for row in records if row.get("fixture_id") == "1489370"), None)
+        if not usa:
+            fail("fixture_id=1489370 USA vs Paraguay is missing")
+        usa_cal = usa.get("post_match_calibration", {})
+        if usa_cal.get("actual_score") != "4-1":
+            fail("fixture_id=1489370 post_match_calibration.actual_score must be 4-1")
+        if "平手盘也可能打开" not in usa_cal.get("lesson_cn", ""):
+            fail("fixture_id=1489370 calibration must include 平手盘也可能打开")
         qatar_lineups = qatar.get("live_refresh", {}).get("modules", {}).get("lineups", {})
         for key in ("source", "status", "fetched_at", "message_cn"):
             if key not in qatar_lineups:

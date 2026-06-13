@@ -635,6 +635,56 @@
         }
       }
     },
+    "score_distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "main_score",
+        "fallback_score",
+        "score_pool",
+        "game_open_trigger",
+        "market_vs_score_risk",
+        "score_summary_cn",
+        "post_match_calibration"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "missing",
+            "ready"
+          ]
+        },
+        "main_score": {
+          "type": "string"
+        },
+        "fallback_score": {
+          "type": "string"
+        },
+        "score_pool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/score_pool_item"
+          }
+        },
+        "game_open_trigger": {
+          "$ref": "#/$defs/game_open_trigger"
+        },
+        "market_vs_score_risk": {
+          "$ref": "#/$defs/market_vs_score_risk"
+        },
+        "score_summary_cn": {
+          "type": "string"
+        },
+        "post_match_calibration": {
+          "$ref": "#/$defs/post_match_calibration"
+        }
+      }
+    },
+    "post_match_calibration": {
+      "$ref": "#/$defs/post_match_calibration"
+    },
     "risk_flags": {
       "type": "array",
       "items": {
@@ -1050,6 +1100,142 @@
           "type": "string"
         }
       }
+    },
+    "score_pool_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "path",
+        "weight",
+        "reason_cn"
+      ],
+      "properties": {
+        "score": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "medium_low",
+            "low",
+            "very_low"
+          ]
+        },
+        "reason_cn": {
+          "type": "string"
+        }
+      }
+    },
+    "game_open_trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "early_goal_risk",
+        "transition_chaos_risk",
+        "defensive_collapse_risk",
+        "red_card_penalty_risk",
+        "must_reprice_if_triggered"
+      ],
+      "properties": {
+        "early_goal_risk": {
+          "$ref": "#/$defs/score_risk_level"
+        },
+        "transition_chaos_risk": {
+          "$ref": "#/$defs/score_risk_level"
+        },
+        "defensive_collapse_risk": {
+          "$ref": "#/$defs/score_risk_level"
+        },
+        "red_card_penalty_risk": {
+          "$ref": "#/$defs/score_risk_level_with_unknown"
+        },
+        "must_reprice_if_triggered": {
+          "type": "boolean"
+        }
+      }
+    },
+    "market_vs_score_risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ah_depth_risk",
+        "ou_underestimate_risk",
+        "favorite_win_but_not_cover_risk",
+        "summary_cn"
+      ],
+      "properties": {
+        "ah_depth_risk": {
+          "$ref": "#/$defs/score_risk_level"
+        },
+        "ou_underestimate_risk": {
+          "$ref": "#/$defs/score_risk_level"
+        },
+        "favorite_win_but_not_cover_risk": {
+          "$ref": "#/$defs/score_risk_level"
+        },
+        "summary_cn": {
+          "type": "string"
+        }
+      }
+    },
+    "post_match_calibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_score",
+        "prediction_hit_type",
+        "miss_reason_tags",
+        "lesson_cn"
+      ],
+      "properties": {
+        "actual_score": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prediction_hit_type": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "main_hit",
+            "pool_hit",
+            "miss"
+          ]
+        },
+        "miss_reason_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lesson_cn": {
+          "type": "string"
+        }
+      }
+    },
+    "score_risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "score_risk_level_with_unknown": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "low",
+        "medium",
+        "high"
+      ]
     },
     "flag": {
       "type": "object",

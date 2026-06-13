@@ -148,6 +148,9 @@ def assert_dashboard() -> None:
         "实时 API 成功",
         "使用缓存",
         "使用兜底数据",
+        "比分分布",
+        "比赛打开机制",
+        "深让不等于大胜",
         "数据暂缺，保留上一版",
         "fixture_id:fixtureId",
         "const selectedMatch=selectedRecord",
@@ -259,6 +262,11 @@ def assert_fixture_id_smoke() -> None:
                         fail("fixture_id=1489373 lineup_effect.status must be ready after smoke")
                     if qatar.get("tactical_effect", {}).get("status") != "ready":
                         fail("fixture_id=1489373 tactical_effect.status must be ready after smoke")
+                    score_distribution = qatar.get("score_distribution", {})
+                    if not score_distribution:
+                        fail("fixture_id=1489373 score_distribution missing after smoke")
+                    if "post_match_calibration" not in score_distribution:
+                        fail("fixture_id=1489373 score_distribution.post_match_calibration missing after smoke")
                     live_refresh = qatar.get("live_refresh", {})
                     lineups = live_refresh.get("modules", {}).get("lineups", {})
                     for key in ("source", "status", "fetched_at", "message_cn"):
