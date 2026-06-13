@@ -6,12 +6,14 @@ from __future__ import annotations
 import json
 import re
 import sys
+import importlib.util
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
+QATAR_CARD = ROOT / "data/processed/match_cards/group_stage_round1/fixture_1489373_qatar_vs_switzerland.json"
 
 FORBIDDEN_TERMS = [
     "待 W1 参考信号",
@@ -49,7 +51,60 @@ def assert_no_forbidden_text(text: str, label: str) -> None:
             if re.search(rf"(?<![A-Za-z]){re.escape(term)}(?![A-Za-z])", text, re.I):
                 fail(f"Forbidden term found in {label}: {term}")
         elif term in text:
-            fail(f"Forbidden term found in {label}: {term}")
+                fail(f"Forbidden term found in {label}: {term}")
+
+
+def assert_lineup_effect_builder() -> None:
+    source = read(BUILD_SCRIPT)
+    for token in ("lineup_effect_for_card", "reference_should_recalculate", "key_absences", "rotation_flags", "lineup_summary_cn"):
+        if token not in source:
+            fail(f"build_w1_dashboard_data.py missing lineup_effect token: {token}")
+    if not QATAR_CARD.is_file():
+        fail("Qatar vs Switzerland card missing for lineup_effect validation")
+    spec = importlib.util.spec_from_file_location("w1_dashboard_builder", BUILD_SCRIPT)
+    if not spec or not spec.loader:
+        fail("Unable to import dashboard builder")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    card = json.loads(read(QATAR_CARD))
+    effect = module.lineup_effect_for_card(card)
+    required = (
+        "status",
+        "formation_home",
+        "formation_away",
+        "formation_changed",
+        "home_starter_confidence",
+        "away_starter_confidence",
+        "key_absences",
+        "rotation_flags",
+        "attacking_power_effect",
+        "defensive_stability_effect",
+        "midfield_control_effect",
+        "pace_transition_effect",
+        "set_piece_effect",
+        "pressing_effect",
+        "reference_should_recalculate",
+        "lineup_summary_cn",
+    )
+    missing = [key for key in required if key not in effect]
+    if missing:
+        fail(f"lineup_effect missing keys: {missing}")
+    if effect["status"] != "missing":
+        fail("Qatar vs Switzerland lineup_effect.status must be missing before confirmed lineup")
+    if effect["reference_should_recalculate"] is not False:
+        fail("Missing lineup must not force reference recalculation")
+    for key in (
+        "attacking_power_effect",
+        "defensive_stability_effect",
+        "midfield_control_effect",
+        "pace_transition_effect",
+        "set_piece_effect",
+        "pressing_effect",
+    ):
+        if effect.get(key) != "unknown":
+            fail(f"Missing lineup must keep {key}=unknown")
+    if "首发未确认" not in effect.get("lineup_summary_cn", ""):
+        fail("Missing lineup summary must explain 首发未确认")
 
 
 def main() -> int:
@@ -67,6 +122,7 @@ def main() -> int:
             fail("schema_version must be W1_VISUAL_DASHBOARD_DATA_BOUND_V1")
         if data.get("dashboard_binding", {}).get("version") != "W1_DATA_BINDING_V1":
             fail("dashboard_binding.version must be W1_DATA_BINDING_V1")
+        assert_lineup_effect_builder()
 
         records = data.get("match_records", [])
         if len(records) < 24:
@@ -170,6 +226,11 @@ def main() -> int:
                 fail(f"{row.get('fixture_id')}: environment_context venue/city/country must not be empty")
             if env.get("weather_status") == "missing" and env.get("environment_summary_cn") != "天气数据暂缺":
                 fail(f"{row.get('fixture_id')}: missing weather must say 天气数据暂缺")
+            lineup_effect = row.get("lineup_effect")
+            if lineup_effect:
+                for key in ("status", "key_absences", "rotation_flags", "reference_should_recalculate", "lineup_summary_cn"):
+                    if key not in lineup_effect:
+                        fail(f"{row.get('fixture_id')}: lineup_effect missing {key}")
 
         qatar = next((row for row in records if row.get("fixture_id") == "1489373"), None)
         if not qatar:

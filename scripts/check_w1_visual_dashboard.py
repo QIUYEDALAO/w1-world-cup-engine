@@ -314,6 +314,9 @@ def assert_html(data: dict) -> None:
     for token in ("isFutureKickoff", "isToday", "uniqueByFixture", "待赛果更新"):
         if token not in text:
             fail(f"HTML missing date-aware focus token: {token}")
+    for token in ("首发效应", "核心缺席", "轮换风险", "进攻/防守/中场", "转换速度/定位球/压迫", "是否需要重算参考倾向"):
+        if token not in text:
+            fail(f"HTML missing lineup effect token: {token}")
     for token in ("live", "not_started", "upcoming", "finished"):
         if token not in text:
             fail(f"Default/focus logic missing priority token: {token}")

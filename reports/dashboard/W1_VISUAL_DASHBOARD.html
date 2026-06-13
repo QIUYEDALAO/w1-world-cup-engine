@@ -1044,18 +1044,20 @@
         "kickoff_local_time": "2026-06-13 12:00 PDT",
         "weather_status": "已接入",
         "weather_code": 0,
-        "temperature_c": 21.4,
-        "humidity_pct": 64,
-        "wind_speed_kmh": 10.0,
+        "temperature_c": 20.6,
+        "humidity_pct": 74,
+        "wind_speed_kmh": 12.9,
         "precipitation_mm": 0.0,
         "precipitation_probability_pct": 0,
-        "weather_snapshot_time": "2026-06-13T17:02:20+00:00",
+        "weather_snapshot_time": "2026-06-13T18:30:56+00:00",
         "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "露天",
-        "environment_risk_level": "低",
-        "environment_risk_flags": [],
-        "environment_summary_cn": "赛时天气已接入：温度 21.4°C，湿度 64%，风速 10.0 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_risk_level": "中",
+        "environment_risk_flags": [
+          "高湿度"
+        ],
+        "environment_summary_cn": "赛时天气已接入：温度 20.6°C，湿度 74%，风速 12.9 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
       },
       "supporting_factors": [
         "市场信号未形成明确主队强势；AH=Home +1=3.00",
@@ -1157,22 +1159,22 @@
         "city": "New York New Jersey",
         "country": "USA",
         "kickoff_local_time": "2026-06-13 18:00 EDT",
-        "weather_status": "暂缺",
-        "weather_code": null,
-        "temperature_c": null,
-        "humidity_pct": null,
-        "wind_speed_kmh": null,
-        "precipitation_mm": null,
-        "precipitation_probability_pct": null,
-        "weather_snapshot_time": null,
+        "weather_status": "已接入",
+        "weather_code": 0,
+        "temperature_c": 31.6,
+        "humidity_pct": 25,
+        "wind_speed_kmh": 17.4,
+        "precipitation_mm": 0.0,
+        "precipitation_probability_pct": 0,
+        "weather_snapshot_time": "2026-06-13T17:05:55+00:00",
         "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "露天",
-        "environment_risk_level": "低",
+        "environment_risk_level": "高",
         "environment_risk_flags": [
-          "天气数据暂缺"
+          "高温"
         ],
-        "environment_summary_cn": "天气数据暂缺"
+        "environment_summary_cn": "赛时天气已接入：温度 31.6°C，湿度 25%，风速 17.4 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
       },
       "supporting_factors": [
         "市场初始信号略偏主队，1X2 Home=1.62；AH=Home -1=2.15",
@@ -3353,7 +3355,22 @@ function ruleCn(rule){const map={'lineups.confirmed_lineup':'首发未确认','m
 function valueOrGap(v,suffix=''){return v===null||v===undefined||v===''?'暂缺':String(v)+suffix}
 function envStatus(v){const map={ready:'已接入',partial:'部分可用',error:'错误',[MISS]:'暂缺',LOW:'低',MEDIUM:'中',HIGH:'高',open:'露天',closed:'闭合/可闭合',unknown:'暂缺'};return map[v]||v||'暂缺'}
 function envFlagCn(flag){const map={HIGH_TEMP:'高温',HIGH_HUMIDITY:'高湿度',HIGH_ALTITUDE:'高海拔',HIGH_WIND:'大风',RAIN_RISK:'降雨',WEATHER_IMPACT_REDUCED:'屋顶降低天气影响',['WEATHER_'+MISS.toUpperCase()]:'天气数据暂缺'};return map[flag]||flag}
-function renderDataQualityPanel(matchRecord){const q=(matchRecord&&matchRecord.data_quality)||{};const env=(matchRecord&&matchRecord.environment_context)||{};const odds=q.odds||{},lineup=q.lineup||{},referee=q.referee||{},inj=q.injuries||{},ctx=q.local_context||{},guard=q.play_guard||{};const oddsBits=[odds.has_1x2?'1X2':'1X2缺失',odds.has_ah?'AH':'AH缺失',odds.has_ou?'OU':'OU缺失'].join('/');const fail=(guard.fail_rules||[]).map(ruleCn).join('、')||'无';const envFlags=(env.environment_risk_flags||[]).map(envFlagCn).join('、')||'无';const rain=valueOrGap(env.precipitation_probability_pct,'%')+' / '+valueOrGap(env.precipitation_mm,' mm');const html='<div class="quality-panel"><div class="quality-title">数据质量：'+esc(cnStatus('overall',q.overall))+' · '+esc(q.reason_cn||'数据部分缺失，当前只能早盘参考。')+'</div><div class="quality-grid"><div class="quality-row"><b>赔率：</b>'+esc(cnStatus('odds',odds.status))+'，'+esc(odds.bookmakers_count||0)+' 家，'+esc(oddsBits)+'，快照时间 '+esc(odds.snapshot_time||'缺失')+'</div><div class="quality-row"><b>首发：</b>'+esc(cnStatus('lineup',lineup.status))+(statusIs(lineup.status,'confirmed','已确认')?'，主客队人数 '+esc(lineup.home_count||0)+'/'+esc(lineup.away_count||0):'，阻止正式判断')+'</div><div class="quality-row"><b>裁判：</b>'+esc(referee.name||cnStatus('referee',referee.status))+(statusIs(referee.status,MISS,'未公布')?'，非阻断':'')+'</div><div class="quality-row"><b>伤停/停赛：</b>'+esc(cnStatus('injuries',inj.status))+'，记录 '+esc(inj.count||0)+' 条</div><div class="quality-row"><b>本地上下文：</b>standings '+esc(cnStatus('context',ctx.standings))+'，H2H '+esc(cnStatus('context',ctx.h2h))+'，squad '+esc(cnStatus('context',ctx.squad))+'</div><div class="quality-row"><b>风控：</b>'+(guard.pass?'已通过':'未通过')+'，原因：'+esc(fail)+'</div><div class="quality-row"><b>比赛环境：</b>球场：'+esc(valueOrGap(env.venue_name))+'；城市：'+esc(valueOrGap(env.city))+'；天气：'+esc(envStatus(env.weather_status))+'；温度：'+esc(valueOrGap(env.temperature_c,'°C'))+'</div><div class="quality-row"><b>环境明细：</b>湿度：'+esc(valueOrGap(env.humidity_pct,'%'))+'；风速：'+esc(valueOrGap(env.wind_speed_kmh,' km/h'))+'；降雨概率/降雨量：'+esc(rain)+'；海拔：'+esc(valueOrGap(env.altitude_m,' m'))+'</div><div class="quality-row"><b>屋顶：</b>'+esc(envStatus(env.roof_status))+'；天气快照：'+esc(valueOrGap(env.weather_snapshot_time))+'</div><div class="quality-row"><b>环境风险：</b>'+esc(envStatus(env.environment_risk_level))+'；标签：'+esc(envFlags)+'</div><div class="quality-row"><b>解读：</b>'+esc(env.environment_summary_cn||'天气数据暂缺')+'</div></div></div>';$('dataQualityPanel').innerHTML=html;return html}
+function renderDataQualityPanel(matchRecord){
+const q=(matchRecord&&matchRecord.data_quality)||{};
+const env=(matchRecord&&matchRecord.environment_context)||{};
+const le=(matchRecord&&matchRecord.lineup_effect)||{};
+const odds=q.odds||{},lineup=q.lineup||{},referee=q.referee||{},inj=q.injuries||{},ctx=q.local_context||{},guard=q.play_guard||{};
+const oddsBits=[odds.has_1x2?'1X2':'1X2缺失',odds.has_ah?'AH':'AH缺失',odds.has_ou?'OU':'OU缺失'].join('/');
+const fail=(guard.fail_rules||[]).map(ruleCn).join('、')||'无';
+const envFlags=(env.environment_risk_flags||[]).map(envFlagCn).join('、')||'无';
+const rain=valueOrGap(env.precipitation_probability_pct,'%')+' / '+valueOrGap(env.precipitation_mm,' mm');
+const absence=(le.key_absences||[]).join('、')||'无';
+const rotation=(le.rotation_flags||[]).join('、')||'无';
+const lineupSummary=le.lineup_summary_cn||'首发未确认，无法判断核心球员、阵型和轮换影响。';
+const recalc=le.reference_should_recalculate?'需要重算参考倾向':'参考比分和倾向不升级为正式判断';
+const html='<div class="quality-panel"><div class="quality-title">数据质量：'+esc(cnStatus('overall',q.overall))+' · '+esc(q.reason_cn||'数据部分缺失，当前只能早盘参考。')+'</div><div class="quality-grid"><div class="quality-row"><b>赔率：</b>'+esc(cnStatus('odds',odds.status))+'，'+esc(odds.bookmakers_count||0)+' 家，'+esc(oddsBits)+'，快照时间 '+esc(odds.snapshot_time||'缺失')+'</div><div class="quality-row"><b>首发：</b>'+esc(cnStatus('lineup',lineup.status))+(statusIs(lineup.status,'confirmed','已确认')?'，主客队人数 '+esc(lineup.home_count||0)+'/'+esc(lineup.away_count||0):'，阻止正式判断')+'</div><div class="quality-row"><b>裁判：</b>'+esc(referee.name||cnStatus('referee',referee.status))+(statusIs(referee.status,MISS,'未公布')?'，非阻断':'')+'</div><div class="quality-row"><b>伤停/停赛：</b>'+esc(cnStatus('injuries',inj.status))+'，记录 '+esc(inj.count||0)+' 条</div><div class="quality-row"><b>本地上下文：</b>standings '+esc(cnStatus('context',ctx.standings))+'，H2H '+esc(cnStatus('context',ctx.h2h))+'，squad '+esc(cnStatus('context',ctx.squad))+'</div><div class="quality-row"><b>风控：</b>'+(guard.pass?'已通过':'未通过')+'，原因：'+esc(fail)+'</div><div class="quality-row"><b>比赛环境：</b>球场：'+esc(valueOrGap(env.venue_name))+'；城市：'+esc(valueOrGap(env.city))+'；天气：'+esc(envStatus(env.weather_status))+'；温度：'+esc(valueOrGap(env.temperature_c,'°C'))+'</div><div class="quality-row"><b>环境明细：</b>湿度：'+esc(valueOrGap(env.humidity_pct,'%'))+'；风速：'+esc(valueOrGap(env.wind_speed_kmh,' km/h'))+'；降雨概率/降雨量：'+esc(rain)+'；海拔：'+esc(valueOrGap(env.altitude_m,' m'))+'</div><div class="quality-row"><b>屋顶：</b>'+esc(envStatus(env.roof_status))+'；天气快照：'+esc(valueOrGap(env.weather_snapshot_time))+'</div><div class="quality-row"><b>环境风险：</b>'+esc(envStatus(env.environment_risk_level))+'；标签：'+esc(envFlags)+'</div><div class="quality-row"><b>解读：</b>'+esc(env.environment_summary_cn||'天气数据暂缺')+'</div><div class="quality-row"><b>首发效应：</b>'+esc(le.status||'暂不能判断')+'；原因：'+esc(lineupSummary)+'</div><div class="quality-row"><b>阵型：</b>主队 '+esc(valueOrGap(le.formation_home))+'；客队 '+esc(valueOrGap(le.formation_away))+'；阵型变化：'+(le.formation_changed?'是':'否')+'</div><div class="quality-row"><b>核心缺席：</b>'+esc(absence)+'；轮换风险：'+esc(rotation)+'</div><div class="quality-row"><b>进攻/防守/中场：</b>'+esc(le.attacking_power_effect||'暂不能判断')+' / '+esc(le.defensive_stability_effect||'暂不能判断')+' / '+esc(le.midfield_control_effect||'暂不能判断')+'</div><div class="quality-row"><b>转换速度/定位球/压迫：</b>'+esc(le.pace_transition_effect||'暂不能判断')+' / '+esc(le.set_piece_effect||'暂不能判断')+' / '+esc(le.pressing_effect||'暂不能判断')+'</div><div class="quality-row"><b>是否需要重算参考倾向：</b>'+esc(recalc)+'</div></div></div>';
+$('dataQualityPanel').innerHTML=html;
+return html}
 function renderQueryResultSummary(progress,matchRecord){const q=(matchRecord&&matchRecord.data_quality)||{};const overall=cnStatus('overall',q.overall);const status=progress&&progress.status==='failed'?'查询失败':(overall==='数据完整'?'查询完成：数据完整':overall==='数据质量较差'?'查询完成：数据质量较差':'查询完成：数据部分缺失');const allowed=matchRecord&&matchRecord.prediction_stage_cn?matchRecord.prediction_stage_cn:'早盘参考';const denied=(q.play_guard&&q.play_guard.pass)?'无':'正式 W1_PLAY';const reasons=((q.play_guard&&q.play_guard.fail_rules)||[]).map(ruleCn);if(q.referee&&statusIs(q.referee.status,MISS,'未公布'))reasons.push('裁判未公布');const html='<div class="query-summary"><div class="query-item"><div class="query-k">流程状态</div><div class="query-v">'+esc(status)+'</div></div><div class="query-item"><div class="query-k">可输出</div><div class="query-v">'+esc(allowed)+'</div></div><div class="query-item"><div class="query-k">不可输出</div><div class="query-v">'+esc(denied)+'</div></div><div class="query-item"><div class="query-k">缺失原因</div><div class="query-v">'+esc(uniqueByFixture(reasons.map((x,i)=>({fixture_id:i,text:x}))).map(x=>x.text).join('、')||'无')+'</div></div></div>';$('querySummary').innerHTML=html;return html}
 function shareFor(record,side){if(record.status==='finished'&&record.actual_score&&record.actual_score.home!==null){const homeWin=record.actual_score.home>record.actual_score.away;const awayWin=record.actual_score.away>record.actual_score.home;if(side==='home')return homeWin?60:awayWin?20:34;if(side==='away')return awayWin?60:homeWin?20:33;return homeWin||awayWin?20:34}return side==='home'?34:side==='away'?33:33}
 function buildW1Card(teamA,teamB){const r=findRecord(teamA,teamB);if(!r){return{teamA:{name:teamA,share:34},draw:33,teamB:{name:teamB,share:33},referenceScore:'W1 数据未绑定',confidence:'未找到本地比赛记录 · '+stage,keyFactors:['未找到对应比赛编号','需要检查赛前卡与最新快照','不形成正式 W1 结论'],risks:['本地记录缺失'],gaps:['比赛记录缺少该对阵'],analysis:'该对阵没有绑定到本地 W1 比赛记录，不能给出赛前结论。'}}const homeName=r.home_team_cn,awayName=r.away_team_cn;const reference=r.reference_score||r.reference_score_external||r.actual_score_display_cn||'参考比分待补齐';const title=r.status==='finished'&&r.actual_score_display_cn?'已完赛：'+r.actual_score_display_cn:r.boss_summary_cn;const keyFactors=(r.supporting_factors||[]).filter(Boolean);const risks=(r.counter_factors||[]).filter(Boolean);const gaps=(r.data_gaps||[]).map(g=>g.message||g.field||String(g));const stageText=r.prediction_stage_cn||stage;const finalText=r.is_final_decision?'最终结论':'不是最终结论';const actionText=r.current_action_cn==='早盘参考可看方向和比分，但等待赛前观察刷新'?'等待赛前观察刷新':r.current_action_cn;const analysis=[title,'当前阶段：'+stageText,'参考倾向：'+(r.reference_direction||'谨慎观察'),'参考比分：'+reference,'当前结论：'+finalText,'风险等级：'+(r.risk_level_cn||'中高'),'W1 状态：'+r.w1_state,'当前动作：'+actionText,'下一次更新：'+(r.next_update_reason_cn||'等待 watcher 刷新'),'赔率变化：'+(r.odds_movement&&r.odds_movement.summary_cn?r.odds_movement.summary_cn:'未记录'),'市场信号：'+(r.market_signal&&r.market_signal.summary_cn?r.market_signal.summary_cn:'未记录'),r.non_final_disclaimer_cn||'参考内容不绕过正式风控规则'].join('。');return{teamA:{name:homeName,share:shareFor(r,'home')},draw:shareFor(r,'draw'),teamB:{name:awayName,share:shareFor(r,'away')},referenceScore:reference,confidence:(r.hit_status_cn? r.hit_status_cn+' · ':'')+stageText+' · '+finalText+' · 风险等级 '+(r.risk_level_cn||'中高'),keyFactors:keyFactors,risks:risks,gaps:gaps,analysis:analysis}}

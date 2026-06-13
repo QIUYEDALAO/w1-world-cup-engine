@@ -12,6 +12,7 @@
     "markets",
     "squad",
     "lineups",
+    "lineup_effect",
     "context",
     "environment_context",
     "odds_movement",
@@ -260,6 +261,95 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "lineup_effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "formation_home",
+        "formation_away",
+        "formation_changed",
+        "home_starter_confidence",
+        "away_starter_confidence",
+        "key_absences",
+        "rotation_flags",
+        "attacking_power_effect",
+        "defensive_stability_effect",
+        "midfield_control_effect",
+        "pace_transition_effect",
+        "set_piece_effect",
+        "pressing_effect",
+        "reference_should_recalculate",
+        "lineup_summary_cn"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "missing",
+            "ready",
+            "partial"
+          ]
+        },
+        "formation_home": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "formation_away": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "formation_changed": {
+          "type": "boolean"
+        },
+        "home_starter_confidence": {
+          "$ref": "#/$defs/lineup_confidence"
+        },
+        "away_starter_confidence": {
+          "$ref": "#/$defs/lineup_confidence"
+        },
+        "key_absences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rotation_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attacking_power_effect": {
+          "$ref": "#/$defs/lineup_effect_direction"
+        },
+        "defensive_stability_effect": {
+          "$ref": "#/$defs/lineup_effect_direction"
+        },
+        "midfield_control_effect": {
+          "$ref": "#/$defs/lineup_effect_direction"
+        },
+        "pace_transition_effect": {
+          "$ref": "#/$defs/lineup_effect_direction"
+        },
+        "set_piece_effect": {
+          "$ref": "#/$defs/lineup_effect_direction"
+        },
+        "pressing_effect": {
+          "$ref": "#/$defs/lineup_effect_direction"
+        },
+        "reference_should_recalculate": {
+          "type": "boolean"
+        },
+        "lineup_summary_cn": {
+          "type": "string"
         }
       }
     },
@@ -757,6 +847,24 @@
           "type": "string"
         }
       }
+    },
+    "lineup_confidence": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "lineup_effect_direction": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "up",
+        "down",
+        "stable"
+      ]
     },
     "flag": {
       "type": "object",

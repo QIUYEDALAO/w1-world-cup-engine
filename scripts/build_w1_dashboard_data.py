@@ -537,6 +537,110 @@ def data_quality_for_card(
     }
 
 
+LINEUP_UNKNOWN_EFFECT = "unknown"
+LINEUP_STABLE_EFFECT = "stable"
+
+
+def lineup_effect_for_card(card: dict[str, Any]) -> dict[str, Any]:
+    lineups = card.get("lineups", {})
+    confirmed = bool(lineups.get("confirmed_lineup_available"))
+    home_xi = lineups.get("home_starting_xi") or []
+    away_xi = lineups.get("away_starting_xi") or []
+    formation_home = lineups.get("formation_home") or lineups.get("home_formation")
+    formation_away = lineups.get("formation_away") or lineups.get("away_formation")
+    expected_home = lineups.get("expected_home_starting_xi") or []
+    expected_away = lineups.get("expected_away_starting_xi") or []
+    core_home = set(lineups.get("home_core_players") or [])
+    core_away = set(lineups.get("away_core_players") or [])
+
+    base = {
+        "status": "missing",
+        "formation_home": formation_home,
+        "formation_away": formation_away,
+        "formation_changed": False,
+        "home_starter_confidence": "unknown",
+        "away_starter_confidence": "unknown",
+        "key_absences": [],
+        "rotation_flags": [],
+        "attacking_power_effect": LINEUP_UNKNOWN_EFFECT,
+        "defensive_stability_effect": LINEUP_UNKNOWN_EFFECT,
+        "midfield_control_effect": LINEUP_UNKNOWN_EFFECT,
+        "pace_transition_effect": LINEUP_UNKNOWN_EFFECT,
+        "set_piece_effect": LINEUP_UNKNOWN_EFFECT,
+        "pressing_effect": LINEUP_UNKNOWN_EFFECT,
+        "reference_should_recalculate": False,
+        "lineup_summary_cn": "首发未确认，暂不能判断阵型、核心球员和轮换影响。",
+    }
+    if not confirmed:
+        return base
+
+    def confidence(starters: list[Any]) -> str:
+        count = len(starters)
+        if count >= 11:
+            return "high"
+        if count >= 8:
+            return "medium"
+        if count > 0:
+            return "low"
+        return "unknown"
+
+    key_absences = []
+    if core_home and home_xi:
+        key_absences.extend([f"主队核心缺席：{name}" for name in sorted(core_home - set(home_xi))])
+    if core_away and away_xi:
+        key_absences.extend([f"客队核心缺席：{name}" for name in sorted(core_away - set(away_xi))])
+
+    rotation_flags = []
+    if expected_home and home_xi:
+        home_changed = len(set(expected_home) - set(home_xi))
+        if home_changed >= 3:
+            rotation_flags.append(f"主队轮换较多：{home_changed} 人不同于预期")
+    if expected_away and away_xi:
+        away_changed = len(set(expected_away) - set(away_xi))
+        if away_changed >= 3:
+            rotation_flags.append(f"客队轮换较多：{away_changed} 人不同于预期")
+
+    formation_expected_home = lineups.get("expected_formation_home") or lineups.get("home_expected_formation")
+    formation_expected_away = lineups.get("expected_formation_away") or lineups.get("away_expected_formation")
+    formation_changed = bool(
+        (formation_home and formation_expected_home and formation_home != formation_expected_home)
+        or (formation_away and formation_expected_away and formation_away != formation_expected_away)
+    )
+    reference_should_recalculate = bool(key_absences or rotation_flags or formation_changed)
+    impact = "down" if key_absences or rotation_flags else LINEUP_STABLE_EFFECT
+    summary_parts = ["首发已确认"]
+    if formation_changed:
+        summary_parts.append("阵型与预期不同")
+    if key_absences:
+        summary_parts.append("存在核心球员缺席")
+    if rotation_flags:
+        summary_parts.append("存在明显轮换")
+    if reference_should_recalculate:
+        summary_parts.append("参考比分/倾向需要重算")
+    else:
+        summary_parts.append("暂未发现需要重算参考倾向的首发冲击")
+
+    return {
+        **base,
+        "status": "ready",
+        "formation_home": formation_home,
+        "formation_away": formation_away,
+        "formation_changed": formation_changed,
+        "home_starter_confidence": confidence(home_xi),
+        "away_starter_confidence": confidence(away_xi),
+        "key_absences": key_absences,
+        "rotation_flags": rotation_flags,
+        "attacking_power_effect": impact,
+        "defensive_stability_effect": impact,
+        "midfield_control_effect": impact,
+        "pace_transition_effect": impact,
+        "set_piece_effect": impact,
+        "pressing_effect": impact,
+        "reference_should_recalculate": reference_should_recalculate,
+        "lineup_summary_cn": "；".join(summary_parts) + "。",
+    }
+
+
 def parse_utc_datetime(raw: str | None) -> datetime | None:
     if not raw:
         return None
@@ -705,6 +809,7 @@ def build_record(
 
     data_quality = data_quality_for_card(card, latest, play_guard_pass, odds_ok, risks, gaps)
     environment_context = environment_context_for_card(fid, card, latest, venues, weather_by_fixture)
+    lineup_effect = lineup_effect_for_card(card)
 
     return {
         "match": f"{home_cn} vs {away_cn}",
@@ -738,6 +843,7 @@ def build_record(
         "odds_status": "READY" if odds_ok else "WAIT",
         "data_quality": data_quality,
         "environment_context": environment_context,
+        "lineup_effect": lineup_effect,
         "odds_movement": movement,
         "market_signal": market_signal,
         "supporting_factors": [cn_display_text(item) for item in supporting],
@@ -817,6 +923,25 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         env["environment_risk_flags"] = [flag_map.get(str(flag), clean_public_text(flag)) for flag in env.get("environment_risk_flags", [])]
         return env
 
+    def public_lineup_effect(value: dict[str, Any]) -> dict[str, Any]:
+        effect = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        status_map = {"missing": "暂不能判断", "ready": "已就绪", "partial": "部分可用"}
+        confidence_map = {"unknown": "未知", "low": "低", "medium": "中", "high": "高"}
+        effect_map = {"unknown": "暂不能判断", "up": "增强", "down": "下降", "stable": "稳定"}
+        effect["status"] = status_map.get(str(effect.get("status")), clean_public_text(effect.get("status", "暂不能判断")))
+        for key in ("home_starter_confidence", "away_starter_confidence"):
+            effect[key] = confidence_map.get(str(effect.get(key)), clean_public_text(effect.get(key, "未知")))
+        for key in (
+            "attacking_power_effect",
+            "defensive_stability_effect",
+            "midfield_control_effect",
+            "pace_transition_effect",
+            "set_piece_effect",
+            "pressing_effect",
+        ):
+            effect[key] = effect_map.get(str(effect.get(key)), clean_public_text(effect.get(key, "暂不能判断")))
+        return effect
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -860,6 +985,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "market_signal": row["market_signal"],
             "data_quality": public_quality(row["data_quality"]),
             "environment_context": public_environment(row["environment_context"]),
+            "lineup_effect": public_lineup_effect(row["lineup_effect"]),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
             "data_gaps": clean_gaps,
