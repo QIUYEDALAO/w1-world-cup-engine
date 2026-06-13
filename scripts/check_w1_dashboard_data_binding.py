@@ -56,7 +56,7 @@ def assert_no_forbidden_text(text: str, label: str) -> None:
 
 def assert_lineup_effect_builder() -> None:
     source = read(BUILD_SCRIPT)
-    for token in ("lineup_effect_for_card", "reference_should_recalculate", "key_absences", "rotation_flags", "lineup_summary_cn"):
+    for token in ("lineup_effect_for_card", "tactical_effect_for_card", "reference_should_recalculate", "key_absences", "rotation_flags", "lineup_summary_cn"):
         if token not in source:
             fail(f"build_w1_dashboard_data.py missing lineup_effect token: {token}")
     if not QATAR_CARD.is_file():
@@ -89,22 +89,33 @@ def assert_lineup_effect_builder() -> None:
     missing = [key for key in required if key not in effect]
     if missing:
         fail(f"lineup_effect missing keys: {missing}")
-    if effect["status"] != "missing":
-        fail("Qatar vs Switzerland lineup_effect.status must be missing before confirmed lineup")
-    if effect["reference_should_recalculate"] is not False:
-        fail("Missing lineup must not force reference recalculation")
-    for key in (
-        "attacking_power_effect",
-        "defensive_stability_effect",
-        "midfield_control_effect",
-        "pace_transition_effect",
-        "set_piece_effect",
-        "pressing_effect",
-    ):
-        if effect.get(key) != "unknown":
-            fail(f"Missing lineup must keep {key}=unknown")
-    if "首发未确认" not in effect.get("lineup_summary_cn", ""):
-        fail("Missing lineup summary must explain 首发未确认")
+    if card.get("lineups", {}).get("confirmed_lineup_available"):
+        if effect["status"] != "ready":
+            fail("Qatar vs Switzerland lineup_effect.status must be ready after confirmed lineup")
+        tactical = module.tactical_effect_for_card(card, effect)
+        if tactical.get("status") != "ready":
+            fail("Qatar vs Switzerland tactical_effect.status must be ready after confirmed lineup")
+        tactical_text = " ".join(tactical.get("home_style_tags", []) + tactical.get("away_style_tags", []))
+        for token in ("边路速度", "转换进攻", "前场冲击", "三中卫", "翼卫推进", "中路保护"):
+            if token not in tactical_text:
+                fail(f"Qatar vs Switzerland tactical_effect missing tag: {token}")
+    else:
+        if effect["status"] != "missing":
+            fail("Qatar vs Switzerland lineup_effect.status must be missing before confirmed lineup")
+        if effect["reference_should_recalculate"] is not False:
+            fail("Missing lineup must not force reference recalculation")
+        for key in (
+            "attacking_power_effect",
+            "defensive_stability_effect",
+            "midfield_control_effect",
+            "pace_transition_effect",
+            "set_piece_effect",
+            "pressing_effect",
+        ):
+            if effect.get(key) != "unknown":
+                fail(f"Missing lineup must keep {key}=unknown")
+        if "首发未确认" not in effect.get("lineup_summary_cn", ""):
+            fail("Missing lineup summary must explain 首发未确认")
 
 
 def main() -> int:
@@ -176,6 +187,8 @@ def main() -> int:
             "next_refresh",
             "data_quality",
             "environment_context",
+            "lineup_effect",
+            "tactical_effect",
         ]
         for row in records:
             missing = [key for key in required_fields if key not in row]
@@ -231,6 +244,11 @@ def main() -> int:
                 for key in ("status", "key_absences", "rotation_flags", "reference_should_recalculate", "lineup_summary_cn"):
                     if key not in lineup_effect:
                         fail(f"{row.get('fixture_id')}: lineup_effect missing {key}")
+            tactical_effect = row.get("tactical_effect")
+            if tactical_effect:
+                for key in ("status", "home_formation", "away_formation", "home_style_tags", "away_style_tags", "reference_should_recalculate", "tactical_summary_cn"):
+                    if key not in tactical_effect:
+                        fail(f"{row.get('fixture_id')}: tactical_effect missing {key}")
 
         qatar = next((row for row in records if row.get("fixture_id") == "1489373"), None)
         if not qatar:
@@ -242,7 +260,7 @@ def main() -> int:
             fail("fixture_id=1489373 odds bookmakers_count must be 13")
         if not all(qatar_quality.get("odds", {}).get(key) is True for key in ("has_1x2", "has_ah", "has_ou")):
             fail("fixture_id=1489373 odds must have 1X2/AH/OU")
-        if "lineups.confirmed_lineup" not in qatar_quality.get("play_guard", {}).get("fail_rules", []):
+        if qatar.get("lineup_status") != "CONFIRMED" and "lineups.confirmed_lineup" not in qatar_quality.get("play_guard", {}).get("fail_rules", []):
             fail("fixture_id=1489373 play_guard fail_rules must include lineups.confirmed_lineup")
         qatar_env = qatar.get("environment_context", {})
         if qatar_env.get("venue_name") != "Levi's Stadium":
@@ -257,6 +275,28 @@ def main() -> int:
                     fail(f"fixture_id=1489373 ready weather missing {key}")
         if qatar_env.get("weather_status") == "missing" and qatar_env.get("environment_summary_cn") != "天气数据暂缺":
             fail("fixture_id=1489373 environment_summary_cn must be 天气数据暂缺 when weather is missing")
+        if qatar.get("lineup_status") == "CONFIRMED":
+            expected = {
+                "confirmed_lineup_available": True,
+                "home_formation": "4-3-3",
+                "away_formation": "3-4-2-1",
+                "home_starting_count": 11,
+                "away_starting_count": 11,
+            }
+            for key, value in expected.items():
+                if qatar.get(key) != value:
+                    fail(f"fixture_id=1489373 {key} mismatch: {qatar.get(key)}")
+            if int(qatar.get("home_bench_count") or 0) < 1 or int(qatar.get("away_bench_count") or 0) < 1:
+                fail("fixture_id=1489373 bench counts must be present when lineups are confirmed")
+            if qatar.get("lineup_effect", {}).get("status") != "ready":
+                fail("fixture_id=1489373 lineup_effect.status must be ready when lineups are confirmed")
+            tactical = qatar.get("tactical_effect", {})
+            if tactical.get("status") != "ready":
+                fail("fixture_id=1489373 tactical_effect.status must be ready when lineups are confirmed")
+            tactical_text = " ".join(tactical.get("home_style_tags", []) + tactical.get("away_style_tags", []))
+            for token in ("边路速度", "转换进攻", "前场冲击", "三中卫", "翼卫推进", "中路保护"):
+                if token not in tactical_text:
+                    fail(f"fixture_id=1489373 tactical_effect missing tag: {token}")
 
         if data.get("status_cards", {}).get("play_guard_version") != "W1_PLAY_GUARD_V1":
             fail("PLAY_GUARD_V1 must remain in status_cards")

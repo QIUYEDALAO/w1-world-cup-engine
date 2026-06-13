@@ -317,6 +317,9 @@ def assert_html(data: dict) -> None:
     for token in ("首发效应", "核心缺席", "轮换风险", "进攻/防守/中场", "转换速度/定位球/压迫", "是否需要重算参考倾向"):
         if token not in text:
             fail(f"HTML missing lineup effect token: {token}")
+    for token in ("战术效应", "主队打法", "客队打法", "边路速度", "转换进攻", "前场冲击", "三中卫", "翼卫推进", "中路保护"):
+        if token not in text:
+            fail(f"HTML missing tactical effect token: {token}")
     for token in ("live", "not_started", "upcoming", "finished"):
         if token not in text:
             fail(f"Default/focus logic missing priority token: {token}")
@@ -358,6 +361,10 @@ def assert_html(data: dict) -> None:
         fail("Embedded match_records must expose data_quality for fixture_id=1489373")
     if "environment_context" not in qatar:
         fail("Embedded match_records must expose environment_context for fixture_id=1489373")
+    if "lineup_effect" not in qatar:
+        fail("Embedded match_records must expose lineup_effect for fixture_id=1489373")
+    if "tactical_effect" not in qatar:
+        fail("Embedded match_records must expose tactical_effect for fixture_id=1489373")
 
 
 def assert_docs() -> None:

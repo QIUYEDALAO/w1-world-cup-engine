@@ -87,6 +87,10 @@ def assert_server() -> None:
         "未找到对应比赛 fixture_id",
         "payload.get(\"fixture_id\")",
         "current_match",
+        "fetch_api_football_lineups",
+        "fixtures/lineups",
+        "write_lineups_to_card",
+        "refresh_lineups",
     ):
         if token not in text:
             fail(f"server missing fixture_id priority token: {token}")
@@ -175,6 +179,8 @@ def assert_fixture_id_smoke() -> None:
     port = free_port()
     env = os.environ.copy()
     env["W1_DASHBOARD_PORT"] = str(port)
+    env.pop("APIFOOTBALL_KEY", None)
+    env.pop("W1_LOCAL_REAL_REFRESH", None)
     proc = subprocess.Popen(
         ["python3", str(SERVER)],
         cwd=ROOT,
@@ -197,10 +203,14 @@ def assert_fixture_id_smoke() -> None:
         started = http_json(f"{base}/predict", {"fixture_id": "1489373"})
         if not started.get("ok"):
             fail("fixture_id smoke predict did not start")
-        for _ in range(15):
+        saw_qatar = False
+        last_progress = {}
+        for _ in range(300):
             progress = http_json(f"{base}/progress")
+            last_progress = progress
             current = progress.get("current_match") or progress.get("match") or {}
             if current.get("fixture_id") == "1489373":
+                saw_qatar = True
                 match = current.get("match") or ""
                 home_en = current.get("home_team") or ""
                 away_en = current.get("away_team") or ""
@@ -211,8 +221,35 @@ def assert_fixture_id_smoke() -> None:
                     fail("fixture_id=1489373 smoke resolved to wrong match")
                 if "Brazil" in text or "Morocco" in text:
                     fail("fixture_id=1489373 smoke must not resolve to Brazil vs Morocco")
-                return
+                if progress.get("status") == "done":
+                    data = http_json(f"{base}/dashboard-data")
+                    qatar = next(
+                        (row for row in data.get("match_records", []) if str(row.get("fixture_id")) == "1489373"),
+                        None,
+                    )
+                    if not qatar:
+                        fail("fixture_id=1489373 missing from dashboard data after smoke")
+                    expected = {
+                        "lineup_status": "CONFIRMED",
+                        "confirmed_lineup_available": True,
+                        "home_formation": "4-3-3",
+                        "away_formation": "3-4-2-1",
+                        "home_starting_count": 11,
+                        "away_starting_count": 11,
+                    }
+                    for key, value in expected.items():
+                        if qatar.get(key) != value:
+                            fail(f"fixture_id=1489373 {key} mismatch after smoke: {qatar.get(key)}")
+                    if int(qatar.get("home_bench_count") or 0) < 1 or int(qatar.get("away_bench_count") or 0) < 1:
+                        fail("fixture_id=1489373 bench counts must be present after smoke")
+                    if qatar.get("lineup_effect", {}).get("status") != "ready":
+                        fail("fixture_id=1489373 lineup_effect.status must be ready after smoke")
+                    if qatar.get("tactical_effect", {}).get("status") != "ready":
+                        fail("fixture_id=1489373 tactical_effect.status must be ready after smoke")
+                    return
             time.sleep(0.1)
+        if saw_qatar:
+            fail(f"fixture_id=1489373 smoke did not finish: {last_progress.get('step_label')} {last_progress.get('message_cn')}")
         fail("fixture_id=1489373 smoke did not reach progress/current_match")
     finally:
         proc.terminate()

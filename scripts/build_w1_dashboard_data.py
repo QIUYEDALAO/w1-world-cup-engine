@@ -606,7 +606,7 @@ def lineup_effect_for_card(card: dict[str, Any]) -> dict[str, Any]:
         (formation_home and formation_expected_home and formation_home != formation_expected_home)
         or (formation_away and formation_expected_away and formation_away != formation_expected_away)
     )
-    reference_should_recalculate = bool(key_absences or rotation_flags or formation_changed)
+    reference_should_recalculate = bool(key_absences or rotation_flags or formation_changed or formation_home or formation_away)
     impact = "down" if key_absences or rotation_flags else LINEUP_STABLE_EFFECT
     summary_parts = ["首发已确认"]
     if formation_changed:
@@ -638,6 +638,101 @@ def lineup_effect_for_card(card: dict[str, Any]) -> dict[str, Any]:
         "pressing_effect": impact,
         "reference_should_recalculate": reference_should_recalculate,
         "lineup_summary_cn": "；".join(summary_parts) + "。",
+    }
+
+
+def style_tags_for_formation(formation: str | None) -> list[str]:
+    if not formation:
+        return []
+    compact = formation.strip()
+    if compact == "4-3-3":
+        return ["边路速度", "转换进攻", "前场冲击", "高位压迫"]
+    if compact == "4-2-3-1":
+        return ["中路组织", "前腰串联", "攻守平衡", "控球推进"]
+    if compact == "4-4-2":
+        return ["双前锋", "边路传中", "第二落点"]
+    if compact in {"5-3-2", "3-5-2", "3-4-3", "3-4-2-1"}:
+        tags = ["三中卫", "翼卫推进", "中路保护", "防守反击"]
+        if compact == "3-4-2-1":
+            tags.append("双前腰衔接")
+        return tags
+    return ["阵型待确认"]
+
+
+def tactical_effect_for_card(card: dict[str, Any], lineup_effect: dict[str, Any]) -> dict[str, Any]:
+    lineups = card.get("lineups", {})
+    confirmed = bool(lineups.get("confirmed_lineup_available"))
+    home_formation = lineups.get("formation_home") or lineups.get("home_formation")
+    away_formation = lineups.get("formation_away") or lineups.get("away_formation")
+    base = {
+        "status": "missing",
+        "home_formation": home_formation,
+        "away_formation": away_formation,
+        "home_style_tags": [],
+        "away_style_tags": [],
+        "home_tactical_summary_cn": "",
+        "away_tactical_summary_cn": "",
+        "formation_mismatch_cn": "",
+        "attacking_side_effect": "unknown",
+        "defensive_stability_effect": "unknown",
+        "tempo_effect": "unknown",
+        "transition_effect": "unknown",
+        "set_piece_effect": "unknown",
+        "reference_should_recalculate": False,
+        "tactical_summary_cn": "首发未确认，暂不能判断阵型、打法和战术效应。",
+    }
+    if not confirmed:
+        return base
+    if not home_formation or not away_formation:
+        return {
+            **base,
+            "status": "partial",
+            "tactical_summary_cn": "首发已确认，但阵型或位置数据不完整，战术效应不足。",
+        }
+
+    home_tags = style_tags_for_formation(home_formation)
+    away_tags = style_tags_for_formation(away_formation)
+    home_back_three = "三中卫" in home_tags
+    away_back_three = "三中卫" in away_tags
+    home_front_speed = "边路速度" in home_tags or "前场冲击" in home_tags
+    away_front_speed = "边路速度" in away_tags or "前场冲击" in away_tags
+
+    if home_front_speed and not away_front_speed:
+        attacking = "home_up"
+    elif away_front_speed and not home_front_speed:
+        attacking = "away_up"
+    else:
+        attacking = "balanced"
+
+    if home_back_three and not away_back_three:
+        defensive = "home_up"
+    elif away_back_three and not home_back_three:
+        defensive = "away_up"
+    else:
+        defensive = "balanced"
+
+    transition = "home_counter" if "防守反击" in home_tags else ("away_counter" if "防守反击" in away_tags else "balanced")
+    tempo = "fast" if ("高位压迫" in home_tags or "高位压迫" in away_tags or "转换进攻" in home_tags or "转换进攻" in away_tags) else "medium"
+    mismatch = f"主队 {home_formation} 对客队 {away_formation}，需要重看边路与三中卫保护的对位。"
+    should_recalculate = bool(lineup_effect.get("reference_should_recalculate") or home_formation or away_formation)
+
+    return {
+        **base,
+        "status": "ready",
+        "home_formation": home_formation,
+        "away_formation": away_formation,
+        "home_style_tags": home_tags,
+        "away_style_tags": away_tags,
+        "home_tactical_summary_cn": f"{home_formation}：" + " / ".join(home_tags),
+        "away_tactical_summary_cn": f"{away_formation}：" + " / ".join(away_tags),
+        "formation_mismatch_cn": mismatch,
+        "attacking_side_effect": attacking,
+        "defensive_stability_effect": defensive,
+        "tempo_effect": tempo,
+        "transition_effect": transition,
+        "set_piece_effect": "balanced",
+        "reference_should_recalculate": should_recalculate,
+        "tactical_summary_cn": f"战术效应已生成：主队 {home_formation}，客队 {away_formation}；参考倾向需要结合首发重算。",
     }
 
 
@@ -810,6 +905,7 @@ def build_record(
     data_quality = data_quality_for_card(card, latest, play_guard_pass, odds_ok, risks, gaps)
     environment_context = environment_context_for_card(fid, card, latest, venues, weather_by_fixture)
     lineup_effect = lineup_effect_for_card(card)
+    tactical_effect = tactical_effect_for_card(card, lineup_effect)
 
     return {
         "match": f"{home_cn} vs {away_cn}",
@@ -838,12 +934,20 @@ def build_record(
         "ledger_required": bool(play_guard_pass),
         "play_guard_version": "W1_PLAY_GUARD_V1",
         "play_guard_pass": play_guard_pass,
-        "lineup_status": (ledger or {}).get("lineup_status") or latest.get("lineup_status") or lineups.get("status"),
+        "lineup_status": lineups.get("status") if lineups.get("confirmed_lineup_available") else ((ledger or {}).get("lineup_status") or latest.get("lineup_status") or lineups.get("status")),
+        "confirmed_lineup_available": bool(lineups.get("confirmed_lineup_available")),
+        "home_formation": lineups.get("formation_home") or lineups.get("home_formation"),
+        "away_formation": lineups.get("formation_away") or lineups.get("away_formation"),
+        "home_starting_count": len(lineups.get("home_starting_xi") or []),
+        "away_starting_count": len(lineups.get("away_starting_xi") or []),
+        "home_bench_count": len(lineups.get("home_substitutes") or lineups.get("home_bench_players") or []),
+        "away_bench_count": len(lineups.get("away_substitutes") or lineups.get("away_bench_players") or []),
         "referee_status": (ledger or {}).get("referee_status") or latest.get("referee_status") or ("READY" if referee.get("available") else "MISSING"),
         "odds_status": "READY" if odds_ok else "WAIT",
         "data_quality": data_quality,
         "environment_context": environment_context,
         "lineup_effect": lineup_effect,
+        "tactical_effect": tactical_effect,
         "odds_movement": movement,
         "market_signal": market_signal,
         "supporting_factors": [cn_display_text(item) for item in supporting],
@@ -942,6 +1046,36 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             effect[key] = effect_map.get(str(effect.get(key)), clean_public_text(effect.get(key, "暂不能判断")))
         return effect
 
+    def public_tactical_effect(value: dict[str, Any]) -> dict[str, Any]:
+        effect = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        status_map = {"missing": "暂不能判断", "ready": "已就绪", "partial": "部分可用"}
+        side_map = {
+            "unknown": "暂不能判断",
+            "home_up": "主队增强",
+            "away_up": "客队增强",
+            "balanced": "相对均衡",
+        }
+        tempo_map = {"unknown": "暂不能判断", "fast": "偏快", "medium": "中等", "slow": "偏慢"}
+        transition_map = {
+            "unknown": "暂不能判断",
+            "home_counter": "主队防守反击",
+            "away_counter": "客队防守反击",
+            "balanced": "相对均衡",
+        }
+        set_piece_map = {
+            "unknown": "暂不能判断",
+            "home_edge": "主队占优",
+            "away_edge": "客队占优",
+            "balanced": "相对均衡",
+        }
+        effect["status"] = status_map.get(str(effect.get("status")), clean_public_text(effect.get("status", "暂不能判断")))
+        effect["attacking_side_effect"] = side_map.get(str(effect.get("attacking_side_effect")), clean_public_text(effect.get("attacking_side_effect", "暂不能判断")))
+        effect["defensive_stability_effect"] = side_map.get(str(effect.get("defensive_stability_effect")), clean_public_text(effect.get("defensive_stability_effect", "暂不能判断")))
+        effect["tempo_effect"] = tempo_map.get(str(effect.get("tempo_effect")), clean_public_text(effect.get("tempo_effect", "暂不能判断")))
+        effect["transition_effect"] = transition_map.get(str(effect.get("transition_effect")), clean_public_text(effect.get("transition_effect", "暂不能判断")))
+        effect["set_piece_effect"] = set_piece_map.get(str(effect.get("set_piece_effect")), clean_public_text(effect.get("set_piece_effect", "暂不能判断")))
+        return effect
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -966,6 +1100,13 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "home_flag": row["home_flag"],
             "away_flag": row["away_flag"],
             "kickoff": row["kickoff"],
+            "confirmed_lineup_available": row.get("confirmed_lineup_available"),
+            "home_formation": row.get("home_formation"),
+            "away_formation": row.get("away_formation"),
+            "home_starting_count": row.get("home_starting_count"),
+            "away_starting_count": row.get("away_starting_count"),
+            "home_bench_count": row.get("home_bench_count"),
+            "away_bench_count": row.get("away_bench_count"),
             "status": row["status"],
             "actual_score": row["actual_score"],
             "actual_score_display_cn": row["actual_score_display_cn"],
@@ -986,6 +1127,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "data_quality": public_quality(row["data_quality"]),
             "environment_context": public_environment(row["environment_context"]),
             "lineup_effect": public_lineup_effect(row["lineup_effect"]),
+            "tactical_effect": public_tactical_effect(row["tactical_effect"]),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
             "data_gaps": clean_gaps,

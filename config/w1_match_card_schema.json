@@ -261,6 +261,60 @@
           "items": {
             "type": "string"
           }
+        },
+        "home_substitutes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "away_substitutes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "formation_home": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "formation_away": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "home_starting_players": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/lineup_player"
+          }
+        },
+        "away_starting_players": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/lineup_player"
+          }
+        },
+        "home_bench_players": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/lineup_player"
+          }
+        },
+        "away_bench_players": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/lineup_player"
+          }
+        },
+        "lineup_source": {
+          "type": "string"
+        },
+        "lineup_updated_at": {
+          "type": "string"
         }
       }
     },
@@ -865,6 +919,36 @@
         "down",
         "stable"
       ]
+    },
+    "lineup_player": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "number": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "position": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "grid": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
     },
     "flag": {
       "type": "object",
