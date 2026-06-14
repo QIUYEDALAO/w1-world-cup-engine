@@ -227,6 +227,53 @@ def assert_html(data: dict) -> None:
         fail("HTML dashboard is missing")
     assert_no_forbidden_terms(HTML)
     text = read(HTML)
+    if "backendConnected=false" in text and "fetchBackendDashboardData" in text:
+        required_new = [
+            "W1 世界杯赛前预测控制台",
+            "backendConnected",
+            "/dashboard-data",
+            "/predict",
+            "/progress",
+            "后端未连接",
+            "正在抓取 + 预测",
+            "已保留当前快照，未覆盖",
+            "主比分",
+            "备选比分",
+            "风险路径",
+            "专家展开区",
+            "完整比分矩阵",
+            "非推荐列表",
+            "数据质量",
+            "比赛环境",
+            "阵容效应",
+            "战术效应",
+            "赛后校准",
+            "不构成投注",
+        ]
+        for token in required_new:
+            if token not in text:
+                fail(f"HTML missing backend dashboard token: {token}")
+        if "fetch('/api/predict" in text or 'fetch("/api/predict' in text or "worldcup.youliaoyun.com/api" in text:
+            fail("HTML must not call the original site prediction API")
+        embedded = re.search(r'<script id="w1-data" type="application/json">(.*?)</script>', text, re.S)
+        if not embedded:
+            fail("HTML must embed dashboard data for file-open use")
+        try:
+            embedded_data = json.loads(embedded.group(1))
+        except json.JSONDecodeError as exc:
+            fail(f"Embedded dashboard JSON is not parseable: {exc}")
+        if len(embedded_data.get("match_records", [])) < 24:
+            fail("Embedded dashboard JSON must include at least 24 match_records")
+        qatar = next((row for row in embedded_data.get("match_records", []) if row.get("fixture_id") == "1489373"), None)
+        if not qatar:
+            fail("Embedded match_records must include fixture_id=1489373")
+        for key in ("data_quality", "environment_context", "lineup_effect", "tactical_effect", "live_refresh", "score_matrix_summary", "recommendation_view"):
+            if key not in qatar:
+                fail(f"Embedded match_records fixture_id=1489373 missing {key}")
+        view = qatar.get("recommendation_view", {})
+        if view.get("display_score_limit") != 2:
+            fail("recommendation_view.display_score_limit must be 2")
+        return
     required = [
         "W1 世界杯赛前预测总控台",
         "WHO",
