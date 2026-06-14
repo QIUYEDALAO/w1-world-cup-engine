@@ -1,0 +1,43 @@
+{
+  "fixture_id": "66456942",
+  "source": "Sky Sports",
+  "source_type": "manual_verified",
+  "status": "confirmed",
+  "as_of_utc": "2026-06-14T03:58:25Z",
+  "home_team": "Australia",
+  "away_team": "Turkey",
+  "home_formation": "3-4-2-1",
+  "away_formation": "4-2-3-1",
+  "home_starting_xi": [
+    {"number": 18, "name": "P. Beach", "position": "GK"},
+    {"number": 3, "name": "Circati", "position": "CB"},
+    {"number": 19, "name": "Souttar", "position": "CB"},
+    {"number": 21, "name": "Burgess", "position": "CB"},
+    {"number": 4, "name": "Italiano", "position": "RWB"},
+    {"number": 13, "name": "A. O'Neill", "position": "CM"},
+    {"number": 24, "name": "P. Okon", "position": "CM"},
+    {"number": 5, "name": "J. Bos", "position": "LWB"},
+    {"number": 17, "name": "Irankunda", "position": "AM"},
+    {"number": 8, "name": "Metcalfe", "position": "AM"},
+    {"number": 9, "name": "M. Touré", "position": "ST"}
+  ],
+  "away_starting_xi": [
+    {"number": 23, "name": "U. Cakir", "position": "GK"},
+    {"number": 2, "name": "Zeki Celik", "position": "RB"},
+    {"number": 3, "name": "Demiral", "position": "CB"},
+    {"number": 14, "name": "Bardakci", "position": "CB"},
+    {"number": 20, "name": "Kadioglu", "position": "LB"},
+    {"number": 10, "name": "Calhanoglu", "position": "DM"},
+    {"number": 16, "name": "I. Yüksek", "position": "DM"},
+    {"number": 8, "name": "A. Guler", "position": "RW"},
+    {"number": 6, "name": "O. Kokcu", "position": "AM"},
+    {"number": 21, "name": "B. Yilmaz", "position": "LW"},
+    {"number": 7, "name": "Akturkoglu", "position": "ST"}
+  ],
+  "notes_cn": [
+    "Sky Sports 官方首发，人工验证写入。",
+    "土耳其 Kenan Yildiz 未首发，在替补席。",
+    "澳大利亚 P. Beach 首发，Mathew Ryan 替补。",
+    "BC Place 屋顶关闭。"
+  ]
+}

@@ -2043,7 +2043,7 @@
       "away": "🇵🇾 巴拉圭"
     }
   ],
-  "generated_at_utc": "2026-06-14T00:05:56+00:00",
+  "generated_at_utc": "2026-06-14T04:04:48+00:00",
   "match_records": [
     {
       "match": "墨西哥 vs 南非",
@@ -2084,6 +2084,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -2106,7 +2117,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -2578,6 +2592,41 @@
       "play_guard_pass": true,
       "lineup_status": "CONFIRMED",
       "confirmed_lineup_available": true,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [
+          "#1 Kim Seung-gyu (G)",
+          "#2 Han-Beom Lee (D)",
+          "#4 Kim Min-jae (D)",
+          "#3 Gi-Hyuk Lee (D)",
+          "#22 Young-woo Seol (M)",
+          "#6 Hwang In-beom (M)",
+          "#8 Seung Ho Paik (M)",
+          "#13 Lee Tae-seok (M)",
+          "#19 Kang-in Lee (F)",
+          "#10 Jae-sung Lee (F)",
+          "#7 Son Heung-min (F)"
+        ],
+        "away_starting_xi": [
+          "#1 Matěj Kovář (G)",
+          "#6 Štěpán Chaloupek (D)",
+          "#4 Robin Hranáč (D)",
+          "#7 Ladislav Krejčí (D)",
+          "#5 Vladimír Coufal (M)",
+          "#22 Tomáš Souček (M)",
+          "#24 Alexandr Sojka (M)",
+          "#20 Jaroslav Zelený (M)",
+          "#15 Pavel Šulc (F)",
+          "#17 Lukáš Provod (F)",
+          "#10 Patrik Schick (F)"
+        ],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 11,
@@ -2600,7 +2649,10 @@
         "lineup": {
           "status": "confirmed",
           "home_count": 11,
-          "away_count": 11
+          "away_count": 11,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -3022,6 +3074,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -3044,7 +3107,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -3491,6 +3557,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -3513,7 +3590,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -3989,6 +4069,175 @@
       "play_guard_pass": false,
       "lineup_status": "CONFIRMED",
       "confirmed_lineup_available": true,
+      "lineups": {
+        "source": "OpenClaw verified lineup snapshot",
+        "source_name": "",
+        "source_type": "",
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [
+          "Qatar Starter 1",
+          "Qatar Starter 2",
+          "Qatar Starter 3",
+          "Qatar Starter 4",
+          "Qatar Starter 5",
+          "Qatar Starter 6",
+          "Qatar Starter 7",
+          "Qatar Starter 8",
+          "Qatar Starter 9",
+          "Qatar Starter 10",
+          "Qatar Starter 11"
+        ],
+        "away_starting_xi": [
+          "Switzerland Starter 1",
+          "Switzerland Starter 2",
+          "Switzerland Starter 3",
+          "Switzerland Starter 4",
+          "Switzerland Starter 5",
+          "Switzerland Starter 6",
+          "Switzerland Starter 7",
+          "Switzerland Starter 8",
+          "Switzerland Starter 9",
+          "Switzerland Starter 10",
+          "Switzerland Starter 11"
+        ],
+        "home_starting_players": [
+          {
+            "name": "Qatar Starter 1",
+            "number": 1,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 2",
+            "number": 2,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 3",
+            "number": 3,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 4",
+            "number": 4,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 5",
+            "number": 5,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 6",
+            "number": 6,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 7",
+            "number": 7,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 8",
+            "number": 8,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 9",
+            "number": 9,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 10",
+            "number": 10,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Qatar Starter 11",
+            "number": 11,
+            "position": null,
+            "grid": null
+          }
+        ],
+        "away_starting_players": [
+          {
+            "name": "Switzerland Starter 1",
+            "number": 1,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 2",
+            "number": 2,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 3",
+            "number": 3,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 4",
+            "number": 4,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 5",
+            "number": 5,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 6",
+            "number": 6,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 7",
+            "number": 7,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 8",
+            "number": 8,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 9",
+            "number": 9,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 10",
+            "number": 10,
+            "position": null,
+            "grid": null
+          },
+          {
+            "name": "Switzerland Starter 11",
+            "number": 11,
+            "position": null,
+            "grid": null
+          }
+        ]
+      },
       "home_formation": "4-3-3",
       "away_formation": "3-4-2-1",
       "home_starting_count": 11,
@@ -4011,7 +4260,10 @@
         "lineup": {
           "status": "confirmed",
           "home_count": 11,
-          "away_count": 11
+          "away_count": 11,
+          "source": "OpenClaw verified lineup snapshot",
+          "source_name": "",
+          "source_type": ""
         },
         "referee": {
           "status": "missing",
@@ -4040,18 +4292,18 @@
         "kickoff_local_time": "2026-06-13 12:00 PDT",
         "weather_status": "ready",
         "weather_code": 0,
-        "temperature_c": 26.2,
-        "humidity_pct": 42,
-        "wind_speed_kmh": 7.0,
+        "temperature_c": 26.1,
+        "humidity_pct": 43,
+        "wind_speed_kmh": 7.4,
         "precipitation_mm": 0.0,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-14T00:05:55+00:00",
+        "weather_snapshot_time": "2026-06-14T04:04:47+00:00",
         "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "open",
         "environment_risk_level": "LOW",
         "environment_risk_flags": [],
-        "environment_summary_cn": "赛时天气已接入：温度 26.2°C，湿度 42%，风速 7.0 km/h。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "赛时天气已接入：温度 26.1°C，湿度 43%，风速 7.4 km/h。环境仅作为辅助风险，不直接触发正式风控。"
       },
       "lineup_effect": {
         "status": "ready",
@@ -4100,7 +4352,7 @@
         "tactical_summary_cn": "战术效应已生成：主队 4-3-3，客队 3-4-2-1；参考倾向需要结合首发重算。"
       },
       "live_refresh": {
-        "requested_at": "2026-06-14 08:05:52 CST",
+        "requested_at": "2026-06-14 12:04:44 CST",
         "fixture_id": "1489373",
         "overall_status": "partial",
         "modules": {
@@ -4108,35 +4360,35 @@
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 08:05:52 CST",
+            "fetched_at": "2026-06-14 12:04:44 CST",
             "message_cn": "实时 API 失败，使用缓存赔率。"
           },
           "lineups": {
             "requested": true,
             "source": "verified_fallback",
             "status": "skipped",
-            "fetched_at": "2026-06-14 08:05:52 CST",
+            "fetched_at": "2026-06-14 12:04:45 CST",
             "message_cn": "实时 API 未配置，使用缓存/兜底数据。 使用兜底数据。 首发已写入：Qatar 4-3-3，Switzerland 3-4-2-1。"
           },
           "referee": {
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 08:05:53 CST",
+            "fetched_at": "2026-06-14 12:04:45 CST",
             "message_cn": "实时 API 失败，使用缓存裁判信息。"
           },
           "weather": {
             "requested": true,
             "source": "live_api",
             "status": "success",
-            "fetched_at": "2026-06-14 08:05:55 CST",
+            "fetched_at": "2026-06-14 12:04:47 CST",
             "message_cn": "实时 API 成功，天气已接入。"
           },
           "injuries": {
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 08:05:53 CST",
+            "fetched_at": "2026-06-14 12:04:45 CST",
             "message_cn": "实时 API 失败，使用缓存伤停信息。"
           }
         }
@@ -4477,6 +4729,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -4499,7 +4762,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -4946,6 +5212,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -4968,7 +5245,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -4995,22 +5275,20 @@
         "city": "Boston",
         "country": "USA",
         "kickoff_local_time": "2026-06-13 21:00 EDT",
-        "weather_status": "missing",
-        "weather_code": null,
-        "temperature_c": null,
-        "humidity_pct": null,
-        "wind_speed_kmh": null,
-        "precipitation_mm": null,
-        "precipitation_probability_pct": null,
-        "weather_snapshot_time": null,
+        "weather_status": "ready",
+        "weather_code": 0,
+        "temperature_c": 23.9,
+        "humidity_pct": 42,
+        "wind_speed_kmh": 8.4,
+        "precipitation_mm": 0.0,
+        "precipitation_probability_pct": 0,
+        "weather_snapshot_time": "2026-06-14T00:11:48+00:00",
         "weather_reason_cn": "",
         "altitude_m": 62,
         "roof_status": "open",
         "environment_risk_level": "LOW",
-        "environment_risk_flags": [
-          "WEATHER_MISSING"
-        ],
-        "environment_summary_cn": "天气数据暂缺"
+        "environment_risk_flags": [],
+        "environment_summary_cn": "赛时天气已接入：温度 23.9°C，湿度 42%，风速 8.4 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
       },
       "lineup_effect": {
         "status": "missing",
@@ -5413,12 +5691,186 @@
       "ledger_required": false,
       "play_guard_version": "W1_PLAY_GUARD_V1",
       "play_guard_pass": false,
-      "lineup_status": "WAIT_EVENT",
-      "confirmed_lineup_available": false,
-      "home_formation": null,
-      "away_formation": null,
-      "home_starting_count": 0,
-      "away_starting_count": 0,
+      "lineup_status": "CONFIRMED",
+      "confirmed_lineup_available": true,
+      "lineups": {
+        "source": "manual_verified",
+        "source_name": "Sky Sports",
+        "source_type": "manual_verified",
+        "notes_cn": [
+          "Sky Sports 官方首发，人工验证写入。",
+          "土耳其 Kenan Yildiz 未首发，在替补席。",
+          "澳大利亚 P. Beach 首发，Mathew Ryan 替补。",
+          "BC Place 屋顶关闭。"
+        ],
+        "as_of_utc": "2026-06-14T03:58:25Z",
+        "home_starting_xi": [
+          "P. Beach",
+          "Circati",
+          "Souttar",
+          "Burgess",
+          "Italiano",
+          "A. O'Neill",
+          "P. Okon",
+          "J. Bos",
+          "Irankunda",
+          "Metcalfe",
+          "M. Touré"
+        ],
+        "away_starting_xi": [
+          "U. Cakir",
+          "Zeki Celik",
+          "Demiral",
+          "Bardakci",
+          "Kadioglu",
+          "Calhanoglu",
+          "I. Yüksek",
+          "A. Guler",
+          "O. Kokcu",
+          "B. Yilmaz",
+          "Akturkoglu"
+        ],
+        "home_starting_players": [
+          {
+            "name": "P. Beach",
+            "number": 18,
+            "position": "GK",
+            "grid": null
+          },
+          {
+            "name": "Circati",
+            "number": 3,
+            "position": "CB",
+            "grid": null
+          },
+          {
+            "name": "Souttar",
+            "number": 19,
+            "position": "CB",
+            "grid": null
+          },
+          {
+            "name": "Burgess",
+            "number": 21,
+            "position": "CB",
+            "grid": null
+          },
+          {
+            "name": "Italiano",
+            "number": 4,
+            "position": "RWB",
+            "grid": null
+          },
+          {
+            "name": "A. O'Neill",
+            "number": 13,
+            "position": "CM",
+            "grid": null
+          },
+          {
+            "name": "P. Okon",
+            "number": 24,
+            "position": "CM",
+            "grid": null
+          },
+          {
+            "name": "J. Bos",
+            "number": 5,
+            "position": "LWB",
+            "grid": null
+          },
+          {
+            "name": "Irankunda",
+            "number": 17,
+            "position": "AM",
+            "grid": null
+          },
+          {
+            "name": "Metcalfe",
+            "number": 8,
+            "position": "AM",
+            "grid": null
+          },
+          {
+            "name": "M. Touré",
+            "number": 9,
+            "position": "ST",
+            "grid": null
+          }
+        ],
+        "away_starting_players": [
+          {
+            "name": "U. Cakir",
+            "number": 23,
+            "position": "GK",
+            "grid": null
+          },
+          {
+            "name": "Zeki Celik",
+            "number": 2,
+            "position": "RB",
+            "grid": null
+          },
+          {
+            "name": "Demiral",
+            "number": 3,
+            "position": "CB",
+            "grid": null
+          },
+          {
+            "name": "Bardakci",
+            "number": 14,
+            "position": "CB",
+            "grid": null
+          },
+          {
+            "name": "Kadioglu",
+            "number": 20,
+            "position": "LB",
+            "grid": null
+          },
+          {
+            "name": "Calhanoglu",
+            "number": 10,
+            "position": "DM",
+            "grid": null
+          },
+          {
+            "name": "I. Yüksek",
+            "number": 16,
+            "position": "DM",
+            "grid": null
+          },
+          {
+            "name": "A. Guler",
+            "number": 8,
+            "position": "RW",
+            "grid": null
+          },
+          {
+            "name": "O. Kokcu",
+            "number": 6,
+            "position": "AM",
+            "grid": null
+          },
+          {
+            "name": "B. Yilmaz",
+            "number": 21,
+            "position": "LW",
+            "grid": null
+          },
+          {
+            "name": "Akturkoglu",
+            "number": 7,
+            "position": "ST",
+            "grid": null
+          }
+        ]
+      },
+      "home_formation": "3-4-2-1",
+      "away_formation": "4-2-3-1",
+      "home_starting_count": 11,
+      "away_starting_count": 11,
       "home_bench_count": 0,
       "away_bench_count": 0,
       "referee_status": "MISSING",
@@ -5435,9 +5887,12 @@
           "snapshot_time": "2026-06-10T06:45:00Z"
         },
         "lineup": {
-          "status": "missing",
-          "home_count": 0,
-          "away_count": 0
+          "status": "ready",
+          "home_count": 11,
+          "away_count": 11,
+          "source": "manual_verified",
+          "source_name": "Sky Sports",
+          "source_type": "manual_verified"
         },
         "referee": {
           "status": "missing",
@@ -5464,98 +5919,108 @@
         "city": "Vancouver",
         "country": "Canada",
         "kickoff_local_time": "2026-06-13 21:00 PDT",
-        "weather_status": "missing",
-        "weather_code": null,
-        "temperature_c": null,
-        "humidity_pct": null,
-        "wind_speed_kmh": null,
-        "precipitation_mm": null,
-        "precipitation_probability_pct": null,
-        "weather_snapshot_time": null,
+        "weather_status": "ready",
+        "weather_code": 2,
+        "temperature_c": 21.7,
+        "humidity_pct": 54,
+        "wind_speed_kmh": 4.3,
+        "precipitation_mm": 0.0,
+        "precipitation_probability_pct": 0,
+        "weather_snapshot_time": "2026-06-14T04:04:02+00:00",
         "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "closed",
         "environment_risk_level": "LOW",
         "environment_risk_flags": [
-          "WEATHER_IMPACT_REDUCED",
-          "WEATHER_MISSING"
+          "WEATHER_IMPACT_REDUCED"
         ],
-        "environment_summary_cn": "天气数据暂缺"
+        "environment_summary_cn": "赛时天气已接入：温度 21.7°C，湿度 54%，风速 4.3 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
       },
       "lineup_effect": {
-        "status": "missing",
-        "formation_home": null,
-        "formation_away": null,
+        "status": "ready",
+        "formation_home": "3-4-2-1",
+        "formation_away": "4-2-3-1",
         "formation_changed": false,
-        "home_starter_confidence": "unknown",
-        "away_starter_confidence": "unknown",
+        "home_starter_confidence": "high",
+        "away_starter_confidence": "high",
         "key_absences": [],
         "rotation_flags": [],
-        "attacking_power_effect": "unknown",
-        "defensive_stability_effect": "unknown",
-        "midfield_control_effect": "unknown",
-        "pace_transition_effect": "unknown",
-        "set_piece_effect": "unknown",
-        "pressing_effect": "unknown",
-        "reference_should_recalculate": false,
-        "lineup_summary_cn": "首发未确认，暂不能判断阵型、核心球员和轮换影响。"
+        "attacking_power_effect": "stable",
+        "defensive_stability_effect": "stable",
+        "midfield_control_effect": "stable",
+        "pace_transition_effect": "stable",
+        "set_piece_effect": "stable",
+        "pressing_effect": "stable",
+        "reference_should_recalculate": true,
+        "lineup_summary_cn": "首发已确认；参考比分/倾向需要重算。"
       },
       "tactical_effect": {
-        "status": "missing",
-        "home_formation": null,
-        "away_formation": null,
-        "home_style_tags": [],
-        "away_style_tags": [],
-        "home_tactical_summary_cn": "",
-        "away_tactical_summary_cn": "",
-        "formation_mismatch_cn": "",
-        "attacking_side_effect": "unknown",
-        "defensive_stability_effect": "unknown",
-        "tempo_effect": "unknown",
-        "transition_effect": "unknown",
-        "set_piece_effect": "unknown",
-        "reference_should_recalculate": false,
-        "tactical_summary_cn": "首发未确认，暂不能判断阵型、打法和战术效应。"
+        "status": "ready",
+        "home_formation": "3-4-2-1",
+        "away_formation": "4-2-3-1",
+        "home_style_tags": [
+          "三中卫",
+          "翼卫推进",
+          "中路保护",
+          "防守反击",
+          "双前腰衔接"
+        ],
+        "away_style_tags": [
+          "中路组织",
+          "前腰串联",
+          "攻守平衡",
+          "控球推进"
+        ],
+        "home_tactical_summary_cn": "3-4-2-1：三中卫 / 翼卫推进 / 中路保护 / 防守反击 / 双前腰衔接",
+        "away_tactical_summary_cn": "4-2-3-1：中路组织 / 前腰串联 / 攻守平衡 / 控球推进",
+        "formation_mismatch_cn": "主队 3-4-2-1 对客队 4-2-3-1，需要重看边路与三中卫保护的对位。",
+        "attacking_side_effect": "balanced",
+        "defensive_stability_effect": "home_up",
+        "tempo_effect": "medium",
+        "transition_effect": "home_counter",
+        "set_piece_effect": "balanced",
+        "reference_should_recalculate": true,
+        "tactical_summary_cn": "战术效应已生成：主队 3-4-2-1，客队 4-2-3-1；参考倾向需要结合首发重算。"
       },
       "live_refresh": {
-        "requested_at": null,
+        "requested_at": "2026-06-14 12:04:00 CST",
         "fixture_id": "1539001",
-        "overall_status": "failed",
+        "overall_status": "partial",
         "modules": {
           "odds": {
-            "requested": false,
-            "source": "missing",
+            "requested": true,
+            "source": "cache",
             "status": "skipped",
-            "fetched_at": null,
-            "message_cn": "尚未点击开始预测。"
+            "fetched_at": "2026-06-14 12:04:00 CST",
+            "message_cn": "实时 API 失败，使用缓存赔率。"
           },
           "lineups": {
-            "requested": false,
-            "source": "missing",
-            "status": "skipped",
-            "fetched_at": null,
-            "message_cn": "尚未点击开始预测。"
+            "requested": true,
+            "source": "manual_verified",
+            "status": "success",
+            "fetched_at": "2026-06-14 12:04:01 CST",
+            "message_cn": "manual_verified / Sky Sports：官方首发已确认。 Australia 3-4-2-1，Turkey 4-2-3-1。"
           },
           "referee": {
-            "requested": false,
-            "source": "missing",
+            "requested": true,
+            "source": "cache",
             "status": "skipped",
-            "fetched_at": null,
-            "message_cn": "尚未点击开始预测。"
+            "fetched_at": "2026-06-14 12:04:01 CST",
+            "message_cn": "实时 API 失败，使用缓存裁判信息。"
           },
           "weather": {
-            "requested": false,
+            "requested": true,
             "source": "live_api",
-            "status": "skipped",
-            "fetched_at": null,
-            "message_cn": "尚未点击开始预测。"
+            "status": "success",
+            "fetched_at": "2026-06-14 12:04:02 CST",
+            "message_cn": "实时 API 成功，天气已接入。"
           },
           "injuries": {
-            "requested": false,
-            "source": "missing",
+            "requested": true,
+            "source": "cache",
             "status": "skipped",
-            "fetched_at": null,
-            "message_cn": "尚未点击开始预测。"
+            "fetched_at": "2026-06-14 12:04:01 CST",
+            "message_cn": "实时 API 失败，使用缓存伤停信息。"
           }
         }
       },
@@ -5792,21 +6257,11 @@
         "最新快照：首发未确认（赛前 T-1h）"
       ],
       "counter_factors": [
-        "首发未公布；W1硬风控：当前保持等待。",
-        "首发未确认；等待赛前名单刷新。",
-        "裁判未公布；比赛详情快照暂未提供。"
+        "裁判未公布；比赛详情快照暂未提供。",
+        "停赛数据仍为部分覆盖；按 W1 规则作为非阻断缺口。",
+        "旅行距离仍为部分覆盖；按 W1 规则作为非阻断缺口。"
       ],
       "risk_flags": [
-        {
-          "code": "CONFIRMED_LINEUP_MISSING",
-          "severity": "HIGH",
-          "message": "首发未公布；W1硬风控：当前保持等待。"
-        },
-        {
-          "code": "LINEUP_WAIT_EVENT",
-          "severity": "HIGH",
-          "message": "首发未确认；等待赛前名单刷新。"
-        },
         {
           "code": "REFEREE_MISSING",
           "severity": "LOW",
@@ -5824,12 +6279,6 @@
         }
       ],
       "data_gaps": [
-        {
-          "field": "lineups.confirmed_lineup",
-          "severity": "HIGH",
-          "message": "首发未公布；阻止非等待最终结论。",
-          "blocks_play": true
-        },
         {
           "field": "match.referee",
           "severity": "LOW",
@@ -5885,6 +6334,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -5907,7 +6367,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -6355,6 +6818,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -6377,7 +6851,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -6825,6 +7302,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -6847,7 +7335,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -7294,6 +7785,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -7316,7 +7818,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -7763,6 +8268,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -7785,7 +8301,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -8233,6 +8752,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -8255,7 +8785,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -8702,6 +9235,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -8724,7 +9268,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -9171,6 +9718,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -9193,7 +9751,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -9641,6 +10202,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -9663,7 +10235,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -10110,6 +10685,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -10132,7 +10718,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -10579,6 +11168,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -10601,7 +11201,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -11048,6 +11651,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -11070,7 +11684,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -11517,6 +12134,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -11539,7 +12167,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -11987,6 +12618,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -12009,7 +12651,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -12457,6 +13102,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -12479,7 +13135,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",
@@ -12926,6 +13585,17 @@
       "play_guard_pass": false,
       "lineup_status": "WAIT_EVENT",
       "confirmed_lineup_available": false,
+      "lineups": {
+        "source": null,
+        "source_name": null,
+        "source_type": null,
+        "notes_cn": [],
+        "as_of_utc": null,
+        "home_starting_xi": [],
+        "away_starting_xi": [],
+        "home_starting_players": [],
+        "away_starting_players": []
+      },
       "home_formation": null,
       "away_formation": null,
       "home_starting_count": 0,
@@ -12948,7 +13618,10 @@
         "lineup": {
           "status": "missing",
           "home_count": 0,
-          "away_count": 0
+          "away_count": 0,
+          "source": null,
+          "source_name": null,
+          "source_type": null
         },
         "referee": {
           "status": "missing",

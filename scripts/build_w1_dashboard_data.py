@@ -22,6 +22,7 @@ DASHBOARD_HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 STATE_JSON = ROOT / "state/w1_refresh_state.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
+MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
 RESULTS_JSON = ROOT / "data/results/round1_results.json"
 SNAPSHOT_DIR = ROOT / "data/snapshots/group_stage_round1"
@@ -189,6 +190,19 @@ def write_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def team_key(name: Any) -> str:
+    value = str(name or "").strip().lower()
+    return {
+        "turkey": "turkiye",
+        "türkiye": "turkiye",
+        "turkiye": "turkiye",
+    }.get(value, value)
+
+
+def teams_match(left: Any, right: Any) -> bool:
+    return team_key(left) == team_key(right)
+
+
 def result_overlay() -> dict[str, dict[str, Any]]:
     if not RESULTS_JSON.is_file():
         return {}
@@ -304,6 +318,108 @@ def live_refresh_cache() -> dict[str, dict[str, Any]]:
         return {}
     data = read_json(LIVE_REFRESH_STATE)
     return {str(fid): row for fid, row in data.get("fixtures", {}).items()}
+
+
+def manual_player(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": str(row.get("name") or "Unknown Player"),
+        "number": row.get("number"),
+        "position": row.get("position"),
+        "grid": row.get("grid"),
+    }
+
+
+def manual_lineup_payload(path: Path) -> dict[str, Any] | None:
+    try:
+        payload = read_json(path)
+    except json.JSONDecodeError:
+        return None
+    if str(payload.get("status", "")).lower() != "confirmed":
+        return None
+    home_starting = [manual_player(row) for row in payload.get("home_starting_xi", [])]
+    away_starting = [manual_player(row) for row in payload.get("away_starting_xi", [])]
+    if len(home_starting) < 11 or len(away_starting) < 11:
+        return None
+    return {
+        "fixture_id": str(payload.get("fixture_id") or path.stem),
+        "source": "manual_verified",
+        "source_name": payload.get("source", "manual_verified"),
+        "source_type": payload.get("source_type", "manual_verified"),
+        "home_team": payload.get("home_team"),
+        "away_team": payload.get("away_team"),
+        "home_formation": payload.get("home_formation"),
+        "away_formation": payload.get("away_formation"),
+        "home_starting_players": home_starting,
+        "away_starting_players": away_starting,
+        "home_bench_players": [manual_player(row) for row in payload.get("home_substitutes", [])],
+        "away_bench_players": [manual_player(row) for row in payload.get("away_substitutes", [])],
+        "notes_cn": payload.get("notes_cn", []),
+        "as_of_utc": payload.get("as_of_utc"),
+    }
+
+
+def manual_lineup_for_card(card: dict[str, Any]) -> dict[str, Any] | None:
+    card_fid = fixture_id_from_card(card)
+    direct = MANUAL_LINEUPS_DIR / f"{card_fid}.json"
+    if direct.is_file():
+        return manual_lineup_payload(direct)
+    teams = card.get("teams", {})
+    home = teams.get("home", {}).get("name")
+    away = teams.get("away", {}).get("name")
+    for path in sorted(MANUAL_LINEUPS_DIR.glob("*.json")):
+        payload = manual_lineup_payload(path)
+        if not payload:
+            continue
+        if teams_match(payload.get("home_team"), home) and teams_match(payload.get("away_team"), away):
+            return payload
+    return None
+
+
+def player_name(player: dict[str, Any]) -> str:
+    return str(player.get("name") or "Unknown Player")
+
+
+def apply_manual_lineup_override(card: dict[str, Any]) -> dict[str, Any]:
+    manual = manual_lineup_for_card(card)
+    if not manual:
+        return card
+    home_starting = manual.get("home_starting_players") or []
+    away_starting = manual.get("away_starting_players") or []
+    home_bench = manual.get("home_bench_players") or []
+    away_bench = manual.get("away_bench_players") or []
+    card = json.loads(json.dumps(card, ensure_ascii=False))
+    card["lineups"] = {
+        **card.get("lineups", {}),
+        "confirmed_lineup_available": True,
+        "status": "CONFIRMED",
+        "home_starting_xi": [player_name(player) for player in home_starting],
+        "away_starting_xi": [player_name(player) for player in away_starting],
+        "home_substitutes": [player_name(player) for player in home_bench],
+        "away_substitutes": [player_name(player) for player in away_bench],
+        "formation_home": manual.get("home_formation"),
+        "formation_away": manual.get("away_formation"),
+        "home_starting_players": home_starting,
+        "away_starting_players": away_starting,
+        "home_bench_players": home_bench,
+        "away_bench_players": away_bench,
+        "lineup_source": "manual_verified",
+        "lineup_source_name": manual.get("source_name", ""),
+        "lineup_source_type": manual.get("source_type", ""),
+        "lineup_notes_cn": manual.get("notes_cn", []),
+        "lineup_as_of_utc": manual.get("as_of_utc"),
+        "manual_lineup_fixture_id": manual.get("fixture_id"),
+    }
+    card["risk_flags"] = [
+        flag
+        for flag in card.get("risk_flags", [])
+        if flag.get("code") not in {"CONFIRMED_LINEUP_MISSING", "LINEUP_WAIT_EVENT"}
+    ]
+    card["data_gaps"] = [
+        gap
+        for gap in card.get("data_gaps", [])
+        if gap.get("field") != "lineups.confirmed_lineup"
+    ]
+    return card
 
 
 def default_live_refresh(fid: str) -> dict[str, Any]:
@@ -684,7 +800,7 @@ def data_quality_for_card(
     odds_status = "success" if odds_ok and has_1x2 and has_ah and has_ou else "missing"
 
     lineup_confirmed = bool(lineups.get("confirmed_lineup_available"))
-    lineup_status = "confirmed" if lineup_confirmed else "missing"
+    lineup_status = "ready" if lineup_confirmed and lineups.get("lineup_source") == "manual_verified" else ("confirmed" if lineup_confirmed else "missing")
     home_count = len(lineups.get("home_starting_xi") or [])
     away_count = len(lineups.get("away_starting_xi") or [])
 
@@ -740,6 +856,9 @@ def data_quality_for_card(
             "status": lineup_status,
             "home_count": home_count,
             "away_count": away_count,
+            "source": lineups.get("lineup_source"),
+            "source_name": lineups.get("lineup_source_name"),
+            "source_type": lineups.get("lineup_source_type"),
         },
         "referee": {
             "status": referee_status,
@@ -1078,7 +1197,7 @@ def build_record(
     live_refresh_by_fixture: dict[str, dict[str, Any]],
     results: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    card = read_json(card_path)
+    card = apply_manual_lineup_override(read_json(card_path))
     fid = fixture_id_from_card(card)
     teams = card.get("teams", {})
     home = teams.get("home", {}).get("name", latest.get("home_team", ""))
@@ -1170,6 +1289,17 @@ def build_record(
         "play_guard_pass": play_guard_pass,
         "lineup_status": lineups.get("status") if lineups.get("confirmed_lineup_available") else ((ledger or {}).get("lineup_status") or latest.get("lineup_status") or lineups.get("status")),
         "confirmed_lineup_available": bool(lineups.get("confirmed_lineup_available")),
+        "lineups": {
+            "source": lineups.get("lineup_source"),
+            "source_name": lineups.get("lineup_source_name"),
+            "source_type": lineups.get("lineup_source_type"),
+            "notes_cn": lineups.get("lineup_notes_cn", []),
+            "as_of_utc": lineups.get("lineup_as_of_utc"),
+            "home_starting_xi": lineups.get("home_starting_xi", []),
+            "away_starting_xi": lineups.get("away_starting_xi", []),
+            "home_starting_players": lineups.get("home_starting_players", []),
+            "away_starting_players": lineups.get("away_starting_players", []),
+        },
         "home_formation": lineups.get("formation_home") or lineups.get("home_formation"),
         "away_formation": lineups.get("formation_away") or lineups.get("away_formation"),
         "home_starting_count": len(lineups.get("home_starting_xi") or []),
@@ -1226,7 +1356,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             mapping = {
                 "overall": {"complete": "数据完整", "partial": "数据部分缺失", "poor": "数据质量较差"},
                 "odds": {"success": "成功", "missing": "缺失", "stale": "过期", "error": "错误"},
-                "lineup": {"confirmed": "已确认", "probable": "预计", "missing": "未公布", "error": "错误"},
+                "lineup": {"ready": "已确认", "confirmed": "已确认", "probable": "预计", "missing": "未公布", "error": "错误"},
                 "referee": {"success": "已公布", "missing": "未公布", "error": "错误"},
                 "injuries": {"success": "有记录", "empty": "无记录 / 暂无", "missing": "缺失", "error": "错误"},
                 "context": {"available": "可用", "partial": "部分可用", "missing": "缺失"},
@@ -1321,6 +1451,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "cache": "使用缓存",
             "fallback": "使用兜底数据",
             "verified_fallback": "使用兜底数据",
+            "manual_verified": "manual_verified / Sky Sports",
             "missing": "实时 API 暂无",
         }
         status_map = {
@@ -1400,6 +1531,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "away_flag": row["away_flag"],
             "kickoff": row["kickoff"],
             "confirmed_lineup_available": row.get("confirmed_lineup_available"),
+            "lineups": row.get("lineups", {}),
             "home_formation": row.get("home_formation"),
             "away_formation": row.get("away_formation"),
             "home_starting_count": row.get("home_starting_count"),

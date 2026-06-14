@@ -28,6 +28,7 @@ PORT = int(os.environ.get("W1_DASHBOARD_PORT", "8765"))
 PROGRESS = ROOT / "state/w1_predict_progress.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
+MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
 WEATHER_CLIENT = ROOT / "scripts/w1_weather_client.py"
@@ -119,6 +120,19 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp.replace(path)
 
 
+def team_key(name: Any) -> str:
+    value = str(name or "").strip().lower()
+    return {
+        "turkey": "turkiye",
+        "türkiye": "turkiye",
+        "turkiye": "turkiye",
+    }.get(value, value)
+
+
+def teams_match(a: Any, b: Any) -> bool:
+    return team_key(a) == team_key(b)
+
+
 def api_football_get(endpoint: str, fixture_id: str, env: dict[str, str]) -> tuple[dict[str, Any] | None, str | None]:
     key = env.get(ENV_KEY_NAME)
     if not key:
@@ -189,6 +203,10 @@ def write_live_refresh_state(fixture_id: str, live_refresh: dict[str, Any]) -> N
 def write_live_refresh_to_card(fixture_id: str, live_refresh: dict[str, Any]) -> bool:
     path = card_path_for_fixture_id(fixture_id)
     if not path:
+        manual = manual_lineup_payload(fixture_id)
+        if manual:
+            path = card_path_for_manual_lineup(manual)
+    if not path:
         return False
     card = load_json(path)
     card["live_refresh"] = live_refresh
@@ -210,6 +228,9 @@ def find_match_by_fixture_id(fixture_id: Any) -> dict[str, Any] | None:
     for row in match_records():
         if str(row.get("fixture_id")) == wanted:
             return row
+    manual = manual_lineup_payload(wanted)
+    if manual:
+        return find_match_by_teams_en(manual.get("home_team"), manual.get("away_team"))
     return None
 
 
@@ -218,6 +239,15 @@ def find_match_by_name(home: str, away: str) -> dict[str, Any] | None:
         if row.get("home_team_cn") == home and row.get("away_team_cn") == away:
             return row
         if row.get("home_team_cn") == away and row.get("away_team_cn") == home:
+            return row
+    return None
+
+
+def find_match_by_teams_en(home: Any, away: Any) -> dict[str, Any] | None:
+    for row in match_records():
+        if teams_match(row.get("home_team"), home) and teams_match(row.get("away_team"), away):
+            return row
+        if teams_match(row.get("home_team"), away) and teams_match(row.get("away_team"), home):
             return row
     return None
 
@@ -232,6 +262,22 @@ def card_path_for_fixture_id(fixture_id: Any) -> Path | None:
         except json.JSONDecodeError:
             continue
         if str(card.get("match", {}).get("match_id", "")).split(":")[-1] == wanted:
+            return path
+    return None
+
+
+def card_path_for_manual_lineup(lineup: dict[str, Any]) -> Path | None:
+    home = lineup.get("home_team")
+    away = lineup.get("away_team")
+    for path in CARDS_DIR.glob("*.json"):
+        try:
+            card = load_json(path)
+        except json.JSONDecodeError:
+            continue
+        teams = card.get("teams", {})
+        card_home = teams.get("home", {}).get("name")
+        card_away = teams.get("away", {}).get("name")
+        if teams_match(card_home, home) and teams_match(card_away, away):
             return path
     return None
 
@@ -270,6 +316,60 @@ def verified_lineup_payload(fixture_id: str) -> dict[str, Any] | None:
         "home_bench_players": players("Qatar Sub", 15),
         "away_bench_players": players("Switzerland Sub", 15),
     }
+
+
+def manual_player(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": str(row.get("name") or "Unknown Player"),
+        "number": row.get("number"),
+        "position": row.get("position"),
+        "grid": row.get("grid"),
+    }
+
+
+def manual_lineup_payload(fixture_id: str) -> dict[str, Any] | None:
+    path = MANUAL_LINEUPS_DIR / f"{fixture_id}.json"
+    if not path.is_file():
+        return None
+    payload = load_json(path)
+    if str(payload.get("status", "")).lower() != "confirmed":
+        return None
+    home_starting = [manual_player(row) for row in payload.get("home_starting_xi", [])]
+    away_starting = [manual_player(row) for row in payload.get("away_starting_xi", [])]
+    if len(home_starting) < 11 or len(away_starting) < 11:
+        return None
+    return {
+        "fixture_id": str(payload.get("fixture_id") or fixture_id),
+        "source": "manual_verified",
+        "source_name": payload.get("source", "manual_verified"),
+        "source_type": payload.get("source_type", "manual_verified"),
+        "home_team": payload.get("home_team"),
+        "away_team": payload.get("away_team"),
+        "home_formation": payload.get("home_formation"),
+        "away_formation": payload.get("away_formation"),
+        "home_starting_players": home_starting,
+        "away_starting_players": away_starting,
+        "home_bench_players": [manual_player(row) for row in payload.get("home_substitutes", [])],
+        "away_bench_players": [manual_player(row) for row in payload.get("away_substitutes", [])],
+        "notes_cn": payload.get("notes_cn", []),
+        "as_of_utc": payload.get("as_of_utc"),
+    }
+
+
+def manual_lineup_payload_for_match(fixture_id: str, match: dict[str, Any] | None = None) -> dict[str, Any] | None:
+    direct = manual_lineup_payload(fixture_id)
+    if direct:
+        return direct
+    selected = match or find_match_by_fixture_id(fixture_id)
+    home = (selected or {}).get("home_team") or (selected or {}).get("home_team_cn")
+    away = (selected or {}).get("away_team") or (selected or {}).get("away_team_cn")
+    for path in sorted(MANUAL_LINEUPS_DIR.glob("*.json")):
+        payload = manual_lineup_payload(path.stem)
+        if not payload:
+            continue
+        if teams_match(payload.get("home_team"), home) and teams_match(payload.get("away_team"), away):
+            return payload
+    return None
 
 
 def player_name(player: dict[str, Any]) -> str:
@@ -323,6 +423,8 @@ def fetch_api_football_lineups(fixture_id: str, env: dict[str, str]) -> dict[str
 
 def write_lineups_to_card(fixture_id: str, lineups: dict[str, Any]) -> bool:
     path = card_path_for_fixture_id(fixture_id)
+    if not path and lineups.get("source") == "manual_verified":
+        path = card_path_for_manual_lineup(lineups)
     if not path:
         return False
     card = load_json(path)
@@ -345,6 +447,10 @@ def write_lineups_to_card(fixture_id: str, lineups: dict[str, Any]) -> bool:
         "home_bench_players": home_bench,
         "away_bench_players": away_bench,
         "lineup_source": lineups.get("source", ""),
+        "lineup_source_name": lineups.get("source_name", ""),
+        "lineup_source_type": lineups.get("source_type", ""),
+        "lineup_notes_cn": lineups.get("notes_cn", []),
+        "lineup_as_of_utc": lineups.get("as_of_utc"),
         "lineup_updated_at": now_ts(),
     }
     if card["lineups"]["confirmed_lineup_available"]:
@@ -387,6 +493,19 @@ def refresh_lineups(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any
     fixture_id = str(match.get("fixture_id") or "")
     if not fixture_id:
         return live_module(source="missing", status="error", message_cn="缺少 fixture_id，无法刷新首发。")
+    manual = manual_lineup_payload_for_match(fixture_id, match)
+    if manual:
+        if not write_lineups_to_card(fixture_id, manual):
+            return live_module(source="manual_verified", status="error", message_cn="找到人工验证首发，但未找到对应本地 match card。")
+        return live_module(
+            source="manual_verified",
+            status="success",
+            message_cn=(
+                f"manual_verified / {manual.get('source_name', 'Sky Sports')}：官方首发已确认。"
+                f" {manual.get('home_team')} {manual.get('home_formation')}，"
+                f"{manual.get('away_team')} {manual.get('away_formation')}。"
+            ),
+        )
     lineups, module = fetch_live_lineups_from_api(fixture_id, env)
     if not lineups:
         fallback = verified_lineup_payload(fixture_id)
