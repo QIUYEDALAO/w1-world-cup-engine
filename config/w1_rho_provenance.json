@@ -1,0 +1,9 @@
+{
+  "default_rho": -0.10,
+  "calibrated": false,
+  "source_report": null,
+  "valid_sample": null,
+  "input_synthetic": null,
+  "calibrated_at": null,
+  "note": "uncalibrated placeholder; 未经历史 CSV 拟合, 不得当作已校准值。校准后须同时更新本文件与 w1_score_engine.DEFAULT_RHO。"
+}
