@@ -1,0 +1,22 @@
+{
+  "candidate_type": "rho_provenance_candidate",
+  "default_rho_candidate": -0.057766,
+  "calibrated": false,
+  "production_ready": true,
+  "source_report": "reports/W1_RHO_REAL_OU_CALIBRATION_REPORT.md",
+  "source_json": "reports/w1_rho_real_ou_calibration.json",
+  "source_figure": "reports/W1_RHO_REAL_OU_CALIBRATION_RELIABILITY.png",
+  "input_csv": "data/historical/rho_calibration_real.csv",
+  "valid_sample": 10731,
+  "min_prod_sample": 500,
+  "input_synthetic": false,
+  "rho_hat": -0.057766,
+  "bootstrap_ci_95": [
+    -0.0825,
+    -0.035
+  ],
+  "rps_gap_model_minus_market": 0.00011,
+  "default_rho_updated": false,
+  "generated_at": "2026-06-14T11:12:11.824922+00:00",
+  "note": "Candidate only. Do not update config/w1_rho_provenance.json or DEFAULT_RHO without explicit approval."
+}

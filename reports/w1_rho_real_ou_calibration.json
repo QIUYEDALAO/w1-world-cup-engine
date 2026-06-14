@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-06-14T11:11:46.117810+00:00",
+  "mode": "ou",
+  "input_csv": "data/historical/rho_calibration_real.csv",
+  "report": "reports/W1_RHO_REAL_OU_CALIBRATION_REPORT.md",
+  "figure": "reports/W1_RHO_REAL_OU_CALIBRATION_RELIABILITY.png",
+  "stats": {
+    "read": 10731,
+    "valid": 10731,
+    "dropped": 0,
+    "missing_optional": 0
+  },
+  "rho_hat": -0.057766,
+  "nll_rho_hat": 31012.399375,
+  "nll_rho_zero": 31022.927411,
+  "nll_improvement": 10.528036,
+  "hessian_se": 0.012696,
+  "bootstrap_ci_95": [
+    -0.0825,
+    -0.035
+  ],
+  "production_ready": true,
+  "input_synthetic": false,
+  "valid_sample": 10731,
+  "min_prod_sample": 500,
+  "rps_gap_model_minus_market": 0.00011,
+  "baseline": {
+    "rps_model": 0.391899,
+    "rps_market": 0.391789,
+    "rps_uniform": 0.470941,
+    "logloss_rho_hat": 2.889982,
+    "logloss_rho_zero": 2.890963
+  },
+  "reliability_1x2": [
+    {
+      "predicted_home_win_prob": 0.147962,
+      "actual_home_win_rate": 0.123552,
+      "n": 1036
+    },
+    {
+      "predicted_home_win_prob": 0.31198,
+      "actual_home_win_rate": 0.284674,
+      "n": 3706
+    },
+    {
+      "predicted_home_win_prob": 0.490338,
+      "actual_home_win_rate": 0.487345,
+      "n": 3872
+    },
+    {
+      "predicted_home_win_prob": 0.685603,
+      "actual_home_win_rate": 0.708111,
+      "n": 1874
+    },
+    {
+      "predicted_home_win_prob": 0.837526,
+      "actual_home_win_rate": 0.855967,
+      "n": 243
+    }
+  ],
+  "reliability_total": [
+    {
+      "threshold": 1.5,
+      "predicted_over_prob": 0.76897,
+      "actual_over_rate": 0.773181,
+      "n": 10731
+    },
+    {
+      "threshold": 2.5,
+      "predicted_over_prob": 0.52795,
+      "actual_over_rate": 0.530426,
+      "n": 10731
+    },
+    {
+      "threshold": 3.5,
+      "predicted_over_prob": 0.311367,
+      "actual_over_rate": 0.310968,
+      "n": 10731
+    },
+    {
+      "threshold": 4.5,
+      "predicted_over_prob": 0.158796,
+      "actual_over_rate": 0.155251,
+      "n": 10731
+    }
+  ],
+  "default_rho_updated": false,
+  "notes_cn": [
+    "本报告只生成 rho calibration candidate，不自动修改 DEFAULT_RHO。",
+    "若 valid_sample < min_prod_sample，production_ready 必须为 false。"
+  ]
+}

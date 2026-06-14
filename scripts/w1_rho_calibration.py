@@ -20,8 +20,11 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
+import json
 import math
+import struct
 import sys
+import zlib
 from pathlib import Path
 from typing import Any
 
@@ -275,16 +278,30 @@ def fit_rho(rows: list[dict[str, Any]], max_goals: int) -> tuple[float, float, f
 
 
 def bootstrap_rho(rows: list[dict[str, Any]], max_goals: int, B: int, seed: int = 0):
-    """条件 bootstrap: lambda 固定(已缓存 @rho_hat), 仅重采样比赛重拟 rho。"""
+    """条件 bootstrap: lambda 固定(已缓存 @rho_hat), 仅重采样比赛重拟 rho。
+
+    In environments without scipy this needs to stay lightweight for 10k+ rows, so
+    bootstrap uses a dense rho grid and weighted likelihood over resampled counts.
+    """
     rng = np.random.default_rng(seed)
     n = len(rows)
+    grid = np.linspace(RHO_BOUNDS[0], RHO_BOUNDS[1], 101)
+    log_probs = np.zeros((len(grid), n), dtype=float)
+    for g_idx, rho in enumerate(grid):
+        for r_idx, rec in enumerate(rows):
+            M = E.score_matrix(rec["_lh"], rec["_la"], float(rho), max_goals)
+            h, a = rec["home_goals"], rec["away_goals"]
+            p = M[h, a] if (h < M.shape[0] and a < M.shape[1]) else 0.0
+            p = float(p) if math.isfinite(float(p)) and float(p) > 0 else 1e-15
+            log_probs[g_idx, r_idx] = math.log(max(p, 1e-15))
+    floor_log = math.log(1e-15)
+    log_probs = np.nan_to_num(log_probs, nan=floor_log, neginf=floor_log, posinf=floor_log)
     est = []
     for _ in range(B):
         idx = rng.integers(0, n, size=n)
-        sample = [rows[i] for i in idx]
-        r = minimize_scalar(nll_cached, args=(sample, max_goals),
-                            bounds=RHO_BOUNDS, method="bounded", options={"xatol": 2e-3}).x
-        est.append(float(r))
+        counts = np.bincount(idx, minlength=n).astype(float)
+        nll = -np.sum(log_probs * counts[None, :], axis=1)
+        est.append(float(grid[int(np.argmin(nll))]))
     return float(np.percentile(est, 2.5)), float(np.percentile(est, 97.5))
 
 
@@ -345,7 +362,7 @@ def write_plot(rho_hat: float, rows: list[dict[str, Any]], rel_tot, max_goals: i
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
     except Exception:
-        return False
+        return write_plot_fallback(rho_hat, rows, rel_tot, max_goals, out_png)
     rhos = np.linspace(RHO_BOUNDS[0], RHO_BOUNDS[1], 25)
     nlls = [nll_cached(r, rows, max_goals) for r in rhos]
     fig, ax = plt.subplots(1, 2, figsize=(11, 4.2))
@@ -364,6 +381,92 @@ def write_plot(rho_hat: float, rows: list[dict[str, Any]], rel_tot, max_goals: i
     ax[1].set_title("total-goals tail reliability"); ax[1].set_xlim(0, 1); ax[1].set_ylim(0, 1)
     ax[1].legend()
     fig.tight_layout(); fig.savefig(out_png, dpi=110); plt.close(fig)
+    return True
+
+
+def write_plot_fallback(rho_hat: float, rows: list[dict[str, Any]], rel_tot, max_goals: int, out_png: Path) -> bool:
+    width, height = 1200, 500
+    pixels = bytearray([255, 255, 255] * width * height)
+
+    def put(x: int, y: int, color: tuple[int, int, int]) -> None:
+        if 0 <= x < width and 0 <= y < height:
+            idx = (y * width + x) * 3
+            pixels[idx:idx + 3] = bytes(color)
+
+    def line(x0: int, y0: int, x1: int, y1: int, color: tuple[int, int, int]) -> None:
+        dx = abs(x1 - x0)
+        dy = -abs(y1 - y0)
+        sx = 1 if x0 < x1 else -1
+        sy = 1 if y0 < y1 else -1
+        err = dx + dy
+        while True:
+            put(x0, y0, color)
+            if x0 == x1 and y0 == y1:
+                break
+            e2 = 2 * err
+            if e2 >= dy:
+                err += dy
+                x0 += sx
+            if e2 <= dx:
+                err += dx
+                y0 += sy
+
+    def circle(cx: int, cy: int, r: int, color: tuple[int, int, int]) -> None:
+        for x in range(cx - r, cx + r + 1):
+            for y in range(cy - r, cy + r + 1):
+                if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
+                    put(x, y, color)
+
+    left = (70, 40, 560, 440)
+    right = (670, 40, 1160, 440)
+    black, blue, red, green, gray = (0, 0, 0), (31, 119, 180), (220, 20, 60), (46, 139, 87), (150, 150, 150)
+    for box in (left, right):
+        x0, y0, x1, y1 = box
+        line(x0, y1, x1, y1, black)
+        line(x0, y0, x0, y1, black)
+    rhos = np.linspace(RHO_BOUNDS[0], RHO_BOUNDS[1], 50)
+    nlls = [nll_cached(float(r), rows, max_goals) for r in rhos]
+    nmin, nmax = min(nlls), max(nlls)
+
+    def map_left(r: float, nll: float) -> tuple[int, int]:
+        x0, y0, x1, y1 = left
+        x = x0 + int((r - RHO_BOUNDS[0]) / (RHO_BOUNDS[1] - RHO_BOUNDS[0]) * (x1 - x0))
+        y = y1 - int((nll - nmin) / max(nmax - nmin, 1e-9) * (y1 - y0))
+        return x, y
+
+    pts = [map_left(float(r), float(n)) for r, n in zip(rhos, nlls)]
+    for a, b in zip(pts, pts[1:]):
+        line(a[0], a[1], b[0], b[1], blue)
+    rx, _ = map_left(rho_hat, nmin)
+    line(rx, left[1], rx, left[3], red)
+    zx, _ = map_left(0.0, nmin)
+    line(zx, left[1], zx, left[3], gray)
+
+    x0, y0, x1, y1 = right
+    line(x0, y1, x1, y0, gray)
+    for _, (pred, emp, _) in rel_tot.items():
+        x = x0 + int(float(pred) * (x1 - x0))
+        y = y1 - int(float(emp) * (y1 - y0))
+        circle(x, y, 6, green)
+
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    scanlines = bytearray()
+    stride = width * 3
+    for y in range(height):
+        scanlines.append(0)
+        start = y * stride
+        scanlines.extend(pixels[start:start + stride])
+
+    def chunk(tag: bytes, data: bytes) -> bytes:
+        return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+
+    png = (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(bytes(scanlines), 9))
+        + chunk(b"IEND", b"")
+    )
+    out_png.write_bytes(png)
     return True
 
 
@@ -471,6 +574,53 @@ def write_report(path: Path, csv_path: Path, stats, rho_hat, nll_hat, nll_zero, 
     path.write_text("\n".join(L) + "\n", encoding="utf-8")
 
 
+def default_json_path(report_path: Path) -> Path:
+    if report_path.name == "W1_RHO_REAL_OU_CALIBRATION_REPORT.md":
+        return report_path.with_name("w1_rho_real_ou_calibration.json")
+    return report_path.with_suffix(".json")
+
+
+def write_json_summary(path: Path, csv_path: Path, stats, rho_hat, nll_hat, nll_zero, se,
+                       ci, rel_1x2, rel_tot, base, production_ready: bool, synthetic: bool,
+                       rps_gap: float, min_prod_sample: int, mode: str, plot_path: Path,
+                       report_path: Path) -> None:
+    payload = {
+        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "mode": mode,
+        "input_csv": str(csv_path),
+        "report": str(report_path),
+        "figure": str(plot_path),
+        "stats": stats,
+        "rho_hat": round(float(rho_hat), 6),
+        "nll_rho_hat": round(float(nll_hat), 6),
+        "nll_rho_zero": round(float(nll_zero), 6),
+        "nll_improvement": round(float(nll_zero - nll_hat), 6),
+        "hessian_se": None if math.isnan(se) else round(float(se), 6),
+        "bootstrap_ci_95": None if ci is None else [round(float(ci[0]), 6), round(float(ci[1]), 6)],
+        "production_ready": bool(production_ready),
+        "input_synthetic": bool(synthetic),
+        "valid_sample": stats.get("valid"),
+        "min_prod_sample": min_prod_sample,
+        "rps_gap_model_minus_market": round(float(rps_gap), 6),
+        "baseline": {key: round(float(value), 6) for key, value in base.items()},
+        "reliability_1x2": [
+            {"predicted_home_win_prob": round(float(pred), 6), "actual_home_win_rate": round(float(emp), 6), "n": n}
+            for pred, emp, n in rel_1x2
+        ],
+        "reliability_total": [
+            {"threshold": threshold, "predicted_over_prob": round(float(values[0]), 6), "actual_over_rate": round(float(values[1]), 6), "n": values[2]}
+            for threshold, values in rel_tot.items()
+        ],
+        "default_rho_updated": False,
+        "notes_cn": [
+            "本报告只生成 rho calibration candidate，不自动修改 DEFAULT_RHO。",
+            "若 valid_sample < min_prod_sample，production_ready 必须为 false。",
+        ],
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 # ===========================================================================
 # 7. CLI
 # ===========================================================================
@@ -479,6 +629,9 @@ def main() -> int:
     ap.add_argument("--csv", type=Path, default=None, help="历史 CSV(字段见 REQUIRED_COLUMNS)")
     ap.add_argument("--report", type=Path, default=Path("reports/W1_RHO_CALIBRATION_REPORT.md"))
     ap.add_argument("--plot", type=Path, default=None)
+    ap.add_argument("--figure", type=Path, default=None, help="兼容别名: 同 --plot")
+    ap.add_argument("--mode", choices=["ou"], default="ou", help="校准模式; 当前生产候选只允许 ou")
+    ap.add_argument("--json-out", type=Path, default=None, help="机器可读报告输出路径")
     ap.add_argument("--bootstrap", type=int, default=0, help="bootstrap 次数(0=跳过); 200 较稳但慢")
     ap.add_argument("--min-prod-sample", type=int, default=500, help="允许写入生产 DEFAULT_RHO 的最小有效样本")
     ap.add_argument("--max-goals", type=int, default=E.MAX_GOALS)
@@ -525,15 +678,19 @@ def main() -> int:
                         and RHO_BOUNDS[0] + 1e-3 < rho_hat < RHO_BOUNDS[1] - 1e-3)
     note = args.synthetic_note or ("自动检测: 输入疑似合成数据(competition=SYNTH)。" if synthetic else "")
 
-    plot_path = args.plot or args.report.with_name("W1_RHO_CALIBRATION_RELIABILITY.png")
+    plot_path = args.figure or args.plot or args.report.with_name("W1_RHO_CALIBRATION_RELIABILITY.png")
+    json_path = args.json_out or default_json_path(args.report)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     plot_ok = write_plot(rho_hat, rows, rel_tot, args.max_goals, plot_path)
     write_report(args.report, args.csv, stats, rho_hat, nll_hat, nll_zero, se, ci,
                  rel_1x2, rel_tot, base, args.max_goals, plot_ok, note,
                  production_ready, synthetic, rps_gap, args.min_prod_sample)
+    write_json_summary(json_path, args.csv, stats, rho_hat, nll_hat, nll_zero, se, ci,
+                       rel_1x2, rel_tot, base, production_ready, synthetic,
+                       rps_gap, args.min_prod_sample, args.mode, plot_path, args.report)
 
     print(f"PASS: rho_hat={rho_hat:.4f} (SE={se:.4f})  valid={stats['valid']}  "
-          f"PRODUCTION_READY={'YES' if production_ready else 'NO'}  report -> {args.report}")
+          f"PRODUCTION_READY={'YES' if production_ready else 'NO'}  report -> {args.report}  json -> {json_path}")
     return 0
 
 
