@@ -2043,7 +2043,7 @@
       "away": "🇵🇾 巴拉圭"
     }
   ],
-  "generated_at_utc": "2026-06-14T04:04:48+00:00",
+  "generated_at_utc": "2026-06-14T04:14:17+00:00",
   "match_records": [
     {
       "match": "墨西哥 vs 南非",
@@ -4297,7 +4297,7 @@
         "wind_speed_kmh": 7.4,
         "precipitation_mm": 0.0,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-14T04:04:47+00:00",
+        "weather_snapshot_time": "2026-06-14T04:14:16+00:00",
         "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "open",
@@ -4352,7 +4352,7 @@
         "tactical_summary_cn": "战术效应已生成：主队 4-3-3，客队 3-4-2-1；参考倾向需要结合首发重算。"
       },
       "live_refresh": {
-        "requested_at": "2026-06-14 12:04:44 CST",
+        "requested_at": "2026-06-14 12:14:12 CST",
         "fixture_id": "1489373",
         "overall_status": "partial",
         "modules": {
@@ -4360,35 +4360,35 @@
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 12:04:44 CST",
+            "fetched_at": "2026-06-14 12:14:12 CST",
             "message_cn": "实时 API 失败，使用缓存赔率。"
           },
           "lineups": {
             "requested": true,
             "source": "verified_fallback",
             "status": "skipped",
-            "fetched_at": "2026-06-14 12:04:45 CST",
+            "fetched_at": "2026-06-14 12:14:12 CST",
             "message_cn": "实时 API 未配置，使用缓存/兜底数据。 使用兜底数据。 首发已写入：Qatar 4-3-3，Switzerland 3-4-2-1。"
           },
           "referee": {
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 12:04:45 CST",
+            "fetched_at": "2026-06-14 12:14:13 CST",
             "message_cn": "实时 API 失败，使用缓存裁判信息。"
           },
           "weather": {
             "requested": true,
             "source": "live_api",
             "status": "success",
-            "fetched_at": "2026-06-14 12:04:47 CST",
+            "fetched_at": "2026-06-14 12:14:16 CST",
             "message_cn": "实时 API 成功，天气已接入。"
           },
           "injuries": {
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 12:04:45 CST",
+            "fetched_at": "2026-06-14 12:14:13 CST",
             "message_cn": "实时 API 失败，使用缓存伤停信息。"
           }
         }
@@ -5923,10 +5923,10 @@
         "weather_code": 2,
         "temperature_c": 21.7,
         "humidity_pct": 54,
-        "wind_speed_kmh": 4.3,
+        "wind_speed_kmh": 4.1,
         "precipitation_mm": 0.0,
         "precipitation_probability_pct": 0,
-        "weather_snapshot_time": "2026-06-14T04:04:02+00:00",
+        "weather_snapshot_time": "2026-06-14T04:14:10+00:00",
         "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "closed",
@@ -5934,7 +5934,7 @@
         "environment_risk_flags": [
           "WEATHER_IMPACT_REDUCED"
         ],
-        "environment_summary_cn": "赛时天气已接入：温度 21.7°C，湿度 54%，风速 4.3 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "赛时天气已接入：温度 21.7°C，湿度 54%，风速 4.1 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
       },
       "lineup_effect": {
         "status": "ready",
@@ -5983,7 +5983,7 @@
         "tactical_summary_cn": "战术效应已生成：主队 3-4-2-1，客队 4-2-3-1；参考倾向需要结合首发重算。"
       },
       "live_refresh": {
-        "requested_at": "2026-06-14 12:04:00 CST",
+        "requested_at": "2026-06-14 12:14:07 CST",
         "fixture_id": "1539001",
         "overall_status": "partial",
         "modules": {
@@ -5991,35 +5991,35 @@
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 12:04:00 CST",
+            "fetched_at": "2026-06-14 12:14:08 CST",
             "message_cn": "实时 API 失败，使用缓存赔率。"
           },
           "lineups": {
             "requested": true,
             "source": "manual_verified",
             "status": "success",
-            "fetched_at": "2026-06-14 12:04:01 CST",
+            "fetched_at": "2026-06-14 12:14:08 CST",
             "message_cn": "manual_verified / Sky Sports：官方首发已确认。 Australia 3-4-2-1，Turkey 4-2-3-1。"
           },
           "referee": {
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 12:04:01 CST",
+            "fetched_at": "2026-06-14 12:14:08 CST",
             "message_cn": "实时 API 失败，使用缓存裁判信息。"
           },
           "weather": {
             "requested": true,
             "source": "live_api",
             "status": "success",
-            "fetched_at": "2026-06-14 12:04:02 CST",
+            "fetched_at": "2026-06-14 12:14:10 CST",
             "message_cn": "实时 API 成功，天气已接入。"
           },
           "injuries": {
             "requested": true,
             "source": "cache",
             "status": "skipped",
-            "fetched_at": "2026-06-14 12:04:01 CST",
+            "fetched_at": "2026-06-14 12:14:08 CST",
             "message_cn": "实时 API 失败，使用缓存伤停信息。"
           }
         }

@@ -23,6 +23,7 @@ STATE_JSON = ROOT / "state/w1_refresh_state.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
+FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
 RESULTS_JSON = ROOT / "data/results/round1_results.json"
 SNAPSHOT_DIR = ROOT / "data/snapshots/group_stage_round1"
@@ -203,6 +204,34 @@ def teams_match(left: Any, right: Any) -> bool:
     return team_key(left) == team_key(right)
 
 
+def fixture_aliases() -> dict[str, str]:
+    if not FIXTURE_ALIASES.is_file():
+        return {}
+    try:
+        data = read_json(FIXTURE_ALIASES)
+    except json.JSONDecodeError:
+        return {}
+    return {str(key): str(value) for key, value in data.items()}
+
+
+def fixture_id_candidates(fixture_id: Any) -> list[str]:
+    wanted = str(fixture_id or "").strip()
+    if not wanted:
+        return []
+    aliases = fixture_aliases()
+    candidates = [wanted]
+    if aliases.get(wanted):
+        candidates.append(aliases[wanted])
+    candidates.extend(key for key, value in aliases.items() if value == wanted)
+    seen: set[str] = set()
+    out: list[str] = []
+    for candidate in candidates:
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            out.append(candidate)
+    return out
+
+
 def result_overlay() -> dict[str, dict[str, Any]]:
     if not RESULTS_JSON.is_file():
         return {}
@@ -317,7 +346,11 @@ def live_refresh_cache() -> dict[str, dict[str, Any]]:
     if not LIVE_REFRESH_STATE.is_file():
         return {}
     data = read_json(LIVE_REFRESH_STATE)
-    return {str(fid): row for fid, row in data.get("fixtures", {}).items()}
+    by_fixture: dict[str, dict[str, Any]] = {}
+    for fid, row in data.get("fixtures", {}).items():
+        for candidate in fixture_id_candidates(fid) or [str(fid)]:
+            by_fixture[candidate] = row
+    return by_fixture
 
 
 def manual_player(row: dict[str, Any]) -> dict[str, Any]:
@@ -360,9 +393,10 @@ def manual_lineup_payload(path: Path) -> dict[str, Any] | None:
 
 def manual_lineup_for_card(card: dict[str, Any]) -> dict[str, Any] | None:
     card_fid = fixture_id_from_card(card)
-    direct = MANUAL_LINEUPS_DIR / f"{card_fid}.json"
-    if direct.is_file():
-        return manual_lineup_payload(direct)
+    for candidate in fixture_id_candidates(card_fid):
+        direct = MANUAL_LINEUPS_DIR / f"{candidate}.json"
+        if direct.is_file():
+            return manual_lineup_payload(direct)
     teams = card.get("teams", {})
     home = teams.get("home", {}).get("name")
     away = teams.get("away", {}).get("name")

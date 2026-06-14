@@ -29,6 +29,7 @@ PROGRESS = ROOT / "state/w1_predict_progress.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
+FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
 WEATHER_CLIENT = ROOT / "scripts/w1_weather_client.py"
@@ -133,6 +134,34 @@ def teams_match(a: Any, b: Any) -> bool:
     return team_key(a) == team_key(b)
 
 
+def fixture_aliases() -> dict[str, str]:
+    if not FIXTURE_ALIASES.is_file():
+        return {}
+    try:
+        data = load_json(FIXTURE_ALIASES)
+    except json.JSONDecodeError:
+        return {}
+    return {str(key): str(value) for key, value in data.items()}
+
+
+def fixture_id_candidates(fixture_id: Any) -> list[str]:
+    wanted = str(fixture_id or "").strip()
+    if not wanted:
+        return []
+    aliases = fixture_aliases()
+    candidates = [wanted]
+    if aliases.get(wanted):
+        candidates.append(aliases[wanted])
+    candidates.extend(key for key, value in aliases.items() if value == wanted)
+    seen: set[str] = set()
+    out: list[str] = []
+    for candidate in candidates:
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            out.append(candidate)
+    return out
+
+
 def api_football_get(endpoint: str, fixture_id: str, env: dict[str, str]) -> tuple[dict[str, Any] | None, str | None]:
     key = env.get(ENV_KEY_NAME)
     if not key:
@@ -196,7 +225,8 @@ def write_live_refresh_state(fixture_id: str, live_refresh: dict[str, Any]) -> N
     state = load_json(LIVE_REFRESH_STATE) if LIVE_REFRESH_STATE.is_file() else {"schema_version": "w1_live_refresh_state.v1", "fixtures": {}}
     state.setdefault("schema_version", "w1_live_refresh_state.v1")
     state.setdefault("fixtures", {})
-    state["fixtures"][str(fixture_id)] = live_refresh
+    for candidate in fixture_id_candidates(fixture_id) or [str(fixture_id)]:
+        state["fixtures"][candidate] = live_refresh
     write_json(LIVE_REFRESH_STATE, state)
 
 
@@ -224,11 +254,11 @@ def match_records() -> list[dict[str, Any]]:
 def find_match_by_fixture_id(fixture_id: Any) -> dict[str, Any] | None:
     if fixture_id in (None, ""):
         return None
-    wanted = str(fixture_id)
+    candidates = fixture_id_candidates(fixture_id)
     for row in match_records():
-        if str(row.get("fixture_id")) == wanted:
+        if str(row.get("fixture_id")) in candidates:
             return row
-    manual = manual_lineup_payload(wanted)
+    manual = manual_lineup_payload(str(fixture_id))
     if manual:
         return find_match_by_teams_en(manual.get("home_team"), manual.get("away_team"))
     return None
@@ -253,15 +283,15 @@ def find_match_by_teams_en(home: Any, away: Any) -> dict[str, Any] | None:
 
 
 def card_path_for_fixture_id(fixture_id: Any) -> Path | None:
-    wanted = str(fixture_id or "")
-    if not wanted:
+    candidates = fixture_id_candidates(fixture_id)
+    if not candidates:
         return None
     for path in CARDS_DIR.glob("*.json"):
         try:
             card = load_json(path)
         except json.JSONDecodeError:
             continue
-        if str(card.get("match", {}).get("match_id", "")).split(":")[-1] == wanted:
+        if str(card.get("match", {}).get("match_id", "")).split(":")[-1] in candidates:
             return path
     return None
 
@@ -328,8 +358,13 @@ def manual_player(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def manual_lineup_payload(fixture_id: str) -> dict[str, Any] | None:
-    path = MANUAL_LINEUPS_DIR / f"{fixture_id}.json"
-    if not path.is_file():
+    path = None
+    for candidate in fixture_id_candidates(fixture_id):
+        candidate_path = MANUAL_LINEUPS_DIR / f"{candidate}.json"
+        if candidate_path.is_file():
+            path = candidate_path
+            break
+    if path is None:
         return None
     payload = load_json(path)
     if str(payload.get("status", "")).lower() != "confirmed":
