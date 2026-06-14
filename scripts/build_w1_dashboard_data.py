@@ -804,6 +804,60 @@ def normalize_score_distribution(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def recommendation_view_from_score_distribution(score_distribution: dict[str, Any]) -> dict[str, Any]:
+    """Derive the public-facing score view without changing the score matrix."""
+    primary_score = score_distribution.get("main_score")
+    secondary_score = score_distribution.get("fallback_score")
+    if secondary_score == primary_score:
+        secondary_score = None
+
+    pool = score_distribution.get("score_pool", []) or []
+    shown_scores = {score for score in (primary_score, secondary_score) if score}
+    risk_paths = []
+    open_game_paths = []
+    tail_paths = []
+    for item in pool:
+        score = item.get("score")
+        if score in shown_scores:
+            continue
+        path = str(item.get("path") or "")
+        reason = str(item.get("reason_cn") or "")
+        entry = {
+            "score": score,
+            "path": path,
+            "probability": item.get("probability", item.get("weight")),
+            "reason_cn": cn_display_text(reason),
+        }
+        risk_paths.append(entry)
+        if any(token in path + reason for token in ("打开", "打穿", "转换", "大比分")):
+            open_game_paths.append(entry)
+        if any(token in path + reason for token in ("崩盘", "尾部", "极端")):
+            tail_paths.append(entry)
+
+    summary_parts = []
+    if open_game_paths:
+        summary_parts.append("存在打开局路径，需观察早球、转换混乱和阵型压上。")
+    if tail_paths:
+        summary_parts.append("尾部崩盘路径仅作为压力测试，不作为对外推荐。")
+    if not summary_parts:
+        summary_parts.append("风险路径保留在专家详情层，主展示不超过两个比分。")
+
+    return {
+        "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
+        "primary_score": primary_score,
+        "secondary_score": secondary_score,
+        "primary_basis": "most_likely_result_conditional_mode",
+        "secondary_basis": "second_result_conditional_mode" if secondary_score else None,
+        "risk_path_summary": "".join(summary_parts),
+        "risk_paths": risk_paths[:6],
+        "tail_paths": tail_paths[:4],
+        "open_game_paths": open_game_paths[:4],
+        "expert_score_pool_available": bool(pool),
+        "display_score_limit": 2,
+        "note_cn": "主比分唯一，备选比分最多一个；其余比分路径只在专家详情层展示。",
+    }
+
+
 def risk_level_cn(play_guard_pass: bool, gaps: list[dict[str, Any]], risks: list[dict[str, Any]]) -> str:
     if play_guard_pass:
         return "中"
@@ -1299,8 +1353,11 @@ def build_record(
     raw_score_distribution = W1ENGINE.build_score_distribution(card, actual=actual_tuple(score), rho=W1_RHO) if W1_SCORE_ENGINE_ON else {"status": "skipped", "skip_reason": "W1_SCORE_ENGINE=off"}
     score_distribution = normalize_score_distribution(raw_score_distribution)
     score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
-    if score_distribution.get("main_score"):
-        reference_score = f"{score_distribution['main_score']} / {score_distribution.get('fallback_score', '1-1')}"
+    recommendation_view = recommendation_view_from_score_distribution(score_distribution)
+    if recommendation_view.get("primary_score"):
+        reference_score = recommendation_view["primary_score"]
+        if recommendation_view.get("secondary_score"):
+            reference_score = f"{reference_score} / {recommendation_view['secondary_score']}"
     hit_status = "比分命中" if (
         status == "finished"
         and score_distribution.get("post_match_calibration", {}).get("prediction_hit_type") == "main_hit"
@@ -1361,6 +1418,7 @@ def build_record(
         "live_refresh": live_refresh,
         "score_distribution": score_distribution,
         "score_matrix_summary": score_matrix_summary,
+        "recommendation_view": recommendation_view,
         "post_match_calibration": score_distribution["post_match_calibration"],
         "odds_movement": movement,
         "market_signal": market_signal,
@@ -1552,6 +1610,24 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         summary["notes_cn"] = [clean_public_text(item) for item in summary.get("notes_cn", [])]
         return summary
 
+    def public_recommendation_view(value: dict[str, Any]) -> dict[str, Any]:
+        view = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        view["risk_path_summary"] = clean_public_text(view.get("risk_path_summary", ""))
+        view["note_cn"] = clean_public_text(view.get("note_cn", ""))
+        for key in ("risk_paths", "tail_paths", "open_game_paths"):
+            clean_items = []
+            for item in view.get(key, []) or []:
+                clean_items.append(
+                    {
+                        "score": item.get("score"),
+                        "path": clean_public_text(item.get("path", "")),
+                        "probability": item.get("probability"),
+                        "reason_cn": clean_public_text(item.get("reason_cn", "")),
+                    }
+                )
+            view[key] = clean_items
+        return view
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -1608,6 +1684,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "live_refresh": public_live_refresh(row["live_refresh"]),
             "score_distribution": public_score_distribution(row["score_distribution"]),
             "score_matrix_summary": public_score_matrix_summary(row.get("score_matrix_summary", {})),
+            "recommendation_view": public_recommendation_view(row.get("recommendation_view", {})),
             "post_match_calibration": public_score_distribution(row["score_distribution"]).get("post_match_calibration", {}),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
