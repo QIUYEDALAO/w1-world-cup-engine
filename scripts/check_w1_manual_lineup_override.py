@@ -22,7 +22,8 @@ SERVER = ROOT / "scripts/w1_local_predict_server.py"
 BUILD = ROOT / "scripts/build_w1_dashboard_data.py"
 DASHBOARD = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
-BASE_URL = "http://127.0.0.1:8765"
+TEST_PORT = "8877"
+BASE_URL = f"http://127.0.0.1:{TEST_PORT}"
 FORBIDDEN = ["建议下注", "推荐投注", "稳赚", "必胜", "保证命中", "bet", "stake", "profit", "guaranteed"]
 
 
@@ -173,9 +174,12 @@ def server_available() -> bool:
 def assert_predict_1539001_done() -> None:
     proc = None
     if not server_available():
+        env = dict(**__import__("os").environ)
+        env["W1_DASHBOARD_PORT"] = TEST_PORT
         proc = subprocess.Popen(
             [sys.executable, str(SERVER)],
             cwd=ROOT,
+            env=env,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             text=True,

@@ -26,6 +26,22 @@
       },
       "result_source": "post_match_auto_calibration_sample",
       "result_note": "赛后自动校准样本；赛果待回写 ledger"
+    },
+    "1539001": {
+      "fixture_id": "1539001",
+      "alias_fixture_ids": [
+        "66456942"
+      ],
+      "home_team": "Australia",
+      "away_team": "Turkey",
+      "actual_score": "2-0",
+      "status": "complete",
+      "source": "manual_result",
+      "notes_cn": [
+        "澳大利亚 2-0 土耳其，赛后手动写入。"
+      ],
+      "result_source": "manual_result",
+      "result_note": "澳大利亚 2-0 土耳其，赛后手动写入。"
     }
   }
 }

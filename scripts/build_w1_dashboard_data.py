@@ -236,7 +236,13 @@ def result_overlay() -> dict[str, dict[str, Any]]:
     if not RESULTS_JSON.is_file():
         return {}
     data = read_json(RESULTS_JSON)
-    return {str(fid): row for fid, row in data.get("results", {}).items()}
+    results: dict[str, dict[str, Any]] = {}
+    for fid, row in data.get("results", {}).items():
+        row = dict(row)
+        results[str(fid)] = row
+        for alias in row.get("alias_fixture_ids", []):
+            results[str(alias)] = row
+    return results
 
 
 def cn_display_text(value: Any) -> str:
@@ -520,14 +526,20 @@ def odds_movement(latest: dict[str, Any], previous: dict[str, Any] | None) -> di
 def status_for_fixture(fid: str, results: dict[str, dict[str, Any]]) -> str:
     overlay = results.get(fid)
     if overlay:
-        return overlay["status"]
+        status = str(overlay.get("status", ""))
+        return "finished" if status in {"complete", "finished"} else status
     return "not_started"
 
 
 def actual_score_for_fixture(fid: str, results: dict[str, dict[str, Any]]) -> dict[str, Any]:
     overlay = results.get(fid)
     if overlay:
-        return overlay["actual_score"]
+        score = overlay.get("actual_score")
+        if isinstance(score, dict):
+            return score
+        if isinstance(score, str) and "-" in score:
+            home, away = score.split("-", 1)
+            return {"home": int(home), "away": int(away)}
     return {"home": None, "away": None}
 
 
