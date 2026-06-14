@@ -248,7 +248,12 @@ def assert_html(data: dict) -> None:
             "阵容效应",
             "战术效应",
             "赛后校准",
-            "不构成投注",
+            "市场状态",
+            "盘口异动监控",
+            "TV",
+            "μ drift",
+            "仅作研究参考",
+            "不构成收益承诺",
         ]
         for token in required_new:
             if token not in text:

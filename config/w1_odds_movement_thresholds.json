@@ -1,0 +1,74 @@
+{
+  "schema_version": "W1_ODDS_MOVEMENT_THRESHOLD_CALIBRATION_V1",
+  "calibrated": "none",
+  "tier": "C",
+  "thresholds": {
+    "x2_tv": {
+      "minor_max": 0.03,
+      "major_min": 0.07
+    },
+    "x2_tv_recent": {
+      "minor_max": 0.03,
+      "major_min": 0.05
+    },
+    "ou_mu": {
+      "minor_max": 0.15,
+      "major_min": 0.35
+    },
+    "ou_mu_recent": {
+      "minor_max": 0.1,
+      "major_min": 0.2
+    },
+    "ah_delta": {
+      "minor_max": 0.15,
+      "major_min": 0.4
+    },
+    "reversal": {
+      "gated": false,
+      "min_books": 3,
+      "min_tv": 0.03
+    },
+    "ou_line_move": {
+      "medium_min": 0.25,
+      "major_min": 0.5
+    },
+    "ah_line_move": {
+      "medium_min": 0.5
+    }
+  },
+  "liquidity": {
+    "min_books_1x2": 3,
+    "min_books_ou": 2,
+    "stale_max_minutes": 360,
+    "spread_max_home_prob": 0.1,
+    "outlier_prob_gap": 0.06
+  },
+  "windows": {
+    "recent_minutes": 60,
+    "lineup_window_start_minutes": 75,
+    "lineup_window_end_minutes": 45
+  },
+  "provenance": {
+    "dataset_id": null,
+    "n_positive": 0,
+    "n_negative": 0,
+    "n_uncertain_excluded": 0,
+    "date_range": [
+      null,
+      null
+    ],
+    "auc": {
+      "x2_tv": null,
+      "ou_mu": null
+    },
+    "major_false_positive_rate": {
+      "x2_tv": null,
+      "ou_mu": null
+    },
+    "shrinkage_w": 0.0,
+    "labeler_agreement_kappa": null,
+    "source_report": null,
+    "calibrated_at": null,
+    "note": "V1 default thresholds only; not calibrated. Movement thresholds are WARN_ONLY except THIN_MARKET_SKIP liquidity gates."
+  }
+}

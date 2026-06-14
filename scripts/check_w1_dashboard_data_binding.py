@@ -210,6 +210,35 @@ def main() -> int:
             if row.get("reference_score") and row.get("is_final_decision") is False:
                 if "不是最终结论" not in row.get("non_final_disclaimer_cn", ""):
                     fail(f"{row.get('fixture_id')}: reference_score must carry non-final disclaimer")
+            movement = row.get("odds_movement", {})
+            if movement.get("schema_version") != "W1_ODDS_MOVEMENT_MONITOR_V1":
+                fail(f"{row.get('fixture_id')}: odds_movement must use W1_ODDS_MOVEMENT_MONITOR_V1")
+            for key in (
+                "status",
+                "status_reason_code",
+                "liquidity",
+                "snapshots",
+                "cumulative_move",
+                "recent_move",
+                "coherence",
+                "digestion",
+                "play_guard_input",
+                "display",
+                "single_book_outliers",
+                "disclaimer_cn",
+            ):
+                if key not in movement:
+                    fail(f"{row.get('fixture_id')}: odds_movement missing {key}")
+            cumulative = movement.get("cumulative_move", {})
+            if "x2_tv_distance" not in cumulative or "mu_delta" not in cumulative:
+                fail(f"{row.get('fixture_id')}: odds_movement must expose TV distance and mu drift")
+            play_guard_input = movement.get("play_guard_input", {})
+            if play_guard_input.get("recommended_gate") not in {"SKIP", "OBSERVE_ONLY", "ALLOW_FORMAL"}:
+                fail(f"{row.get('fixture_id')}: odds_movement recommended_gate invalid")
+            if movement.get("status") == "THIN_MARKET_SKIP" and play_guard_input.get("recommended_gate") != "SKIP":
+                fail(f"{row.get('fixture_id')}: THIN_MARKET_SKIP must map to SKIP")
+            if not movement.get("display", {}).get("normal_sentence_cn"):
+                fail(f"{row.get('fixture_id')}: odds_movement normal display missing")
             quality = row.get("data_quality", {})
             if not quality:
                 fail(f"{row.get('fixture_id')}: data_quality missing")

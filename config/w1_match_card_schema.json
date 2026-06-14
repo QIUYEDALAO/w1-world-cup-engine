@@ -803,60 +803,81 @@
     },
     "odds_movement": {
       "type": "object",
-      "additionalProperties": false,
       "required": [
+        "schema_version",
+        "fixture_id",
         "status",
-        "first_seen_at_utc",
-        "latest_seen_at_utc",
-        "movement_summary",
-        "material_change"
+        "status_reason_code",
+        "liquidity",
+        "snapshots",
+        "cumulative_move",
+        "recent_move",
+        "coherence",
+        "digestion",
+        "play_guard_input",
+        "display",
+        "single_book_outliers",
+        "disclaimer_cn"
       ],
       "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "W1_ODDS_MOVEMENT_MONITOR_V1"
+        },
+        "fixture_id": {
+          "type": "string"
+        },
         "status": {
           "type": "string",
           "enum": [
-            "READY",
-            "PARTIAL",
-            "MISSING"
+            "MARKET_STABLE",
+            "MARKET_MOVING",
+            "MARKET_ALERT",
+            "MARKET_CONFLICT",
+            "THIN_MARKET_SKIP"
           ]
         },
-        "first_seen_at_utc": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "format": "date-time"
-        },
-        "latest_seen_at_utc": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "format": "date-time"
-        },
-        "movement_summary": {
+        "status_reason_code": {
           "type": "string"
         },
-        "material_change": {
-          "type": "boolean"
+        "calibration": {
+          "type": "object"
         },
-        "odds_1X2_delta": {
-          "type": [
-            "object",
-            "null"
-          ]
+        "liquidity": {
+          "type": "object"
         },
-        "odds_AH_delta": {
-          "type": [
-            "object",
-            "null"
-          ]
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
         },
-        "odds_OU_delta": {
-          "type": [
-            "object",
-            "null"
-          ]
+        "cumulative_move": {
+          "type": "object"
+        },
+        "recent_move": {
+          "type": "object"
+        },
+        "coherence": {
+          "type": "object"
+        },
+        "digestion": {
+          "type": "object"
+        },
+        "play_guard_input": {
+          "type": "object"
+        },
+        "display": {
+          "type": "object"
+        },
+        "single_book_outliers": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "disclaimer_cn": {
+          "type": "string"
         }
       }
     },

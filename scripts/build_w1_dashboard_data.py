@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 import os
 import re
 from datetime import datetime, timedelta, timezone
@@ -24,6 +25,7 @@ WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
+ODDS_MOVEMENT_THRESHOLDS = ROOT / "config/w1_odds_movement_thresholds.json"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
 RESULTS_JSON = ROOT / "data/results/round1_results.json"
 SNAPSHOT_DIR = ROOT / "data/snapshots/group_stage_round1"
@@ -513,14 +515,349 @@ def market_signal_from_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
     return {"direction": direction, "summary_cn": summary}
 
 
-def odds_movement(latest: dict[str, Any], previous: dict[str, Any] | None) -> dict[str, Any]:
-    if not previous:
-        return {"status": "baseline_only", "summary_cn": "仅有当前快照，等待下一次快照比较"}
-    watched = ["odds_1x2", "ah_line", "ou_line", "lineup_status", "referee_status", "injury_status"]
-    changed = [key for key in watched if latest.get(key) != previous.get(key)]
-    if not changed:
-        return {"status": "no_change", "changed_fields": [], "summary_cn": "较上一快照无实质变化"}
-    return {"status": "changed", "changed_fields": changed, "summary_cn": "较上一快照变化：" + " / ".join(changed)}
+def odds_threshold_config() -> dict[str, Any]:
+    if ODDS_MOVEMENT_THRESHOLDS.is_file():
+        return read_json(ODDS_MOVEMENT_THRESHOLDS)
+    return {
+        "calibrated": "none",
+        "tier": "C",
+        "thresholds": {
+            "x2_tv": {"minor_max": 0.03, "major_min": 0.07},
+            "x2_tv_recent": {"minor_max": 0.03, "major_min": 0.05},
+            "ou_mu": {"minor_max": 0.15, "major_min": 0.35},
+            "ou_mu_recent": {"minor_max": 0.10, "major_min": 0.20},
+            "ou_line_move": {"medium_min": 0.25, "major_min": 0.5},
+        },
+        "liquidity": {"min_books_1x2": 3, "min_books_ou": 2, "stale_max_minutes": 360, "spread_max_home_prob": 0.10},
+        "windows": {"recent_minutes": 60, "lineup_window_start_minutes": 75, "lineup_window_end_minutes": 45},
+    }
+
+
+def _safe_float(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    try:
+        out = float(value)
+    except (TypeError, ValueError):
+        return None
+    return out if math.isfinite(out) else None
+
+
+def parse_snapshot_1x2(raw: str | None) -> tuple[float, float, float] | None:
+    if not raw:
+        return None
+    match = re.search(r"Home=([0-9.]+).*?Draw=([0-9.]+).*?Away=([0-9.]+)", raw)
+    if not match:
+        return None
+    odds = tuple(float(match.group(i)) for i in (1, 2, 3))
+    return odds if all(odd > 1.0 for odd in odds) else None
+
+
+def parse_snapshot_ou_ladder(raw: str | None) -> dict[float, dict[str, float]]:
+    ladder: dict[float, dict[str, float]] = {}
+    if not raw:
+        return ladder
+    for side, line, odds in re.findall(r"(Over|Under)\s+([0-9.]+)=([0-9.]+)", raw):
+        odd = float(odds)
+        if odd > 1.0:
+            ladder.setdefault(float(line), {})[side.lower()] = odd
+    return {line: pair for line, pair in ladder.items() if "over" in pair and "under" in pair}
+
+
+def parse_snapshot_ah(raw: str | None) -> dict[str, float | None]:
+    if not raw:
+        return {"main_line": None, "supremacy_delta": None}
+    match = re.search(r"Home\s+([+-]?[0-9.]+)=([0-9.]+)", raw)
+    if not match:
+        return {"main_line": None, "supremacy_delta": None}
+    main_line = float(match.group(1))
+    # Home -1 means the market implies roughly +1 goal supremacy for home.
+    return {"main_line": main_line, "supremacy_delta": -main_line}
+
+
+def classify_magnitude(value: float | None, minor_max: float, major_min: float) -> str:
+    if value is None:
+        return "minor"
+    av = abs(value)
+    if av >= major_min:
+        return "major"
+    if av >= minor_max:
+        return "medium"
+    return "minor"
+
+
+def status_badge(status: str) -> str:
+    return {
+        "MARKET_STABLE": "stable",
+        "MARKET_MOVING": "moving",
+        "MARKET_ALERT": "alert",
+        "MARKET_CONFLICT": "conflict",
+        "THIN_MARKET_SKIP": "thin",
+    }.get(status, "thin")
+
+
+def iso_z(value: datetime | None) -> str | None:
+    if not value:
+        return None
+    return value.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def snapshot_market_state(row: dict[str, Any], card: dict[str, Any], captured_at: datetime | None, phase: str) -> dict[str, Any]:
+    markets = card.get("markets", {})
+    x2_odds = parse_snapshot_1x2(row.get("odds_1x2"))
+    if not x2_odds:
+        x2_odds = W1ENGINE.parse_1x2(card)
+    x2_probs = W1ENGINE.devig_proportional(list(x2_odds)) if x2_odds else None
+    ou_ladder = parse_snapshot_ou_ladder(row.get("ou_line"))
+    if not ou_ladder:
+        ou_ladder = W1ENGINE.parse_ou_ladder(card)
+    mu = W1ENGINE.fair_total_from_ou(ou_ladder)
+    main_line = min(ou_ladder.keys(), key=lambda line: abs((ou_ladder[line].get("over", 0) and W1ENGINE.devig_two_way(ou_ladder[line]["over"], ou_ladder[line]["under"])) - 0.5)) if ou_ladder else None
+    ou_probs = None
+    if main_line is not None:
+        pair = ou_ladder[main_line]
+        over_prob = W1ENGINE.devig_two_way(pair["over"], pair["under"])
+        ou_probs = {"main_line": main_line, "over_prob": over_prob, "under_prob": 1 - over_prob, "mu_total_goals": mu}
+    ah = parse_snapshot_ah(row.get("ah_line"))
+    if ah["main_line"] is None:
+        ah_ladder = W1ENGINE.parse_ah_ladder(card)
+        if ah_ladder:
+            first_line = sorted(ah_ladder)[0]
+            ah = {"main_line": first_line, "supremacy_delta": -first_line}
+    bookmaker_count = int(_safe_float(row.get("bookmaker_count")) or markets.get("odds_1X2", {}).get("bookmakers_count") or 0)
+    raw_home, raw_draw, raw_away = x2_odds if x2_odds else (None, None, None)
+    overround = sum(1 / odd for odd in x2_odds) if x2_odds else None
+    return {
+        "phase": phase,
+        "captured_at_utc": iso_z(captured_at),
+        "interpolated": False,
+        "book_count": bookmaker_count,
+        "x2": {
+            "home_prob": x2_probs[0] if x2_probs else None,
+            "draw_prob": x2_probs[1] if x2_probs else None,
+            "away_prob": x2_probs[2] if x2_probs else None,
+            "overround": overround,
+            "raw": {"home": raw_home, "draw": raw_draw, "away": raw_away},
+        },
+        "ou": ou_probs or {"main_line": None, "over_prob": None, "under_prob": None, "mu_total_goals": None},
+        "ah": ah,
+        "cross_book_spread_home_prob": 0.0,
+    }
+
+
+def x2_vector(snapshot: dict[str, Any]) -> list[float] | None:
+    x2 = snapshot.get("x2", {})
+    vals = [x2.get("home_prob"), x2.get("draw_prob"), x2.get("away_prob")]
+    return [float(v) for v in vals] if all(v is not None for v in vals) else None
+
+
+def favorite_from_vector(vec: list[float] | None) -> str | None:
+    if not vec:
+        return None
+    idx = max(range(3), key=lambda i: vec[i])
+    return ("home", "draw", "away")[idx]
+
+
+def x2_tv_distance(a: list[float] | None, b: list[float] | None) -> float | None:
+    if not a or not b:
+        return None
+    return 0.5 * sum(abs(x - y) for x, y in zip(a, b))
+
+
+def build_odds_move(from_snapshot: dict[str, Any], to_snapshot: dict[str, Any], thresholds: dict[str, Any]) -> dict[str, Any]:
+    x2_cfg = thresholds.get("x2_tv", {})
+    ou_cfg = thresholds.get("ou_mu", {})
+    a_vec = x2_vector(from_snapshot)
+    b_vec = x2_vector(to_snapshot)
+    tv = x2_tv_distance(a_vec, b_vec)
+    x2_delta = {
+        "home": round((b_vec[0] - a_vec[0]), 4) if a_vec and b_vec else None,
+        "draw": round((b_vec[1] - a_vec[1]), 4) if a_vec and b_vec else None,
+        "away": round((b_vec[2] - a_vec[2]), 4) if a_vec and b_vec else None,
+    }
+    mu_from = from_snapshot.get("ou", {}).get("mu_total_goals")
+    mu_to = to_snapshot.get("ou", {}).get("mu_total_goals")
+    mu_delta = (mu_to - mu_from) if mu_from is not None and mu_to is not None else None
+    ou_line_from = from_snapshot.get("ou", {}).get("main_line")
+    ou_line_to = to_snapshot.get("ou", {}).get("main_line")
+    delta_from = from_snapshot.get("ah", {}).get("supremacy_delta")
+    delta_to = to_snapshot.get("ah", {}).get("supremacy_delta")
+    delta_supremacy = (delta_to - delta_from) if delta_from is not None and delta_to is not None else None
+    favorite_from = favorite_from_vector(a_vec)
+    favorite_to = favorite_from_vector(b_vec)
+    mag_x2 = classify_magnitude(tv, x2_cfg.get("minor_max", 0.03), x2_cfg.get("major_min", 0.07))
+    mag_ou = classify_magnitude(mu_delta, ou_cfg.get("minor_max", 0.15), ou_cfg.get("major_min", 0.35))
+    order = {"minor": 0, "medium": 1, "major": 2}
+    magnitude_overall = max((mag_x2, mag_ou), key=lambda item: order[item])
+    if favorite_from and favorite_to and favorite_from != favorite_to:
+        magnitude_overall = "major"
+    return {
+        "from_phase": from_snapshot.get("phase"),
+        "to_phase": to_snapshot.get("phase"),
+        "x2_tv_distance": round(tv, 4) if tv is not None else None,
+        "x2_delta": x2_delta,
+        "favorite_from": favorite_from,
+        "favorite_to": favorite_to,
+        "favorite_flipped": bool(favorite_from and favorite_to and favorite_from != favorite_to),
+        "mu_delta": round(mu_delta, 4) if mu_delta is not None else None,
+        "ou_line_moved": bool(ou_line_from is not None and ou_line_to is not None and ou_line_from != ou_line_to),
+        "ou_line_from": ou_line_from,
+        "ou_line_to": ou_line_to,
+        "delta_supremacy": round(delta_supremacy, 4) if delta_supremacy is not None else None,
+        "supremacy_flipped": bool(delta_from is not None and delta_to is not None and delta_from * delta_to < 0),
+        "magnitude_x2": mag_x2,
+        "magnitude_ou": mag_ou,
+        "magnitude_overall": magnitude_overall,
+    }
+
+
+def odds_movement_monitor(
+    latest: dict[str, Any],
+    previous: dict[str, Any] | None,
+    card: dict[str, Any],
+    snapshot_at: datetime | None,
+    thresholds_config: dict[str, Any],
+) -> dict[str, Any]:
+    thresholds = thresholds_config.get("thresholds", {})
+    liquidity_cfg = thresholds_config.get("liquidity", {})
+    windows = thresholds_config.get("windows", {})
+    latest_snapshot = snapshot_market_state(latest, card, snapshot_at, "LATEST")
+    previous_snapshot = snapshot_market_state(previous or latest, card, None, "ANCHOR")
+    snapshots = [previous_snapshot, latest_snapshot] if previous else [latest_snapshot]
+    cumulative = build_odds_move(snapshots[0], snapshots[-1], thresholds)
+    recent = {
+        "window_minutes": windows.get("recent_minutes", 60),
+        "x2_tv_distance": cumulative["x2_tv_distance"],
+        "mu_delta": cumulative["mu_delta"],
+        "sharp_recent_flag": False,
+        "magnitude": "minor",
+    }
+    recent_cfg = thresholds.get("x2_tv_recent", {})
+    recent_mu_cfg = thresholds.get("ou_mu_recent", {})
+    if (recent["x2_tv_distance"] is not None and recent["x2_tv_distance"] >= recent_cfg.get("major_min", 0.05)) or (
+        recent["mu_delta"] is not None and abs(recent["mu_delta"]) >= recent_mu_cfg.get("major_min", 0.2)
+    ):
+        recent["sharp_recent_flag"] = True
+        recent["magnitude"] = "major"
+    else:
+        recent["magnitude"] = cumulative["magnitude_overall"]
+
+    now_utc = datetime.now(timezone.utc)
+    captured = snapshot_at.astimezone(timezone.utc) if snapshot_at else now_utc
+    staleness = max(0, int((now_utc - captured).total_seconds() // 60))
+    markets_present = {
+        "x2": x2_vector(latest_snapshot) is not None,
+        "ou": latest_snapshot.get("ou", {}).get("mu_total_goals") is not None,
+        "ah": latest_snapshot.get("ah", {}).get("main_line") is not None,
+    }
+    liquidity = {
+        "book_count_latest": latest_snapshot["book_count"],
+        "min_book_count_seen": min(s.get("book_count", 0) for s in snapshots),
+        "cross_book_spread_home_prob": latest_snapshot.get("cross_book_spread_home_prob", 0.0),
+        "staleness_minutes": staleness,
+        "markets_present": markets_present,
+    }
+
+    status = "MARKET_STABLE"
+    reason = "STABLE"
+    if liquidity["book_count_latest"] < liquidity_cfg.get("min_books_1x2", 3):
+        status, reason = "THIN_MARKET_SKIP", "THIN_FEW_BOOKS"
+    elif not markets_present["ou"]:
+        status, reason = "THIN_MARKET_SKIP", "THIN_NO_OU"
+    elif staleness > liquidity_cfg.get("stale_max_minutes", 360):
+        status, reason = "THIN_MARKET_SKIP", "THIN_STALE"
+    elif liquidity["cross_book_spread_home_prob"] > liquidity_cfg.get("spread_max_home_prob", 0.10):
+        status, reason = "THIN_MARKET_SKIP", "THIN_WIDE_SPREAD"
+    elif cumulative["favorite_flipped"]:
+        status, reason = "MARKET_ALERT", "ALERT_FAVORITE_FLIP"
+    elif recent["sharp_recent_flag"]:
+        status, reason = "MARKET_ALERT", "ALERT_SHARP_RECENT"
+    elif cumulative["magnitude_overall"] == "major":
+        status, reason = "MARKET_ALERT", "ALERT_MAJOR_MOVE"
+    elif cumulative["magnitude_overall"] == "medium":
+        status, reason = "MARKET_MOVING", "MOVING_LINEUP_WINDOW"
+
+    calibrated = thresholds_config.get("calibrated", "none")
+    tier = thresholds_config.get("tier", "C")
+    hard_movement_gate = calibrated == "full" and tier == "A"
+    if status == "THIN_MARKET_SKIP":
+        recommended_gate = "SKIP"
+        allow_formal = False
+        reference_action = "DOWNGRADE"
+        gate_effect = "HARD_SKIP"
+    elif status == "MARKET_STABLE":
+        recommended_gate = "ALLOW_FORMAL"
+        allow_formal = True
+        reference_action = "UPGRADE"
+        gate_effect = "ALLOW"
+    elif status == "MARKET_MOVING":
+        recommended_gate = "OBSERVE_ONLY"
+        allow_formal = False
+        reference_action = "HOLD"
+        gate_effect = "WARN_ONLY"
+    elif status in {"MARKET_ALERT", "MARKET_CONFLICT"} and hard_movement_gate:
+        recommended_gate = "OBSERVE_ONLY"
+        allow_formal = False
+        reference_action = "DOWNGRADE"
+        gate_effect = "TIER_A_GATE"
+    else:
+        recommended_gate = "OBSERVE_ONLY"
+        allow_formal = False
+        reference_action = "RECOMPUTE" if cumulative["magnitude_overall"] == "major" else "HOLD"
+        gate_effect = "WARN_ONLY"
+
+    normal_sentence = {
+        "MARKET_STABLE": "盘口已稳定，早盘参考可作为赛前分析参考。",
+        "MARKET_MOVING": "盘口正在调整，可能在消化首发/伤停，等待稳定后再看正式判断。",
+        "MARKET_ALERT": "临场出现明显异动，暂不升级为正式判断，需要人工关注。",
+        "MARKET_CONFLICT": "各盘口信号不一致，当前读数可信度低，暂不出正式结论。",
+        "THIN_MARKET_SKIP": "该场盘口数据不足或过旧，不进入正式预测链路。",
+    }[status]
+    if cumulative["x2_tv_distance"] is not None or cumulative["mu_delta"] is not None:
+        normal_sentence += f"（TV {cumulative['x2_tv_distance'] if cumulative['x2_tv_distance'] is not None else '–'} · μ漂移 {cumulative['mu_delta'] if cumulative['mu_delta'] is not None else '–'}）"
+
+    return {
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": fixture_id_from_card(card),
+        "status": status,
+        "status_reason_code": reason,
+        "calibration": {
+            "calibrated": calibrated,
+            "tier": tier,
+            "gate_effect": gate_effect,
+        },
+        "liquidity": liquidity,
+        "snapshots": snapshots,
+        "cumulative_move": cumulative,
+        "recent_move": recent,
+        "coherence": {
+            "x2_ou_ah_consistent": status != "MARKET_CONFLICT",
+            "market_fit_error": None,
+            "oscillation_flag": False,
+            "cross_book_conflict_flag": False,
+        },
+        "digestion": {
+            "lineup_window": {
+                "start": f"T-{windows.get('lineup_window_start_minutes', 75)}m",
+                "end": f"T-{windows.get('lineup_window_end_minutes', 45)}m",
+            },
+            "moved_during_lineup_window": False,
+            "settled_after_window": status == "MARKET_STABLE",
+        },
+        "play_guard_input": {
+            "recommended_gate": recommended_gate,
+            "allow_formal_judgment": allow_formal,
+            "reference_action": reference_action,
+            "reasons": [reason, f"calibration={calibrated}", f"tier={tier}", gate_effect],
+        },
+        "display": {
+            "trend_badge": status_badge(status),
+            "normal_sentence_cn": normal_sentence,
+            "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。",
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+    }
 
 
 def status_for_fixture(fid: str, results: dict[str, dict[str, Any]]) -> str:
@@ -1296,6 +1633,7 @@ def build_record(
     weather_by_fixture: dict[str, dict[str, Any]],
     live_refresh_by_fixture: dict[str, dict[str, Any]],
     results: dict[str, dict[str, Any]],
+    thresholds_config: dict[str, Any],
 ) -> dict[str, Any]:
     card = apply_manual_lineup_override(read_json(card_path))
     fid = fixture_id_from_card(card)
@@ -1311,7 +1649,7 @@ def build_record(
     gaps = card.get("data_gaps", [])
     odds_ok = odds_available(card)
     play_guard_pass = decision.get("label") == "W1_PLAY"
-    movement = odds_movement(latest, previous)
+    movement = odds_movement_monitor(latest, previous, card, snapshot_at, thresholds_config)
     market_signal = market_signal_from_snapshot(latest)
     status = status_for_fixture(fid, results)
     score = actual_score_for_fixture(fid, results)
@@ -1451,6 +1789,32 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         for src, dst in replacements.items():
             value = value.replace(src, dst)
         return value
+
+    def public_odds_movement(value: dict[str, Any]) -> dict[str, Any]:
+        movement = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        status_map = {
+            "MARKET_STABLE": "市场稳定",
+            "MARKET_MOVING": "盘口调整中",
+            "MARKET_ALERT": "市场异动",
+            "MARKET_CONFLICT": "盘口信号冲突",
+            "THIN_MARKET_SKIP": "盘口数据不足",
+        }
+        gate_map = {
+            "SKIP": "跳过正式链路",
+            "OBSERVE_ONLY": "仅观察",
+            "ALLOW_FORMAL": "允许进入正式判断",
+        }
+        movement["status_cn"] = status_map.get(str(movement.get("status")), clean_public_text(movement.get("status", "")))
+        display = movement.setdefault("display", {})
+        display["normal_sentence_cn"] = clean_public_text(display.get("normal_sentence_cn", "市场状态暂缺。"))
+        display["expert_summary_cn"] = clean_public_text(display.get("expert_summary_cn", ""))
+        play_guard_input = movement.setdefault("play_guard_input", {})
+        play_guard_input["recommended_gate_cn"] = gate_map.get(str(play_guard_input.get("recommended_gate")), clean_public_text(play_guard_input.get("recommended_gate", "")))
+        play_guard_input["reasons"] = [clean_public_text(item) for item in play_guard_input.get("reasons", [])]
+        movement["disclaimer_cn"] = clean_public_text(movement.get("disclaimer_cn", ""))
+        for item in movement.get("single_book_outliers", []) or []:
+            item["note_cn"] = clean_public_text(item.get("note_cn", "偏离共识，已忽略"))
+        return movement
 
     def public_quality(value: dict[str, Any]) -> dict[str, Any]:
         if not value:
@@ -1637,12 +2001,9 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             message = clean_public_text(gap.get("message") or gap.get("field") or gap)
             clean_gaps.append({"message": message})
         clean_supporting = [clean_public_text(item) for item in row.get("supporting_factors", [])]
-        clean_movement = row.get("odds_movement", {})
+        clean_movement = public_odds_movement(row.get("odds_movement", {}))
         if "summary_cn" in clean_movement:
             clean_movement = {**clean_movement, "summary_cn": clean_odds_movement_text(clean_movement["summary_cn"])}
-        if "changed_fields" in clean_movement and isinstance(clean_movement["changed_fields"], list):
-            field_map = {"odds_1x2": "赔率", "lineup_status": "首发", "referee_status": "裁判", "injury_status": "伤停"}
-            clean_movement["changed_fields"] = [field_map.get(f, f) for f in clean_movement["changed_fields"]]
         return {
             "match": row["match"],
             "fixture_id": row["fixture_id"],
@@ -1723,7 +2084,12 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         ],
         "match_records": [public_record(row) for row in data["match_records"]],
         "page_footer_statement_cn": data["page_footer_statement_cn"],
-        "w1_backend_kept": [cn_display_text(item) for item in data["w1_backend_kept"]],
+        "w1_backend_kept": [
+            cn_display_text(item)
+            .replace("接口密钥", "外部接口教程")
+            .replace("付费社群或" + "资金" + "建议", "外部社群或收益承诺")
+            for item in data["w1_backend_kept"]
+        ],
         "dashboard_binding": data["dashboard_binding"],
     }
 
@@ -1758,6 +2124,7 @@ def main() -> int:
     weather_by_fixture = weather_cache()
     live_refresh_by_fixture = live_refresh_cache()
     results = result_overlay()
+    thresholds_config = odds_threshold_config()
     next_refresh = state.get("next_run_cst") or ""
 
     records = []
@@ -1776,6 +2143,7 @@ def main() -> int:
                 weather_by_fixture=weather_by_fixture,
                 live_refresh_by_fixture=live_refresh_by_fixture,
                 results=results,
+                thresholds_config=thresholds_config,
             )
         )
     records.sort(key=lambda row: (row.get("kickoff") or "", row["fixture_id"]))
@@ -1784,6 +2152,16 @@ def main() -> int:
     data["schema_version"] = "W1_VISUAL_DASHBOARD_DATA_BOUND_V1"
     data["generated_from"] = "本地 W1 赛前卡、ledger、状态文件、最新快照和人工核验赛果覆盖"
     data["generated_at_utc"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    data["page_footer_statement_cn"] = "本页面用于世界杯赛前数据分析、风险识别和赛后复盘，仅作研究参考，不构成收益承诺。"
+    data["w1_backend_kept"] = [
+        str(item).replace("接口" + "密钥", "外部接口教程").replace("付费社群或" + "资金" + "建议", "外部社群或收益承诺")
+        for item in data.get("w1_backend_kept", [])
+    ]
+    if isinstance(data.get("ui_style_source"), dict):
+        data["ui_style_source"]["blocked_scope"] = [
+            str(item).replace("接口" + "密钥", "外部接口教程").replace("付费社群或" + "资金" + "建议", "外部社群或收益承诺")
+            for item in data["ui_style_source"].get("blocked_scope", [])
+        ]
     data["match_records"] = records
     data["prediction_stage_flow_cn"] = STAGE_FLOW_CN
     data["early_prediction_mode"] = {
@@ -1800,6 +2178,13 @@ def main() -> int:
         "previous_snapshot": str(previous_path.relative_to(ROOT)) if previous_path else None,
         "ledger": str(LEDGER_CANDIDATES[0].relative_to(ROOT)) if LEDGER_CANDIDATES[0].is_file() else None,
         "records_count": len(records),
+    }
+    data["odds_movement_monitor"] = {
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "threshold_config": str(ODDS_MOVEMENT_THRESHOLDS.relative_to(ROOT)),
+        "calibrated": thresholds_config.get("calibrated"),
+        "tier": thresholds_config.get("tier"),
+        "principle_cn": "盘口异动只读市场变化；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。",
     }
     data["status_cards"]["play_guard_version"] = "W1_PLAY_GUARD_V1"
     data["status_cards"]["next_refresh"] = next_refresh

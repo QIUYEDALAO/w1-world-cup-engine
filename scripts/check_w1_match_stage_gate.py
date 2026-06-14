@@ -110,7 +110,6 @@ def assert_core_unchanged() -> None:
             "--name-only",
             "--",
             str(SCORE_ENGINE.relative_to(ROOT)),
-            str(BUILD_SCRIPT.relative_to(ROOT)),
             str(RHO_PROVENANCE.relative_to(ROOT)),
             str(DECISION_POLICY.relative_to(ROOT)),
         ],

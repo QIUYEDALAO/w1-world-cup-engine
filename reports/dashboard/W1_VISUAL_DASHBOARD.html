@@ -119,6 +119,11 @@ button{font:inherit;cursor:pointer}
 .rec .v.sec{color:#caa24a}
 .rec .act{align-self:center;font-size:12px}
 .rec .act .l2{color:var(--ink);margin-top:2px} .rec .act .l3{color:var(--mut);font-size:10.5px;margin-top:3px}
+.marketstate{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:9px 12px;margin:-2px 0 14px;font-size:12px}
+.marketstate .mklabel{font-family:var(--mono);font-size:10px;color:var(--mut);letter-spacing:1px}
+.marketstate b{font-family:var(--mono)}
+.marketstate.stable b{color:var(--green)} .marketstate.moving b{color:var(--amber)} .marketstate.alert b,.marketstate.conflict b{color:var(--red)} .marketstate.thin b{color:var(--mut)}
+.marketstate small{margin-left:auto;color:var(--mut);font-family:var(--mono)}
 
 .cols{display:grid;grid-template-columns:minmax(320px,1.05fr) 1fr;gap:14px;align-items:start;margin-bottom:14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
@@ -161,6 +166,12 @@ button{font:inherit;cursor:pointer}
 .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
 .kc{font-family:var(--mono);font-size:10px;border:1px solid var(--line2);border-radius:6px;padding:2px 7px;color:var(--mut)}
 .kc b{color:var(--ink)} .kc.ok b{color:var(--green)} .kc.bad b{color:var(--red)}
+.mtbl{overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:9px}
+.mtbl table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;min-width:620px}
+.mtbl th,.mtbl td{border-bottom:1px solid var(--line);padding:5px 7px;text-align:right;white-space:nowrap}
+.mtbl th:first-child,.mtbl td:first-child,.mtbl th:nth-child(2),.mtbl td:nth-child(2){text-align:left}
+.mtbl tr:last-child td{border-bottom:0}
+.mtbl th{color:var(--mut);font-weight:600;background:#0c120f}
 
 .scen{display:flex;flex-direction:column;gap:7px}
 .scrow{display:grid;grid-template-columns:96px 1fr 42px;align-items:center;gap:9px;font-size:11px}
@@ -254,7 +265,7 @@ button{font:inherit;cursor:pointer}
     <span class="sp"></span>
     <span class="mono">ρ=<b style="color:var(--green)">-0.0578</b> calibrated · ledger <b id="ledN" style="color:var(--ink)">24</b></span>
     <span id="reportLinks"></span>
-    <span class="warn">本页面用于赛前数据分析与赛后复盘，不构成投注/下注/资金建议。</span>
+    <span class="warn">本页面用于赛前数据分析与赛后复盘，仅作研究参考，不构成收益承诺。</span>
   </div>
 </div>
 
@@ -860,9 +871,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489369",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 14,
+          "min_book_count_seen": 14,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 14,
+            "x2": {
+              "home_prob": 0.6731371321227302,
+              "draw_prob": 0.21916092673763307,
+              "away_prob": 0.10770194113963683,
+              "overround": 1.0611295681063122,
+              "raw": {
+                "home": 1.4,
+                "draw": 4.3,
+                "away": 8.75
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4473684210526316,
+              "under_prob": 0.5526315789473684,
+              "mu_total_goals": 2.27845220030349
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 14,
+            "x2": {
+              "home_prob": 0.6731371321227302,
+              "draw_prob": 0.21916092673763307,
+              "away_prob": 0.10770194113963683,
+              "overround": 1.0611295681063122,
+              "raw": {
+                "home": 1.4,
+                "draw": 4.3,
+                "away": 8.75
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4473684210526316,
+              "under_prob": 0.5526315789473684,
+              "mu_total_goals": 2.27845220030349
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_strong",
@@ -1418,13 +1567,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": true,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "changed",
-        "changed_fields": [
-          "赔率",
-          "首发",
-          "裁判"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1538999",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 14,
+          "min_book_count_seen": 14,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 14,
+            "x2": {
+              "home_prob": 0.3596166778749159,
+              "draw_prob": 0.3016139878950908,
+              "away_prob": 0.33876933422999334,
+              "overround": 1.069514870356385,
+              "raw": {
+                "home": 2.6,
+                "draw": 3.1,
+                "away": 2.76
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.167641764176418
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 14,
+            "x2": {
+              "home_prob": 0.35425101214574894,
+              "draw_prob": 0.31174089068825905,
+              "away_prob": 0.3340080971659919,
+              "overround": 1.0692640692640694,
+              "raw": {
+                "home": 2.64,
+                "draw": 3.0,
+                "away": 2.8
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.167641764176418
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
         ],
-        "summary_cn": "较上一快照变化：赔率变化 / 首发状态 / 裁判信息"
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0101,
+          "x2_delta": {
+            "home": -0.0054,
+            "draw": 0.0101,
+            "away": -0.0048
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0101,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0101 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "balanced_or_away",
@@ -1933,9 +2216,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1539000",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 14,
+          "min_book_count_seen": 14,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 14,
+            "x2": {
+              "home_prob": 0.5251750583527843,
+              "draw_prob": 0.26708902967655884,
+              "away_prob": 0.20773591197065688,
+              "overround": 1.0697342607454967,
+              "raw": {
+                "home": 1.78,
+                "draw": 3.5,
+                "away": 4.5
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4285714285714286,
+              "under_prob": 0.5714285714285714,
+              "mu_total_goals": 2.2094594594594597
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 14,
+            "x2": {
+              "home_prob": 0.5251750583527843,
+              "draw_prob": 0.26708902967655884,
+              "away_prob": 0.20773591197065688,
+              "overround": 1.0697342607454967,
+              "raw": {
+                "home": 1.78,
+                "draw": 3.5,
+                "away": 4.5
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4285714285714286,
+              "under_prob": 0.5714285714285714,
+              "mu_total_goals": 2.2094594594594597
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -2450,9 +2871,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489370",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 14,
+          "min_book_count_seen": 14,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 14,
+            "x2": {
+              "home_prob": 0.477326968973747,
+              "draw_prob": 0.2863961813842482,
+              "away_prob": 0.23627684964200474,
+              "overround": 1.0580808080808082,
+              "raw": {
+                "home": 1.98,
+                "draw": 3.3,
+                "away": 4.0
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.167641764176418
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 14,
+            "x2": {
+              "home_prob": 0.477326968973747,
+              "draw_prob": 0.2863961813842482,
+              "away_prob": 0.23627684964200474,
+              "overround": 1.0580808080808082,
+              "raw": {
+                "home": 1.98,
+                "draw": 3.3,
+                "away": 4.0
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.167641764176418
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -3146,9 +3705,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489373",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.06032172775102153,
+              "draw_prob": 0.16696192502514887,
+              "away_prob": 0.7727163472238295,
+              "overround": 1.0695338385954223,
+              "raw": {
+                "home": 15.5,
+                "draw": 5.6,
+                "away": 1.21
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5714285714285715,
+              "under_prob": 0.4285714285714285,
+              "mu_total_goals": 2.839403973509934
+            },
+            "ah": {
+              "main_line": 1.0,
+              "supremacy_delta": -1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.06032172775102153,
+              "draw_prob": 0.16696192502514887,
+              "away_prob": 0.7727163472238295,
+              "overround": 1.0695338385954223,
+              "raw": {
+                "home": 15.5,
+                "draw": 5.6,
+                "away": 1.21
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5714285714285715,
+              "under_prob": 0.4285714285714285,
+              "mu_total_goals": 2.839403973509934
+            },
+            "ah": {
+              "main_line": 1.0,
+              "supremacy_delta": -1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "away",
+          "favorite_to": "away",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "balanced_or_away",
@@ -3681,9 +4378,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489371",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.5749486652977412,
+              "draw_prob": 0.2587268993839836,
+              "away_prob": 0.16632443531827515,
+              "overround": 1.0736331569664903,
+              "raw": {
+                "home": 1.62,
+                "draw": 3.6,
+                "away": 5.6
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.47368421052631576,
+              "under_prob": 0.5263157894736843,
+              "mu_total_goals": 2.3884559181685336
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.5749486652977412,
+              "draw_prob": 0.2587268993839836,
+              "away_prob": 0.16632443531827515,
+              "overround": 1.0736331569664903,
+              "raw": {
+                "home": 1.62,
+                "draw": 3.6,
+                "away": 5.6
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.47368421052631576,
+              "under_prob": 0.5263157894736843,
+              "mu_total_goals": 2.3884559181685336
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -4198,9 +5033,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489372",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.15085351329892815,
+              "draw_prob": 0.23382294561333863,
+              "away_prob": 0.6153235410877333,
+              "overround": 1.0691850594227503,
+              "raw": {
+                "home": 6.2,
+                "draw": 4.0,
+                "away": 1.52
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5066666666666666,
+              "under_prob": 0.4933333333333334,
+              "mu_total_goals": 2.53082514470319
+            },
+            "ah": {
+              "main_line": 0.5,
+              "supremacy_delta": -0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.15085351329892815,
+              "draw_prob": 0.23382294561333863,
+              "away_prob": 0.6153235410877333,
+              "overround": 1.0691850594227503,
+              "raw": {
+                "home": 6.2,
+                "draw": 4.0,
+                "away": 1.52
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5066666666666666,
+              "under_prob": 0.4933333333333334,
+              "mu_total_goals": 2.53082514470319
+            },
+            "ah": {
+              "main_line": 0.5,
+              "supremacy_delta": -0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "away",
+          "favorite_to": "away",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "balanced_or_away",
@@ -4876,9 +5849,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1539001",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.19625207559104924,
+              "draw_prob": 0.25539653672807777,
+              "away_prob": 0.5483513876808729,
+              "overround": 1.0727342126468469,
+              "raw": {
+                "home": 4.75,
+                "draw": 3.65,
+                "away": 1.7
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.47368421052631576,
+              "under_prob": 0.5263157894736843,
+              "mu_total_goals": 2.3884559181685336
+            },
+            "ah": {
+              "main_line": 0.5,
+              "supremacy_delta": -0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.19625207559104924,
+              "draw_prob": 0.25539653672807777,
+              "away_prob": 0.5483513876808729,
+              "overround": 1.0727342126468469,
+              "raw": {
+                "home": 4.75,
+                "draw": 3.65,
+                "away": 1.7
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.47368421052631576,
+              "under_prob": 0.5263157894736843,
+              "mu_total_goals": 2.3884559181685336
+            },
+            "ah": {
+              "main_line": 0.5,
+              "supremacy_delta": -0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "away",
+          "favorite_to": "away",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "balanced_or_away",
@@ -5417,9 +6528,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489374",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.9107953518030322,
+              "draw_prob": 0.056855709839825644,
+              "away_prob": 0.03234893835714218,
+              "overround": 1.0659626056345173,
+              "raw": {
+                "home": 1.03,
+                "draw": 16.5,
+                "away": 29.0
+              }
+            },
+            "ou": {
+              "main_line": 4.5,
+              "over_prob": 0.4473684210526316,
+              "under_prob": 0.5526315789473684,
+              "mu_total_goals": 4.2228260869565215
+            },
+            "ah": {
+              "main_line": -3.0,
+              "supremacy_delta": 3.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.9107953518030322,
+              "draw_prob": 0.056855709839825644,
+              "away_prob": 0.03234893835714218,
+              "overround": 1.0659626056345173,
+              "raw": {
+                "home": 1.03,
+                "draw": 16.5,
+                "away": 29.0
+              }
+            },
+            "ou": {
+              "main_line": 4.5,
+              "over_prob": 0.4473684210526316,
+              "under_prob": 0.5526315789473684,
+              "mu_total_goals": 4.2228260869565215
+            },
+            "ah": {
+              "main_line": -3.0,
+              "supremacy_delta": 3.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 4.5,
+          "ou_line_to": 4.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_strong",
@@ -5469,23 +6718,24 @@ button{font:inherit;cursor:pointer}
         "city": "Houston",
         "country": "USA",
         "kickoff_local_time": "2026-06-14 12:00 CDT",
-        "weather_status": "暂缺",
-        "weather_code": null,
-        "temperature_c": null,
-        "humidity_pct": null,
-        "wind_speed_kmh": null,
-        "precipitation_mm": null,
-        "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-14T15:14:49+00:00",
-        "weather_reason_cn": "天气查询失败：<urlopen error _ssl.c:1112: The handshake operation timed out>",
+        "weather_status": "已接入",
+        "weather_code": 51,
+        "temperature_c": 29.8,
+        "humidity_pct": 83,
+        "wind_speed_kmh": 17.3,
+        "precipitation_mm": 0.4,
+        "precipitation_probability_pct": 24,
+        "weather_snapshot_time": "2026-06-14T19:00:57+00:00",
+        "weather_reason_cn": "",
         "altitude_m": 15,
         "roof_status": "闭合/可闭合",
-        "environment_risk_level": "低",
+        "environment_risk_level": "中",
         "environment_risk_flags": [
-          "屋顶降低天气影响",
-          "天气数据暂缺"
+          "高湿度",
+          "降雨",
+          "屋顶降低天气影响"
         ],
-        "environment_summary_cn": "天气数据暂缺"
+        "environment_summary_cn": "赛时天气已接入：温度 29.8°C，湿度 83%，风速 17.3 km/h，降雨概率 24%。环境仅作为辅助风险，不直接触发正式风控。"
       },
       "lineup_effect": {
         "status": "暂不能判断",
@@ -5523,15 +6773,15 @@ button{font:inherit;cursor:pointer}
         "tactical_summary_cn": "首发未确认，暂不能判断阵型、打法和战术效应。"
       },
       "live_refresh": {
-        "requested_at": "2026-06-14 23:14:35 CST",
+        "requested_at": "2026-06-15 03:00:54 CST",
         "fixture_id": "1489374",
-        "overall_status": "failed",
+        "overall_status": "partial",
         "modules": {
           "odds": {
             "requested": true,
             "source": "使用缓存",
             "status": "跳过",
-            "fetched_at": "2026-06-14 23:14:36 CST",
+            "fetched_at": "2026-06-15 03:00:54 CST",
             "message_cn": "实时 API 失败，使用缓存赔率。",
             "source_label_cn": "使用缓存",
             "status_label_cn": "跳过"
@@ -5540,7 +6790,7 @@ button{font:inherit;cursor:pointer}
             "requested": true,
             "source": "使用缓存",
             "status": "跳过",
-            "fetched_at": "2026-06-14 23:14:36 CST",
+            "fetched_at": "2026-06-15 03:00:55 CST",
             "message_cn": "实时 API 未配置，使用缓存/兜底数据。 使用缓存，保留上一版。",
             "source_label_cn": "使用缓存",
             "status_label_cn": "跳过"
@@ -5549,7 +6799,7 @@ button{font:inherit;cursor:pointer}
             "requested": true,
             "source": "使用缓存",
             "status": "跳过",
-            "fetched_at": "2026-06-14 23:14:36 CST",
+            "fetched_at": "2026-06-15 03:00:55 CST",
             "message_cn": "实时 API 失败，使用缓存裁判信息。",
             "source_label_cn": "使用缓存",
             "status_label_cn": "跳过"
@@ -5557,23 +6807,23 @@ button{font:inherit;cursor:pointer}
           "weather": {
             "requested": true,
             "source": "实时 API 成功",
-            "status": "失败",
-            "fetched_at": "2026-06-14 23:14:49 CST",
-            "message_cn": "天气查询失败：<urlopen error _ssl.c:1112: The handshake operation timed out>",
+            "status": "成功",
+            "fetched_at": "2026-06-15 03:00:57 CST",
+            "message_cn": "实时 API 成功，天气已接入。",
             "source_label_cn": "实时 API 成功",
-            "status_label_cn": "失败"
+            "status_label_cn": "成功"
           },
           "injuries": {
             "requested": true,
             "source": "使用缓存",
             "status": "跳过",
-            "fetched_at": "2026-06-14 23:14:37 CST",
+            "fetched_at": "2026-06-15 03:00:55 CST",
             "message_cn": "实时 API 失败，使用缓存伤停信息。",
             "source_label_cn": "使用缓存",
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "部分实时成功"
       },
       "score_distribution": {
         "status": "已生成",
@@ -5929,9 +7179,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489376",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.4781510246093385,
+              "draw_prob": 0.2663984279966314,
+              "away_prob": 0.2554505473940301,
+              "overround": 1.0725074012745246,
+              "raw": {
+                "home": 1.95,
+                "draw": 3.5,
+                "away": 3.65
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.48941798941798953,
+              "under_prob": 0.5105820105820105,
+              "mu_total_goals": 2.455330903961444
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.4781510246093385,
+              "draw_prob": 0.2663984279966314,
+              "away_prob": 0.2554505473940301,
+              "overround": 1.0725074012745246,
+              "raw": {
+                "home": 1.95,
+                "draw": 3.5,
+                "away": 3.65
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.48941798941798953,
+              "under_prob": 0.5105820105820105,
+              "mu_total_goals": 2.455330903961444
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -6447,9 +7835,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489375",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.2707559719581167,
+              "draw_prob": 0.3266112249145114,
+              "away_prob": 0.4026328031273718,
+              "overround": 1.0705399048727386,
+              "raw": {
+                "home": 3.45,
+                "draw": 2.86,
+                "away": 2.32
+              }
+            },
+            "ou": {
+              "main_line": 1.5,
+              "over_prob": 0.5813953488372093,
+              "under_prob": 0.41860465116279066,
+              "mu_total_goals": 1.8200854700854703
+            },
+            "ah": {
+              "main_line": 0.0,
+              "supremacy_delta": -0.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.2707559719581167,
+              "draw_prob": 0.3266112249145114,
+              "away_prob": 0.4026328031273718,
+              "overround": 1.0705399048727386,
+              "raw": {
+                "home": 3.45,
+                "draw": 2.86,
+                "away": 2.32
+              }
+            },
+            "ou": {
+              "main_line": 1.5,
+              "over_prob": 0.5813953488372093,
+              "under_prob": 0.41860465116279066,
+              "mu_total_goals": 1.8200854700854703
+            },
+            "ah": {
+              "main_line": 0.0,
+              "supremacy_delta": -0.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "away",
+          "favorite_to": "away",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 1.5,
+          "ou_line_to": 1.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "balanced_or_away",
@@ -6964,9 +8490,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1539002",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.49714693295292434,
+              "draw_prob": 0.2748930099857347,
+              "away_prob": 0.22796005706134095,
+              "overround": 1.069934979700235,
+              "raw": {
+                "home": 1.88,
+                "draw": 3.4,
+                "away": 4.1
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.167641764176418
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.49714693295292434,
+              "draw_prob": 0.2748930099857347,
+              "away_prob": 0.22796005706134095,
+              "overround": 1.069934979700235,
+              "raw": {
+                "home": 1.88,
+                "draw": 3.4,
+                "away": 4.1
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.167641764176418
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -7481,9 +9145,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489380",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.8578847607673851,
+              "draw_prob": 0.10748211370533907,
+              "away_prob": 0.03463312552727592,
+              "overround": 1.0694107584332195,
+              "raw": {
+                "home": 1.09,
+                "draw": 8.7,
+                "away": 27.0
+              }
+            },
+            "ou": {
+              "main_line": 3.5,
+              "over_prob": 0.49333333333333335,
+              "under_prob": 0.5066666666666666,
+              "mu_total_goals": 3.467207074428887
+            },
+            "ah": {
+              "main_line": -3.0,
+              "supremacy_delta": 3.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.8578847607673851,
+              "draw_prob": 0.10748211370533907,
+              "away_prob": 0.03463312552727592,
+              "overround": 1.0694107584332195,
+              "raw": {
+                "home": 1.09,
+                "draw": 8.7,
+                "away": 27.0
+              }
+            },
+            "ou": {
+              "main_line": 3.5,
+              "over_prob": 0.49333333333333335,
+              "under_prob": 0.5066666666666666,
+              "mu_total_goals": 3.467207074428887
+            },
+            "ah": {
+              "main_line": -3.0,
+              "supremacy_delta": 3.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 3.5,
+          "ou_line_to": 3.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_strong",
@@ -7993,9 +9795,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489377",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.5651392632524708,
+              "draw_prob": 0.252021563342318,
+              "away_prob": 0.18283917340521116,
+              "overround": 1.0724093077034254,
+              "raw": {
+                "home": 1.65,
+                "draw": 3.7,
+                "away": 5.1
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.48412698412698413,
+              "under_prob": 0.5158730158730158,
+              "mu_total_goals": 2.4328277356446373
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.5651392632524708,
+              "draw_prob": 0.252021563342318,
+              "away_prob": 0.18283917340521116,
+              "overround": 1.0724093077034254,
+              "raw": {
+                "home": 1.65,
+                "draw": 3.7,
+                "away": 5.1
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.48412698412698413,
+              "under_prob": 0.5158730158730158,
+              "mu_total_goals": 2.4328277356446373
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -8510,9 +10450,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489379",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.11222192025468802,
+              "draw_prob": 0.227180960515588,
+              "away_prob": 0.660597119229724,
+              "overround": 1.073604224891262,
+              "raw": {
+                "home": 8.3,
+                "draw": 4.1,
+                "away": 1.41
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.48412698412698413,
+              "under_prob": 0.5158730158730158,
+              "mu_total_goals": 2.4328277356446373
+            },
+            "ah": {
+              "main_line": 0.5,
+              "supremacy_delta": -0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.11222192025468802,
+              "draw_prob": 0.227180960515588,
+              "away_prob": 0.660597119229724,
+              "overround": 1.073604224891262,
+              "raw": {
+                "home": 8.3,
+                "draw": 4.1,
+                "away": 1.41
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.48412698412698413,
+              "under_prob": 0.5158730158730158,
+              "mu_total_goals": 2.4328277356446373
+            },
+            "ah": {
+              "main_line": 0.5,
+              "supremacy_delta": -0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "away",
+          "favorite_to": "away",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "balanced_or_away",
@@ -9027,9 +11105,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489378",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.4943820224719101,
+              "draw_prob": 0.2831460674157303,
+              "away_prob": 0.2224719101123595,
+              "overround": 1.0702260702260704,
+              "raw": {
+                "home": 1.89,
+                "draw": 3.3,
+                "away": 4.2
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.167641764176418
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.4943820224719101,
+              "draw_prob": 0.2831460674157303,
+              "away_prob": 0.2224719101123595,
+              "overround": 1.0702260702260704,
+              "raw": {
+                "home": 1.89,
+                "draw": 3.3,
+                "away": 4.2
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.167641764176418
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -9545,9 +11761,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489383",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.6552262090483619,
+              "draw_prob": 0.22308892355694224,
+              "away_prob": 0.12168486739469576,
+              "overround": 1.0672660672660674,
+              "raw": {
+                "home": 1.43,
+                "draw": 4.2,
+                "away": 7.7
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5066666666666666,
+              "under_prob": 0.4933333333333334,
+              "mu_total_goals": 2.53082514470319
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.6552262090483619,
+              "draw_prob": 0.22308892355694224,
+              "away_prob": 0.12168486739469576,
+              "overround": 1.0672660672660674,
+              "raw": {
+                "home": 1.43,
+                "draw": 4.2,
+                "away": 7.7
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5066666666666666,
+              "under_prob": 0.4933333333333334,
+              "mu_total_goals": 2.53082514470319
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_strong",
@@ -10062,9 +12416,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1539016",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.08129415593277275,
+              "draw_prob": 0.14607543644170104,
+              "away_prob": 0.7726304076255261,
+              "overround": 1.069652802730866,
+              "raw": {
+                "home": 11.5,
+                "draw": 6.4,
+                "away": 1.21
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.6025316455696202,
+              "under_prob": 0.39746835443037976,
+              "mu_total_goals": 2.9879518072289155
+            },
+            "ah": {
+              "main_line": 2.0,
+              "supremacy_delta": -2.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.08129415593277275,
+              "draw_prob": 0.14607543644170104,
+              "away_prob": 0.7726304076255261,
+              "overround": 1.069652802730866,
+              "raw": {
+                "home": 11.5,
+                "draw": 6.4,
+                "away": 1.21
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.6025316455696202,
+              "under_prob": 0.39746835443037976,
+              "mu_total_goals": 2.9879518072289155
+            },
+            "ah": {
+              "main_line": 2.0,
+              "supremacy_delta": -2.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "away",
+          "favorite_to": "away",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "balanced_or_away",
@@ -10573,9 +13065,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489381",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.6783047639078768,
+              "draw_prob": 0.21768850562624878,
+              "away_prob": 0.10400673046587441,
+              "overround": 1.0683069318054152,
+              "raw": {
+                "home": 1.38,
+                "draw": 4.3,
+                "away": 9.0
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.49333333333333335,
+              "under_prob": 0.5066666666666666,
+              "mu_total_goals": 2.471385542168675
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.6783047639078768,
+              "draw_prob": 0.21768850562624878,
+              "away_prob": 0.10400673046587441,
+              "overround": 1.0683069318054152,
+              "raw": {
+                "home": 1.38,
+                "draw": 4.3,
+                "away": 9.0
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.49333333333333335,
+              "under_prob": 0.5066666666666666,
+              "mu_total_goals": 2.471385542168675
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_strong",
@@ -11090,9 +13720,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489382",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.7192595857205817,
+              "draw_prob": 0.18334067871308948,
+              "away_prob": 0.09739973556632879,
+              "overround": 1.069475867269985,
+              "raw": {
+                "home": 1.3,
+                "draw": 5.1,
+                "away": 9.6
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5813953488372093,
+              "under_prob": 0.41860465116279066,
+              "mu_total_goals": 2.885714285714286
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.7192595857205817,
+              "draw_prob": 0.18334067871308948,
+              "away_prob": 0.09739973556632879,
+              "overround": 1.069475867269985,
+              "raw": {
+                "home": 1.3,
+                "draw": 5.1,
+                "away": 9.6
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5813953488372093,
+              "under_prob": 0.41860465116279066,
+              "mu_total_goals": 2.885714285714286
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_strong",
@@ -11601,9 +14369,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1539003",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.7510668563300142,
+              "draw_prob": 0.17069701280227595,
+              "away_prob": 0.07823613086770981,
+              "overround": 1.0651515151515152,
+              "raw": {
+                "home": 1.25,
+                "draw": 5.5,
+                "away": 12.0
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5714285714285715,
+              "under_prob": 0.4285714285714285,
+              "mu_total_goals": 2.842281879194631
+            },
+            "ah": {
+              "main_line": -2.0,
+              "supremacy_delta": 2.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.7510668563300142,
+              "draw_prob": 0.17069701280227595,
+              "away_prob": 0.07823613086770981,
+              "overround": 1.0651515151515152,
+              "raw": {
+                "home": 1.25,
+                "draw": 5.5,
+                "away": 12.0
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5714285714285715,
+              "under_prob": 0.4285714285714285,
+              "mu_total_goals": 2.842281879194631
+            },
+            "ah": {
+              "main_line": -2.0,
+              "supremacy_delta": 2.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_strong",
@@ -12113,9 +15019,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489384",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.547172472147793,
+              "draw_prob": 0.2599069242702017,
+              "away_prob": 0.19292060358200536,
+              "overround": 1.068758666425514,
+              "raw": {
+                "home": 1.71,
+                "draw": 3.6,
+                "away": 4.85
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4473684210526316,
+              "under_prob": 0.5526315789473684,
+              "mu_total_goals": 2.28751786565031
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.547172472147793,
+              "draw_prob": 0.2599069242702017,
+              "away_prob": 0.19292060358200536,
+              "overround": 1.068758666425514,
+              "raw": {
+                "home": 1.71,
+                "draw": 3.6,
+                "away": 4.85
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4473684210526316,
+              "under_prob": 0.5526315789473684,
+              "mu_total_goals": 2.28751786565031
+            },
+            "ah": {
+              "main_line": -1.0,
+              "supremacy_delta": 1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -12631,9 +15675,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489385",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.4678241177580676,
+              "draw_prob": 0.27929798075108514,
+              "away_prob": 0.2528779014908473,
+              "overround": 1.0687777329568373,
+              "raw": {
+                "home": 2.0,
+                "draw": 3.35,
+                "away": 3.7
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.17991452991453
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.4678241177580676,
+              "draw_prob": 0.27929798075108514,
+              "away_prob": 0.2528779014908473,
+              "overround": 1.0687777329568373,
+              "raw": {
+                "home": 2.0,
+                "draw": 3.35,
+                "away": 3.7
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.4186046511627907,
+              "under_prob": 0.5813953488372092,
+              "mu_total_goals": 2.17991452991453
+            },
+            "ah": {
+              "main_line": -0.5,
+              "supremacy_delta": 0.5
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "home",
+          "favorite_to": "home",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "home_slight",
@@ -13148,9 +16330,147 @@ button{font:inherit;cursor:pointer}
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
       "odds_movement": {
-        "status": "no_change",
-        "changed_fields": [],
-        "summary_cn": "较上一快照无实质变化"
+        "schema_version": "W1_ODDS_MOVEMENT_MONITOR_V1",
+        "fixture_id": "1489386",
+        "status": "THIN_MARKET_SKIP",
+        "status_reason_code": "THIN_STALE",
+        "calibration": {
+          "calibrated": "none",
+          "tier": "C",
+          "gate_effect": "HARD_SKIP"
+        },
+        "liquidity": {
+          "book_count_latest": 13,
+          "min_book_count_seen": 13,
+          "cross_book_spread_home_prob": 0.0,
+          "staleness_minutes": 3907,
+          "markets_present": {
+            "x2": true,
+            "ou": true,
+            "ah": true
+          }
+        },
+        "snapshots": [
+          {
+            "phase": "ANCHOR",
+            "captured_at_utc": null,
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.1099885907769313,
+              "draw_prob": 0.2174193073497479,
+              "away_prob": 0.672592101873321,
+              "overround": 1.0696296587900678,
+              "raw": {
+                "home": 8.5,
+                "draw": 4.3,
+                "away": 1.39
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5066666666666666,
+              "under_prob": 0.4933333333333334,
+              "mu_total_goals": 2.531288852051388
+            },
+            "ah": {
+              "main_line": 1.0,
+              "supremacy_delta": -1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          },
+          {
+            "phase": "LATEST",
+            "captured_at_utc": "2026-06-12T01:53:00Z",
+            "interpolated": false,
+            "book_count": 13,
+            "x2": {
+              "home_prob": 0.1099885907769313,
+              "draw_prob": 0.2174193073497479,
+              "away_prob": 0.672592101873321,
+              "overround": 1.0696296587900678,
+              "raw": {
+                "home": 8.5,
+                "draw": 4.3,
+                "away": 1.39
+              }
+            },
+            "ou": {
+              "main_line": 2.5,
+              "over_prob": 0.5066666666666666,
+              "under_prob": 0.4933333333333334,
+              "mu_total_goals": 2.531288852051388
+            },
+            "ah": {
+              "main_line": 1.0,
+              "supremacy_delta": -1.0
+            },
+            "cross_book_spread_home_prob": 0.0
+          }
+        ],
+        "cumulative_move": {
+          "from_phase": "ANCHOR",
+          "to_phase": "LATEST",
+          "x2_tv_distance": 0.0,
+          "x2_delta": {
+            "home": 0.0,
+            "draw": 0.0,
+            "away": 0.0
+          },
+          "favorite_from": "away",
+          "favorite_to": "away",
+          "favorite_flipped": false,
+          "mu_delta": 0.0,
+          "ou_line_moved": false,
+          "ou_line_from": 2.5,
+          "ou_line_to": 2.5,
+          "delta_supremacy": 0.0,
+          "supremacy_flipped": false,
+          "magnitude_x2": "minor",
+          "magnitude_ou": "minor",
+          "magnitude_overall": "minor"
+        },
+        "recent_move": {
+          "window_minutes": 60,
+          "x2_tv_distance": 0.0,
+          "mu_delta": 0.0,
+          "sharp_recent_flag": false,
+          "magnitude": "minor"
+        },
+        "coherence": {
+          "x2_ou_ah_consistent": true,
+          "market_fit_error": null,
+          "oscillation_flag": false,
+          "cross_book_conflict_flag": false
+        },
+        "digestion": {
+          "lineup_window": {
+            "start": "T-75m",
+            "end": "T-45m"
+          },
+          "moved_during_lineup_window": false,
+          "settled_after_window": false
+        },
+        "play_guard_input": {
+          "recommended_gate": "SKIP",
+          "allow_formal_judgment": false,
+          "reference_action": "DOWNGRADE",
+          "reasons": [
+            "THIN_STALE",
+            "calibration=none",
+            "tier=C",
+            "HARD_SKIP"
+          ],
+          "recommended_gate_cn": "跳过正式链路"
+        },
+        "display": {
+          "trend_badge": "thin",
+          "normal_sentence_cn": "该场盘口数据不足或过旧，不进入正式预测链路。（TV 0.0 · μ漂移 0.0）",
+          "expert_summary_cn": "1X2 使用去水后 TV distance；OU 使用隐含 μ drift；RECOMPUTE 仅表示用最新共识盘口重新反解 λ，不手动调整 λ。"
+        },
+        "single_book_outliers": [],
+        "disclaimer_cn": "市场盘口变动监控，仅用于赛前分析参考与风控门槛，不构成收益承诺。",
+        "status_cn": "盘口数据不足"
       },
       "market_signal": {
         "direction": "balanced_or_away",
@@ -13621,7 +16941,7 @@ button{font:inherit;cursor:pointer}
       "hit_status_cn": null
     }
   ],
-  "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘，不构成投注建议、下注建议、资金建议或收益承诺。",
+  "page_footer_statement_cn": "本页面用于世界杯赛前数据分析、风险识别和赛后复盘，仅作研究参考，不构成收益承诺。",
   "w1_backend_kept": [
     "watcher v2",
     "正式风控规则",
@@ -13816,7 +17136,7 @@ function pCore(r){
     <div class="cell"><div class="k">主比分</div><div class="v">${esc(rv.primary_score||'–')} <small>${fmtP(pP)}</small></div></div>
     <div class="cell"><div class="k">备选比分</div><div class="v sec">${esc(rv.secondary_score||'–')} <small>${fmtP(pS)}</small></div></div>
     <div class="cell act"><div class="k">参考倾向</div><div style="font-size:14px">${esc(r.reference_direction||'–')}</div>
-      <div class="l3">赛前分析参考，非最终结论，不构成投注 / 下注 / 资金建议。</div></div>
+      <div class="l3">赛前分析参考，非最终结论，不构成收益承诺。</div></div>
   </div>
   <div class="core2">
     <div class="card tight"><h3>风险路径摘要</h3><div class="risksum">${esc(rv.risk_path_summary||r.current_action_cn||'—')}</div></div>
@@ -13940,12 +17260,38 @@ function pFactors(r){
       <h3 style="margin-top:12px">关键缺口</h3>${gaps?`<ul class="gaplist" style="list-style:none;padding:0;margin:0">${gaps}</ul>`:'<div class="empty">无</div>'}</div>
   </div>`;
 }
+function pMarketState(r){
+  const om=r.odds_movement||{},d=om.display||{},pg=om.play_guard_input||{};
+  return `<div class="marketstate ${esc((d.trend_badge||'thin'))}">
+    <span class="mklabel">市场状态</span>
+    <b>${esc(om.status_cn||om.status||'盘口状态暂缺')}</b>
+    <span>${esc(d.normal_sentence_cn||'盘口状态暂缺。')}</span>
+    <small>风控门槛：${esc(pg.recommended_gate_cn||pg.recommended_gate||'观察')}</small>
+  </div>`;
+}
 function pMarketMove(r){
-  const om=r.odds_movement||{},ms=r.market_signal||{};
+  const om=r.odds_movement||{},ms=r.market_signal||{},cm=om.cumulative_move||{},rm=om.recent_move||{},liq=om.liquidity||{},co=om.coherence||{},dig=om.digestion||{},pg=om.play_guard_input||{},cal=om.calibration||{},disp=om.display||{};
+  const snapRows=(om.snapshots||[]).map(s=>`<tr><td>${esc(s.phase||'')}</td><td>${esc(s.captured_at_utc||'–')}</td><td>${esc(s.book_count??'–')}</td><td>${fmtP(s.x2&&s.x2.home_prob)}</td><td>${fmtP(s.x2&&s.x2.draw_prob)}</td><td>${fmtP(s.x2&&s.x2.away_prob)}</td><td>${s.ou&&s.ou.mu_total_goals!=null?Number(s.ou.mu_total_goals).toFixed(2):'–'}</td><td>${s.ah&&s.ah.supremacy_delta!=null?Number(s.ah.supremacy_delta).toFixed(2):'–'}</td></tr>`).join('');
+  const outliers=(om.single_book_outliers||[]).map(o=>`<li>${esc(o.bookmaker||'unknown')} · ${esc(o.market||'')} · ${esc(o.note_cn||'偏离共识，已忽略')}</li>`).join('');
   return `<div class="grid2">
-    <div class="card tight"><h3>赔率异动<span class="r">${esc(om.status||'–')}</span></h3>
-      <div class="note" style="margin-top:0">${esc(om.summary_cn||'—')}</div>
-      ${(om.changed_fields&&om.changed_fields.length)?`<div class="chips">${om.changed_fields.map(f=>`<span class="kc">${esc(f)}</span>`).join('')}</div>`:''}</div>
+    <div class="card tight"><h3>盘口异动监控<span class="r">${esc(om.status_cn||om.status||'–')} · ${esc(om.status_reason_code||'')}</span></h3>
+      <div class="note" style="margin-top:0">${esc(disp.expert_summary_cn||'')}</div>
+      <div class="chips">
+        <span class="kc">TV <b>${cm.x2_tv_distance??'–'}</b></span>
+        <span class="kc">μ drift <b>${cm.mu_delta??'–'}</b></span>
+        <span class="kc">累计 <b>${esc(cm.magnitude_overall||'–')}</b></span>
+        <span class="kc">近端 <b>${esc(rm.magnitude||'–')}</b></span>
+        <span class="kc">book_count <b>${liq.book_count_latest??'–'}</b></span>
+        <span class="kc">spread <b>${liq.cross_book_spread_home_prob??'–'}</b></span>
+        <span class="kc">stale <b>${liq.staleness_minutes??'–'}m</b></span>
+        <span class="kc">gate <b>${esc(pg.recommended_gate_cn||pg.recommended_gate||'–')}</b></span>
+        <span class="kc">cal <b>${esc((cal.calibrated||'none')+'/'+(cal.tier||'C'))}</b></span>
+      </div>
+      <div class="mtbl"><table><thead><tr><th>phase</th><th>captured</th><th>books</th><th>P主</th><th>P平</th><th>P客</th><th>μ</th><th>δ</th></tr></thead><tbody>${snapRows}</tbody></table></div>
+      <div class="note">coherence：fit=${co.market_fit_error??'–'}，振荡=${co.oscillation_flag?'是':'否'}，跨家冲突=${co.cross_book_conflict_flag?'是':'否'}；首发消化窗口 ${esc((dig.lineup_window&&dig.lineup_window.start)||'T-75m')} ~ ${esc((dig.lineup_window&&dig.lineup_window.end)||'T-45m')}。</div>
+      <div class="note">${outliers?`已忽略离群：<ul>${outliers}</ul>`:'单家异常价：无；若出现只透明展示，不参与结论。'}</div>
+      <div class="note">${esc(om.disclaimer_cn||'市场盘口变动监控，仅用于赛前分析参考与风控门槛。')}</div>
+    </div>
     <div class="card tight"><h3>市场信号<span class="r">${esc(ms.direction||'–')}</span></h3>
       <div class="note" style="margin-top:0">${esc(ms.summary_cn||'—')}</div></div>
   </div>`;
@@ -13986,6 +17332,7 @@ function renderPanel(){
   const r=RECS[active];if(!r){$('#panel').innerHTML='<div class="empty">无数据</div>';return;}
   $('#panel').innerHTML=
     pBanner()+pHeader(r)+pPredict(r)+pCore(r)+
+    pMarketState(r)+
     `<button class="expbtn" onclick="toggleExpert()"><span id="expCaret">${expertOpen?'▾':'▸'}</span> 专家展开区 / 模型调试<small>完整比分矩阵、Top 8、市场 vs 模型、数据质量、环境、因子、赛后校准</small></button>`+
     `<div id="expert" class="${expertOpen?'open':''}">`+
       `<div class="cols"><div>${pMatrix(r)}</div><div>${pTopScores(r)}${pMarket(r)}</div></div>`+
