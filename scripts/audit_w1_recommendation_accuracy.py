@@ -223,8 +223,9 @@ def table_row(match: dict[str, Any]) -> str:
 
 
 def write_markdown(matches: list[dict[str, Any]], metrics: dict[str, Any]) -> None:
+    n = metrics["total_completed_matches"]
     lines = [
-        "# W1 Recommendation Accuracy Audit",
+        "# W1 Post-Match Recommendation Audit V1",
         "",
         f"生成时间：{datetime.now(timezone.utc).isoformat()}",
         "",
@@ -251,6 +252,8 @@ def write_markdown(matches: list[dict[str, Any]], metrics: dict[str, Any]) -> No
         f"- mean_actual_score_probability：{num(metrics['mean_actual_score_probability'])}",
         f"- mean_rps_1x2：{num(metrics['mean_rps_1x2'])}",
         f"- mean_exact_score_log_loss：{num(metrics['mean_exact_score_log_loss'])}",
+        "",
+        f"样本量提示：当前 n={n}。若 n 仍小于 30，本报告只能作为赛后验证快照，不能据此调整模型、阈值或权重。",
         "",
         "## 3. 逐场表",
         "",
@@ -298,7 +301,7 @@ def write_markdown(matches: list[dict[str, Any]], metrics: dict[str, Any]) -> No
             "- 精确比分命中率不是唯一指标；它对小样本高度敏感。",
             "- score_pool 覆盖不等于推荐成功，只说明实际比分进入了候选路径。",
             "- RPS/log score 才是当前主评估口径，用于衡量方向概率和精确比分概率的损失。",
-            "- 当前样本量小，不允许调权重。",
+            f"- 当前样本量 n={metrics['total_completed_matches']}，仍然很小，不允许调权重。",
             "- Australia 2-0 Turkey 是方向性失误样本。",
             "- Qatar 1-1 Switzerland 是热门未胜样本。",
             "- USA 4-1 Paraguay 是尾部打开样本。",
@@ -306,7 +309,7 @@ def write_markdown(matches: list[dict[str, Any]], metrics: dict[str, Any]) -> No
             "",
             "## 7. 合规边界",
             "",
-            "本报告仅用于赛前/赛后分析研究与专家审阅，不提供交易、执行或资金操作意见，不承诺命中率。",
+            "本报告仅用于赛前/赛后分析研究与专家审阅，不提供执行意见，不承诺命中率或收益。",
         ]
     )
     AUDIT_MD.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -331,7 +334,7 @@ def main() -> int:
             "精确比分命中率不是唯一指标。",
             "score_pool 覆盖不等于推荐成功。",
             "RPS/log score 是当前主评估口径。",
-            "样本量小，不允许调权重。",
+            f"当前样本量 n={metrics['total_completed_matches']}，仍然很小，不允许调权重。",
         ],
     }
     AUDIT_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

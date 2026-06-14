@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-14T07:34:47.856755+00:00",
+  "generated_at_utc": "2026-06-14T19:13:22.875147+00:00",
   "data_sources": [
     "reports/dashboard/assets/w1_dashboard_data.json",
     "data/results/round1_results.json",
@@ -13,27 +13,27 @@
     "secondary_score_accuracy": 0.25,
     "primary_or_secondary_accuracy": 0.25,
     "score_pool_coverage": 0.5,
-    "mean_actual_score_probability": 0.0701,
-    "mean_rps_1x2": 0.5031,
-    "mean_exact_score_log_loss": 3.0662,
+    "mean_actual_score_probability": 0.0693,
+    "mean_rps_1x2": 0.5012,
+    "mean_exact_score_log_loss": 3.0738,
     "worst_3_by_log_loss": [
       {
         "fixture_id": "1489370",
         "match": "美国 vs 巴拉圭",
         "actual_score": "4-1",
-        "exact_score_log_loss": 4.3797
+        "exact_score_log_loss": 4.3863
       },
       {
         "fixture_id": "1539001",
         "match": "澳大利亚 vs 土耳其",
         "actual_score": "2-0",
-        "exact_score_log_loss": 3.4974
+        "exact_score_log_loss": 3.4848
       },
       {
         "fixture_id": "1489373",
         "match": "卡塔尔 vs 瑞士",
         "actual_score": "1-1",
-        "exact_score_log_loss": 2.5551
+        "exact_score_log_loss": 2.5834
       }
     ],
     "best_3_by_actual_score_probability": [
@@ -41,19 +41,19 @@
         "fixture_id": "1489369",
         "match": "墨西哥 vs 南非",
         "actual_score": "2-0",
-        "actual_score_probability": 0.16
+        "actual_score_probability": 0.1587
       },
       {
         "fixture_id": "1489373",
         "match": "卡塔尔 vs 瑞士",
         "actual_score": "1-1",
-        "actual_score_probability": 0.0777
+        "actual_score_probability": 0.0755
       },
       {
         "fixture_id": "1539001",
         "match": "澳大利亚 vs 土耳其",
         "actual_score": "2-0",
-        "actual_score_probability": 0.0303
+        "actual_score_probability": 0.0307
       }
     ]
   },
@@ -69,55 +69,55 @@
         {
           "score": "1-0",
           "path": "小胜主线",
-          "weight": 0.1718,
-          "probability": 0.1718,
-          "region_probability": 0.1718,
+          "weight": 0.1749,
+          "probability": 0.1749,
+          "region_probability": 0.1749,
           "reason_cn": "比分矩阵众数;市场+基础面主路径。"
         },
         {
           "score": "0-0",
           "path": "防平路径",
-          "weight": 0.1117,
-          "probability": 0.1117,
-          "region_probability": 0.2366,
+          "weight": 0.1078,
+          "probability": 0.1078,
+          "region_probability": 0.2303,
           "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
         },
         {
           "score": "2-0",
           "path": "优势扩大",
-          "weight": 0.16,
-          "probability": 0.16,
-          "region_probability": 0.4049,
+          "weight": 0.1587,
+          "probability": 0.1587,
+          "region_probability": 0.4013,
           "reason_cn": "热门净胜≥2 的区域质量。"
         },
         {
           "score": "3-1",
           "path": "打开局",
-          "weight": 0.0482,
-          "probability": 0.0482,
+          "weight": 0.0483,
+          "probability": 0.0483,
           "region_probability": 0.1963,
           "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
         },
         {
           "score": "3-1",
           "path": "强队打穿",
-          "weight": 0.0482,
-          "probability": 0.0482,
-          "region_probability": 0.1639,
+          "weight": 0.0483,
+          "probability": 0.0483,
+          "region_probability": 0.163,
           "reason_cn": "热门在高比分局取胜的联合质量。"
         },
         {
           "score": "0-1",
           "path": "防线崩盘",
-          "weight": 0.0431,
-          "probability": 0.0431,
-          "region_probability": 0.0917,
+          "weight": 0.0477,
+          "probability": 0.0477,
+          "region_probability": 0.0977,
           "reason_cn": "热门输球尾部质量。"
         }
       ],
-      "actual_score_probability": 0.16,
-      "rps_1x2": 0.1162,
-      "exact_score_log_loss": 1.8325,
+      "actual_score_probability": 0.1587,
+      "rps_1x2": 0.1172,
+      "exact_score_log_loss": 1.8408,
       "predicted_direction": "H",
       "predicted_direction_cn": "主胜",
       "actual_direction": "H",
@@ -126,7 +126,7 @@
       "primary_score_hit": false,
       "secondary_score_hit": false,
       "score_pool_hit": true,
-      "market_fit_error": 0.0174,
+      "market_fit_error": 0.0111,
       "lineup_source": "missing",
       "confirmed_lineup": false,
       "odds_status": "success",
@@ -138,61 +138,61 @@
       "alias_fixture_ids": [],
       "match": "美国 vs 巴拉圭",
       "actual_score": "4-1",
-      "primary_score": "1-1",
+      "primary_score": "1-0",
       "secondary_score": "1-1",
       "score_pool": [
         {
-          "score": "1-1",
+          "score": "1-0",
           "path": "小胜主线",
-          "weight": 0.1402,
-          "probability": 0.1402,
-          "region_probability": 0.1402,
+          "weight": 0.1446,
+          "probability": 0.1446,
+          "region_probability": 0.1446,
           "reason_cn": "比分矩阵众数;市场+基础面主路径。"
         },
         {
           "score": "1-1",
           "path": "防平路径",
-          "weight": 0.1402,
-          "probability": 0.1402,
-          "region_probability": 0.3075,
+          "weight": 0.135,
+          "probability": 0.135,
+          "region_probability": 0.2971,
           "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
         },
         {
           "score": "2-0",
           "path": "优势扩大",
-          "weight": 0.1014,
-          "probability": 0.1014,
-          "region_probability": 0.2285,
+          "weight": 0.1009,
+          "probability": 0.1009,
+          "region_probability": 0.227,
           "reason_cn": "热门净胜≥2 的区域质量。"
         },
         {
           "score": "3-1",
           "path": "打开局",
-          "weight": 0.0376,
-          "probability": 0.0376,
+          "weight": 0.0375,
+          "probability": 0.0375,
           "region_probability": 0.1743,
           "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
         },
         {
           "score": "3-1",
           "path": "强队打穿",
-          "weight": 0.0376,
-          "probability": 0.0376,
-          "region_probability": 0.0993,
+          "weight": 0.0375,
+          "probability": 0.0375,
+          "region_probability": 0.0988,
           "reason_cn": "热门在高比分局取胜的联合质量。"
         },
         {
           "score": "0-1",
           "path": "防线崩盘",
-          "weight": 0.083,
-          "probability": 0.083,
-          "region_probability": 0.2223,
+          "weight": 0.0888,
+          "probability": 0.0888,
+          "region_probability": 0.2293,
           "reason_cn": "热门输球尾部质量。"
         }
       ],
-      "actual_score_probability": 0.0125,
-      "rps_1x2": 0.3301,
-      "exact_score_log_loss": 4.3797,
+      "actual_score_probability": 0.0124,
+      "rps_1x2": 0.3297,
+      "exact_score_log_loss": 4.3863,
       "predicted_direction": "H",
       "predicted_direction_cn": "主胜",
       "actual_direction": "H",
@@ -201,7 +201,7 @@
       "primary_score_hit": false,
       "secondary_score_hit": false,
       "score_pool_hit": false,
-      "market_fit_error": 0.0211,
+      "market_fit_error": 0.0107,
       "lineup_source": "missing",
       "confirmed_lineup": false,
       "odds_status": "success",
@@ -219,55 +219,55 @@
         {
           "score": "0-2",
           "path": "小胜主线",
-          "weight": 0.1571,
-          "probability": 0.1571,
-          "region_probability": 0.1571,
+          "weight": 0.1561,
+          "probability": 0.1561,
+          "region_probability": 0.1561,
           "reason_cn": "比分矩阵众数;市场+基础面主路径。"
         },
         {
           "score": "1-1",
           "path": "防平路径",
-          "weight": 0.0777,
-          "probability": 0.0777,
-          "region_probability": 0.1676,
+          "weight": 0.0755,
+          "probability": 0.0755,
+          "region_probability": 0.1631,
           "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
         },
         {
           "score": "0-2",
           "path": "优势扩大",
-          "weight": 0.1571,
-          "probability": 0.1571,
-          "region_probability": 0.5441,
+          "weight": 0.1561,
+          "probability": 0.1561,
+          "region_probability": 0.5407,
           "reason_cn": "热门净胜≥2 的区域质量。"
         },
         {
           "score": "0-4",
           "path": "打开局",
-          "weight": 0.0704,
-          "probability": 0.0704,
+          "weight": 0.0695,
+          "probability": 0.0695,
           "region_probability": 0.3168,
           "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
         },
         {
           "score": "0-4",
           "path": "强队打穿",
-          "weight": 0.0704,
-          "probability": 0.0704,
-          "region_probability": 0.2839,
+          "weight": 0.0695,
+          "probability": 0.0695,
+          "region_probability": 0.2829,
           "reason_cn": "热门在高比分局取胜的联合质量。"
         },
         {
           "score": "1-0",
           "path": "防线崩盘",
-          "weight": 0.0234,
-          "probability": 0.0234,
-          "region_probability": 0.0597,
+          "weight": 0.0268,
+          "probability": 0.0268,
+          "region_probability": 0.0641,
           "reason_cn": "热门输球尾部质量。"
         }
       ],
-      "actual_score_probability": 0.0777,
-      "rps_1x2": 0.6007,
-      "exact_score_log_loss": 2.5551,
+      "actual_score_probability": 0.0755,
+      "rps_1x2": 0.6013,
+      "exact_score_log_loss": 2.5834,
       "predicted_direction": "A",
       "predicted_direction_cn": "客胜",
       "actual_direction": "D",
@@ -276,7 +276,7 @@
       "primary_score_hit": false,
       "secondary_score_hit": true,
       "score_pool_hit": true,
-      "market_fit_error": 0.0007,
+      "market_fit_error": 0.0039,
       "lineup_source": "OpenClaw verified lineup snapshot",
       "confirmed_lineup": true,
       "odds_status": "success",
@@ -296,55 +296,55 @@
         {
           "score": "0-1",
           "path": "小胜主线",
-          "weight": 0.1329,
-          "probability": 0.1329,
-          "region_probability": 0.1329,
+          "weight": 0.1374,
+          "probability": 0.1374,
+          "region_probability": 0.1374,
           "reason_cn": "比分矩阵众数;市场+基础面主路径。"
         },
         {
           "score": "1-1",
           "path": "防平路径",
-          "weight": 0.1292,
-          "probability": 0.1292,
-          "region_probability": 0.2762,
+          "weight": 0.1247,
+          "probability": 0.1247,
+          "region_probability": 0.2669,
           "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
         },
         {
           "score": "0-2",
           "path": "优势扩大",
-          "weight": 0.114,
-          "probability": 0.114,
-          "region_probability": 0.2953,
+          "weight": 0.1133,
+          "probability": 0.1133,
+          "region_probability": 0.2931,
           "reason_cn": "热门净胜≥2 的区域质量。"
         },
         {
           "score": "1-3",
           "path": "打开局",
-          "weight": 0.0486,
-          "probability": 0.0486,
+          "weight": 0.0485,
+          "probability": 0.0485,
           "region_probability": 0.2189,
           "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
         },
         {
           "score": "1-3",
           "path": "强队打穿",
-          "weight": 0.0486,
-          "probability": 0.0486,
-          "region_probability": 0.1434,
+          "weight": 0.0485,
+          "probability": 0.0485,
+          "region_probability": 0.1426,
           "reason_cn": "热门在高比分局取胜的联合质量。"
         },
         {
           "score": "1-0",
           "path": "防线崩盘",
-          "weight": 0.0628,
-          "probability": 0.0628,
-          "region_probability": 0.181,
+          "weight": 0.0682,
+          "probability": 0.0682,
+          "region_probability": 0.1879,
           "reason_cn": "热门输球尾部质量。"
         }
       ],
-      "actual_score_probability": 0.0303,
-      "rps_1x2": 0.9654,
-      "exact_score_log_loss": 3.4974,
+      "actual_score_probability": 0.0307,
+      "rps_1x2": 0.9566,
+      "exact_score_log_loss": 3.4848,
       "predicted_direction": "A",
       "predicted_direction_cn": "客胜",
       "actual_direction": "H",
@@ -353,7 +353,7 @@
       "primary_score_hit": false,
       "secondary_score_hit": false,
       "score_pool_hit": false,
-      "market_fit_error": 0.0208,
+      "market_fit_error": 0.0115,
       "lineup_source": "manual_verified",
       "confirmed_lineup": true,
       "odds_status": "success",
@@ -365,6 +365,6 @@
     "精确比分命中率不是唯一指标。",
     "score_pool 覆盖不等于推荐成功。",
     "RPS/log score 是当前主评估口径。",
-    "样本量小，不允许调权重。"
+    "当前样本量 n=4，仍然很小，不允许调权重。"
   ]
 }

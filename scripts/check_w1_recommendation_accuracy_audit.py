@@ -21,9 +21,9 @@ PROTECTED_FILES = [
     ROOT / "config/w1_decision_policy.json",
 ]
 FORBIDDEN_PATTERNS = [
-    "稳赚",
-    "必胜",
-    "保证命中",
+    "稳" + "赚",
+    "必" + "胜",
+    "保证" + "命中",
     "下注" + "建议",
     "投注" + "建议",
     "资金" + "建议",
