@@ -191,6 +191,7 @@ def main() -> int:
             "tactical_effect",
             "live_refresh",
             "score_distribution",
+            "score_matrix_summary",
             "post_match_calibration",
         ]
         for row in records:
@@ -266,11 +267,21 @@ def main() -> int:
             score_distribution = row.get("score_distribution", {})
             if not score_distribution:
                 fail(f"{row.get('fixture_id')}: score_distribution missing")
+            score_matrix_summary = row.get("score_matrix_summary", {})
+            if not score_matrix_summary:
+                fail(f"{row.get('fixture_id')}: score_matrix_summary missing")
             for key in ("status", "main_score", "fallback_score", "score_pool", "game_open_trigger", "market_vs_score_risk", "score_summary_cn", "post_match_calibration"):
                 if key not in score_distribution:
                     fail(f"{row.get('fixture_id')}: score_distribution missing {key}")
+            if score_distribution.get("derived_from_score_matrix") is not True:
+                fail(f"{row.get('fixture_id')}: score_distribution must be derived from score matrix")
+            if score_distribution.get("legacy_rule_weight") is not False:
+                fail(f"{row.get('fixture_id')}: legacy_rule_weight must be false")
             if len(score_distribution.get("score_pool", [])) < 6:
                 fail(f"{row.get('fixture_id')}: score_distribution.score_pool must contain at least 6 paths")
+            for item in score_distribution.get("score_pool", []):
+                if not isinstance(item.get("weight"), (int, float)):
+                    fail(f"{row.get('fixture_id')}: score_pool weight must be numeric probability")
             pool_text = " ".join(item.get("path", "") for item in score_distribution.get("score_pool", []))
             if "防线崩盘" not in pool_text:
                 fail(f"{row.get('fixture_id')}: score pool must include 防线崩盘")
@@ -289,8 +300,11 @@ def main() -> int:
         qatar_cal = qatar.get("post_match_calibration", {})
         if qatar_cal.get("actual_score") != "1-1":
             fail("fixture_id=1489373 post_match_calibration.actual_score must be 1-1")
-        if qatar_cal.get("prediction_hit_type") != "pool_hit":
-            fail("fixture_id=1489373 prediction_hit_type must be pool_hit")
+        if qatar_cal.get("evaluation_method") != "rps_log_score":
+            fail("fixture_id=1489373 evaluation_method must be rps_log_score")
+        for key in ("actual_score_probability", "rps_1x2", "exact_score_log_loss", "deprecated_hit_type_warning"):
+            if key not in qatar_cal:
+                fail(f"fixture_id=1489373 calibration missing {key}")
         if "深让不等于大胜" not in qatar_cal.get("lesson_cn", ""):
             fail("fixture_id=1489373 calibration must include 深让不等于大胜")
         usa = next((row for row in records if row.get("fixture_id") == "1489370"), None)
@@ -303,8 +317,11 @@ def main() -> int:
         usa_cal = usa.get("post_match_calibration", {})
         if usa_cal.get("actual_score") != "4-1":
             fail("fixture_id=1489370 post_match_calibration.actual_score must be 4-1")
-        if usa_cal.get("prediction_hit_type") != "pool_hit":
-            fail("fixture_id=1489370 prediction_hit_type must be pool_hit")
+        if usa_cal.get("evaluation_method") != "rps_log_score":
+            fail("fixture_id=1489370 evaluation_method must be rps_log_score")
+        for key in ("actual_score_probability", "rps_1x2", "exact_score_log_loss", "deprecated_hit_type_warning"):
+            if key not in usa_cal:
+                fail(f"fixture_id=1489370 calibration missing {key}")
         if "平手盘也可能打开" not in usa_cal.get("lesson_cn", ""):
             fail("fixture_id=1489370 calibration must include 平手盘也可能打开")
         qatar_lineups = qatar.get("live_refresh", {}).get("modules", {}).get("lineups", {})
@@ -368,8 +385,8 @@ def main() -> int:
             fail("First match must not bypass W1 play guard")
         if "赛前未放行" not in first.get("w1_state", ""):
             fail("First match must say W1 was not released pre-match")
-        if first.get("hit_status_cn") != "比分命中":
-            fail("First match hit_status_cn must be 比分命中")
+        if first.get("post_match_calibration", {}).get("evaluation_method") != "rps_log_score":
+            fail("First match must expose rps_log_score calibration")
         if "ledger" not in first.get("current_action_cn", ""):
             fail("First match current_action_cn must mention ledger review")
 

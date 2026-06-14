@@ -1,0 +1,31 @@
+{
+  "results": {
+    "1489369": {
+      "status": "finished",
+      "actual_score": {
+        "home": 2,
+        "away": 0
+      },
+      "result_source": "manual_verified_overlay",
+      "result_note": "赛果待回写 ledger"
+    },
+    "1489370": {
+      "status": "finished",
+      "actual_score": {
+        "home": 4,
+        "away": 1
+      },
+      "result_source": "post_match_auto_calibration_sample",
+      "result_note": "赛后自动校准样本；赛果待回写 ledger"
+    },
+    "1489373": {
+      "status": "finished",
+      "actual_score": {
+        "home": 1,
+        "away": 1
+      },
+      "result_source": "post_match_auto_calibration_sample",
+      "result_note": "赛后自动校准样本；赛果待回写 ledger"
+    }
+  }
+}

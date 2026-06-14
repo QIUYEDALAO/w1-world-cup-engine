@@ -640,12 +640,18 @@
       "additionalProperties": false,
       "required": [
         "status",
+        "derived_from_score_matrix",
         "main_score",
         "fallback_score",
         "score_pool",
         "game_open_trigger",
         "market_vs_score_risk",
         "score_summary_cn",
+        "legacy_rule_weight",
+        "model",
+        "engine",
+        "matrix_model",
+        "top_scores",
         "post_match_calibration"
       ],
       "properties": {
@@ -653,14 +659,21 @@
           "type": "string",
           "enum": [
             "missing",
-            "ready"
+            "ready",
+            "skipped"
           ]
         },
         "main_score": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "fallback_score": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "score_pool": {
           "type": "array",
@@ -679,6 +692,32 @@
         },
         "post_match_calibration": {
           "$ref": "#/$defs/post_match_calibration"
+        },
+        "derived_from_score_matrix": {
+          "type": "boolean"
+        },
+        "legacy_rule_weight": {
+          "type": "boolean"
+        },
+        "model": {
+          "type": "string",
+          "const": "market_implied_poisson_dixon_coles"
+        },
+        "engine": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "matrix_model": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "top_scores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/top_score_item"
+          }
         }
       }
     },
@@ -874,6 +913,9 @@
           }
         }
       }
+    },
+    "score_matrix_summary": {
+      "$ref": "#/$defs/score_matrix_summary"
     }
   },
   "$defs": {
@@ -1118,17 +1160,22 @@
           "type": "string"
         },
         "weight": {
-          "type": "string",
-          "enum": [
-            "high",
-            "medium",
-            "medium_low",
-            "low",
-            "very_low"
-          ]
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         },
         "reason_cn": {
           "type": "string"
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "region_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },
@@ -1140,7 +1187,13 @@
         "transition_chaos_risk",
         "defensive_collapse_risk",
         "red_card_penalty_risk",
-        "must_reprice_if_triggered"
+        "must_reprice_if_triggered",
+        "open_game_prob",
+        "high_total_prob",
+        "blowout_prob",
+        "favorite_collapse_prob",
+        "note_cn",
+        "collapse_note_cn"
       ],
       "properties": {
         "early_goal_risk": {
@@ -1157,6 +1210,63 @@
         },
         "must_reprice_if_triggered": {
           "type": "boolean"
+        },
+        "open_game_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "high_total_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "blowout_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "favorite_collapse_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "open_game_mass": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "collapse_mass": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "timing_risks_modeled": {
+          "type": "boolean"
+        },
+        "note_cn": {
+          "type": "string"
+        },
+        "collapse_note_cn": {
+          "type": "string"
         }
       }
     },
@@ -1181,6 +1291,42 @@
         },
         "summary_cn": {
           "type": "string"
+        },
+        "supremacy_delta": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "favorite_side": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "favorite_win_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "favorite_cover_minus1_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "draw_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },
@@ -1191,7 +1337,12 @@
         "actual_score",
         "prediction_hit_type",
         "miss_reason_tags",
-        "lesson_cn"
+        "lesson_cn",
+        "evaluation_method",
+        "actual_score_probability",
+        "rps_1x2",
+        "exact_score_log_loss",
+        "deprecated_hit_type_warning"
       ],
       "properties": {
         "actual_score": {
@@ -1204,6 +1355,7 @@
           "type": "string",
           "enum": [
             "pending",
+            "待复盘",
             "main_hit",
             "pool_hit",
             "miss"
@@ -1216,6 +1368,78 @@
           }
         },
         "lesson_cn": {
+          "type": "string"
+        },
+        "evaluation_method": {
+          "type": "string",
+          "const": "rps_log_score"
+        },
+        "actual_score_probability": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rps_1x2": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "exact_score_log_loss": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "deprecated_hit_type_warning": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "actual_score_rank": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "rps_model": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rps_uniform_baseline": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "beat_uniform": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "log_score_exact": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "log_score_outcome": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "note_cn": {
           "type": "string"
         }
       }
@@ -1289,6 +1513,171 @@
         },
         "blocks_play": {
           "type": "boolean"
+        }
+      }
+    },
+    "top_score_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "probability"
+      ],
+      "properties": {
+        "score": {
+          "type": "string"
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "score_matrix_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "market_source",
+        "mu_total_goals",
+        "delta_goal_diff",
+        "lambda_home",
+        "lambda_away",
+        "dixon_coles_rho",
+        "top_scores",
+        "home_win_prob",
+        "draw_prob",
+        "away_win_prob",
+        "open_game_mass",
+        "collapse_mass",
+        "market_fit_error",
+        "actual_score_probability",
+        "rps_1x2",
+        "exact_score_log_loss",
+        "notes_cn"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "skipped"
+          ]
+        },
+        "market_source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mu_total_goals": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "delta_goal_diff": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "lambda_home": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "lambda_away": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "dixon_coles_rho": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "top_scores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/top_score_item"
+          }
+        },
+        "home_win_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "draw_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "away_win_prob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "open_game_mass": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "collapse_mass": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "market_fit_error": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "actual_score_probability": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rps_1x2": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "exact_score_log_loss": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "notes_cn": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

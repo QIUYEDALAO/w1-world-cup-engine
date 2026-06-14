@@ -1,0 +1,3263 @@
+{
+  "1489369": {
+    "status": "ready",
+    "fixture_id": "1489369",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.278,
+      "delta": 1.257,
+      "lambda_home": 1.767,
+      "lambda_away": 0.511,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.673,
+        0.219,
+        0.108
+      ],
+      "model_hda": [
+        0.672,
+        0.237,
+        0.092
+      ],
+      "fit_sse": 0.000562,
+      "market_reproduction_max_abs_err": 0.0174,
+      "market_reproduction_ok": true
+    },
+    "main_score": "1-0",
+    "fallback_score": "0-0",
+    "top_scores": [
+      {
+        "score": "1-0",
+        "probability": 0.1718
+      },
+      {
+        "score": "2-0",
+        "probability": 0.16
+      },
+      {
+        "score": "0-0",
+        "probability": 0.1117
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1018
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0943
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0818
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0482
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0431
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-0",
+        "path": "小胜主线",
+        "probability": 0.1718,
+        "region_probability": 0.1718,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "0-0",
+        "path": "防平路径",
+        "probability": 0.1117,
+        "region_probability": 0.2366,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.16,
+        "region_probability": 0.4049,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0482,
+        "region_probability": 0.1963,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0482,
+        "region_probability": 0.1639,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0431,
+        "region_probability": 0.0917,
+        "weight": "medium_low",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.1963,
+      "high_total_prob": 0.3982,
+      "blowout_prob": 0.1942,
+      "favorite_collapse_prob": 0.0917,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 1.257,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.6718,
+      "favorite_cover_minus1_prob": 0.4049,
+      "draw_prob": 0.2366,
+      "summary_cn": "市场期望净胜球 δ=1.26, 但热门取胜仅 67%、平局 24%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": "2-0",
+      "outcome": "H",
+      "actual_score_probability": 0.16,
+      "actual_score_rank": 2,
+      "rps_model": 0.1162,
+      "rps_uniform_baseline": 0.5556,
+      "beat_uniform": true,
+      "log_score_exact": 1.8325,
+      "log_score_outcome": 0.3979,
+      "note_cn": "实际比分 2-0 概率 16.0%, 在矩阵中排第 2; 单场不调权重, 累计入 RPS 评估。"
+    }
+  },
+  "1489370": {
+    "status": "ready",
+    "fixture_id": "1489370",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.168,
+      "delta": 0.495,
+      "lambda_home": 1.331,
+      "lambda_away": 0.836,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.477,
+        0.286,
+        0.236
+      ],
+      "model_hda": [
+        0.47,
+        0.308,
+        0.222
+      ],
+      "fit_sse": 0.000694,
+      "market_reproduction_max_abs_err": 0.0211,
+      "market_reproduction_ok": false
+    },
+    "main_score": "1-1",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-1",
+        "probability": 0.1402
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1396
+      },
+      {
+        "score": "0-0",
+        "probability": 0.1272
+      },
+      {
+        "score": "2-0",
+        "probability": 0.1014
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0848
+      },
+      {
+        "score": "0-1",
+        "probability": 0.083
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0533
+      },
+      {
+        "score": "3-0",
+        "probability": 0.045
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-1",
+        "path": "小胜主线",
+        "probability": 0.1402,
+        "region_probability": 0.1402,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1402,
+        "region_probability": 0.3075,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1014,
+        "region_probability": 0.2285,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0376,
+        "region_probability": 0.1743,
+        "weight": "medium",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0376,
+        "region_probability": 0.0993,
+        "weight": "medium_low",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.083,
+        "region_probability": 0.2223,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.1743,
+      "high_total_prob": 0.3686,
+      "blowout_prob": 0.1018,
+      "favorite_collapse_prob": 0.2223,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.495,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.4702,
+      "favorite_cover_minus1_prob": 0.2285,
+      "draw_prob": 0.3075,
+      "summary_cn": "市场期望净胜球 δ=0.50, 但热门取胜仅 47%、平局 31%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": "4-1",
+      "outcome": "H",
+      "actual_score_probability": 0.0125,
+      "actual_score_rank": 15,
+      "rps_model": 0.3301,
+      "rps_uniform_baseline": 0.5556,
+      "beat_uniform": true,
+      "log_score_exact": 4.3797,
+      "log_score_outcome": 0.7546,
+      "note_cn": "实际比分 4-1 概率 1.3%, 在矩阵中排第 15; 单场不调权重, 累计入 RPS 评估。"
+    }
+  },
+  "1489371": {
+    "status": "ready",
+    "fixture_id": "1489371",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.388,
+      "delta": 0.88,
+      "lambda_home": 1.634,
+      "lambda_away": 0.754,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.575,
+        0.259,
+        0.166
+      ],
+      "model_hda": [
+        0.573,
+        0.268,
+        0.16
+      ],
+      "fit_sse": 0.000127,
+      "market_reproduction_max_abs_err": 0.0088,
+      "market_reproduction_ok": true
+    },
+    "main_score": "1-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-0",
+        "probability": 0.1387
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1244
+      },
+      {
+        "score": "2-0",
+        "probability": 0.1226
+      },
+      {
+        "score": "0-0",
+        "probability": 0.1031
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0924
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0668
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0579
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0504
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-0",
+        "path": "小胜主线",
+        "probability": 0.1387,
+        "region_probability": 0.1387,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1244,
+        "region_probability": 0.2675,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1226,
+        "region_probability": 0.3208,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0504,
+        "region_probability": 0.2189,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0504,
+        "region_probability": 0.1525,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0579,
+        "region_probability": 0.1596,
+        "weight": "medium",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.2189,
+      "high_total_prob": 0.4273,
+      "blowout_prob": 0.1501,
+      "favorite_collapse_prob": 0.1596,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.88,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.5729,
+      "favorite_cover_minus1_prob": 0.3208,
+      "draw_prob": 0.2675,
+      "summary_cn": "市场期望净胜球 δ=0.88, 但热门取胜仅 57%、平局 27%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489372": {
+    "status": "ready",
+    "fixture_id": "1489372",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.531,
+      "delta": -1.045,
+      "lambda_home": 0.743,
+      "lambda_away": 1.788,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.151,
+        0.234,
+        0.615
+      ],
+      "model_hda": [
+        0.14,
+        0.247,
+        0.613
+      ],
+      "fit_sse": 0.000303,
+      "market_reproduction_max_abs_err": 0.0134,
+      "market_reproduction_ok": true
+    },
+    "main_score": "0-1",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "0-1",
+        "probability": 0.1317
+      },
+      {
+        "score": "0-2",
+        "probability": 0.1272
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1163
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0945
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0902
+      },
+      {
+        "score": "0-3",
+        "probability": 0.0758
+      },
+      {
+        "score": "1-3",
+        "probability": 0.0563
+      },
+      {
+        "score": "1-0",
+        "probability": 0.0486
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "0-1",
+        "path": "小胜主线",
+        "probability": 0.1317,
+        "region_probability": 0.1317,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1163,
+        "region_probability": 0.2472,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "0-2",
+        "path": "优势扩大",
+        "probability": 0.1272,
+        "region_probability": 0.3631,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "1-3",
+        "path": "打开局",
+        "probability": 0.0563,
+        "region_probability": 0.249,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "1-3",
+        "path": "强队打穿",
+        "probability": 0.0563,
+        "region_probability": 0.1835,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-0",
+        "path": "防线崩盘",
+        "probability": 0.0486,
+        "region_probability": 0.14,
+        "weight": "medium",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.249,
+      "high_total_prob": 0.4641,
+      "blowout_prob": 0.1784,
+      "favorite_collapse_prob": 0.14,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": -1.045,
+      "favorite_side": "away",
+      "favorite_win_prob": 0.6128,
+      "favorite_cover_minus1_prob": 0.3631,
+      "draw_prob": 0.2472,
+      "summary_cn": "市场期望净胜球 δ=-1.04, 但热门取胜仅 61%、平局 25%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489373": {
+    "status": "ready",
+    "fixture_id": "1489373",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.839,
+      "delta": -1.797,
+      "lambda_home": 0.521,
+      "lambda_away": 2.318,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.06,
+        0.167,
+        0.773
+      ],
+      "model_hda": [
+        0.06,
+        0.168,
+        0.773
+      ],
+      "fit_sse": 1e-06,
+      "market_reproduction_max_abs_err": 0.0007,
+      "market_reproduction_ok": true
+    },
+    "main_score": "0-2",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "0-2",
+        "probability": 0.1571
+      },
+      {
+        "score": "0-1",
+        "probability": 0.1285
+      },
+      {
+        "score": "0-3",
+        "probability": 0.1214
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0819
+      },
+      {
+        "score": "1-1",
+        "probability": 0.0777
+      },
+      {
+        "score": "0-4",
+        "probability": 0.0704
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0655
+      },
+      {
+        "score": "1-3",
+        "probability": 0.0633
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "0-2",
+        "path": "小胜主线",
+        "probability": 0.1571,
+        "region_probability": 0.1571,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.0777,
+        "region_probability": 0.1676,
+        "weight": "medium",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "0-2",
+        "path": "优势扩大",
+        "probability": 0.1571,
+        "region_probability": 0.5441,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "0-4",
+        "path": "打开局",
+        "probability": 0.0704,
+        "region_probability": 0.3168,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "0-4",
+        "path": "强队打穿",
+        "probability": 0.0704,
+        "region_probability": 0.2839,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-0",
+        "path": "防线崩盘",
+        "probability": 0.0234,
+        "region_probability": 0.0597,
+        "weight": "medium_low",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.3168,
+      "high_total_prob": 0.5399,
+      "blowout_prob": 0.3155,
+      "favorite_collapse_prob": 0.0597,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": -1.797,
+      "favorite_side": "away",
+      "favorite_win_prob": 0.7727,
+      "favorite_cover_minus1_prob": 0.5441,
+      "draw_prob": 0.1676,
+      "summary_cn": "市场期望净胜球 δ=-1.80, 但热门取胜仅 77%、平局 17%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": "1-1",
+      "outcome": "D",
+      "actual_score_probability": 0.0777,
+      "actual_score_rank": 5,
+      "rps_model": 0.6007,
+      "rps_uniform_baseline": 0.2222,
+      "beat_uniform": false,
+      "log_score_exact": 2.5551,
+      "log_score_outcome": 1.786,
+      "note_cn": "实际比分 1-1 概率 7.8%, 在矩阵中排第 5; 单场不调权重, 累计入 RPS 评估。"
+    }
+  },
+  "1489374": {
+    "status": "ready",
+    "fixture_id": "1489374",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 4.223,
+      "delta": 3.153,
+      "lambda_home": 3.688,
+      "lambda_away": 0.535,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.911,
+        0.057,
+        0.032
+      ],
+      "model_hda": [
+        0.912,
+        0.067,
+        0.02
+      ],
+      "fit_sse": 0.000257,
+      "market_reproduction_max_abs_err": 0.0121,
+      "market_reproduction_ok": true
+    },
+    "main_score": "3-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "3-0",
+        "probability": 0.1227
+      },
+      {
+        "score": "4-0",
+        "probability": 0.1131
+      },
+      {
+        "score": "2-0",
+        "probability": 0.0998
+      },
+      {
+        "score": "5-0",
+        "probability": 0.0834
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0656
+      },
+      {
+        "score": "4-1",
+        "probability": 0.0605
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0534
+      },
+      {
+        "score": "6-0",
+        "probability": 0.0513
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "3-0",
+        "path": "小胜主线",
+        "probability": 0.1227,
+        "region_probability": 0.1227,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.0319,
+        "region_probability": 0.0673,
+        "weight": "medium_low",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "3-0",
+        "path": "优势扩大",
+        "probability": 0.1227,
+        "region_probability": 0.7871,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "4-0",
+        "path": "打开局",
+        "probability": 0.1131,
+        "region_probability": 0.6082,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "4-0",
+        "path": "强队打穿",
+        "probability": 0.1131,
+        "region_probability": 0.5853,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-2",
+        "path": "防线崩盘",
+        "probability": 0.0077,
+        "region_probability": 0.0203,
+        "weight": "low",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.6082,
+      "high_total_prob": 0.7924,
+      "blowout_prob": 0.6038,
+      "favorite_collapse_prob": 0.0203,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 3.153,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.9125,
+      "favorite_cover_minus1_prob": 0.7871,
+      "draw_prob": 0.0673,
+      "summary_cn": "市场期望净胜球 δ=3.15, 但热门取胜仅 91%、平局 7%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489375": {
+    "status": "ready",
+    "fixture_id": "1489375",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 1.82,
+      "delta": -0.251,
+      "lambda_home": 0.785,
+      "lambda_away": 1.036,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.271,
+        0.327,
+        0.403
+      ],
+      "model_hda": [
+        0.257,
+        0.349,
+        0.393
+      ],
+      "fit_sse": 0.000777,
+      "market_reproduction_max_abs_err": 0.0226,
+      "market_reproduction_ok": false
+    },
+    "main_score": "0-0",
+    "fallback_score": "0-0",
+    "top_scores": [
+      {
+        "score": "0-0",
+        "probability": 0.1752
+      },
+      {
+        "score": "0-1",
+        "probability": 0.1546
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1448
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1139
+      },
+      {
+        "score": "0-2",
+        "probability": 0.0869
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0682
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0516
+      },
+      {
+        "score": "2-0",
+        "probability": 0.0499
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "0-0",
+        "path": "小胜主线",
+        "probability": 0.1752,
+        "region_probability": 0.1752,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "0-0",
+        "path": "防平路径",
+        "probability": 0.1752,
+        "region_probability": 0.3492,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "0-2",
+        "path": "优势扩大",
+        "probability": 0.0869,
+        "region_probability": 0.1608,
+        "weight": "medium",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "2-2",
+        "path": "打开局",
+        "probability": 0.0267,
+        "region_probability": 0.112,
+        "weight": "medium",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "1-3",
+        "path": "强队打穿",
+        "probability": 0.0235,
+        "region_probability": 0.0538,
+        "weight": "medium_low",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-0",
+        "path": "防线崩盘",
+        "probability": 0.1139,
+        "region_probability": 0.2573,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.112,
+      "high_total_prob": 0.2748,
+      "blowout_prob": 0.0673,
+      "favorite_collapse_prob": 0.2573,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": -0.251,
+      "favorite_side": "away",
+      "favorite_win_prob": 0.3935,
+      "favorite_cover_minus1_prob": 0.1608,
+      "draw_prob": 0.3492,
+      "summary_cn": "市场期望净胜球 δ=-0.25, 但热门取胜仅 39%、平局 35%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489376": {
+    "status": "ready",
+    "fixture_id": "1489376",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.455,
+      "delta": 0.481,
+      "lambda_home": 1.468,
+      "lambda_away": 0.987,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.478,
+        0.266,
+        0.255
+      ],
+      "model_hda": [
+        0.47,
+        0.288,
+        0.242
+      ],
+      "fit_sse": 0.000728,
+      "market_reproduction_max_abs_err": 0.0217,
+      "market_reproduction_ok": false
+    },
+    "main_score": "1-1",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-1",
+        "probability": 0.1368
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1136
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0983
+      },
+      {
+        "score": "2-0",
+        "probability": 0.0925
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0913
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0723
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0614
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0453
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-1",
+        "path": "小胜主线",
+        "probability": 0.1368,
+        "region_probability": 0.1368,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1368,
+        "region_probability": 0.2881,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.0925,
+        "region_probability": 0.2405,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "2-2",
+        "path": "打开局",
+        "probability": 0.0451,
+        "region_probability": 0.2329,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0447,
+        "region_probability": 0.1276,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0723,
+        "region_probability": 0.2415,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.2329,
+      "high_total_prob": 0.4447,
+      "blowout_prob": 0.1194,
+      "favorite_collapse_prob": 0.2415,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.481,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.4704,
+      "favorite_cover_minus1_prob": 0.2405,
+      "draw_prob": 0.2881,
+      "summary_cn": "市场期望净胜球 δ=0.48, 但热门取胜仅 47%、平局 29%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489377": {
+    "status": "ready",
+    "fixture_id": "1489377",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.433,
+      "delta": 0.835,
+      "lambda_home": 1.634,
+      "lambda_away": 0.799,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.565,
+        0.252,
+        0.183
+      ],
+      "model_hda": [
+        0.561,
+        0.269,
+        0.17
+      ],
+      "fit_sse": 0.000446,
+      "market_reproduction_max_abs_err": 0.0165,
+      "market_reproduction_ok": true
+    },
+    "main_score": "1-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-0",
+        "probability": 0.132
+      },
+      {
+        "score": "1-1",
+        "probability": 0.126
+      },
+      {
+        "score": "2-0",
+        "probability": 0.1172
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0992
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0936
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0638
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0587
+      },
+      {
+        "score": "3-1",
+        "probability": 0.051
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-0",
+        "path": "小胜主线",
+        "probability": 0.132,
+        "region_probability": 0.132,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.126,
+        "region_probability": 0.2686,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1172,
+        "region_probability": 0.3127,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.051,
+        "region_probability": 0.2282,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.051,
+        "region_probability": 0.1544,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0587,
+        "region_probability": 0.1704,
+        "weight": "medium",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.2282,
+      "high_total_prob": 0.4388,
+      "blowout_prob": 0.1479,
+      "favorite_collapse_prob": 0.1704,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.835,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.561,
+      "favorite_cover_minus1_prob": 0.3127,
+      "draw_prob": 0.2686,
+      "summary_cn": "市场期望净胜球 δ=0.84, 但热门取胜仅 56%、平局 27%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489378": {
+    "status": "ready",
+    "fixture_id": "1489378",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.168,
+      "delta": 0.56,
+      "lambda_home": 1.364,
+      "lambda_away": 0.804,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.494,
+        0.283,
+        0.222
+      ],
+      "model_hda": [
+        0.488,
+        0.304,
+        0.208
+      ],
+      "fit_sse": 0.000674,
+      "market_reproduction_max_abs_err": 0.0207,
+      "market_reproduction_ok": false
+    },
+    "main_score": "1-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-0",
+        "probability": 0.1435
+      },
+      {
+        "score": "1-1",
+        "probability": 0.138
+      },
+      {
+        "score": "0-0",
+        "probability": 0.127
+      },
+      {
+        "score": "2-0",
+        "probability": 0.1064
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0856
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0794
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0504
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0484
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-0",
+        "path": "小胜主线",
+        "probability": 0.1435,
+        "region_probability": 0.1435,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.138,
+        "region_probability": 0.3039,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1064,
+        "region_probability": 0.2416,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0389,
+        "region_probability": 0.1743,
+        "weight": "medium",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0389,
+        "region_probability": 0.1039,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0794,
+        "region_probability": 0.2083,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.1743,
+      "high_total_prob": 0.3686,
+      "blowout_prob": 0.1064,
+      "favorite_collapse_prob": 0.2083,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.56,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.4878,
+      "favorite_cover_minus1_prob": 0.2416,
+      "draw_prob": 0.3039,
+      "summary_cn": "市场期望净胜球 δ=0.56, 但热门取胜仅 49%、平局 30%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489379": {
+    "status": "ready",
+    "fixture_id": "1489379",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.433,
+      "delta": -1.227,
+      "lambda_home": 0.603,
+      "lambda_away": 1.83,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.112,
+        0.227,
+        0.661
+      ],
+      "model_hda": [
+        0.106,
+        0.234,
+        0.66
+      ],
+      "fit_sse": 9e-05,
+      "market_reproduction_max_abs_err": 0.0071,
+      "market_reproduction_ok": true
+    },
+    "main_score": "0-1",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "0-1",
+        "probability": 0.1509
+      },
+      {
+        "score": "0-2",
+        "probability": 0.147
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1066
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0975
+      },
+      {
+        "score": "0-3",
+        "probability": 0.0896
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0886
+      },
+      {
+        "score": "1-3",
+        "probability": 0.0541
+      },
+      {
+        "score": "1-0",
+        "probability": 0.0433
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "0-1",
+        "path": "小胜主线",
+        "probability": 0.1509,
+        "region_probability": 0.1509,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1066,
+        "region_probability": 0.2343,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "0-2",
+        "path": "优势扩大",
+        "probability": 0.147,
+        "region_probability": 0.4023,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "1-3",
+        "path": "打开局",
+        "probability": 0.0541,
+        "region_probability": 0.2282,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "1-3",
+        "path": "强队打穿",
+        "probability": 0.0541,
+        "region_probability": 0.1836,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-0",
+        "path": "防线崩盘",
+        "probability": 0.0433,
+        "region_probability": 0.106,
+        "weight": "medium",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.2282,
+      "high_total_prob": 0.4388,
+      "blowout_prob": 0.1982,
+      "favorite_collapse_prob": 0.106,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": -1.227,
+      "favorite_side": "away",
+      "favorite_win_prob": 0.6598,
+      "favorite_cover_minus1_prob": 0.4023,
+      "draw_prob": 0.2343,
+      "summary_cn": "市场期望净胜球 δ=-1.23, 但热门取胜仅 66%、平局 23%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489380": {
+    "status": "ready",
+    "fixture_id": "1489380",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 3.467,
+      "delta": 2.454,
+      "lambda_home": 2.961,
+      "lambda_away": 0.507,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.858,
+        0.107,
+        0.035
+      ],
+      "model_hda": [
+        0.858,
+        0.108,
+        0.034
+      ],
+      "fit_sse": 1e-06,
+      "market_reproduction_max_abs_err": 0.0008,
+      "market_reproduction_ok": true
+    },
+    "main_score": "2-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "2-0",
+        "probability": 0.1368
+      },
+      {
+        "score": "3-0",
+        "probability": 0.135
+      },
+      {
+        "score": "4-0",
+        "probability": 0.0999
+      },
+      {
+        "score": "1-0",
+        "probability": 0.0877
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0693
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0684
+      },
+      {
+        "score": "5-0",
+        "probability": 0.0592
+      },
+      {
+        "score": "1-1",
+        "probability": 0.0515
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "2-0",
+        "path": "小胜主线",
+        "probability": 0.1368,
+        "region_probability": 0.1368,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.0515,
+        "region_probability": 0.1082,
+        "weight": "medium",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1368,
+        "region_probability": 0.6813,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "4-0",
+        "path": "打开局",
+        "probability": 0.0999,
+        "region_probability": 0.4561,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "4-0",
+        "path": "强队打穿",
+        "probability": 0.0999,
+        "region_probability": 0.4292,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-2",
+        "path": "防线崩盘",
+        "probability": 0.0119,
+        "region_probability": 0.0339,
+        "weight": "low",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.4561,
+      "high_total_prob": 0.673,
+      "blowout_prob": 0.463,
+      "favorite_collapse_prob": 0.0339,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 2.454,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.858,
+      "favorite_cover_minus1_prob": 0.6813,
+      "draw_prob": 0.1082,
+      "summary_cn": "市场期望净胜球 δ=2.45, 但热门取胜仅 86%、平局 11%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489381": {
+    "status": "ready",
+    "fixture_id": "1489381",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.471,
+      "delta": 1.304,
+      "lambda_home": 1.888,
+      "lambda_away": 0.584,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.678,
+        0.218,
+        0.104
+      ],
+      "model_hda": [
+        0.678,
+        0.225,
+        0.097
+      ],
+      "fit_sse": 0.000101,
+      "market_reproduction_max_abs_err": 0.0074,
+      "market_reproduction_ok": true
+    },
+    "main_score": "2-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "2-0",
+        "probability": 0.1505
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1502
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1024
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0947
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0938
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0878
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0553
+      },
+      {
+        "score": "4-0",
+        "probability": 0.0447
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "2-0",
+        "path": "小胜主线",
+        "probability": 0.1505,
+        "region_probability": 0.1505,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1024,
+        "region_probability": 0.2251,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1505,
+        "region_probability": 0.4219,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0553,
+        "region_probability": 0.2363,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0553,
+        "region_probability": 0.1944,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.04,
+        "region_probability": 0.0973,
+        "weight": "medium_low",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.2363,
+      "high_total_prob": 0.4488,
+      "blowout_prob": 0.2122,
+      "favorite_collapse_prob": 0.0973,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 1.304,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.6776,
+      "favorite_cover_minus1_prob": 0.4219,
+      "draw_prob": 0.2251,
+      "summary_cn": "市场期望净胜球 δ=1.30, 但热门取胜仅 68%、平局 23%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489382": {
+    "status": "ready",
+    "fixture_id": "1489382",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.886,
+      "delta": 1.543,
+      "lambda_home": 2.215,
+      "lambda_away": 0.671,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.719,
+        0.183,
+        0.097
+      ],
+      "model_hda": [
+        0.719,
+        0.192,
+        0.09
+      ],
+      "fit_sse": 0.000132,
+      "market_reproduction_max_abs_err": 0.0084,
+      "market_reproduction_ok": true
+    },
+    "main_score": "2-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "2-0",
+        "probability": 0.1369
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1153
+      },
+      {
+        "score": "3-0",
+        "probability": 0.101
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0919
+      },
+      {
+        "score": "1-1",
+        "probability": 0.0913
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0678
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0641
+      },
+      {
+        "score": "4-0",
+        "probability": 0.0559
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "2-0",
+        "path": "小胜主线",
+        "probability": 0.1369,
+        "region_probability": 0.1369,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.0913,
+        "region_probability": 0.1918,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1369,
+        "region_probability": 0.4856,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0678,
+        "region_probability": 0.3272,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0678,
+        "region_probability": 0.2735,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0292,
+        "region_probability": 0.0896,
+        "weight": "medium_low",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.3272,
+      "high_total_prob": 0.5507,
+      "blowout_prob": 0.2717,
+      "favorite_collapse_prob": 0.0896,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 1.543,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.7186,
+      "favorite_cover_minus1_prob": 0.4856,
+      "draw_prob": 0.1918,
+      "summary_cn": "市场期望净胜球 δ=1.54, 但热门取胜仅 72%、平局 19%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489383": {
+    "status": "ready",
+    "fixture_id": "1489383",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.531,
+      "delta": 1.213,
+      "lambda_home": 1.872,
+      "lambda_away": 0.659,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.655,
+        0.223,
+        0.122
+      ],
+      "model_hda": [
+        0.654,
+        0.232,
+        0.114
+      ],
+      "fit_sse": 0.000144,
+      "market_reproduction_max_abs_err": 0.009,
+      "market_reproduction_ok": true
+    },
+    "main_score": "2-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "2-0",
+        "probability": 0.1395
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1392
+      },
+      {
+        "score": "1-1",
+        "probability": 0.108
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0919
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0894
+      },
+      {
+        "score": "3-0",
+        "probability": 0.087
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0573
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0426
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "2-0",
+        "path": "小胜主线",
+        "probability": 0.1395,
+        "region_probability": 0.1395,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.108,
+        "region_probability": 0.2321,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1395,
+        "region_probability": 0.402,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0573,
+        "region_probability": 0.249,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0573,
+        "region_probability": 0.1964,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0426,
+        "region_probability": 0.1139,
+        "weight": "medium",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.249,
+      "high_total_prob": 0.4641,
+      "blowout_prob": 0.2016,
+      "favorite_collapse_prob": 0.1139,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 1.213,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.654,
+      "favorite_cover_minus1_prob": 0.402,
+      "draw_prob": 0.2321,
+      "summary_cn": "市场期望净胜球 δ=1.21, 但热门取胜仅 65%、平局 23%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489384": {
+    "status": "ready",
+    "fixture_id": "1489384",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.288,
+      "delta": 0.757,
+      "lambda_home": 1.522,
+      "lambda_away": 0.765,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.547,
+        0.26,
+        0.193
+      ],
+      "model_hda": [
+        0.541,
+        0.283,
+        0.176
+      ],
+      "fit_sse": 0.000837,
+      "market_reproduction_max_abs_err": 0.0228,
+      "market_reproduction_ok": false
+    },
+    "main_score": "1-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-0",
+        "probability": 0.1427
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1301
+      },
+      {
+        "score": "2-0",
+        "probability": 0.1176
+      },
+      {
+        "score": "0-0",
+        "probability": 0.1133
+      },
+      {
+        "score": "2-1",
+        "probability": 0.09
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0659
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0597
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0457
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-0",
+        "path": "小胜主线",
+        "probability": 0.1427,
+        "region_probability": 0.1427,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1301,
+        "region_probability": 0.2827,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1176,
+        "region_probability": 0.2893,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0457,
+        "region_probability": 0.1981,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0457,
+        "region_probability": 0.1312,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0659,
+        "region_probability": 0.1761,
+        "weight": "medium",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.1981,
+      "high_total_prob": 0.4006,
+      "blowout_prob": 0.131,
+      "favorite_collapse_prob": 0.1761,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.757,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.5413,
+      "favorite_cover_minus1_prob": 0.2893,
+      "draw_prob": 0.2827,
+      "summary_cn": "市场期望净胜球 δ=0.76, 但热门取胜仅 54%、平局 28%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489385": {
+    "status": "ready",
+    "fixture_id": "1489385",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.18,
+      "delta": 0.447,
+      "lambda_home": 1.313,
+      "lambda_away": 0.867,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.468,
+        0.279,
+        0.253
+      ],
+      "model_hda": [
+        0.457,
+        0.309,
+        0.234
+      ],
+      "fit_sse": 0.001364,
+      "market_reproduction_max_abs_err": 0.0297,
+      "market_reproduction_ok": false
+    },
+    "main_score": "1-1",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-1",
+        "probability": 0.1415
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1356
+      },
+      {
+        "score": "0-0",
+        "probability": 0.1259
+      },
+      {
+        "score": "2-0",
+        "probability": 0.0975
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0851
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0845
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0558
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0427
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-1",
+        "path": "小胜主线",
+        "probability": 0.1415,
+        "region_probability": 0.1415,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1415,
+        "region_probability": 0.309,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.0975,
+        "region_probability": 0.2196,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.037,
+        "region_probability": 0.1767,
+        "weight": "medium",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.037,
+        "region_probability": 0.097,
+        "weight": "medium_low",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0851,
+        "region_probability": 0.2337,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.1767,
+      "high_total_prob": 0.3719,
+      "blowout_prob": 0.0995,
+      "favorite_collapse_prob": 0.2337,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.447,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.4573,
+      "favorite_cover_minus1_prob": 0.2196,
+      "draw_prob": 0.309,
+      "summary_cn": "市场期望净胜球 δ=0.45, 但热门取胜仅 46%、平局 31%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1489386": {
+    "status": "ready",
+    "fixture_id": "1489386",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.531,
+      "delta": -1.287,
+      "lambda_home": 0.622,
+      "lambda_away": 1.909,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.11,
+        0.217,
+        0.673
+      ],
+      "model_hda": [
+        0.103,
+        0.225,
+        0.672
+      ],
+      "fit_sse": 0.000103,
+      "market_reproduction_max_abs_err": 0.0076,
+      "market_reproduction_ok": true
+    },
+    "main_score": "0-2",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "0-2",
+        "probability": 0.145
+      },
+      {
+        "score": "0-1",
+        "probability": 0.1424
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1039
+      },
+      {
+        "score": "0-3",
+        "probability": 0.0923
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0902
+      },
+      {
+        "score": "0-0",
+        "probability": 0.089
+      },
+      {
+        "score": "1-3",
+        "probability": 0.0574
+      },
+      {
+        "score": "0-4",
+        "probability": 0.0441
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "0-2",
+        "path": "小胜主线",
+        "probability": 0.145,
+        "region_probability": 0.145,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1039,
+        "region_probability": 0.225,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "0-2",
+        "path": "优势扩大",
+        "probability": 0.145,
+        "region_probability": 0.4194,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "1-3",
+        "path": "打开局",
+        "probability": 0.0574,
+        "region_probability": 0.2491,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "1-3",
+        "path": "强队打穿",
+        "probability": 0.0574,
+        "region_probability": 0.2018,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-0",
+        "path": "防线崩盘",
+        "probability": 0.04,
+        "region_probability": 0.1033,
+        "weight": "medium",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.2491,
+      "high_total_prob": 0.4642,
+      "blowout_prob": 0.2127,
+      "favorite_collapse_prob": 0.1033,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": -1.287,
+      "favorite_side": "away",
+      "favorite_win_prob": 0.6718,
+      "favorite_cover_minus1_prob": 0.4194,
+      "draw_prob": 0.225,
+      "summary_cn": "市场期望净胜球 δ=-1.29, 但热门取胜仅 67%、平局 22%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1538999": {
+    "status": "ready",
+    "fixture_id": "1538999",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.168,
+      "delta": 0.04,
+      "lambda_home": 1.104,
+      "lambda_away": 1.064,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.354,
+        0.312,
+        0.334
+      ],
+      "model_hda": [
+        0.35,
+        0.321,
+        0.329
+      ],
+      "fit_sse": 0.000121,
+      "market_reproduction_max_abs_err": 0.009,
+      "market_reproduction_ok": true
+    },
+    "main_score": "1-1",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-1",
+        "probability": 0.1478
+      },
+      {
+        "score": "0-0",
+        "probability": 0.1279
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1129
+      },
+      {
+        "score": "0-1",
+        "probability": 0.1083
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0742
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0715
+      },
+      {
+        "score": "2-0",
+        "probability": 0.0697
+      },
+      {
+        "score": "0-2",
+        "probability": 0.0647
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-1",
+        "path": "小胜主线",
+        "probability": 0.1478,
+        "region_probability": 0.1478,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1478,
+        "region_probability": 0.3207,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.0697,
+        "region_probability": 0.1468,
+        "weight": "medium",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "2-2",
+        "path": "打开局",
+        "probability": 0.0395,
+        "region_probability": 0.1743,
+        "weight": "medium",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0273,
+        "region_probability": 0.0674,
+        "weight": "medium_low",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.1083,
+        "region_probability": 0.3294,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.1743,
+      "high_total_prob": 0.3686,
+      "blowout_prob": 0.0855,
+      "favorite_collapse_prob": 0.3294,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.04,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.3499,
+      "favorite_cover_minus1_prob": 0.1468,
+      "draw_prob": 0.3207,
+      "summary_cn": "市场期望净胜球 δ=0.04, 但热门取胜仅 35%、平局 32%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1539000": {
+    "status": "ready",
+    "fixture_id": "1539000",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.209,
+      "delta": 0.669,
+      "lambda_home": 1.439,
+      "lambda_away": 0.77,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.525,
+        0.267,
+        0.208
+      ],
+      "model_hda": [
+        0.518,
+        0.294,
+        0.188
+      ],
+      "fit_sse": 0.001151,
+      "market_reproduction_max_abs_err": 0.0269,
+      "market_reproduction_ok": false
+    },
+    "main_score": "1-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-0",
+        "probability": 0.1458
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1338
+      },
+      {
+        "score": "0-0",
+        "probability": 0.1219
+      },
+      {
+        "score": "2-0",
+        "probability": 0.1137
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0876
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0724
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0545
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0469
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-0",
+        "path": "小胜主线",
+        "probability": 0.1458,
+        "region_probability": 0.1458,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1338,
+        "region_probability": 0.294,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1137,
+        "region_probability": 0.2665,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.042,
+        "region_probability": 0.1825,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.042,
+        "region_probability": 0.1161,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0724,
+        "region_probability": 0.1884,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.1825,
+      "high_total_prob": 0.3798,
+      "blowout_prob": 0.1179,
+      "favorite_collapse_prob": 0.1884,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.669,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.5176,
+      "favorite_cover_minus1_prob": 0.2665,
+      "draw_prob": 0.294,
+      "summary_cn": "市场期望净胜球 δ=0.67, 但热门取胜仅 52%、平局 29%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1539001": {
+    "status": "ready",
+    "fixture_id": "1539001",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.388,
+      "delta": -0.764,
+      "lambda_home": 0.812,
+      "lambda_away": 1.576,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.196,
+        0.255,
+        0.548
+      ],
+      "model_hda": [
+        0.181,
+        0.276,
+        0.543
+      ],
+      "fit_sse": 0.000695,
+      "market_reproduction_max_abs_err": 0.0208,
+      "market_reproduction_ok": false
+    },
+    "main_score": "0-1",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "0-1",
+        "probability": 0.1329
+      },
+      {
+        "score": "1-1",
+        "probability": 0.1292
+      },
+      {
+        "score": "0-2",
+        "probability": 0.114
+      },
+      {
+        "score": "0-0",
+        "probability": 0.1035
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0926
+      },
+      {
+        "score": "1-0",
+        "probability": 0.0628
+      },
+      {
+        "score": "0-3",
+        "probability": 0.0599
+      },
+      {
+        "score": "1-3",
+        "probability": 0.0486
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "0-1",
+        "path": "小胜主线",
+        "probability": 0.1329,
+        "region_probability": 0.1329,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.1292,
+        "region_probability": 0.2762,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "0-2",
+        "path": "优势扩大",
+        "probability": 0.114,
+        "region_probability": 0.2953,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "1-3",
+        "path": "打开局",
+        "probability": 0.0486,
+        "region_probability": 0.2189,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "1-3",
+        "path": "强队打穿",
+        "probability": 0.0486,
+        "region_probability": 0.1434,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-0",
+        "path": "防线崩盘",
+        "probability": 0.0628,
+        "region_probability": 0.181,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.2189,
+      "high_total_prob": 0.4273,
+      "blowout_prob": 0.1379,
+      "favorite_collapse_prob": 0.181,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": -0.764,
+      "favorite_side": "away",
+      "favorite_win_prob": 0.5428,
+      "favorite_cover_minus1_prob": 0.2953,
+      "draw_prob": 0.2762,
+      "summary_cn": "市场期望净胜球 δ=-0.76, 但热门取胜仅 54%、平局 28%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1539002": {
+    "status": "ready",
+    "fixture_id": "1539002",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.168,
+      "delta": 0.561,
+      "lambda_home": 1.364,
+      "lambda_away": 0.803,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.497,
+        0.275,
+        0.228
+      ],
+      "model_hda": [
+        0.488,
+        0.304,
+        0.208
+      ],
+      "fit_sse": 0.001314,
+      "market_reproduction_max_abs_err": 0.0289,
+      "market_reproduction_ok": false
+    },
+    "main_score": "1-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "1-0",
+        "probability": 0.1436
+      },
+      {
+        "score": "1-1",
+        "probability": 0.138
+      },
+      {
+        "score": "0-0",
+        "probability": 0.127
+      },
+      {
+        "score": "2-0",
+        "probability": 0.1065
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0856
+      },
+      {
+        "score": "0-1",
+        "probability": 0.0794
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0504
+      },
+      {
+        "score": "3-0",
+        "probability": 0.0484
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "1-0",
+        "path": "小胜主线",
+        "probability": 0.1436,
+        "region_probability": 0.1436,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.138,
+        "region_probability": 0.3038,
+        "weight": "high",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1065,
+        "region_probability": 0.2417,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0389,
+        "region_probability": 0.1743,
+        "weight": "medium",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0389,
+        "region_probability": 0.104,
+        "weight": "medium",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.0794,
+        "region_probability": 0.2081,
+        "weight": "high",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.1743,
+      "high_total_prob": 0.3686,
+      "blowout_prob": 0.1064,
+      "favorite_collapse_prob": 0.2081,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 0.561,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.488,
+      "favorite_cover_minus1_prob": 0.2417,
+      "draw_prob": 0.3038,
+      "summary_cn": "市场期望净胜球 δ=0.56, 但热门取胜仅 49%、平局 30%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1539003": {
+    "status": "ready",
+    "fixture_id": "1539003",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.842,
+      "delta": 1.69,
+      "lambda_home": 2.266,
+      "lambda_away": 0.576,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.751,
+        0.171,
+        0.078
+      ],
+      "model_hda": [
+        0.751,
+        0.178,
+        0.071
+      ],
+      "fit_sse": 0.000114,
+      "market_reproduction_max_abs_err": 0.0077,
+      "market_reproduction_ok": true
+    },
+    "main_score": "2-0",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "2-0",
+        "probability": 0.1497
+      },
+      {
+        "score": "1-0",
+        "probability": 0.1245
+      },
+      {
+        "score": "3-0",
+        "probability": 0.1131
+      },
+      {
+        "score": "2-1",
+        "probability": 0.0862
+      },
+      {
+        "score": "1-1",
+        "probability": 0.0837
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0659
+      },
+      {
+        "score": "3-1",
+        "probability": 0.0651
+      },
+      {
+        "score": "4-0",
+        "probability": 0.0641
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "2-0",
+        "path": "小胜主线",
+        "probability": 0.1497,
+        "region_probability": 0.1497,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.0837,
+        "region_probability": 0.1784,
+        "weight": "medium",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "2-0",
+        "path": "优势扩大",
+        "probability": 0.1497,
+        "region_probability": 0.5192,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "3-1",
+        "path": "打开局",
+        "probability": 0.0651,
+        "region_probability": 0.3175,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "3-1",
+        "path": "强队打穿",
+        "probability": 0.0651,
+        "region_probability": 0.2774,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "0-1",
+        "path": "防线崩盘",
+        "probability": 0.026,
+        "region_probability": 0.0708,
+        "weight": "medium_low",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.3175,
+      "high_total_prob": 0.5406,
+      "blowout_prob": 0.2957,
+      "favorite_collapse_prob": 0.0708,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": 1.69,
+      "favorite_side": "home",
+      "favorite_win_prob": 0.7509,
+      "favorite_cover_minus1_prob": 0.5192,
+      "draw_prob": 0.1784,
+      "summary_cn": "市场期望净胜球 δ=1.69, 但热门取胜仅 75%、平局 18%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  },
+  "1539016": {
+    "status": "ready",
+    "fixture_id": "1539016",
+    "engine": "w1_score_engine.dixon_coles.v1",
+    "model": {
+      "mu": 2.988,
+      "delta": -1.827,
+      "lambda_home": 0.58,
+      "lambda_away": 2.408,
+      "rho": -0.1,
+      "max_goals": 10,
+      "devig_1x2": [
+        0.081,
+        0.146,
+        0.773
+      ],
+      "model_hda": [
+        0.064,
+        0.164,
+        0.773
+      ],
+      "fit_sse": 0.000614,
+      "market_reproduction_max_abs_err": 0.0176,
+      "market_reproduction_ok": true
+    },
+    "main_score": "0-2",
+    "fallback_score": "1-1",
+    "top_scores": [
+      {
+        "score": "0-2",
+        "probability": 0.1461
+      },
+      {
+        "score": "0-3",
+        "probability": 0.1172
+      },
+      {
+        "score": "0-1",
+        "probability": 0.1143
+      },
+      {
+        "score": "1-2",
+        "probability": 0.0848
+      },
+      {
+        "score": "1-1",
+        "probability": 0.0774
+      },
+      {
+        "score": "0-4",
+        "probability": 0.0706
+      },
+      {
+        "score": "1-3",
+        "probability": 0.068
+      },
+      {
+        "score": "0-0",
+        "probability": 0.0574
+      }
+    ],
+    "score_pool": [
+      {
+        "score": "0-2",
+        "path": "小胜主线",
+        "probability": 0.1461,
+        "region_probability": 0.1461,
+        "weight": "medium",
+        "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+      },
+      {
+        "score": "1-1",
+        "path": "防平路径",
+        "probability": 0.0774,
+        "region_probability": 0.1636,
+        "weight": "medium",
+        "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+      },
+      {
+        "score": "0-2",
+        "path": "优势扩大",
+        "probability": 0.1461,
+        "region_probability": 0.5513,
+        "weight": "high",
+        "reason_cn": "热门净胜≥2 的区域质量。"
+      },
+      {
+        "score": "0-4",
+        "path": "打开局",
+        "probability": 0.0706,
+        "region_probability": 0.35,
+        "weight": "high",
+        "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+      },
+      {
+        "score": "0-4",
+        "path": "强队打穿",
+        "probability": 0.0706,
+        "region_probability": 0.3102,
+        "weight": "high",
+        "reason_cn": "热门在高比分局取胜的联合质量。"
+      },
+      {
+        "score": "1-0",
+        "path": "防线崩盘",
+        "probability": 0.0222,
+        "region_probability": 0.0638,
+        "weight": "medium_low",
+        "reason_cn": "热门输球尾部质量。"
+      }
+    ],
+    "game_open_trigger": {
+      "open_game_prob": 0.35,
+      "high_total_prob": 0.5741,
+      "blowout_prob": 0.3268,
+      "favorite_collapse_prob": 0.0638,
+      "timing_risks_modeled": false,
+      "note_cn": "早球/红牌/点球属临场路径依赖, 赛前比分矩阵不建模, 仅以分布宽度体现; 需另接信号。",
+      "must_reprice_if_triggered": true
+    },
+    "market_vs_score_risk": {
+      "supremacy_delta": -1.827,
+      "favorite_side": "away",
+      "favorite_win_prob": 0.7725,
+      "favorite_cover_minus1_prob": 0.5513,
+      "draw_prob": 0.1636,
+      "summary_cn": "市场期望净胜球 δ=-1.83, 但热门取胜仅 77%、平局 16%; AH 是期望不是保证。"
+    },
+    "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
+    "post_match_calibration": {
+      "actual_score": null,
+      "outcome": null,
+      "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。"
+    }
+  }
+}

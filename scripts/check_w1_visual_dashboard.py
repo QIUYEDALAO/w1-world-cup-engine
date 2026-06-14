@@ -172,7 +172,7 @@ def assert_dashboard_data(data: dict) -> None:
         "current_status": "24 场 W1 数据已绑定",
         "first_match_cn": "墨西哥 vs 南非",
         "reference_lean": "墨西哥不败",
-        "reference_score": "2-0",
+        "reference_score": "1-0 / 0-0",
         "current_action": "需要写入 ledger 做赛后验证",
         "formal_review_time_cst": "6月12日 02:00 / 02:30 CST",
     }
@@ -206,8 +206,8 @@ def assert_dashboard_data(data: dict) -> None:
         fail("First match must not pass W1 guard")
     if first.get("actual_score_display_cn") != "墨西哥 2-0 南非":
         fail("First match actual score must be bound")
-    if first.get("hit_status_cn") != "比分命中":
-        fail("First match hit status must be bound")
+    if first.get("post_match_calibration", {}).get("evaluation_method") != "rps_log_score":
+        fail("First match must expose RPS/log score calibration")
 
     tech = first["public_technical_details"]
     if len(tech) < 5:
@@ -276,7 +276,8 @@ def assert_html(data: dict) -> None:
         "墨西哥不败",
         "参考比分",
         "2-0",
-        "比分命中",
+        "RPS",
+        "log score",
         "墨西哥 2-0 南非",
         "当前动作",
         "需要写入 ledger 做赛后验证",

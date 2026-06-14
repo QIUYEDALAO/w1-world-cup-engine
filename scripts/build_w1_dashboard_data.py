@@ -5,11 +5,14 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
+
+import w1_score_engine as W1ENGINE
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,11 +23,14 @@ STATE_JSON = ROOT / "state/w1_refresh_state.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
+RESULTS_JSON = ROOT / "data/results/round1_results.json"
 SNAPSHOT_DIR = ROOT / "data/snapshots/group_stage_round1"
 LEDGER_CANDIDATES = [
     ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv",
 ]
 PREDICTION_VERSION = "W1_EARLY_PREDICTION_MODE_V1"
+W1_RHO = float(os.environ.get("W1_RHO", W1ENGINE.DEFAULT_RHO))
+W1_SCORE_ENGINE_ON = os.environ.get("W1_SCORE_ENGINE", "on").lower() != "off"
 STAGE_LABEL_CN = {
     "EARLY_REFERENCE": "早盘参考",
     "PREMATCH_WATCH": "赛前观察",
@@ -140,27 +146,6 @@ TEAM_FLAG = {
     "哥伦比亚": "🇨🇴",
 }
 
-EXTERNAL_RESULT_OVERLAY = {
-    "1489369": {
-        "status": "finished",
-        "actual_score": {"home": 2, "away": 0},
-        "result_source": "manual_verified_overlay",
-        "result_note": "赛果待回写 ledger",
-    },
-    "1489373": {
-        "status": "finished",
-        "actual_score": {"home": 1, "away": 1},
-        "result_source": "post_match_auto_calibration_sample",
-        "result_note": "赛后自动校准样本；赛果待回写 ledger",
-    },
-    "1489370": {
-        "status": "finished",
-        "actual_score": {"home": 4, "away": 1},
-        "result_source": "post_match_auto_calibration_sample",
-        "result_note": "赛后自动校准样本；赛果待回写 ledger",
-    }
-}
-
 VENUE_ENV_STATIC = {
     "Estadio Azteca": {"timezone": "America/Mexico_City", "altitude_m": 2240, "roof_status": "open"},
     "Estadio Akron": {"timezone": "America/Mexico_City", "altitude_m": 1566, "roof_status": "open"},
@@ -202,6 +187,13 @@ def read_json(path: Path) -> dict[str, Any]:
 
 def write_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def result_overlay() -> dict[str, dict[str, Any]]:
+    if not RESULTS_JSON.is_file():
+        return {}
+    data = read_json(RESULTS_JSON)
+    return {str(fid): row for fid, row in data.get("results", {}).items()}
 
 
 def cn_display_text(value: Any) -> str:
@@ -375,15 +367,15 @@ def odds_movement(latest: dict[str, Any], previous: dict[str, Any] | None) -> di
     return {"status": "changed", "changed_fields": changed, "summary_cn": "较上一快照变化：" + " / ".join(changed)}
 
 
-def status_for_fixture(fid: str) -> str:
-    overlay = EXTERNAL_RESULT_OVERLAY.get(fid)
+def status_for_fixture(fid: str, results: dict[str, dict[str, Any]]) -> str:
+    overlay = results.get(fid)
     if overlay:
         return overlay["status"]
     return "not_started"
 
 
-def actual_score_for_fixture(fid: str) -> dict[str, Any]:
-    overlay = EXTERNAL_RESULT_OVERLAY.get(fid)
+def actual_score_for_fixture(fid: str, results: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    overlay = results.get(fid)
     if overlay:
         return overlay["actual_score"]
     return {"home": None, "away": None}
@@ -449,9 +441,7 @@ def prediction_stage(kickoff: str | None, snapshot_at: datetime | None, play_gua
     }
 
 
-def reference_from_market(market_signal: dict[str, Any], home_cn: str, away_cn: str, fid: str) -> dict[str, str]:
-    if fid == "1489369":
-        return {"reference_direction": "墨西哥不败", "reference_score": "2-0"}
+def reference_from_market(market_signal: dict[str, Any], home_cn: str, away_cn: str) -> dict[str, str]:
     direction = market_signal.get("direction")
     if direction == "home_strong":
         return {"reference_direction": f"{home_cn}不败", "reference_score": "2-0 / 2-1"}
@@ -460,153 +450,194 @@ def reference_from_market(market_signal: dict[str, Any], home_cn: str, away_cn: 
     return {"reference_direction": "谨慎观察", "reference_score": "1-1"}
 
 
-def line_value(raw: str | None) -> float | None:
-    if not raw:
+def actual_tuple(score: dict[str, Any]) -> tuple[int, int] | None:
+    if score.get("home") is None or score.get("away") is None:
         return None
-    match = re.search(r"Home ([+-]?[0-9.]+)", raw)
-    if not match:
-        match = re.search(r"([+-][0-9.]+)", raw)
-    return float(match.group(1)) if match else None
+    return int(score["home"]), int(score["away"])
 
 
-def ou_value(raw: str | None) -> float | None:
-    if not raw:
-        return None
-    match = re.search(r"Over ([0-9.]+)", raw)
-    return float(match.group(1)) if match else None
-
-
-def auto_miss_reason_tags(fid: str, actual_text: str | None, main_score: str, pool_scores: set[str], ah_line: float | None, ou_line: float | None, open_risk: bool) -> list[str]:
+def legacy_hit_type(main_score: str | None, pool: list[dict[str, Any]], actual_text: str | None) -> str:
     if not actual_text:
-        return []
+        return "待复盘"
+    if actual_text == main_score:
+        return "main_hit"
+    if actual_text in {str(item.get("score")) for item in pool}:
+        return "pool_hit"
+    return "miss"
+
+
+def calibration_lesson(score_distribution: dict[str, Any], hit_type: str) -> tuple[list[str], str]:
     tags: list[str] = []
-    if actual_text != main_score and actual_text in pool_scores:
-        tags.append("POOL_PATH_CONFIRMED")
-    if actual_text not in pool_scores:
-        tags.append("SCORE_POOL_MISS")
-    if fid == "1489373" or (ah_line is not None and abs(ah_line) >= 1.5 and actual_text in {"0-0", "1-1", "2-1"}):
-        tags.extend(["AH_DEEP_NOT_WIN_MARGIN", "FAVORITE_WIN_BUT_NOT_COVER_RISK"])
-    if fid == "1489370" or open_risk:
-        tags.append("GAME_OPEN_TRIGGER")
-    if ou_line is not None and ou_line <= 2.5 and actual_text:
+    market = score_distribution.get("market_vs_score_risk", {})
+    trigger = score_distribution.get("game_open_trigger", {})
+    actual_text = score_distribution.get("post_match_calibration", {}).get("actual_score")
+    if actual_text:
         try:
             goals = sum(int(part) for part in actual_text.split("-"))
         except ValueError:
             goals = 0
         if goals >= 4:
-            tags.append("OU_UNDERESTIMATE_HIGH_SCORE")
-    if fid == "1489370":
-        tags.append("PICKEM_CAN_OPEN")
-    return list(dict.fromkeys(tags))
-
-
-def auto_lesson_cn(fid: str, hit_type: str, tags: list[str]) -> str:
-    if fid == "1489373":
-        return "赛后校准：瑞士方向深让不能直接等于大胜，1-1 进入反证样本；深让不等于大胜。"
-    if fid == "1489370":
-        return "赛后校准：平手盘也可能打开，大小球不直接决定比分；早球和转换混乱会把比分推向 4-1。"
+            tags.extend(["GAME_OPEN_TRIGGER", "OU_NOT_SCORE_CAP"])
+        if market.get("draw_prob", 0) >= 0.18 and actual_text.split("-")[0] == actual_text.split("-")[1]:
+            tags.append("DRAW_MASS_CONFIRMED")
+        if trigger.get("open_game_prob", 0) >= 0.25:
+            tags.append("MATRIX_OPEN_GAME_MASS")
+        if market.get("favorite_cover_minus1_prob", 0) < market.get("favorite_win_prob", 0):
+            tags.append("FAVORITE_WIN_NOT_COVER_SEPARATION")
     if hit_type == "待复盘":
-        return "等待赛后校准。"
+        return tags, "等待赛后校准；RPS/log score 将在实际比分写入后计算。"
     if hit_type == "main_hit":
-        return "赛后校准：主比分命中，保留当前主路径权重。"
-    if hit_type == "pool_hit":
-        return "赛后校准：比分池命中，后续需要检查触发路径和权重是否合理。"
-    return "赛后校准：比分池未覆盖实际比分，需要增加反证标签：" + "、".join(tags)
-
-
-def score_distribution_for_record(
-    fid: str,
-    reference: dict[str, str],
-    latest: dict[str, Any],
-    tactical_effect: dict[str, Any],
-    referee_available: bool,
-    actual_score: dict[str, Any],
-) -> dict[str, Any]:
-    ah_line = line_value(latest.get("ah_line"))
-    ou_line = ou_value(latest.get("ou_line"))
-    home_tags = set(tactical_effect.get("home_style_tags") or [])
-    away_tags = set(tactical_effect.get("away_style_tags") or [])
-    style_tags = home_tags | away_tags
-    high_press = "高位压迫" in style_tags
-    wing_speed = "边路速度" in style_tags or "转换进攻" in style_tags
-    back_three_push = "三中卫" in style_tags and "翼卫推进" in style_tags
-    defensive_counter = "防守反击" in style_tags
-
-    deep_favorite = ah_line is not None and ah_line <= -1.5
-    pickem_like = ah_line is not None and abs(ah_line) <= 0.5
-    low_ou = ou_line is not None and ou_line <= 2.5
-    open_risk = high_press or wing_speed or back_three_push or defensive_counter or fid == "1489370"
-
-    early_goal = "high" if open_risk and not low_ou else ("medium" if open_risk else "low")
-    transition = "high" if open_risk else ("medium" if pickem_like else "low")
-    collapse = "high" if fid == "1489370" else ("medium" if open_risk else "low")
-    red_card = "unknown" if not referee_available else "medium"
-    ah_depth_risk = "high" if deep_favorite else ("medium" if ah_line is not None and abs(ah_line) >= 1 else "low")
-    ou_underestimate = "high" if low_ou and open_risk else ("medium" if low_ou else "low")
-    favorite_not_cover = "high" if deep_favorite or fid == "1489373" else ("medium" if ah_line is not None and ah_line < 0 else "low")
-
-    main_score = reference["reference_score"].split("/")[0].strip() if reference.get("reference_score") else "1-0"
-    fallback_score = "1-1" if main_score != "1-1" else "0-0"
-    if fid == "1489373":
-        main_score = "0-2"
-        fallback_score = "1-1"
-    score_pool = [
-        {"score": main_score, "path": "小胜主线", "weight": "high", "reason_cn": "市场和基础面主路径，但 AH 不自动等于胜差。"},
-        {"score": fallback_score, "path": "防平路径", "weight": "medium", "reason_cn": "首发、裁判或节奏不完整时保留防平路径。"},
-        {"score": "2-0", "path": "优势扩大", "weight": "medium", "reason_cn": "优势方若先入球并控住转换，比分可能扩大。"},
-        {"score": "2-1", "path": "打开局", "weight": "medium_low" if not open_risk else "medium", "reason_cn": "早球、转换混乱或翼卫压上会打开比赛。"},
-        {"score": "3-1", "path": "强队打穿", "weight": "low" if not open_risk else "medium_low", "reason_cn": "OU 2/2.5 不直接禁止大比分，只降低初始权重。"},
-        {"score": "4-1", "path": "防线崩盘", "weight": "very_low" if not open_risk else "low", "reason_cn": "防线崩盘路径来自早球、红牌/点球或连续转换失位。"},
-    ]
-    if fid == "1489370":
-        for item in score_pool:
-            if item["score"] in {"3-1", "4-1"}:
-                item["weight"] = "medium"
-                item["reason_cn"] += " 美国 vs 巴拉圭反证：平手盘也可能打开。"
-    if fid == "1489373":
-        for item in score_pool:
-            if item["score"] == "1-1":
-                item["weight"] = "high"
-                item["reason_cn"] += " 卡塔尔 vs 瑞士反证：深让不等于大胜。"
-
-    actual = actual_score if actual_score.get("home") is not None else None
-    actual_text = f"{actual['home']}-{actual['away']}" if actual else None
-    pool_scores = {item["score"] for item in score_pool}
-    if not actual_text:
-        hit_type = "待复盘"
-    elif actual_text == main_score:
-        hit_type = "main_hit"
-    elif actual_text in pool_scores:
-        hit_type = "pool_hit"
+        lesson = "赛后校准：矩阵主比分命中，继续累计 RPS/log score 样本。"
+    elif hit_type == "pool_hit":
+        lesson = "赛后校准：比分池命中，说明多路径比分分布比单一比分更稳。"
     else:
-        hit_type = "miss"
-    miss_reason_tags = auto_miss_reason_tags(fid, actual_text, main_score, pool_scores, ah_line, ou_line, open_risk)
-    lesson_cn = auto_lesson_cn(fid, hit_type, miss_reason_tags)
+        lesson = "赛后校准：实际比分未进入比分池，需要检查市场先验、打开局质量和尾部概率。"
+    lesson += " 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。"
+    return list(dict.fromkeys(tags)), lesson
 
+
+def score_matrix_summary_from_distribution(score_distribution: dict[str, Any]) -> dict[str, Any]:
+    if score_distribution.get("status") != "ready":
+        return {
+            "status": "skipped",
+            "market_source": "match_card.markets",
+            "mu_total_goals": None,
+            "delta_goal_diff": None,
+            "lambda_home": None,
+            "lambda_away": None,
+            "dixon_coles_rho": W1_RHO,
+            "top_scores": [],
+            "home_win_prob": None,
+            "draw_prob": None,
+            "away_win_prob": None,
+            "open_game_mass": None,
+            "collapse_mass": None,
+            "market_fit_error": None,
+            "actual_score_probability": None,
+            "rps_1x2": None,
+            "exact_score_log_loss": None,
+            "notes_cn": [score_distribution.get("skip_reason", "市场数据不足，比分矩阵跳过。")],
+        }
+    model = score_distribution.get("matrix_model", {})
+    trigger = score_distribution.get("game_open_trigger", {})
+    calibration = score_distribution.get("post_match_calibration", {})
+    hda = model.get("model_hda") or [None, None, None]
     return {
         "status": "ready",
-        "main_score": main_score,
-        "fallback_score": fallback_score,
-        "score_pool": score_pool,
+        "market_source": "match_card.markets.odds_1X2 + odds_OU entries",
+        "mu_total_goals": model.get("mu"),
+        "delta_goal_diff": model.get("delta"),
+        "lambda_home": model.get("lambda_home"),
+        "lambda_away": model.get("lambda_away"),
+        "dixon_coles_rho": model.get("rho"),
+        "top_scores": score_distribution.get("top_scores", []),
+        "home_win_prob": hda[0],
+        "draw_prob": hda[1],
+        "away_win_prob": hda[2],
+        "open_game_mass": trigger.get("open_game_prob"),
+        "collapse_mass": trigger.get("blowout_prob"),
+        "market_fit_error": model.get("market_reproduction_max_abs_err"),
+        "actual_score_probability": calibration.get("actual_score_probability"),
+        "rps_1x2": calibration.get("rps_1x2"),
+        "exact_score_log_loss": calibration.get("exact_score_log_loss"),
+        "notes_cn": [
+            "比分矩阵由 1X2 去水概率和 OU 盘口派生。",
+            "打开局概率来自比分矩阵区域概率，不是单独规则加权。",
+            "崩盘路径来自比分矩阵尾部质量。",
+        ],
+    }
+
+
+def normalize_score_distribution(raw: dict[str, Any]) -> dict[str, Any]:
+    if raw.get("status") != "ready":
+        return {
+            "status": "skipped",
+            "derived_from_score_matrix": True,
+            "legacy_rule_weight": False,
+            "model": "market_implied_poisson_dixon_coles",
+            "skip_reason": raw.get("skip_reason", "市场数据不足，比分矩阵跳过。"),
+            "main_score": None,
+            "fallback_score": None,
+            "score_pool": [],
+            "top_scores": [],
+            "game_open_trigger": {
+                "open_game_prob": None,
+                "high_total_prob": None,
+                "blowout_prob": None,
+                "favorite_collapse_prob": None,
+                "must_reprice_if_triggered": True,
+                "note_cn": "打开局概率来自比分矩阵区域概率，不是单独规则加权。",
+            },
+            "market_vs_score_risk": {
+                "summary_cn": "深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+            },
+            "score_summary_cn": "比分矩阵暂未生成；保留旧字段兼容。",
+            "post_match_calibration": {
+                "actual_score": None,
+                "prediction_hit_type": "待复盘",
+                "evaluation_method": "rps_log_score",
+                "actual_score_probability": None,
+                "rps_1x2": None,
+                "exact_score_log_loss": None,
+                "deprecated_hit_type_warning": "main_hit/pool_hit/miss 仅保留展示，不作为核心评估",
+                "miss_reason_tags": [],
+                "lesson_cn": "等待赛后校准。",
+            },
+        }
+
+    matrix_model = raw.get("model", {})
+    pool = []
+    for item in raw.get("score_pool", []):
+        probability = float(item.get("probability") or 0.0)
+        pool.append(
+            {
+                "score": item.get("score"),
+                "path": item.get("path"),
+                "weight": probability,
+                "probability": probability,
+                "region_probability": float(item.get("region_probability") or probability),
+                "reason_cn": cn_display_text(item.get("reason_cn", "")),
+            }
+        )
+    top_scores = raw.get("top_scores") or [{"score": item.get("score"), "probability": item.get("probability")} for item in pool[:8]]
+
+    calibration = raw.get("post_match_calibration", {})
+    hit_type = legacy_hit_type(raw.get("main_score"), pool, calibration.get("actual_score"))
+    tags, lesson = calibration_lesson(raw, hit_type)
+    return {
+        "status": "ready",
+        "derived_from_score_matrix": True,
+        "legacy_rule_weight": False,
+        "model": "market_implied_poisson_dixon_coles",
+        "engine": raw.get("engine"),
+        "matrix_model": matrix_model,
+        "main_score": raw.get("main_score"),
+        "fallback_score": raw.get("fallback_score"),
+        "score_pool": pool,
+        "top_scores": top_scores,
         "game_open_trigger": {
-            "early_goal_risk": early_goal,
-            "transition_chaos_risk": transition,
-            "defensive_collapse_risk": collapse,
-            "red_card_penalty_risk": red_card,
-            "must_reprice_if_triggered": True,
+            **raw.get("game_open_trigger", {}),
+            "open_game_mass": raw.get("game_open_trigger", {}).get("open_game_prob"),
+            "collapse_mass": raw.get("game_open_trigger", {}).get("blowout_prob"),
+            "note_cn": "打开局概率来自比分矩阵区域概率，不是单独规则加权。",
+            "collapse_note_cn": "崩盘路径来自比分矩阵尾部质量。",
         },
         "market_vs_score_risk": {
-            "ah_depth_risk": ah_depth_risk,
-            "ou_underestimate_risk": ou_underestimate,
-            "favorite_win_but_not_cover_risk": favorite_not_cover,
-            "summary_cn": "深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+            **raw.get("market_vs_score_risk", {}),
+            "summary_cn": raw.get("market_vs_score_risk", {}).get("summary_cn", "")
+            + " 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
         },
-        "score_summary_cn": "比分分布替代单一模板比分：主比分、防平路径、打开局和防线崩盘路径同时保留，触发后必须重估。",
+        "score_summary_cn": raw.get("score_summary_cn", "比分分布来自市场派生的 Dixon-Coles 矩阵。"),
         "post_match_calibration": {
-            "actual_score": actual_text,
+            **calibration,
             "prediction_hit_type": hit_type,
-            "miss_reason_tags": miss_reason_tags,
-            "lesson_cn": lesson_cn,
+            "evaluation_method": "rps_log_score",
+            "actual_score_probability": calibration.get("actual_score_probability"),
+            "rps_1x2": calibration.get("rps_model"),
+            "exact_score_log_loss": calibration.get("log_score_exact"),
+            "deprecated_hit_type_warning": "main_hit/pool_hit/miss 仅保留展示，不作为核心评估",
+            "miss_reason_tags": tags,
+            "lesson_cn": lesson,
         },
     }
 
@@ -1045,6 +1076,7 @@ def build_record(
     venues: dict[str, dict[str, Any]],
     weather_by_fixture: dict[str, dict[str, Any]],
     live_refresh_by_fixture: dict[str, dict[str, Any]],
+    results: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     card = read_json(card_path)
     fid = fixture_id_from_card(card)
@@ -1062,9 +1094,9 @@ def build_record(
     play_guard_pass = decision.get("label") == "W1_PLAY"
     movement = odds_movement(latest, previous)
     market_signal = market_signal_from_snapshot(latest)
-    status = status_for_fixture(fid)
-    score = actual_score_for_fixture(fid)
-    overlay = EXTERNAL_RESULT_OVERLAY.get(fid, {})
+    status = status_for_fixture(fid, results)
+    score = actual_score_for_fixture(fid, results)
+    overlay = results.get(fid, {})
 
     supporting = [
         market_signal["summary_cn"],
@@ -1077,11 +1109,9 @@ def build_record(
 
     score_display = format_score(home_cn, away_cn, score)
     stage_info = prediction_stage(cst_label(latest.get("kickoff_cst") or (ledger or {}).get("kickoff_cst")), snapshot_at, play_guard_pass)
-    reference = reference_from_market(market_signal, home_cn, away_cn, fid)
+    reference = reference_from_market(market_signal, home_cn, away_cn)
     risk_cn = risk_level_cn(play_guard_pass, gaps, risks)
-    is_first = fid == "1489369"
     reference_score = reference["reference_score"]
-    hit_status = "比分命中" if is_first and status == "finished" else None
     w1_state = "赛前未放行/未形成正式 W1_PLAY" if not play_guard_pass else "已通过正式风控规则"
     if stage_info["prediction_stage"] == "EARLY_REFERENCE" and status != "finished" and not play_guard_pass:
         risk_cn = "中高"
@@ -1101,14 +1131,15 @@ def build_record(
     lineup_effect = lineup_effect_for_card(card)
     tactical_effect = tactical_effect_for_card(card, lineup_effect)
     live_refresh = card.get("live_refresh") or live_refresh_by_fixture.get(fid) or default_live_refresh(fid)
-    score_distribution = score_distribution_for_record(
-        fid=fid,
-        reference=reference,
-        latest=latest,
-        tactical_effect=tactical_effect,
-        referee_available=bool(referee.get("available") or referee.get("name")),
-        actual_score=score,
-    )
+    raw_score_distribution = W1ENGINE.build_score_distribution(card, actual=actual_tuple(score), rho=W1_RHO) if W1_SCORE_ENGINE_ON else {"status": "skipped", "skip_reason": "W1_SCORE_ENGINE=off"}
+    score_distribution = normalize_score_distribution(raw_score_distribution)
+    score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
+    if score_distribution.get("main_score"):
+        reference_score = f"{score_distribution['main_score']} / {score_distribution.get('fallback_score', '1-1')}"
+    hit_status = "比分命中" if (
+        status == "finished"
+        and score_distribution.get("post_match_calibration", {}).get("prediction_hit_type") == "main_hit"
+    ) else None
 
     return {
         "match": f"{home_cn} vs {away_cn}",
@@ -1153,6 +1184,7 @@ def build_record(
         "tactical_effect": tactical_effect,
         "live_refresh": live_refresh,
         "score_distribution": score_distribution,
+        "score_matrix_summary": score_matrix_summary,
         "post_match_calibration": score_distribution["post_match_calibration"],
         "odds_movement": movement,
         "market_signal": market_signal,
@@ -1164,7 +1196,7 @@ def build_record(
         "boss_summary_cn": boss_summary,
         "next_refresh": next_refresh,
         "external_result_overlay": overlay or None,
-        "reference_score_external": reference_score if is_first else None,
+        "reference_score_external": reference_score,
         "hit_status_cn": hit_status,
         "ledger_row_found": ledger is not None,
         "card_json": str(card_path.relative_to(ROOT)),
@@ -1312,31 +1344,36 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
 
     def public_score_distribution(value: dict[str, Any]) -> dict[str, Any]:
         dist = json.loads(json.dumps(value or {}, ensure_ascii=False))
-        status_map = {"ready": "已生成", "missing": "暂缺"}
-        weight_map = {
-            "high": "高",
-            "medium": "中",
-            "medium_low": "中低",
-            "low": "低",
-            "very_low": "极低",
-        }
+        status_map = {"ready": "已生成", "skipped": "跳过", "missing": "暂缺"}
         risk_map = {"unknown": "未知", "low": "低", "medium": "中", "high": "高"}
         hit_map = {"pending": "待复盘", "待复盘": "待复盘", "main_hit": "主比分命中", "pool_hit": "比分池命中", "miss": "未命中"}
         dist["status"] = status_map.get(str(dist.get("status")), clean_public_text(dist.get("status", "暂缺")))
         for item in dist.get("score_pool", []):
-            item["weight"] = weight_map.get(str(item.get("weight")), clean_public_text(item.get("weight", "")))
+            if isinstance(item.get("weight"), (int, float)):
+                item["weight_pct"] = f"{float(item['weight']) * 100:.1f}%"
+            else:
+                item["weight_pct"] = clean_public_text(item.get("weight", ""))
             item["reason_cn"] = clean_public_text(item.get("reason_cn", ""))
         trigger = dist.get("game_open_trigger", {})
         for key in ("early_goal_risk", "transition_chaos_risk", "defensive_collapse_risk", "red_card_penalty_risk"):
-            trigger[key] = risk_map.get(str(trigger.get(key)), clean_public_text(trigger.get(key, "未知")))
+            if key in trigger:
+                trigger[key] = risk_map.get(str(trigger.get(key)), clean_public_text(trigger.get(key, "未知")))
         market_risk = dist.get("market_vs_score_risk", {})
         for key in ("ah_depth_risk", "ou_underestimate_risk", "favorite_win_but_not_cover_risk"):
-            market_risk[key] = risk_map.get(str(market_risk.get(key)), clean_public_text(market_risk.get(key, "未知")))
+            if key in market_risk:
+                market_risk[key] = risk_map.get(str(market_risk.get(key)), clean_public_text(market_risk.get(key, "未知")))
         calibration = dist.get("post_match_calibration", {})
         calibration["prediction_hit_type_cn"] = hit_map.get(str(calibration.get("prediction_hit_type")), clean_public_text(calibration.get("prediction_hit_type", "待复盘")))
         calibration["prediction_hit_type"] = calibration["prediction_hit_type_cn"]
         calibration["lesson_cn"] = clean_public_text(calibration.get("lesson_cn", ""))
         return dist
+
+    def public_score_matrix_summary(value: dict[str, Any]) -> dict[str, Any]:
+        summary = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        status_map = {"ready": "已生成", "skipped": "跳过"}
+        summary["status"] = status_map.get(str(summary.get("status")), clean_public_text(summary.get("status", "暂缺")))
+        summary["notes_cn"] = [clean_public_text(item) for item in summary.get("notes_cn", [])]
+        return summary
 
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
@@ -1392,6 +1429,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "tactical_effect": public_tactical_effect(row["tactical_effect"]),
             "live_refresh": public_live_refresh(row["live_refresh"]),
             "score_distribution": public_score_distribution(row["score_distribution"]),
+            "score_matrix_summary": public_score_matrix_summary(row.get("score_matrix_summary", {})),
             "post_match_calibration": public_score_distribution(row["score_distribution"]).get("post_match_calibration", {}),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
@@ -1464,6 +1502,7 @@ def main() -> int:
     venues = venue_context()
     weather_by_fixture = weather_cache()
     live_refresh_by_fixture = live_refresh_cache()
+    results = result_overlay()
     next_refresh = state.get("next_run_cst") or ""
 
     records = []
@@ -1481,11 +1520,12 @@ def main() -> int:
                 venues=venues,
                 weather_by_fixture=weather_by_fixture,
                 live_refresh_by_fixture=live_refresh_by_fixture,
+                results=results,
             )
         )
     records.sort(key=lambda row: (row.get("kickoff") or "", row["fixture_id"]))
 
-    first = next(row for row in records if row["fixture_id"] == "1489369")
+    first = records[0] if records else {}
     data["schema_version"] = "W1_VISUAL_DASHBOARD_DATA_BOUND_V1"
     data["generated_from"] = "本地 W1 赛前卡、ledger、状态文件、最新快照和人工核验赛果覆盖"
     data["generated_at_utc"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
@@ -1539,6 +1579,8 @@ def main() -> int:
         "supporting_factors": first["supporting_factors"],
         "counter_factors": first["counter_factors"],
         "key_gaps": [gap.get("message", str(gap)) for gap in first["data_gaps"]],
+        "score_matrix_summary": first.get("score_matrix_summary", {}),
+        "post_match_calibration": first.get("post_match_calibration", {}),
         "current_action": first["current_action_cn"],
         "play_guard_result": "未通过正式风控规则；赛前未放行/未形成正式 W1_PLAY",
         "actual_score_display_cn": first["actual_score_display_cn"],
