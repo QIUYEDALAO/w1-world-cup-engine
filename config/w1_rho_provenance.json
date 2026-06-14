@@ -1,9 +1,12 @@
 {
-  "default_rho": -0.10,
-  "calibrated": false,
-  "source_report": null,
-  "valid_sample": null,
-  "input_synthetic": null,
-  "calibrated_at": null,
-  "note": "uncalibrated placeholder; 未经历史 CSV 拟合, 不得当作已校准值。校准后须同时更新本文件与 w1_score_engine.DEFAULT_RHO。"
+  "default_rho": -0.057766,
+  "calibrated": true,
+  "input_synthetic": false,
+  "valid_sample": 10731,
+  "mode": "ou",
+  "source_report": "reports/W1_RHO_REAL_OU_CALIBRATION_REPORT.md",
+  "source_json": "reports/w1_rho_real_ou_calibration.json",
+  "source_candidate": "reports/w1_rho_provenance_candidate.json",
+  "calibrated_at": "2026-06-14",
+  "note": "Fitted on football-data E0/SP1/D1/I1/F1, 6 seasons, mode=ou; World Cup qualifiers sanity check supports updating from -0.10."
 }

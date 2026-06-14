@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate real OU rho calibration artifacts without allowing production changes."""
+"""Validate real OU rho calibration artifacts and active provenance consistency."""
 
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ def assert_csv() -> int:
     return len(rows)
 
 
-def assert_reports(sample_count: int) -> None:
+def assert_reports(sample_count: int) -> tuple[dict, dict]:
     for path in (REPORT, FIGURE, JSON_REPORT, CANDIDATE):
         if not path.is_file():
             fail(f"missing artifact: {path.relative_to(ROOT)}")
@@ -82,8 +82,10 @@ def assert_reports(sample_count: int) -> None:
         fail("json valid_sample must match CSV row count")
     if data.get("mode") != "ou":
         fail("json mode must be ou")
+    if data.get("production_ready") is not True:
+        fail("json production_ready must be true before DEFAULT_RHO can be updated")
     if data.get("default_rho_updated") is not False:
-        fail("json must confirm DEFAULT_RHO was not updated")
+        fail("json report should remain an immutable calibration report, not an active update marker")
     candidate = read_json(CANDIDATE)
     if candidate.get("source_report") != "reports/W1_RHO_REAL_OU_CALIBRATION_REPORT.md":
         fail("candidate source_report mismatch")
@@ -91,25 +93,39 @@ def assert_reports(sample_count: int) -> None:
         fail("candidate valid_sample mismatch")
     if candidate.get("calibrated") is not False:
         fail("candidate must not be active calibrated provenance")
+    return data, candidate
 
 
-def assert_production_unchanged() -> None:
+def assert_production_consistent(report_data: dict, candidate: dict) -> None:
     text = SCORE_ENGINE.read_text(encoding="utf-8")
-    if "DEFAULT_RHO = -0.10" not in text:
-        fail("DEFAULT_RHO changed")
+    expected_rho = float(report_data.get("rho_hat"))
+    if f"DEFAULT_RHO = {expected_rho}" not in text:
+        fail(f"DEFAULT_RHO must equal calibrated rho_hat {expected_rho}")
     provenance = read_json(PROVENANCE)
-    if provenance.get("calibrated") is not False:
-        fail("config/w1_rho_provenance.json must remain calibrated=false")
+    if provenance.get("calibrated") is not True:
+        fail("config/w1_rho_provenance.json must be calibrated=true after approved update")
+    if abs(float(provenance.get("default_rho")) - expected_rho) > 1e-9:
+        fail("provenance default_rho must match rho_hat")
+    if provenance.get("input_synthetic") is not False:
+        fail("provenance input_synthetic must be false")
+    if provenance.get("valid_sample") != report_data.get("valid_sample"):
+        fail("provenance valid_sample must match report")
+    if provenance.get("mode") != "ou":
+        fail("provenance mode must be ou")
+    if provenance.get("source_report") != candidate.get("source_report"):
+        fail("provenance source_report must match candidate")
+    if provenance.get("source_json") != candidate.get("source_json"):
+        fail("provenance source_json must match candidate")
+    if provenance.get("source_candidate") != "reports/w1_rho_provenance_candidate.json":
+        fail("provenance source_candidate mismatch")
     result = subprocess.run(
         [
             "git",
             "diff",
             "--name-only",
             "--",
-            str(SCORE_ENGINE.relative_to(ROOT)),
             str(BUILD_DASHBOARD.relative_to(ROOT)),
             str(PLAY_GUARD.relative_to(ROOT)),
-            str(PROVENANCE.relative_to(ROOT)),
         ],
         cwd=ROOT,
         text=True,
@@ -120,14 +136,14 @@ def assert_production_unchanged() -> None:
         fail(f"git diff failed: {result.stderr or result.stdout}")
     changed = [line for line in result.stdout.splitlines() if line.strip()]
     if changed:
-        fail(f"protected production files changed: {changed}")
+        fail(f"protected score matrix / PLAY_GUARD files changed: {changed}")
 
 
 def main() -> int:
     try:
         sample_count = assert_csv()
-        assert_reports(sample_count)
-        assert_production_unchanged()
+        report_data, candidate = assert_reports(sample_count)
+        assert_production_consistent(report_data, candidate)
     except (CheckError, json.JSONDecodeError) as exc:
         print(f"W1 real OU rho calibration check FAIL: {exc}", file=sys.stderr)
         return 1

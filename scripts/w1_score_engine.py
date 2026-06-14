@@ -23,7 +23,7 @@ import numpy as np
 # --- 需历史校准的结构参数(集中此处)-------------------------------------
 # Dixon-Coles 低分相关。rho<0 抬高 0-0/1-1、压低 1-0/0-1。
 # TODO(校准): 用历史国际比赛终场比分极大似然拟合;勿用 64 场世界杯估。
-DEFAULT_RHO = -0.10
+DEFAULT_RHO = -0.057766  # calibrated 2026-06-14, n=10731, report=reports/W1_RHO_REAL_OU_CALIBRATION_REPORT.md
 MAX_GOALS = 10
 
 
