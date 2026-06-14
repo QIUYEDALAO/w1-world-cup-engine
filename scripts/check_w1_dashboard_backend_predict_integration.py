@@ -16,6 +16,7 @@ SERVER = ROOT / "scripts/w1_local_predict_server.py"
 SCORE_ENGINE = ROOT / "scripts/w1_score_engine.py"
 RHO_PROVENANCE = ROOT / "config/w1_rho_provenance.json"
 DECISION_POLICY = ROOT / "config/w1_decision_policy.json"
+FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
 
 
 class CheckError(Exception):
@@ -48,6 +49,12 @@ def assert_api_discovery() -> None:
     ):
         if token not in text:
             fail(f"server missing API token: {token}")
+
+
+def assert_fixture_aliases() -> None:
+    aliases = json.loads(read(FIXTURE_ALIASES))
+    if aliases.get("66457070") != "1489374" or aliases.get("1489374") != "66457070":
+        fail("Germany vs Curacao fixture aliases must map 66457070 <-> 1489374")
 
 
 def assert_html_backend_wiring() -> None:
@@ -136,6 +143,7 @@ def assert_no_forbidden() -> None:
 def main() -> int:
     try:
         assert_api_discovery()
+        assert_fixture_aliases()
         assert_html_backend_wiring()
         assert_display_policy()
         assert_core_unchanged()

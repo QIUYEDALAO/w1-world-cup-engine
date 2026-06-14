@@ -121,8 +121,8 @@ def assert_runner() -> None:
     text = read(RUNNER)
     if "w1_local_predict_server.py" not in text:
         fail("runner must start local server")
-    if "http://127.0.0.1:8765/reports/dashboard/W1_VISUAL_DASHBOARD.html" not in text:
-        fail("runner must show dashboard URL")
+    if "W1_DASHBOARD_PORT" not in text or "reports/dashboard/W1_VISUAL_DASHBOARD.html" not in text:
+        fail("runner must show configurable dashboard URL")
 
 
 def assert_dashboard() -> None:
