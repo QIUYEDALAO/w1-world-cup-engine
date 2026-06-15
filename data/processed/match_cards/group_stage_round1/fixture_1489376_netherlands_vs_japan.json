@@ -165,10 +165,398 @@
     }
   },
   "lineups": {
-    "confirmed_lineup_available": false,
-    "status": "MISSING",
-    "home_starting_xi": [],
-    "away_starting_xi": []
+    "confirmed_lineup_available": true,
+    "status": "CONFIRMED",
+    "home_starting_xi": [
+      "Bart Verbruggen",
+      "Denzel Dumfries",
+      "Jan Paul van Hecke",
+      "Virgil van Dijk",
+      "Micky van de Ven",
+      "Ryan Gravenberch",
+      "Frenkie de Jong",
+      "Tijjani Reijnders",
+      "Crysencio Summerville",
+      "Donyell Malen",
+      "Cody Gakpo"
+    ],
+    "away_starting_xi": [
+      "Zion Suzuki",
+      "Tsuyoshi Watanabe",
+      "Shogo Taniguchi",
+      "Hiroki Itō",
+      "Ritsu Doan",
+      "Kaishu Sano",
+      "Daichi Kamada",
+      "Keito Nakamura",
+      "Takefusa Kubo",
+      "Daizen Maeda",
+      "Ayase Ueda"
+    ],
+    "home_substitutes": [
+      "Quinten Timber",
+      "Teun Koopmeiners",
+      "Memphis Depay",
+      "Nathan Aké",
+      "Brian Brobbey",
+      "Mark Flekken",
+      "Robin Roefs",
+      "Jorrel Hato",
+      "Lutsharel Geertruida",
+      "Mats Wieffer",
+      "Guus Til",
+      "Marten de Roon",
+      "Justin Kluivert",
+      "Wout Weghorst",
+      "Noa Lang"
+    ],
+    "away_substitutes": [
+      "Junya Ito",
+      "Yukinari Sugawara",
+      "Takehiro Tomiyasu",
+      "Koki Ogawa",
+      "Kento Shiogai",
+      "Keisuke Osako",
+      "Tomoki Hayakawa",
+      "Ayumu Seko",
+      "Ko Itakura",
+      "Junnosuke Suzuki",
+      "Yuto Nagatomo",
+      "Ao Tanaka",
+      "Yuito Suzuki",
+      "Keisuke Goto",
+      "Shuto Machino"
+    ],
+    "formation_home": "4-3-3",
+    "formation_away": "3-4-2-1",
+    "home_starting_players": [
+      {
+        "name": "Bart Verbruggen",
+        "number": 1,
+        "position": "G",
+        "grid": "1:1"
+      },
+      {
+        "name": "Denzel Dumfries",
+        "number": 22,
+        "position": "D",
+        "grid": "2:4"
+      },
+      {
+        "name": "Jan Paul van Hecke",
+        "number": 6,
+        "position": "D",
+        "grid": "2:3"
+      },
+      {
+        "name": "Virgil van Dijk",
+        "number": 4,
+        "position": "D",
+        "grid": "2:2"
+      },
+      {
+        "name": "Micky van de Ven",
+        "number": 15,
+        "position": "D",
+        "grid": "2:1"
+      },
+      {
+        "name": "Ryan Gravenberch",
+        "number": 8,
+        "position": "M",
+        "grid": "3:3"
+      },
+      {
+        "name": "Frenkie de Jong",
+        "number": 21,
+        "position": "M",
+        "grid": "3:2"
+      },
+      {
+        "name": "Tijjani Reijnders",
+        "number": 14,
+        "position": "M",
+        "grid": "3:1"
+      },
+      {
+        "name": "Crysencio Summerville",
+        "number": 24,
+        "position": "F",
+        "grid": "4:3"
+      },
+      {
+        "name": "Donyell Malen",
+        "number": 18,
+        "position": "F",
+        "grid": "4:2"
+      },
+      {
+        "name": "Cody Gakpo",
+        "number": 11,
+        "position": "F",
+        "grid": "4:1"
+      }
+    ],
+    "away_starting_players": [
+      {
+        "name": "Zion Suzuki",
+        "number": 1,
+        "position": "G",
+        "grid": "1:1"
+      },
+      {
+        "name": "Tsuyoshi Watanabe",
+        "number": 16,
+        "position": "D",
+        "grid": "2:3"
+      },
+      {
+        "name": "Shogo Taniguchi",
+        "number": 3,
+        "position": "D",
+        "grid": "2:2"
+      },
+      {
+        "name": "Hiroki Itō",
+        "number": 21,
+        "position": "D",
+        "grid": "2:1"
+      },
+      {
+        "name": "Ritsu Doan",
+        "number": 10,
+        "position": "M",
+        "grid": "3:4"
+      },
+      {
+        "name": "Kaishu Sano",
+        "number": 24,
+        "position": "M",
+        "grid": "3:3"
+      },
+      {
+        "name": "Daichi Kamada",
+        "number": 15,
+        "position": "M",
+        "grid": "3:2"
+      },
+      {
+        "name": "Keito Nakamura",
+        "number": 13,
+        "position": "M",
+        "grid": "3:1"
+      },
+      {
+        "name": "Takefusa Kubo",
+        "number": 8,
+        "position": "F",
+        "grid": "4:2"
+      },
+      {
+        "name": "Daizen Maeda",
+        "number": 11,
+        "position": "F",
+        "grid": "4:1"
+      },
+      {
+        "name": "Ayase Ueda",
+        "number": 18,
+        "position": "F",
+        "grid": "5:1"
+      }
+    ],
+    "home_bench_players": [
+      {
+        "name": "Quinten Timber",
+        "number": 26,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Teun Koopmeiners",
+        "number": 20,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Memphis Depay",
+        "number": 10,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Nathan Aké",
+        "number": 5,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Brian Brobbey",
+        "number": 19,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Mark Flekken",
+        "number": 23,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Robin Roefs",
+        "number": 13,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Jorrel Hato",
+        "number": 25,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Lutsharel Geertruida",
+        "number": 2,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Mats Wieffer",
+        "number": 12,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Guus Til",
+        "number": 16,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Marten de Roon",
+        "number": 3,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Justin Kluivert",
+        "number": 7,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Wout Weghorst",
+        "number": 9,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Noa Lang",
+        "number": 17,
+        "position": "F",
+        "grid": null
+      }
+    ],
+    "away_bench_players": [
+      {
+        "name": "Junya Ito",
+        "number": 14,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Yukinari Sugawara",
+        "number": 2,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Takehiro Tomiyasu",
+        "number": 22,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Koki Ogawa",
+        "number": 19,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Kento Shiogai",
+        "number": 26,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Keisuke Osako",
+        "number": 12,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Tomoki Hayakawa",
+        "number": 23,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Ayumu Seko",
+        "number": 20,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Ko Itakura",
+        "number": 4,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Junnosuke Suzuki",
+        "number": 25,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Yuto Nagatomo",
+        "number": 5,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Ao Tanaka",
+        "number": 7,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Yuito Suzuki",
+        "number": 17,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Keisuke Goto",
+        "number": 9,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Shuto Machino",
+        "number": 6,
+        "position": "F",
+        "grid": null
+      }
+    ],
+    "lineup_source": "api-football fixtures/lineups",
+    "lineup_source_name": "",
+    "lineup_source_type": "",
+    "lineup_notes_cn": [],
+    "lineup_as_of_utc": null,
+    "lineup_updated_at": "2026-06-15 17:05:55 CST",
+    "lineup_confirmed_utc": "2026-06-15 17:05:55 CST",
+    "lineup_payload_type": "starting_xi"
   },
   "context": {
     "standings": {
@@ -202,16 +590,6 @@
   },
   "risk_flags": [
     {
-      "code": "CONFIRMED_LINEUP_MISSING",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
-    },
-    {
-      "code": "LINEUP_WAIT_EVENT",
-      "severity": "HIGH",
-      "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
-    },
-    {
       "code": "REFEREE_MISSING",
       "severity": "LOW",
       "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
@@ -229,12 +607,6 @@
   ],
   "data_gaps": [
     {
-      "field": "lineups.confirmed_lineup",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
-      "blocks_play": true
-    },
-    {
       "field": "match.referee",
       "severity": "LOW",
       "message": "referee_status=MISSING; keep as a non-blocking gap.",
@@ -250,5 +622,63 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
-  }
+  },
+  "live_refresh": {
+    "requested_at": "2026-06-15 17:05:51 CST",
+    "fixture_id": "1489376",
+    "overall_status": "partial",
+    "modules": {
+      "odds": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:05:54 CST",
+        "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1527。"
+      },
+      "lineups": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:05:55 CST",
+        "message_cn": "实时 API 成功，fixture_id=1489376 首发已确认。 首发已写入：Netherlands 4-3-3，Japan 3-4-2-1。"
+      },
+      "referee": {
+        "requested": true,
+        "source": "missing",
+        "status": "empty",
+        "fetched_at": "2026-06-15 17:05:57 CST",
+        "message_cn": "实时 API 暂无裁判。"
+      },
+      "result_sync": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:05:59 CST",
+        "message_cn": "实时 API 成功，已同步完赛比分：荷兰 2-2 日本。"
+      },
+      "weather": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:04 CST",
+        "message_cn": "实时 API 成功，天气已接入。"
+      },
+      "injuries": {
+        "requested": true,
+        "source": "missing",
+        "status": "empty",
+        "fetched_at": "2026-06-15 17:06:00 CST",
+        "message_cn": "实时 API 暂无伤停。"
+      }
+    }
+  },
+  "status": "finished",
+  "actual_score": {
+    "home": 2,
+    "away": 2
+  },
+  "actual_score_display_cn": "荷兰 2-2 日本",
+  "result_source": "api_football_fixture_result",
+  "result_note": "API-Football fixtures endpoint result sync",
+  "result_synced_at_utc": "2026-06-15T09:05:59Z"
 }

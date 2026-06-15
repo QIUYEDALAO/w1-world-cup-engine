@@ -8,6 +8,42 @@ PORT="${W1_DASHBOARD_PORT:-8787}"
 export W1_DASHBOARD_PORT="$PORT"
 export NO_PROXY="127.0.0.1,localhost,${NO_PROXY:-}"
 export no_proxy="127.0.0.1,localhost,${no_proxy:-}"
+
+load_api_env_key() {
+  local env_file="$1"
+  local key_name value
+  [ -f "$env_file" ] || return 0
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line#export }"
+    case "$line" in
+      APIFOOTBALL_KEY=*|OPENCLAW_APIFOOTBALL_KEY=*)
+        key_name="${line%%=*}"
+        value="${line#*=}"
+        value="${value%\"}"
+        value="${value#\"}"
+        value="${value%\'}"
+        value="${value#\'}"
+        if [ "$key_name" = "APIFOOTBALL_KEY" ] && [ -z "${APIFOOTBALL_KEY:-}" ]; then
+          export APIFOOTBALL_KEY="$value"
+        elif [ "$key_name" = "OPENCLAW_APIFOOTBALL_KEY" ] && [ -z "${OPENCLAW_APIFOOTBALL_KEY:-}" ]; then
+          export OPENCLAW_APIFOOTBALL_KEY="$value"
+        fi
+        ;;
+    esac
+  done < "$env_file"
+}
+
+for env_file in \
+  "/Users/liudehua/.openclaw/.env" \
+  "/Users/liudehua/.openclaw/service-env/ai.openclaw.gateway.env" \
+  "/Users/liudehua/.openclaw/secrets/v4_daily_scan.env" \
+  "/Users/liudehua/.openclaw/workspace/v4-football/api_keys.sh"
+do
+  if [ -f "$env_file" ] && [ -z "${APIFOOTBALL_KEY:-}" ] && [ -z "${OPENCLAW_APIFOOTBALL_KEY:-}" ]; then
+    load_api_env_key "$env_file"
+  fi
+done
+
 if [ -z "${APIFOOTBALL_KEY:-}" ] && [ -n "${OPENCLAW_APIFOOTBALL_KEY:-}" ]; then
   export APIFOOTBALL_KEY="$OPENCLAW_APIFOOTBALL_KEY"
 fi

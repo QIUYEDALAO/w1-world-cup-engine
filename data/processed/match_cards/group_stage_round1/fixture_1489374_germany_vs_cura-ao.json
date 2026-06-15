@@ -165,10 +165,398 @@
     }
   },
   "lineups": {
-    "confirmed_lineup_available": false,
-    "status": "MISSING",
-    "home_starting_xi": [],
-    "away_starting_xi": []
+    "confirmed_lineup_available": true,
+    "status": "CONFIRMED",
+    "home_starting_xi": [
+      "Manuel Neuer",
+      "Joshua Kimmich",
+      "Jonathan Tah",
+      "Nico Schlotterbeck",
+      "Nathaniel Brown",
+      "Felix Nmecha",
+      "Aleksandar Pavlović",
+      "Leroy Sané",
+      "Jamal Musiala",
+      "Florian Wirtz",
+      "Kai Havertz"
+    ],
+    "away_starting_xi": [
+      "Eloy Room",
+      "Sherel Constancio Floranus",
+      "Riechedly Bazoer",
+      "Armando Obispo",
+      "Deveron Fonville",
+      "Livano Comenencia",
+      "Leandro Bacuna",
+      "Juninho Bacuna",
+      "Tahith Chong",
+      "Jürgen Locadia",
+      "Sontje Hansen"
+    ],
+    "home_substitutes": [
+      "Deniz Undav",
+      "David Raum",
+      "Antonio Rüdiger",
+      "Leon Goretzka",
+      "Waldemar Anton",
+      "Alexander Nübel",
+      "Oliver Baumann",
+      "Malick Thiaw",
+      "Jamie Leweling",
+      "Assan Ouédraogo",
+      "Nadiem Amiri",
+      "Angelo Stiller",
+      "Pascal Groß",
+      "Nick Woltemade",
+      "Maximilian Beier"
+    ],
+    "away_substitutes": [
+      "Jeremy Antonisse",
+      "Jearl Margaritha",
+      "Gervane Kastaneer",
+      "Trevor Iriving Doornbusch",
+      "Tyrick Bodak",
+      "Jurien Gaari",
+      "Joshua Brenet",
+      "Shurandy Sambo",
+      "Roshon van Eijma",
+      "Ar'Jany Martha",
+      "Kenji Gorré",
+      "Kevin Felida",
+      "Tyrese Noslin",
+      "Godfried Roemeratoe",
+      "Brandley Kuwas"
+    ],
+    "formation_home": "4-2-3-1",
+    "formation_away": "4-3-1-2",
+    "home_starting_players": [
+      {
+        "name": "Manuel Neuer",
+        "number": 1,
+        "position": "G",
+        "grid": "1:1"
+      },
+      {
+        "name": "Joshua Kimmich",
+        "number": 6,
+        "position": "D",
+        "grid": "2:4"
+      },
+      {
+        "name": "Jonathan Tah",
+        "number": 4,
+        "position": "D",
+        "grid": "2:3"
+      },
+      {
+        "name": "Nico Schlotterbeck",
+        "number": 15,
+        "position": "D",
+        "grid": "2:2"
+      },
+      {
+        "name": "Nathaniel Brown",
+        "number": 18,
+        "position": "D",
+        "grid": "2:1"
+      },
+      {
+        "name": "Felix Nmecha",
+        "number": 23,
+        "position": "M",
+        "grid": "3:2"
+      },
+      {
+        "name": "Aleksandar Pavlović",
+        "number": 5,
+        "position": "M",
+        "grid": "3:1"
+      },
+      {
+        "name": "Leroy Sané",
+        "number": 19,
+        "position": "M",
+        "grid": "4:3"
+      },
+      {
+        "name": "Jamal Musiala",
+        "number": 10,
+        "position": "M",
+        "grid": "4:2"
+      },
+      {
+        "name": "Florian Wirtz",
+        "number": 17,
+        "position": "M",
+        "grid": "4:1"
+      },
+      {
+        "name": "Kai Havertz",
+        "number": 7,
+        "position": "F",
+        "grid": "5:1"
+      }
+    ],
+    "away_starting_players": [
+      {
+        "name": "Eloy Room",
+        "number": 1,
+        "position": "G",
+        "grid": "1:1"
+      },
+      {
+        "name": "Sherel Constancio Floranus",
+        "number": 5,
+        "position": "D",
+        "grid": "2:4"
+      },
+      {
+        "name": "Riechedly Bazoer",
+        "number": 23,
+        "position": "D",
+        "grid": "2:3"
+      },
+      {
+        "name": "Armando Obispo",
+        "number": 18,
+        "position": "D",
+        "grid": "2:2"
+      },
+      {
+        "name": "Deveron Fonville",
+        "number": 24,
+        "position": "D",
+        "grid": "2:1"
+      },
+      {
+        "name": "Livano Comenencia",
+        "number": 8,
+        "position": "M",
+        "grid": "3:3"
+      },
+      {
+        "name": "Leandro Bacuna",
+        "number": 10,
+        "position": "M",
+        "grid": "3:2"
+      },
+      {
+        "name": "Juninho Bacuna",
+        "number": 7,
+        "position": "M",
+        "grid": "3:1"
+      },
+      {
+        "name": "Tahith Chong",
+        "number": 21,
+        "position": "M",
+        "grid": "4:1"
+      },
+      {
+        "name": "Jürgen Locadia",
+        "number": 9,
+        "position": "F",
+        "grid": "5:2"
+      },
+      {
+        "name": "Sontje Hansen",
+        "number": 12,
+        "position": "F",
+        "grid": "5:1"
+      }
+    ],
+    "home_bench_players": [
+      {
+        "name": "Deniz Undav",
+        "number": 26,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "David Raum",
+        "number": 22,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Antonio Rüdiger",
+        "number": 2,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Leon Goretzka",
+        "number": 8,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Waldemar Anton",
+        "number": 3,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Alexander Nübel",
+        "number": 21,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Oliver Baumann",
+        "number": 12,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Malick Thiaw",
+        "number": 24,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Jamie Leweling",
+        "number": 9,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Assan Ouédraogo",
+        "number": 25,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Nadiem Amiri",
+        "number": 20,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Angelo Stiller",
+        "number": 16,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Pascal Groß",
+        "number": 13,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Nick Woltemade",
+        "number": 11,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Maximilian Beier",
+        "number": 14,
+        "position": "F",
+        "grid": null
+      }
+    ],
+    "away_bench_players": [
+      {
+        "name": "Jeremy Antonisse",
+        "number": 11,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Jearl Margaritha",
+        "number": 16,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Gervane Kastaneer",
+        "number": 19,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Trevor Iriving Doornbusch",
+        "number": 26,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Tyrick Bodak",
+        "number": 25,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Jurien Gaari",
+        "number": 3,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Joshua Brenet",
+        "number": 20,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Shurandy Sambo",
+        "number": 2,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Roshon van Eijma",
+        "number": 4,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Ar'Jany Martha",
+        "number": 15,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Kenji Gorré",
+        "number": 14,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Kevin Felida",
+        "number": 22,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Tyrese Noslin",
+        "number": 13,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Godfried Roemeratoe",
+        "number": 6,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Brandley Kuwas",
+        "number": 17,
+        "position": "F",
+        "grid": null
+      }
+    ],
+    "lineup_source": "api-football fixtures/lineups",
+    "lineup_source_name": "",
+    "lineup_source_type": "",
+    "lineup_notes_cn": [],
+    "lineup_as_of_utc": null,
+    "lineup_updated_at": "2026-06-15 16:57:41 CST",
+    "lineup_confirmed_utc": "2026-06-15 16:57:41 CST",
+    "lineup_payload_type": "starting_xi"
   },
   "context": {
     "standings": {
@@ -202,16 +590,6 @@
   },
   "risk_flags": [
     {
-      "code": "CONFIRMED_LINEUP_MISSING",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
-    },
-    {
-      "code": "LINEUP_WAIT_EVENT",
-      "severity": "HIGH",
-      "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
-    },
-    {
       "code": "REFEREE_MISSING",
       "severity": "LOW",
       "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
@@ -229,12 +607,6 @@
   ],
   "data_gaps": [
     {
-      "field": "lineups.confirmed_lineup",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
-      "blocks_play": true
-    },
-    {
       "field": "match.referee",
       "severity": "LOW",
       "message": "referee_status=MISSING; keep as a non-blocking gap.",
@@ -250,5 +622,63 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
-  }
+  },
+  "live_refresh": {
+    "requested_at": "2026-06-15 16:57:37 CST",
+    "fixture_id": "1489374",
+    "overall_status": "partial",
+    "modules": {
+      "odds": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 16:57:39 CST",
+        "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1656。"
+      },
+      "lineups": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 16:57:41 CST",
+        "message_cn": "实时 API 成功，fixture_id=1489374 首发已确认。 首发已写入：Germany 4-2-3-1，Curaçao 4-3-1-2。"
+      },
+      "referee": {
+        "requested": true,
+        "source": "missing",
+        "status": "empty",
+        "fetched_at": "2026-06-15 16:57:42 CST",
+        "message_cn": "实时 API 暂无裁判。"
+      },
+      "result_sync": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 16:57:43 CST",
+        "message_cn": "实时 API 成功，已同步完赛比分：德国 7-1 库拉索。"
+      },
+      "weather": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 16:57:47 CST",
+        "message_cn": "实时 API 成功，天气已接入。"
+      },
+      "injuries": {
+        "requested": true,
+        "source": "missing",
+        "status": "empty",
+        "fetched_at": "2026-06-15 16:57:45 CST",
+        "message_cn": "实时 API 暂无伤停。"
+      }
+    }
+  },
+  "status": "finished",
+  "actual_score": {
+    "home": 7,
+    "away": 1
+  },
+  "actual_score_display_cn": "德国 7-1 库拉索",
+  "result_source": "api_football_fixture_result",
+  "result_note": "API-Football fixtures endpoint result sync",
+  "result_synced_at_utc": "2026-06-15T08:57:43Z"
 }

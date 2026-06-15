@@ -165,10 +165,398 @@
     }
   },
   "lineups": {
-    "confirmed_lineup_available": false,
-    "status": "MISSING",
-    "home_starting_xi": [],
-    "away_starting_xi": []
+    "confirmed_lineup_available": true,
+    "status": "CONFIRMED",
+    "home_starting_xi": [
+      "Kristoffer Nordfeldt",
+      "Gustaf Lagerbielke",
+      "Isak Hien",
+      "Victor Lindelöf",
+      "Jesper Karlström",
+      "Alexander Bernhardsson",
+      "Benjamin Nygren",
+      "Yasin Ayari",
+      "Gabriel Gudmundsson",
+      "Viktor Gyökeres",
+      "Alexander Isak"
+    ],
+    "away_starting_xi": [
+      "Abdelmouhib Chamakh",
+      "Yan Valery",
+      "Omar Rekik",
+      "Montassar Talbi",
+      "Amine Ben Hmida",
+      "Ali Abdi",
+      "Rani Khedira",
+      "Ellyes Skhiri",
+      "Hannibal Mejbri",
+      "Elias Saad",
+      "Anis Ben Slimane"
+    ],
+    "home_substitutes": [
+      "Elliot Stroud",
+      "Lucas Bergvall",
+      "Mattias Svanberg",
+      "Daniel Svensson",
+      "Anthony Elanga",
+      "Jacob Widell Zetterström",
+      "Viktor Johansson",
+      "Hjalmar Ekdal",
+      "Eric Smith",
+      "Carl Starfelt",
+      "Herman Johansson",
+      "Ken Sema",
+      "Besfort Zeneli",
+      "Taha Abdi Ali",
+      "Gustaf Nilsson"
+    ],
+    "away_substitutes": [
+      "Mohamed Belhadj Mahmoud",
+      "Sebastian Tounekti",
+      "Elias Achouri",
+      "Ismael Gharbi",
+      "Firas Chaouat",
+      "Aymen Dahmen",
+      "Sabri Ben Hessen",
+      "Adem Arous",
+      "Dylan Bronn",
+      "Moataz Nefati",
+      "Raed Chikhaoui",
+      "Mortadha Ben Ouanes",
+      "Khalil Ayari",
+      "Rayan Elloumi",
+      "Hazem Mastouri"
+    ],
+    "formation_home": "3-1-4-2",
+    "formation_away": "5-3-2",
+    "home_starting_players": [
+      {
+        "name": "Kristoffer Nordfeldt",
+        "number": 23,
+        "position": "G",
+        "grid": "1:1"
+      },
+      {
+        "name": "Gustaf Lagerbielke",
+        "number": 2,
+        "position": "D",
+        "grid": "2:3"
+      },
+      {
+        "name": "Isak Hien",
+        "number": 4,
+        "position": "D",
+        "grid": "2:2"
+      },
+      {
+        "name": "Victor Lindelöf",
+        "number": 3,
+        "position": "D",
+        "grid": "2:1"
+      },
+      {
+        "name": "Jesper Karlström",
+        "number": 16,
+        "position": "M",
+        "grid": "3:1"
+      },
+      {
+        "name": "Alexander Bernhardsson",
+        "number": 21,
+        "position": "M",
+        "grid": "4:4"
+      },
+      {
+        "name": "Benjamin Nygren",
+        "number": 10,
+        "position": "M",
+        "grid": "4:3"
+      },
+      {
+        "name": "Yasin Ayari",
+        "number": 18,
+        "position": "M",
+        "grid": "4:2"
+      },
+      {
+        "name": "Gabriel Gudmundsson",
+        "number": 5,
+        "position": "M",
+        "grid": "4:1"
+      },
+      {
+        "name": "Viktor Gyökeres",
+        "number": 17,
+        "position": "F",
+        "grid": "5:2"
+      },
+      {
+        "name": "Alexander Isak",
+        "number": 9,
+        "position": "F",
+        "grid": "5:1"
+      }
+    ],
+    "away_starting_players": [
+      {
+        "name": "Abdelmouhib Chamakh",
+        "number": 1,
+        "position": "G",
+        "grid": "1:1"
+      },
+      {
+        "name": "Yan Valery",
+        "number": 20,
+        "position": "D",
+        "grid": "2:5"
+      },
+      {
+        "name": "Omar Rekik",
+        "number": 4,
+        "position": "D",
+        "grid": "2:4"
+      },
+      {
+        "name": "Montassar Talbi",
+        "number": 3,
+        "position": "D",
+        "grid": "2:3"
+      },
+      {
+        "name": "Amine Ben Hmida",
+        "number": 21,
+        "position": "D",
+        "grid": "2:2"
+      },
+      {
+        "name": "Ali Abdi",
+        "number": 2,
+        "position": "D",
+        "grid": "2:1"
+      },
+      {
+        "name": "Rani Khedira",
+        "number": 13,
+        "position": "M",
+        "grid": "3:3"
+      },
+      {
+        "name": "Ellyes Skhiri",
+        "number": 17,
+        "position": "M",
+        "grid": "3:2"
+      },
+      {
+        "name": "Hannibal Mejbri",
+        "number": 10,
+        "position": "M",
+        "grid": "3:1"
+      },
+      {
+        "name": "Elias Saad",
+        "number": 8,
+        "position": "F",
+        "grid": "4:2"
+      },
+      {
+        "name": "Anis Ben Slimane",
+        "number": 25,
+        "position": "F",
+        "grid": "4:1"
+      }
+    ],
+    "home_bench_players": [
+      {
+        "name": "Elliot Stroud",
+        "number": 24,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Lucas Bergvall",
+        "number": 7,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Mattias Svanberg",
+        "number": 19,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Daniel Svensson",
+        "number": 8,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Anthony Elanga",
+        "number": 11,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Jacob Widell Zetterström",
+        "number": 1,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Viktor Johansson",
+        "number": 12,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Hjalmar Ekdal",
+        "number": 14,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Eric Smith",
+        "number": 20,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Carl Starfelt",
+        "number": 15,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Herman Johansson",
+        "number": 6,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Ken Sema",
+        "number": 13,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Besfort Zeneli",
+        "number": 22,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Taha Abdi Ali",
+        "number": 26,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Gustaf Nilsson",
+        "number": 25,
+        "position": "F",
+        "grid": null
+      }
+    ],
+    "away_bench_players": [
+      {
+        "name": "Mohamed Belhadj Mahmoud",
+        "number": 15,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Sebastian Tounekti",
+        "number": 26,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Elias Achouri",
+        "number": 7,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Ismael Gharbi",
+        "number": 11,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Firas Chaouat",
+        "number": 19,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Aymen Dahmen",
+        "number": 16,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Sabri Ben Hessen",
+        "number": 22,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Adem Arous",
+        "number": 5,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Dylan Bronn",
+        "number": 6,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Moataz Nefati",
+        "number": 23,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Raed Chikhaoui",
+        "number": 24,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Mortadha Ben Ouanes",
+        "number": 12,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Khalil Ayari",
+        "number": 14,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Rayan Elloumi",
+        "number": 18,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Hazem Mastouri",
+        "number": 9,
+        "position": "F",
+        "grid": null
+      }
+    ],
+    "lineup_source": "api-football fixtures/lineups",
+    "lineup_source_name": "",
+    "lineup_source_type": "",
+    "lineup_notes_cn": [],
+    "lineup_as_of_utc": null,
+    "lineup_updated_at": "2026-06-15 17:06:24 CST",
+    "lineup_confirmed_utc": "2026-06-15 17:06:24 CST",
+    "lineup_payload_type": "starting_xi"
   },
   "context": {
     "standings": {
@@ -202,16 +590,6 @@
   },
   "risk_flags": [
     {
-      "code": "CONFIRMED_LINEUP_MISSING",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
-    },
-    {
-      "code": "LINEUP_WAIT_EVENT",
-      "severity": "HIGH",
-      "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
-    },
-    {
       "code": "REFEREE_MISSING",
       "severity": "LOW",
       "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
@@ -229,12 +607,6 @@
   ],
   "data_gaps": [
     {
-      "field": "lineups.confirmed_lineup",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
-      "blocks_play": true
-    },
-    {
       "field": "match.referee",
       "severity": "LOW",
       "message": "referee_status=MISSING; keep as a non-blocking gap.",
@@ -250,5 +622,63 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
+  },
+  "status": "finished",
+  "actual_score": {
+    "home": 5,
+    "away": 1
+  },
+  "actual_score_display_cn": "瑞典 5-1 突尼斯",
+  "result_source": "api_football_fixture_result",
+  "result_note": "API-Football fixtures endpoint result sync",
+  "result_synced_at_utc": "2026-06-15T09:06:27Z",
+  "live_refresh": {
+    "requested_at": "2026-06-15 17:06:20 CST",
+    "fixture_id": "1539002",
+    "overall_status": "partial",
+    "modules": {
+      "odds": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:23 CST",
+        "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1482。"
+      },
+      "lineups": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:24 CST",
+        "message_cn": "实时 API 成功，fixture_id=1539002 首发已确认。 首发已写入：Sweden 3-1-4-2，Tunisia 5-3-2。"
+      },
+      "referee": {
+        "requested": true,
+        "source": "missing",
+        "status": "empty",
+        "fetched_at": "2026-06-15 17:06:26 CST",
+        "message_cn": "实时 API 暂无裁判。"
+      },
+      "result_sync": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:27 CST",
+        "message_cn": "实时 API 成功，已同步完赛比分：瑞典 5-1 突尼斯。"
+      },
+      "weather": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:32 CST",
+        "message_cn": "实时 API 成功，天气已接入。"
+      },
+      "injuries": {
+        "requested": true,
+        "source": "missing",
+        "status": "empty",
+        "fetched_at": "2026-06-15 17:06:29 CST",
+        "message_cn": "实时 API 暂无伤停。"
+      }
+    }
   }
 }

@@ -42,6 +42,68 @@
       ],
       "result_source": "manual_result",
       "result_note": "澳大利亚 2-0 土耳其，赛后手动写入。"
+    },
+    "1489374": {
+      "fixture_id": "1489374",
+      "api_fixture_id": "1489374",
+      "alias_fixture_ids": [
+        "66457070"
+      ],
+      "home_team": "Germany",
+      "away_team": "Curaçao",
+      "actual_score": {
+        "home": 7,
+        "away": 1
+      },
+      "status": "finished",
+      "result_source": "api_football_fixture_result",
+      "result_note": "API-Football fixtures endpoint result sync",
+      "result_synced_at_utc": "2026-06-15T08:57:43Z"
+    },
+    "1489376": {
+      "fixture_id": "1489376",
+      "api_fixture_id": "1489376",
+      "alias_fixture_ids": [],
+      "home_team": "Netherlands",
+      "away_team": "Japan",
+      "actual_score": {
+        "home": 2,
+        "away": 2
+      },
+      "status": "finished",
+      "result_source": "api_football_fixture_result",
+      "result_note": "API-Football fixtures endpoint result sync",
+      "result_synced_at_utc": "2026-06-15T09:05:59Z"
+    },
+    "1489375": {
+      "fixture_id": "1489375",
+      "api_fixture_id": "1489375",
+      "alias_fixture_ids": [],
+      "home_team": "Ivory Coast",
+      "away_team": "Ecuador",
+      "actual_score": {
+        "home": 1,
+        "away": 0
+      },
+      "status": "finished",
+      "result_source": "api_football_fixture_result",
+      "result_note": "API-Football fixtures endpoint result sync",
+      "result_synced_at_utc": "2026-06-15T09:06:14Z"
+    },
+    "1539002": {
+      "fixture_id": "1539002",
+      "api_fixture_id": "1539002",
+      "alias_fixture_ids": [],
+      "home_team": "Sweden",
+      "away_team": "Tunisia",
+      "actual_score": {
+        "home": 5,
+        "away": 1
+      },
+      "status": "finished",
+      "result_source": "api_football_fixture_result",
+      "result_note": "API-Football fixtures endpoint result sync",
+      "result_synced_at_utc": "2026-06-15T09:06:27Z"
     }
   }
 }

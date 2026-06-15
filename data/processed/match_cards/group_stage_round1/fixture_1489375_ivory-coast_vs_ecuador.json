@@ -165,10 +165,398 @@
     }
   },
   "lineups": {
-    "confirmed_lineup_available": false,
-    "status": "MISSING",
-    "home_starting_xi": [],
-    "away_starting_xi": []
+    "confirmed_lineup_available": true,
+    "status": "CONFIRMED",
+    "home_starting_xi": [
+      "Yahia Fofana",
+      "Guéla Doué",
+      "Wilfried Singo",
+      "Emmanuel Agbadou",
+      "Ghislain Konan",
+      "Yan Diomande",
+      "Franck Kessié",
+      "Seko Fofana",
+      "Bazoumana Touré",
+      "Nicolas Pépé",
+      "Elye Wahi"
+    ],
+    "away_starting_xi": [
+      "Hernán Galíndez",
+      "Alan Franco",
+      "Joel Ordóñez",
+      "Willian Pacho",
+      "Piero Hincapié",
+      "John Yeboah",
+      "Moisés Caicedo",
+      "Pedro Vite",
+      "Alan Minda",
+      "Gonzalo Plata",
+      "Enner Valencia"
+    ],
+    "home_substitutes": [
+      "Amad Diallo",
+      "Ange-Yoan Bonny",
+      "Ibrahim Sangaré",
+      "Christ Inao Oulaï",
+      "Odilon Kossounou",
+      "Mohamed Koné",
+      "Alban Lafont",
+      "Christopher Operi",
+      "Ousmane Diomande",
+      "Evan Ndicka",
+      "Parfait Guiagon",
+      "Simon Adingra",
+      "Jean Michaël Seri",
+      "Evann Guessand",
+      "Oumar Diakité"
+    ],
+    "away_substitutes": [
+      "Nilson Angulo",
+      "Jackson Porozo",
+      "Ángelo Preciado",
+      "Kevin Rodriguez",
+      "Gonzalo Valle",
+      "Moisés Ramírez",
+      "Yaimar Medina",
+      "Félix Torres",
+      "Kendry Páez",
+      "Pervis Estupiñán",
+      "Jordy Alcivar",
+      "Denil Castillo",
+      "Jordy Caicedo",
+      "Anthony Valencia",
+      "Jeremy Arevalo"
+    ],
+    "formation_home": "4-4-2",
+    "formation_away": "4-4-2",
+    "home_starting_players": [
+      {
+        "name": "Yahia Fofana",
+        "number": 1,
+        "position": "G",
+        "grid": "1:1"
+      },
+      {
+        "name": "Guéla Doué",
+        "number": 17,
+        "position": "D",
+        "grid": "2:4"
+      },
+      {
+        "name": "Wilfried Singo",
+        "number": 5,
+        "position": "D",
+        "grid": "2:3"
+      },
+      {
+        "name": "Emmanuel Agbadou",
+        "number": 20,
+        "position": "D",
+        "grid": "2:2"
+      },
+      {
+        "name": "Ghislain Konan",
+        "number": 3,
+        "position": "D",
+        "grid": "2:1"
+      },
+      {
+        "name": "Yan Diomande",
+        "number": 11,
+        "position": "M",
+        "grid": "3:4"
+      },
+      {
+        "name": "Franck Kessié",
+        "number": 8,
+        "position": "M",
+        "grid": "3:3"
+      },
+      {
+        "name": "Seko Fofana",
+        "number": 6,
+        "position": "M",
+        "grid": "3:2"
+      },
+      {
+        "name": "Bazoumana Touré",
+        "number": 24,
+        "position": "M",
+        "grid": "3:1"
+      },
+      {
+        "name": "Nicolas Pépé",
+        "number": 19,
+        "position": "F",
+        "grid": "4:2"
+      },
+      {
+        "name": "Elye Wahi",
+        "number": 12,
+        "position": "F",
+        "grid": "4:1"
+      }
+    ],
+    "away_starting_players": [
+      {
+        "name": "Hernán Galíndez",
+        "number": 1,
+        "position": "G",
+        "grid": "1:1"
+      },
+      {
+        "name": "Alan Franco",
+        "number": 21,
+        "position": "D",
+        "grid": "2:4"
+      },
+      {
+        "name": "Joel Ordóñez",
+        "number": 4,
+        "position": "D",
+        "grid": "2:3"
+      },
+      {
+        "name": "Willian Pacho",
+        "number": 6,
+        "position": "D",
+        "grid": "2:2"
+      },
+      {
+        "name": "Piero Hincapié",
+        "number": 3,
+        "position": "D",
+        "grid": "2:1"
+      },
+      {
+        "name": "John Yeboah",
+        "number": 9,
+        "position": "M",
+        "grid": "3:4"
+      },
+      {
+        "name": "Moisés Caicedo",
+        "number": 23,
+        "position": "M",
+        "grid": "3:3"
+      },
+      {
+        "name": "Pedro Vite",
+        "number": 15,
+        "position": "M",
+        "grid": "3:2"
+      },
+      {
+        "name": "Alan Minda",
+        "number": 14,
+        "position": "M",
+        "grid": "3:1"
+      },
+      {
+        "name": "Gonzalo Plata",
+        "number": 19,
+        "position": "F",
+        "grid": "4:2"
+      },
+      {
+        "name": "Enner Valencia",
+        "number": 13,
+        "position": "F",
+        "grid": "4:1"
+      }
+    ],
+    "home_bench_players": [
+      {
+        "name": "Amad Diallo",
+        "number": 15,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Ange-Yoan Bonny",
+        "number": 9,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Ibrahim Sangaré",
+        "number": 18,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Christ Inao Oulaï",
+        "number": 26,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Odilon Kossounou",
+        "number": 7,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Mohamed Koné",
+        "number": 16,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Alban Lafont",
+        "number": 23,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Christopher Operi",
+        "number": 13,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Ousmane Diomande",
+        "number": 2,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Evan Ndicka",
+        "number": 21,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Parfait Guiagon",
+        "number": 25,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Simon Adingra",
+        "number": 10,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Jean Michaël Seri",
+        "number": 4,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Evann Guessand",
+        "number": 22,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Oumar Diakité",
+        "number": 14,
+        "position": "F",
+        "grid": null
+      }
+    ],
+    "away_bench_players": [
+      {
+        "name": "Nilson Angulo",
+        "number": 20,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Jackson Porozo",
+        "number": 25,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Ángelo Preciado",
+        "number": 17,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Kevin Rodriguez",
+        "number": 11,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Gonzalo Valle",
+        "number": 22,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Moisés Ramírez",
+        "number": 12,
+        "position": "G",
+        "grid": null
+      },
+      {
+        "name": "Yaimar Medina",
+        "number": 26,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Félix Torres",
+        "number": 2,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Kendry Páez",
+        "number": 10,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Pervis Estupiñán",
+        "number": 7,
+        "position": "D",
+        "grid": null
+      },
+      {
+        "name": "Jordy Alcivar",
+        "number": 5,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Denil Castillo",
+        "number": 18,
+        "position": "M",
+        "grid": null
+      },
+      {
+        "name": "Jordy Caicedo",
+        "number": 16,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Anthony Valencia",
+        "number": 8,
+        "position": "F",
+        "grid": null
+      },
+      {
+        "name": "Jeremy Arevalo",
+        "number": 24,
+        "position": "F",
+        "grid": null
+      }
+    ],
+    "lineup_source": "api-football fixtures/lineups",
+    "lineup_source_name": "",
+    "lineup_source_type": "",
+    "lineup_notes_cn": [],
+    "lineup_as_of_utc": null,
+    "lineup_updated_at": "2026-06-15 17:06:10 CST",
+    "lineup_confirmed_utc": "2026-06-15 17:06:10 CST",
+    "lineup_payload_type": "starting_xi"
   },
   "context": {
     "standings": {
@@ -202,16 +590,6 @@
   },
   "risk_flags": [
     {
-      "code": "CONFIRMED_LINEUP_MISSING",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
-    },
-    {
-      "code": "LINEUP_WAIT_EVENT",
-      "severity": "HIGH",
-      "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
-    },
-    {
       "code": "REFEREE_MISSING",
       "severity": "LOW",
       "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
@@ -229,12 +607,6 @@
   ],
   "data_gaps": [
     {
-      "field": "lineups.confirmed_lineup",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
-      "blocks_play": true
-    },
-    {
       "field": "match.referee",
       "severity": "LOW",
       "message": "referee_status=MISSING; keep as a non-blocking gap.",
@@ -250,5 +622,63 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
-  }
+  },
+  "live_refresh": {
+    "requested_at": "2026-06-15 17:06:06 CST",
+    "fixture_id": "1489375",
+    "overall_status": "partial",
+    "modules": {
+      "odds": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:09 CST",
+        "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1420。"
+      },
+      "lineups": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:10 CST",
+        "message_cn": "实时 API 成功，fixture_id=1489375 首发已确认。 首发已写入：Ivory Coast 4-4-2，Ecuador 4-4-2。"
+      },
+      "referee": {
+        "requested": true,
+        "source": "missing",
+        "status": "empty",
+        "fetched_at": "2026-06-15 17:06:12 CST",
+        "message_cn": "实时 API 暂无裁判。"
+      },
+      "result_sync": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:14 CST",
+        "message_cn": "实时 API 成功，已同步完赛比分：科特迪瓦 1-0 厄瓜多尔。"
+      },
+      "weather": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-15 17:06:18 CST",
+        "message_cn": "实时 API 成功，天气已接入。"
+      },
+      "injuries": {
+        "requested": true,
+        "source": "missing",
+        "status": "empty",
+        "fetched_at": "2026-06-15 17:06:15 CST",
+        "message_cn": "实时 API 暂无伤停。"
+      }
+    }
+  },
+  "status": "finished",
+  "actual_score": {
+    "home": 1,
+    "away": 0
+  },
+  "actual_score_display_cn": "科特迪瓦 1-0 厄瓜多尔",
+  "result_source": "api_football_fixture_result",
+  "result_note": "API-Football fixtures endpoint result sync",
+  "result_synced_at_utc": "2026-06-15T09:06:14Z"
 }
