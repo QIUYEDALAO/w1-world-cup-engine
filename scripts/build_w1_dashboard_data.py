@@ -717,6 +717,75 @@ def build_odds_move(from_snapshot: dict[str, Any], to_snapshot: dict[str, Any], 
     }
 
 
+# ---------------------------------------------------------------------------
+# odds_movement status -> PLAY_GUARD gate: single source of truth.
+# Principle: `status` carries gate-changing distinctions; `status_reason_code`
+# carries only non-gate-changing detail. HARD_THIN and SOFT_THIN gate
+# differently (HARD_SKIP vs WARN_ONLY) so they MUST live at the status level.
+# This map and the helpers below are imported by
+# check_w1_odds_movement_status_consistency.py so code and checker never diverge.
+# ---------------------------------------------------------------------------
+
+# Cascade / dominance priority (highest first). MARKET_CONFLICT is reserved:
+# the monitor does not emit it yet (coherence.x2_ou_ah_consistent is always
+# true) but its priority slot is fixed here for when it is implemented.
+ODDS_MOVEMENT_STATUS_PRIORITY = [
+    "HARD_THIN",
+    "SOFT_THIN",
+    "MARKET_CONFLICT",
+    "MARKET_ALERT",
+    "MARKET_MOVING",
+    "MARKET_STABLE",
+]
+
+# Deprecated alias -> canonical status. THIN_MARKET_SKIP == HARD_THIN (skip).
+ODDS_MOVEMENT_DEPRECATED_STATUS_ALIASES = {"THIN_MARKET_SKIP": "HARD_THIN"}
+
+ODDS_MOVEMENT_STATUS_ENUM = set(ODDS_MOVEMENT_STATUS_PRIORITY) | set(
+    ODDS_MOVEMENT_DEPRECATED_STATUS_ALIASES
+)
+
+# Allowed status_reason_code values per status (explicit allowlist, stricter
+# than a prefix rule). CONFLICT reserved for future use.
+ODDS_MOVEMENT_REASON_BY_STATUS = {
+    "HARD_THIN": {"HARD_THIN_NO_1X2", "HARD_THIN_NO_OU"},
+    "SOFT_THIN": {"SOFT_THIN_FEW_BOOKS", "SOFT_THIN_STALE", "SOFT_THIN_WIDE_SPREAD"},
+    "MARKET_STABLE": {"STABLE"},
+    "MARKET_MOVING": {"MOVING_LINEUP_WINDOW"},
+    "MARKET_ALERT": {"ALERT_FAVORITE_FLIP", "ALERT_SHARP_RECENT", "ALERT_MAJOR_MOVE"},
+    "MARKET_CONFLICT": {"CONFLICT"},
+}
+
+# status -> gate fields for the unconditional statuses. MARKET_ALERT /
+# MARKET_CONFLICT depend on tier + magnitude, resolved in
+# resolve_odds_movement_gate (kept byte-for-byte equal to the prior if/elif).
+ODDS_MOVEMENT_GATE_MAP = {
+    "HARD_THIN": {"recommended_gate": "SKIP", "allow_formal_judgment": False, "reference_action": "DOWNGRADE", "gate_effect": "HARD_SKIP"},
+    "SOFT_THIN": {"recommended_gate": "OBSERVE_ONLY", "allow_formal_judgment": False, "reference_action": "EARLY_REFERENCE", "gate_effect": "WARN_ONLY"},
+    "MARKET_STABLE": {"recommended_gate": "ALLOW_FORMAL", "allow_formal_judgment": True, "reference_action": "UPGRADE", "gate_effect": "ALLOW"},
+    "MARKET_MOVING": {"recommended_gate": "OBSERVE_ONLY", "allow_formal_judgment": False, "reference_action": "HOLD", "gate_effect": "WARN_ONLY"},
+}
+
+
+def normalize_odds_movement_status(status: str) -> str:
+    """Map deprecated aliases (e.g. THIN_MARKET_SKIP) to canonical status."""
+    return ODDS_MOVEMENT_DEPRECATED_STATUS_ALIASES.get(status, status)
+
+
+def resolve_odds_movement_gate(status: str, *, hard_movement_gate: bool, magnitude_overall: str) -> dict[str, Any]:
+    """Resolve status -> gate fields. Single source of truth shared with the checker."""
+    status = normalize_odds_movement_status(status)
+    if status in ("MARKET_ALERT", "MARKET_CONFLICT"):
+        if hard_movement_gate:
+            return {"recommended_gate": "OBSERVE_ONLY", "allow_formal_judgment": False, "reference_action": "DOWNGRADE", "gate_effect": "TIER_A_GATE"}
+        return {"recommended_gate": "OBSERVE_ONLY", "allow_formal_judgment": False, "reference_action": "RECOMPUTE" if magnitude_overall == "major" else "HOLD", "gate_effect": "WARN_ONLY"}
+    base = ODDS_MOVEMENT_GATE_MAP.get(status)
+    if base is None:
+        # Unknown status (unreachable by construction): conservative WARN_ONLY.
+        base = {"recommended_gate": "OBSERVE_ONLY", "allow_formal_judgment": False, "reference_action": "HOLD", "gate_effect": "WARN_ONLY"}
+    return dict(base)
+
+
 def odds_movement_monitor(
     latest: dict[str, Any],
     previous: dict[str, Any] | None,
@@ -785,39 +854,21 @@ def odds_movement_monitor(
     elif cumulative["magnitude_overall"] == "medium":
         status, reason = "MARKET_MOVING", "MOVING_LINEUP_WINDOW"
 
+    # Normalize deprecated aliases (THIN_MARKET_SKIP -> HARD_THIN) before any
+    # status-keyed lookup below, then resolve the gate via the shared table.
+    status = normalize_odds_movement_status(status)
     calibrated = thresholds_config.get("calibrated", "none")
     tier = thresholds_config.get("tier", "C")
     hard_movement_gate = calibrated == "full" and tier == "A"
-    if status == "HARD_THIN":
-        recommended_gate = "SKIP"
-        allow_formal = False
-        reference_action = "DOWNGRADE"
-        gate_effect = "HARD_SKIP"
-    elif status == "SOFT_THIN":
-        recommended_gate = "OBSERVE_ONLY"
-        allow_formal = False
-        reference_action = "EARLY_REFERENCE"
-        gate_effect = "WARN_ONLY"
-    elif status == "MARKET_STABLE":
-        recommended_gate = "ALLOW_FORMAL"
-        allow_formal = True
-        reference_action = "UPGRADE"
-        gate_effect = "ALLOW"
-    elif status == "MARKET_MOVING":
-        recommended_gate = "OBSERVE_ONLY"
-        allow_formal = False
-        reference_action = "HOLD"
-        gate_effect = "WARN_ONLY"
-    elif status in {"MARKET_ALERT", "MARKET_CONFLICT"} and hard_movement_gate:
-        recommended_gate = "OBSERVE_ONLY"
-        allow_formal = False
-        reference_action = "DOWNGRADE"
-        gate_effect = "TIER_A_GATE"
-    else:
-        recommended_gate = "OBSERVE_ONLY"
-        allow_formal = False
-        reference_action = "RECOMPUTE" if cumulative["magnitude_overall"] == "major" else "HOLD"
-        gate_effect = "WARN_ONLY"
+    gate = resolve_odds_movement_gate(
+        status,
+        hard_movement_gate=hard_movement_gate,
+        magnitude_overall=cumulative["magnitude_overall"],
+    )
+    recommended_gate = gate["recommended_gate"]
+    allow_formal = gate["allow_formal_judgment"]
+    reference_action = gate["reference_action"]
+    gate_effect = gate["gate_effect"]
 
     normal_sentence = {
         "MARKET_STABLE": "盘口已稳定，早盘参考可作为赛前分析参考。",

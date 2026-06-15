@@ -589,7 +589,8 @@
     }
   },
   "odds_movement": {
-    "status": "READY",
+    "status": "SOFT_THIN",
+    "status_note": "Legacy card-level odds_movement; authoritative status is recomputed into dashboard data by W1_ODDS_MOVEMENT_MONITOR_V1. READY is a market_signal value and was moved out of odds_movement.status (W1_P0_CONSISTENCY_AND_AUDIT_REFRESH_V1).",
     "first_seen_at_utc": "2026-06-10T06:45:00Z",
     "latest_seen_at_utc": "2026-06-12T01:53:08Z",
     "movement_summary": "1X2 Home: 2.60→2.64; 1X2 Draw: 3.10→3.0; 1X2 Away: 2.76→2.8",

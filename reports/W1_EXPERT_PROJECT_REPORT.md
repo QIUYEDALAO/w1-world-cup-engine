@@ -220,13 +220,17 @@ rho provenance：
 - OU 使用隐含 μ drift。
 - 输出 recent / cumulative / phase-aware 的市场变化状态。
 
-状态枚举：
+状态枚举（W1_P0_CONSISTENCY_AND_AUDIT_REFRESH_V1 起对齐）：
 
 - `MARKET_STABLE`
 - `MARKET_MOVING`
 - `MARKET_ALERT`
-- `MARKET_CONFLICT`
-- `THIN_MARKET_SKIP`
+- `MARKET_CONFLICT`（保留，monitor 暂未触发）
+- `HARD_THIN`（= HARD_SKIP）
+- `SOFT_THIN`（= WARN_ONLY）
+- `THIN_MARKET_SKIP`（DEPRECATED，accepted-but-deprecated，映射到 `HARD_THIN`，待 odds snapshot 采集上线后移除）
+
+`status` 只承载会改变 PLAY_GUARD 门控的区分；`status_reason_code`（如 `NO_1X2` / `NO_OU` / `FEW_BOOKS` / `STALE` / `WIDE_SPREAD`）只承载不改变门控的原因。`READY` 不属于 odds_movement.status，只属于 `market_signal.status`。
 
 PLAY_GUARD 关系：
 
@@ -422,6 +426,7 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_rho_real_ou_calibration.py`
 - `scripts/check_w1_weather_integration.py`
 - `scripts/check_w1_lineup_api_binding.py`
+- `scripts/check_w1_odds_movement_status_consistency.py`（W1_P0_CONSISTENCY_AND_AUDIT_REFRESH_V1：odds_movement.status 枚举/前缀/门控一致性，THIN_MARKET_SKIP 仅 WARN）
 
 ## 8. 当前 WARN_ONLY / 限制
 

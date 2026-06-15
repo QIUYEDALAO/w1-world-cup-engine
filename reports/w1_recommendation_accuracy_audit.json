@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-14T19:13:22.875147+00:00",
+  "generated_at_utc": "2026-06-15T12:28:25.906208+00:00",
   "data_sources": [
     "reports/dashboard/assets/w1_dashboard_data.json",
     "data/results/round1_results.json",
@@ -7,16 +7,22 @@
     "data/manual_lineups/"
   ],
   "metrics": {
-    "total_completed_matches": 4,
+    "total_completed_matches": 8,
     "direction_accuracy": 0.5,
     "primary_score_accuracy": 0.0,
-    "secondary_score_accuracy": 0.25,
-    "primary_or_secondary_accuracy": 0.25,
+    "secondary_score_accuracy": 0.125,
+    "primary_or_secondary_accuracy": 0.125,
     "score_pool_coverage": 0.5,
-    "mean_actual_score_probability": 0.0693,
-    "mean_rps_1x2": 0.5012,
-    "mean_exact_score_log_loss": 3.0738,
+    "mean_actual_score_probability": 0.0575,
+    "mean_rps_1x2": 0.4131,
+    "mean_exact_score_log_loss": 3.4229,
     "worst_3_by_log_loss": [
+      {
+        "fixture_id": "1539002",
+        "match": "瑞典 vs 突尼斯",
+        "actual_score": "5-1",
+        "exact_score_log_loss": 5.6316
+      },
       {
         "fixture_id": "1489370",
         "match": "美国 vs 巴拉圭",
@@ -24,16 +30,10 @@
         "exact_score_log_loss": 4.3863
       },
       {
-        "fixture_id": "1539001",
-        "match": "澳大利亚 vs 土耳其",
-        "actual_score": "2-0",
-        "exact_score_log_loss": 3.4848
-      },
-      {
-        "fixture_id": "1489373",
-        "match": "卡塔尔 vs 瑞士",
-        "actual_score": "1-1",
-        "exact_score_log_loss": 2.5834
+        "fixture_id": "1489374",
+        "match": "德国 vs 库拉索",
+        "actual_score": "7-1",
+        "exact_score_log_loss": 4.2371
       }
     ],
     "best_3_by_actual_score_probability": [
@@ -44,16 +44,16 @@
         "actual_score_probability": 0.1587
       },
       {
+        "fixture_id": "1489375",
+        "match": "科特迪瓦 vs 厄瓜多尔",
+        "actual_score": "1-0",
+        "actual_score_probability": 0.1198
+      },
+      {
         "fixture_id": "1489373",
         "match": "卡塔尔 vs 瑞士",
         "actual_score": "1-1",
         "actual_score_probability": 0.0755
-      },
-      {
-        "fixture_id": "1539001",
-        "match": "澳大利亚 vs 土耳其",
-        "actual_score": "2-0",
-        "actual_score_probability": 0.0307
       }
     ]
   },
@@ -359,12 +359,314 @@
       "odds_status": "success",
       "data_quality_status": "partial",
       "calibration_missing_reason": null
+    },
+    {
+      "fixture_id": "1489374",
+      "alias_fixture_ids": [
+        "66457070"
+      ],
+      "match": "德国 vs 库拉索",
+      "actual_score": "7-1",
+      "primary_score": "3-0",
+      "secondary_score": "1-1",
+      "score_pool": [
+        {
+          "score": "3-0",
+          "path": "小胜主线",
+          "weight": 0.1218,
+          "probability": 0.1218,
+          "region_probability": 0.1218,
+          "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+        },
+        {
+          "score": "1-1",
+          "path": "防平路径",
+          "weight": 0.0311,
+          "probability": 0.0311,
+          "region_probability": 0.0658,
+          "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+        },
+        {
+          "score": "3-0",
+          "path": "优势扩大",
+          "weight": 0.1218,
+          "probability": 0.1218,
+          "region_probability": 0.7843,
+          "reason_cn": "热门净胜≥2 的区域质量。"
+        },
+        {
+          "score": "4-0",
+          "path": "打开局",
+          "weight": 0.1121,
+          "probability": 0.1121,
+          "region_probability": 0.6082,
+          "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+        },
+        {
+          "score": "4-0",
+          "path": "强队打穿",
+          "weight": 0.1121,
+          "probability": 0.1121,
+          "region_probability": 0.5845,
+          "reason_cn": "热门在高比分局取胜的联合质量。"
+        },
+        {
+          "score": "1-2",
+          "path": "防线崩盘",
+          "weight": 0.008,
+          "probability": 0.008,
+          "region_probability": 0.0222,
+          "reason_cn": "热门输球尾部质量。"
+        }
+      ],
+      "actual_score_probability": 0.0144,
+      "rps_1x2": 0.0082,
+      "exact_score_log_loss": 4.2371,
+      "predicted_direction": "H",
+      "predicted_direction_cn": "主胜",
+      "actual_direction": "H",
+      "actual_direction_cn": "主胜",
+      "direction_hit": true,
+      "primary_score_hit": false,
+      "secondary_score_hit": false,
+      "score_pool_hit": false,
+      "market_fit_error": 0.0102,
+      "lineup_source": "api-football fixtures/lineups",
+      "confirmed_lineup": true,
+      "odds_status": "success",
+      "data_quality_status": "partial",
+      "calibration_missing_reason": null
+    },
+    {
+      "fixture_id": "1489376",
+      "alias_fixture_ids": [],
+      "match": "荷兰 vs 日本",
+      "actual_score": "2-2",
+      "primary_score": "1-1",
+      "secondary_score": "1-1",
+      "score_pool": [
+        {
+          "score": "1-1",
+          "path": "小胜主线",
+          "weight": 0.1317,
+          "probability": 0.1317,
+          "region_probability": 0.1317,
+          "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+        },
+        {
+          "score": "1-1",
+          "path": "防平路径",
+          "weight": 0.1317,
+          "probability": 0.1317,
+          "region_probability": 0.2779,
+          "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+        },
+        {
+          "score": "2-0",
+          "path": "优势扩大",
+          "weight": 0.0921,
+          "probability": 0.0921,
+          "region_probability": 0.2392,
+          "reason_cn": "热门净胜≥2 的区域质量。"
+        },
+        {
+          "score": "2-2",
+          "path": "打开局",
+          "weight": 0.0452,
+          "probability": 0.0452,
+          "region_probability": 0.2329,
+          "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+        },
+        {
+          "score": "3-1",
+          "path": "强队打穿",
+          "weight": 0.0445,
+          "probability": 0.0445,
+          "region_probability": 0.1271,
+          "reason_cn": "热门在高比分局取胜的联合质量。"
+        },
+        {
+          "score": "0-1",
+          "path": "防线崩盘",
+          "weight": 0.0778,
+          "probability": 0.0778,
+          "region_probability": 0.2482,
+          "reason_cn": "热门输球尾部质量。"
+        }
+      ],
+      "actual_score_probability": 0.0452,
+      "rps_1x2": 0.2862,
+      "exact_score_log_loss": 3.0974,
+      "predicted_direction": "H",
+      "predicted_direction_cn": "主胜",
+      "actual_direction": "D",
+      "actual_direction_cn": "平局",
+      "direction_hit": false,
+      "primary_score_hit": false,
+      "secondary_score_hit": false,
+      "score_pool_hit": true,
+      "market_fit_error": 0.0115,
+      "lineup_source": "api-football fixtures/lineups",
+      "confirmed_lineup": true,
+      "odds_status": "success",
+      "data_quality_status": "partial",
+      "calibration_missing_reason": null
+    },
+    {
+      "fixture_id": "1489375",
+      "alias_fixture_ids": [],
+      "match": "科特迪瓦 vs 厄瓜多尔",
+      "actual_score": "1-0",
+      "primary_score": "0-0",
+      "secondary_score": "0-0",
+      "score_pool": [
+        {
+          "score": "0-0",
+          "path": "小胜主线",
+          "weight": 0.1696,
+          "probability": 0.1696,
+          "region_probability": 0.1696,
+          "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+        },
+        {
+          "score": "0-0",
+          "path": "防平路径",
+          "weight": 0.1696,
+          "probability": 0.1696,
+          "region_probability": 0.3382,
+          "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+        },
+        {
+          "score": "0-2",
+          "path": "优势扩大",
+          "weight": 0.0865,
+          "probability": 0.0865,
+          "region_probability": 0.1601,
+          "reason_cn": "热门净胜≥2 的区域质量。"
+        },
+        {
+          "score": "2-2",
+          "path": "打开局",
+          "weight": 0.0268,
+          "probability": 0.0268,
+          "region_probability": 0.112,
+          "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+        },
+        {
+          "score": "1-3",
+          "path": "强队打穿",
+          "weight": 0.0234,
+          "probability": 0.0234,
+          "region_probability": 0.0536,
+          "reason_cn": "热门在高比分局取胜的联合质量。"
+        },
+        {
+          "score": "1-0",
+          "path": "防线崩盘",
+          "weight": 0.1198,
+          "probability": 0.1198,
+          "region_probability": 0.2639,
+          "reason_cn": "热门输球尾部质量。"
+        }
+      ],
+      "actual_score_probability": 0.1198,
+      "rps_1x2": 0.7001,
+      "exact_score_log_loss": 2.1217,
+      "predicted_direction": "A",
+      "predicted_direction_cn": "客胜",
+      "actual_direction": "H",
+      "actual_direction_cn": "主胜",
+      "direction_hit": false,
+      "primary_score_hit": false,
+      "secondary_score_hit": false,
+      "score_pool_hit": true,
+      "market_fit_error": 0.0116,
+      "lineup_source": "api-football fixtures/lineups",
+      "confirmed_lineup": true,
+      "odds_status": "success",
+      "data_quality_status": "partial",
+      "calibration_missing_reason": null
+    },
+    {
+      "fixture_id": "1539002",
+      "alias_fixture_ids": [],
+      "match": "瑞典 vs 突尼斯",
+      "actual_score": "5-1",
+      "primary_score": "1-0",
+      "secondary_score": "1-1",
+      "score_pool": [
+        {
+          "score": "1-0",
+          "path": "小胜主线",
+          "weight": 0.1484,
+          "probability": 0.1484,
+          "region_probability": 0.1484,
+          "reason_cn": "比分矩阵众数;市场+基础面主路径。"
+        },
+        {
+          "score": "1-1",
+          "path": "防平路径",
+          "weight": 0.133,
+          "probability": 0.133,
+          "region_probability": 0.2937,
+          "reason_cn": "全平局质量;AH 是期望净胜球, 不保证胜差。"
+        },
+        {
+          "score": "2-0",
+          "path": "优势扩大",
+          "weight": 0.1058,
+          "probability": 0.1058,
+          "region_probability": 0.24,
+          "reason_cn": "热门净胜≥2 的区域质量。"
+        },
+        {
+          "score": "3-1",
+          "path": "打开局",
+          "weight": 0.0387,
+          "probability": 0.0387,
+          "region_probability": 0.1743,
+          "reason_cn": "总进球≥4 的区域质量(分布尾部, 非单一比分)。"
+        },
+        {
+          "score": "3-1",
+          "path": "强队打穿",
+          "weight": 0.0387,
+          "probability": 0.0387,
+          "region_probability": 0.1033,
+          "reason_cn": "热门在高比分局取胜的联合质量。"
+        },
+        {
+          "score": "0-1",
+          "path": "防线崩盘",
+          "weight": 0.0852,
+          "probability": 0.0852,
+          "region_probability": 0.2153,
+          "reason_cn": "热门输球尾部质量。"
+        }
+      ],
+      "actual_score_probability": 0.0036,
+      "rps_1x2": 0.3054,
+      "exact_score_log_loss": 5.6316,
+      "predicted_direction": "H",
+      "predicted_direction_cn": "主胜",
+      "actual_direction": "H",
+      "actual_direction_cn": "主胜",
+      "direction_hit": true,
+      "primary_score_hit": false,
+      "secondary_score_hit": false,
+      "score_pool_hit": false,
+      "market_fit_error": 0.0188,
+      "lineup_source": "api-football fixtures/lineups",
+      "confirmed_lineup": true,
+      "odds_status": "success",
+      "data_quality_status": "partial",
+      "calibration_missing_reason": null
     }
   ],
   "notes_cn": [
     "精确比分命中率不是唯一指标。",
     "score_pool 覆盖不等于推荐成功。",
     "RPS/log score 是当前主评估口径。",
-    "当前样本量 n=4，仍然很小，不允许调权重。"
+    "当前样本量 n=8，仍然很小，不允许调权重。"
   ]
 }

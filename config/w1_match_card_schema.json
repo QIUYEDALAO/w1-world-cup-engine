@@ -829,11 +829,14 @@
         },
         "status": {
           "type": "string",
+          "description": "odds_movement gate-driving status. HARD_THIN=HARD_SKIP, SOFT_THIN=WARN_ONLY. THIN_MARKET_SKIP is DEPRECATED (accepted-but-deprecated alias of HARD_THIN since W1_P0_CONSISTENCY_AND_AUDIT_REFRESH_V1 / 2026-06-15); planned removal after odds snapshot collection lands. READY is NOT valid here (it belongs to market_signal.status).",
           "enum": [
             "MARKET_STABLE",
             "MARKET_MOVING",
             "MARKET_ALERT",
             "MARKET_CONFLICT",
+            "HARD_THIN",
+            "SOFT_THIN",
             "THIN_MARKET_SKIP"
           ]
         },
