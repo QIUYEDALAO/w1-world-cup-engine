@@ -1,0 +1,348 @@
+{
+  "schema_version": "W1_FULL_PIPELINE_ANOMALY_REVIEW_V1",
+  "diagnostic_only": true,
+  "engine_modified": false,
+  "rho_modified": false,
+  "refetch_performed": false,
+  "threshold": 0.02,
+  "n_full_subset": 128,
+  "n_outliers": 11,
+  "cause_distribution": {
+    "DRAW_RATE_TENSION": 11
+  },
+  "data_bug_found": false,
+  "orientation_structurally_ruled_out": true,
+  "orientation_note": "covered rows merged on exact (date, home_id, away_id); orientation/team mismatch impossible.",
+  "conclusion_cn": "11/128 超阈值样本全部归因为 DRAW_RATE_TENSION：误差集中于平局，主客复现良好。根因是市场隐含 Dixon-Coles 的固有限制——μ 由 OU 固定、ρ 固定，单一 δ 无法同时匹配市场平局率。非数据 bug、非引擎 bug；记录为已知限制，本阶段不改引擎。",
+  "future_research_candidate": {
+    "id": "W1_DRAW_CALIBRATION_RESEARCH",
+    "idea_cn": "按场让 ρ 或加平局校准项浮动以吸收平局残差;需动引擎,属红线外,单独立项,先回测证明再上。",
+    "implemented_in_this_stage": false
+  },
+  "outliers": [
+    {
+      "match": "denmark vs france",
+      "season": "2018",
+      "actual_score": "0-0",
+      "max_abs_err": 0.0583,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.15,
+        0.355,
+        0.495
+      ],
+      "model_1x2": [
+        0.191,
+        0.297,
+        0.512
+      ],
+      "err_h": 0.0413,
+      "err_d": 0.0583,
+      "err_a": 0.017,
+      "draw_gap_model_minus_market": -0.0583,
+      "mu": 2.061,
+      "delta": -0.633,
+      "lambda_home": 0.714,
+      "lambda_away": 1.347,
+      "favorite_prob": 0.495,
+      "fit_sse": 0.005398,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "australia vs denmark",
+      "season": "2022",
+      "actual_score": "1-0",
+      "max_abs_err": 0.0332,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.148,
+        0.189,
+        0.663
+      ],
+      "model_1x2": [
+        0.12,
+        0.222,
+        0.658
+      ],
+      "err_h": 0.028,
+      "err_d": 0.0332,
+      "err_a": 0.0052,
+      "draw_gap_model_minus_market": 0.0332,
+      "mu": 2.579,
+      "delta": -1.216,
+      "lambda_home": 0.681,
+      "lambda_away": 1.898,
+      "favorite_prob": 0.663,
+      "fit_sse": 0.001915,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "england vs belgium",
+      "season": "2018",
+      "actual_score": "0-1",
+      "max_abs_err": 0.0316,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.361,
+        0.347,
+        0.292
+      ],
+      "model_1x2": [
+        0.376,
+        0.315,
+        0.309
+      ],
+      "err_h": 0.0145,
+      "err_d": 0.0316,
+      "err_a": 0.0171,
+      "draw_gap_model_minus_market": -0.0316,
+      "mu": 2.089,
+      "delta": 0.129,
+      "lambda_home": 1.109,
+      "lambda_away": 0.98,
+      "favorite_prob": 0.361,
+      "fit_sse": 0.001499,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "france vs australia",
+      "season": "2018",
+      "actual_score": "2-1",
+      "max_abs_err": 0.028,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.777,
+        0.133,
+        0.09
+      ],
+      "model_1x2": [
+        0.777,
+        0.161,
+        0.062
+      ],
+      "err_h": 0.0002,
+      "err_d": 0.028,
+      "err_a": 0.0278,
+      "draw_gap_model_minus_market": 0.028,
+      "mu": 2.831,
+      "delta": 1.801,
+      "lambda_home": 2.316,
+      "lambda_away": 0.515,
+      "favorite_prob": 0.777,
+      "fit_sse": 0.001561,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "argentina vs australia",
+      "season": "2022",
+      "actual_score": "2-1",
+      "max_abs_err": 0.0273,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.737,
+        0.158,
+        0.105
+      ],
+      "model_1x2": [
+        0.736,
+        0.185,
+        0.079
+      ],
+      "err_h": 0.0016,
+      "err_d": 0.0273,
+      "err_a": 0.0257,
+      "draw_gap_model_minus_market": 0.0273,
+      "mu": 2.701,
+      "delta": 1.576,
+      "lambda_home": 2.139,
+      "lambda_away": 0.562,
+      "favorite_prob": 0.737,
+      "fit_sse": 0.00141,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "iceland vs croatia",
+      "season": "2018",
+      "actual_score": "1-2",
+      "max_abs_err": 0.0247,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.198,
+        0.244,
+        0.558
+      ],
+      "model_1x2": [
+        0.18,
+        0.269,
+        0.552
+      ],
+      "err_h": 0.0181,
+      "err_d": 0.0247,
+      "err_a": 0.0066,
+      "draw_gap_model_minus_market": 0.0247,
+      "mu": 2.331,
+      "delta": -0.778,
+      "lambda_home": 0.777,
+      "lambda_away": 1.554,
+      "favorite_prob": 0.558,
+      "fit_sse": 0.000984,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "australia vs peru",
+      "season": "2018",
+      "actual_score": "0-2",
+      "max_abs_err": 0.0226,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.305,
+        0.271,
+        0.423
+      ],
+      "model_1x2": [
+        0.293,
+        0.294,
+        0.414
+      ],
+      "err_h": 0.013,
+      "err_d": 0.0226,
+      "err_a": 0.0097,
+      "draw_gap_model_minus_market": 0.0226,
+      "mu": 2.331,
+      "delta": -0.247,
+      "lambda_home": 1.042,
+      "lambda_away": 1.289,
+      "favorite_prob": 0.423,
+      "fit_sse": 0.000774,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "england vs iran",
+      "season": "2022",
+      "actual_score": "6-2",
+      "max_abs_err": 0.0222,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.693,
+        0.201,
+        0.106
+      ],
+      "model_1x2": [
+        0.692,
+        0.223,
+        0.085
+      ],
+      "err_h": 0.0016,
+      "err_d": 0.0222,
+      "err_a": 0.0206,
+      "draw_gap_model_minus_market": 0.0222,
+      "mu": 2.259,
+      "delta": 1.318,
+      "lambda_home": 1.789,
+      "lambda_away": 0.47,
+      "favorite_prob": 0.693,
+      "fit_sse": 0.000921,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "saudi_arabia vs mexico",
+      "season": "2022",
+      "actual_score": "1-2",
+      "max_abs_err": 0.0221,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.191,
+        0.225,
+        0.584
+      ],
+      "model_1x2": [
+        0.174,
+        0.247,
+        0.578
+      ],
+      "err_h": 0.0164,
+      "err_d": 0.0221,
+      "err_a": 0.0057,
+      "draw_gap_model_minus_market": 0.0221,
+      "mu": 2.586,
+      "delta": -0.889,
+      "lambda_home": 0.848,
+      "lambda_away": 1.738,
+      "favorite_prob": 0.584,
+      "fit_sse": 0.000789,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "ghana vs uruguay",
+      "season": "2022",
+      "actual_score": "0-2",
+      "max_abs_err": 0.0213,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.234,
+        0.25,
+        0.517
+      ],
+      "model_1x2": [
+        0.219,
+        0.271,
+        0.51
+      ],
+      "err_h": 0.0143,
+      "err_d": 0.0213,
+      "err_a": 0.0069,
+      "draw_gap_model_minus_market": 0.0213,
+      "mu": 2.459,
+      "delta": -0.616,
+      "lambda_home": 0.922,
+      "lambda_away": 1.537,
+      "favorite_prob": 0.517,
+      "fit_sse": 0.000707,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    },
+    {
+      "match": "peru vs denmark",
+      "season": "2018",
+      "actual_score": "0-1",
+      "max_abs_err": 0.0204,
+      "worst_outcome": "D",
+      "market_1x2": [
+        0.261,
+        0.312,
+        0.427
+      ],
+      "model_1x2": [
+        0.248,
+        0.333,
+        0.419
+      ],
+      "err_h": 0.0125,
+      "err_d": 0.0204,
+      "err_a": 0.0079,
+      "draw_gap_model_minus_market": 0.0204,
+      "mu": 1.848,
+      "delta": -0.317,
+      "lambda_home": 0.765,
+      "lambda_away": 1.083,
+      "favorite_prob": 0.427,
+      "fit_sse": 0.000635,
+      "cause": "DRAW_RATE_TENSION",
+      "cause_note": "draw is the worst-reproduced outcome; any H/A error is spillover from the draw misfit. Single-δ fit cannot match market draw rate at fixed μ,ρ."
+    }
+  ],
+  "notes_cn": [
+    "纯诊断:只读 import w1_score_engine,未改引擎/ρ/政策/阈值,未 refetch。",
+    "平局张力是已知限制,不在本阶段修(修=单独研究阶段)。",
+    "不构成投注/资金建议,不承诺命中率。"
+  ]
+}

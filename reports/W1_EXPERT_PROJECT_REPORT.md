@@ -438,6 +438,7 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_ou_coverage.py`（OU/AH 覆盖率探测：coverage-only、external_fetch_performed=false、无外部抓取）
 - `scripts/check_w1_odds_extension.py`（W1_S1B_ODDS_EXTENSION_V1：覆盖=128、FULL/validated 仅覆盖子集、AH 缺失、合并脚本无外部抓取、本地 odds 不入仓）
 - `scripts/check_w1_full_pipeline_backtest.py`（S1B：128 场 FULL replay、scope 限 2018+2022 不外推 1081、market reproduction、OU/BTTS 校准、引擎只读）
+- `scripts/check_w1_anomaly_review.py`（W1_FULL_PIPELINE_ANOMALY_REVIEW_V1：11 个超阈值样本全部归因、诊断 only、引擎/ρ 未改、无 refetch、未来修法不在本阶段实现）
 
 ## 8. 当前 WARN_ONLY / 限制
 
