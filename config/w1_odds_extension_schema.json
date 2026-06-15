@@ -1,0 +1,44 @@
+{
+  "schema_version": "W1_ODDS_EXTENSION_V1",
+  "description": "S1B Odds-Extension: local OU/1X2/BTTS odds merged onto the international dataset finals subset. Local file only; NO external fetch. AH absent. Covered subset (WC2018+2022, n=128) -> FULL; all else stays 1X2_ONLY.",
+  "input_local_file": {
+    "path": "data/local_odds/world_cup_odds_historical.csv",
+    "gitignored": true,
+    "external_fetch": false,
+    "source_tag": "footiqo / xBet closing odds, 90-minute regulation",
+    "expected_columns": ["matchDate(DD-MM-YY HH:MM)", "Season", "homeTeam", "awayTeam", "H", "D", "A",
+                         "O05","U05","O15","U15","O25","U25","O35","U35","O45","U45", "BTTSY", "BTTSN"],
+    "ah_columns": "ABSENT (AH_MISSING_NO_SOURCE)"
+  },
+  "join": {
+    "key": "match_date + home_team_id + away_team_id",
+    "team_id_source": "config/w1_team_aliases.json",
+    "covered_competitions": ["World Cup 2018", "World Cup 2022"],
+    "covered_count_expected": 128
+  },
+  "extension_columns": {
+    "odds_1x2_home_alternate": "number|null (local H)",
+    "odds_1x2_draw_alternate": "number|null (local D)",
+    "odds_1x2_away_alternate": "number|null (local A)",
+    "ou_O05..ou_U45": "number|null (local OU ladder, 5 lines 0.5..4.5)",
+    "ou_market_available": "bool (true iff all 10 ladder cells present)",
+    "ou_mu_derived": "number|null (market mu interpolated from OU ladder)",
+    "mu_source": "OU_LADDER_LOCAL_FILE when available",
+    "btts_yes_alternate": "number|null (local BTTSY)",
+    "btts_no_alternate": "number|null (local BTTSN)",
+    "odds_extension_covered": "bool (true for WC2018/2022 with local OU)",
+    "odds_extension_missing_reason": "NO_LOCAL_ODDS_SOURCE_2014 | NO_LOCAL_ODDS_MATCH | OUT_OF_SCOPE | ''",
+    "ah_available": "bool = false (no AH source)",
+    "ah_missing_reason": "AH_MISSING_NO_SOURCE",
+    "pipeline_mode": "FULL on covered subset; else 1X2_ONLY",
+    "w1_full_pipeline_validated": "True only on covered subset rows"
+  },
+  "hard_rules": [
+    "covered subset = WC2018+2022 finals, n=128; AH and 2014 NOT covered.",
+    "pipeline_mode=FULL and w1_full_pipeline_validated=True only on covered rows; never on qualifiers / 2014 / AH / 2026.",
+    "w1_full_pipeline_validated_for_full_dataset = false (no extrapolation to 1081).",
+    "2026 (12 matches) is a current snapshot only; never in historical backtest.",
+    "merge reads local file only; NO fetch/scrape/API/purchase; local odds not committed.",
+    "backtest imports w1_score_engine read-only; does not modify engine / DEFAULT_RHO / thresholds / decision_policy."
+  ]
+}

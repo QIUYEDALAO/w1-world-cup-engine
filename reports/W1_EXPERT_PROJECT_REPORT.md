@@ -436,6 +436,8 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_forward_ledger.py`（W1_FORWARD_LEDGER_AND_S2_PROTOTYPE_V1：赛前快照 schema/as_of/append-only，强制无赛后字段 leakage guard）
 - `scripts/check_w1_team_strength_prototype.py`（S2 prototype：prototype 标签、时序无未来泄漏、shrinkage、东道主 fallback、不接线上 λ）
 - `scripts/check_w1_ou_coverage.py`（OU/AH 覆盖率探测：coverage-only、external_fetch_performed=false、无外部抓取）
+- `scripts/check_w1_odds_extension.py`（W1_S1B_ODDS_EXTENSION_V1：覆盖=128、FULL/validated 仅覆盖子集、AH 缺失、合并脚本无外部抓取、本地 odds 不入仓）
+- `scripts/check_w1_full_pipeline_backtest.py`（S1B：128 场 FULL replay、scope 限 2018+2022 不外推 1081、market reproduction、OU/BTTS 校准、引擎只读）
 
 ## 8. 当前 WARN_ONLY / 限制
 
