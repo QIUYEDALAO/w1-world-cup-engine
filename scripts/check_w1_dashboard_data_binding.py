@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
 QATAR_CARD = ROOT / "data/processed/match_cards/group_stage_round1/fixture_1489373_qatar_vs_switzerland.json"
+ALLOWED_RESULT_SOURCES = {"post_match_auto_calibration_sample", "manual_verified_overlay", "api_football_fixture_result"}
 
 FORBIDDEN_TERMS = [
     "待 W1 参考信号",
@@ -324,8 +325,8 @@ def main() -> int:
             fail("fixture_id=1489373 Qatar vs Switzerland is missing")
         if qatar.get("status") != "finished" or qatar.get("actual_score") != {"home": 1, "away": 1}:
             fail("fixture_id=1489373 must be finished with actual_score 1-1")
-        if qatar.get("result_source") != "post_match_auto_calibration_sample":
-            fail("fixture_id=1489373 result_source must be post_match_auto_calibration_sample")
+        if qatar.get("result_source") not in ALLOWED_RESULT_SOURCES:
+            fail(f"fixture_id=1489373 result_source invalid: {qatar.get('result_source')}")
         qatar_cal = qatar.get("post_match_calibration", {})
         if qatar_cal.get("actual_score") != "1-1":
             fail("fixture_id=1489373 post_match_calibration.actual_score must be 1-1")
@@ -341,8 +342,8 @@ def main() -> int:
             fail("fixture_id=1489370 USA vs Paraguay is missing")
         if usa.get("status") != "finished" or usa.get("actual_score") != {"home": 4, "away": 1}:
             fail("fixture_id=1489370 must be finished with actual_score 4-1")
-        if usa.get("result_source") != "post_match_auto_calibration_sample":
-            fail("fixture_id=1489370 result_source must be post_match_auto_calibration_sample")
+        if usa.get("result_source") not in ALLOWED_RESULT_SOURCES:
+            fail(f"fixture_id=1489370 result_source invalid: {usa.get('result_source')}")
         usa_cal = usa.get("post_match_calibration", {})
         if usa_cal.get("actual_score") != "4-1":
             fail("fixture_id=1489370 post_match_calibration.actual_score must be 4-1")

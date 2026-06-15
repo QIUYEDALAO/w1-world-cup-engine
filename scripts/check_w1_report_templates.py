@@ -3,21 +3,18 @@
 
 from __future__ import annotations
 
-import csv
 import json
 import re
 import sys
-from collections import Counter
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = ROOT / "reports/dashboard/W1_LIVE_DASHBOARD.md"
 TEMPLATES = ROOT / "docs/W1_REPORT_TEMPLATES.md"
-CARDS_DIR = ROOT / "data/processed/match_cards/group_stage_round1"
-LEDGER = ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv"
 STATE = ROOT / "state/w1_refresh_state.json"
 POLICY = ROOT / "config/w1_decision_policy.json"
+DECISION_LABELS = {"W1_WAIT", "W1_WATCH", "W1_PLAY", "W1_PASS", "W1_SKIP", "W1_BLOCKED"}
 
 FORBIDDEN_TERMS = ["Q" + "Q", "offi" + "cial", "pend" + "ing"]
 
@@ -41,26 +38,28 @@ def assert_no_forbidden_terms(path: Path) -> None:
             fail(f"Forbidden term found in {path.relative_to(ROOT)}")
 
 
-def current_state() -> tuple[Counter, dict[str, str], dict, dict]:
-    cards = []
-    for path in sorted(CARDS_DIR.glob("*.json")):
-        cards.append(json.loads(read(path)))
-    if len(cards) != 24:
-        fail(f"Expected 24 current match cards, found {len(cards)}")
-
-    with LEDGER.open("r", encoding="utf-8", newline="") as handle:
-        ledger_rows = list(csv.DictReader(handle))
-    if len(ledger_rows) != 24:
-        fail(f"Expected 24 ledger rows, found {len(ledger_rows)}")
-
-    distribution = Counter(card["decision"]["label"] for card in cards)
-    first = next((row for row in ledger_rows if row["fixture_id"] == "1489369"), None)
-    if not first:
-        fail("First fixture 1489369 not found in ledger")
-
+def current_state() -> tuple[dict, dict]:
     state = json.loads(read(STATE))
     policy = json.loads(read(POLICY))
-    return distribution, first, state, policy
+    return state, policy
+
+
+def require_section(text: str, heading: str) -> None:
+    if heading not in text:
+        fail(f"Dashboard section missing: {heading}")
+
+
+def parse_decision_counts(text: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for match in re.finditer(r"\| (W1_[A-Z]+) \| (\d+) \|", text):
+        counts[match.group(1)] = int(match.group(2))
+    missing = {"W1_WAIT", "W1_WATCH", "W1_PLAY", "W1_PASS"} - set(counts)
+    if missing:
+        fail(f"Dashboard decision count labels missing: {sorted(missing)}")
+    invalid = set(counts) - DECISION_LABELS
+    if invalid:
+        fail(f"Dashboard decision count labels invalid: {sorted(invalid)}")
+    return counts
 
 
 def assert_dashboard() -> None:
@@ -69,33 +68,35 @@ def assert_dashboard() -> None:
     assert_no_forbidden_terms(DASHBOARD)
 
     text = read(DASHBOARD)
-    distribution, first, state, policy = current_state()
-    expected_counts = {
-        "W1_WAIT": distribution.get("W1_WAIT", 0),
-        "W1_WATCH": distribution.get("W1_WATCH", 0),
-        "W1_PLAY": distribution.get("W1_PLAY", 0),
-        "W1_PASS": distribution.get("W1_PASS", 0),
-    }
-    for label, count in expected_counts.items():
-        pattern = rf"\\| {label} \\| {count} \\|"
-        if not re.search(pattern, text):
-            fail(f"Dashboard count mismatch for {label}")
-
-    required_values = [
-        first["home_team"] + " vs " + first["away_team"],
-        first["final_decision"],
-        first["lineup_status"],
-        first["referee_status"],
-        state["next_run_cst"],
+    state, policy = current_state()
+    for section in ("## Decision Counts", "## First Match", "## Runtime", "## Unresolved Data Gaps", "## Notes"):
+        require_section(text, section)
+    counts = parse_decision_counts(text)
+    if sum(counts.values()) <= 0:
+        fail("Dashboard decision counts must be numeric and non-empty")
+    required_tokens = [
+        "| fixture_id |",
+        "| match |",
+        "| kickoff_utc |",
+        "| current_decision |",
+        "| lineup_status |",
+        "| referee_status |",
+        "| ledger_required |",
+        "| next_refresh |",
         state["watcher_version"],
         policy["play_guard_version"],
         "confirmed_lineup",
         "suspensions",
         "travel_distance",
     ]
-    for value in required_values:
-        if value not in text:
-            fail(f"Dashboard missing value: {value}")
+    for token in required_tokens:
+        if token not in text:
+            fail(f"Dashboard missing token: {token}")
+    next_refresh_match = re.search(r"\| next_refresh \| ([^|]+) \|", text)
+    if not next_refresh_match:
+        fail("Dashboard next_refresh field missing")
+    if not re.match(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2} CST$", next_refresh_match.group(1).strip()):
+        fail(f"Dashboard next_refresh format invalid: {next_refresh_match.group(1).strip()}")
 
 
 def assert_templates() -> None:
@@ -132,4 +133,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

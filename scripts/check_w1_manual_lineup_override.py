@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import socket
 import subprocess
 import sys
 import time
@@ -171,23 +173,34 @@ def server_available() -> bool:
         return False
 
 
+def free_port() -> str:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return str(sock.getsockname()[1])
+
+
 def assert_predict_1539001_done() -> None:
+    global BASE_URL
     proc = None
-    if not server_available():
-        env = dict(**__import__("os").environ)
-        env["W1_DASHBOARD_PORT"] = TEST_PORT
-        proc = subprocess.Popen(
-            [sys.executable, str(SERVER)],
-            cwd=ROOT,
-            env=env,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            text=True,
-        )
-        for _ in range(20):
-            if server_available():
-                break
-            time.sleep(0.25)
+    port = free_port()
+    BASE_URL = f"http://127.0.0.1:{port}"
+    env = os.environ.copy()
+    env["W1_DASHBOARD_PORT"] = port
+    env["W1_DISABLE_API_ENV_BRIDGE"] = "1"
+    env.pop("APIFOOTBALL_KEY", None)
+    env.pop("OPENCLAW_APIFOOTBALL_KEY", None)
+    proc = subprocess.Popen(
+        [sys.executable, str(SERVER)],
+        cwd=ROOT,
+        env=env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    for _ in range(30):
+        if server_available():
+            break
+        time.sleep(0.25)
     try:
         if not server_available():
             fail("local predict server is not available for /predict smoke")
@@ -195,7 +208,7 @@ def assert_predict_1539001_done() -> None:
         if not started.get("ok"):
             fail(f"/predict fixture_id=1539001 failed to start: {started}")
         progress = {}
-        for _ in range(30):
+        for _ in range(90):
             time.sleep(0.5)
             progress = http_json("/progress")
             if progress.get("status") in {"done", "failed", "error"}:

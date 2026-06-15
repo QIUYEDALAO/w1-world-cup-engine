@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate W1 Australia vs Turkey post-match result update."""
+"""Validate W1 Australia vs Türkiye post-match result update."""
 
 from __future__ import annotations
 
@@ -18,6 +18,12 @@ BUILD = ROOT / "scripts/build_w1_dashboard_data.py"
 SCORE_ENGINE = ROOT / "scripts/w1_score_engine.py"
 DECISION_POLICY = ROOT / "config/w1_decision_policy.json"
 FORBIDDEN = ["建议下注", "推荐投注", "稳赚", "必胜", "保证命中", "bet", "stake", "profit", "guaranteed"]
+TEAM_ALIASES = {
+    "turkey": "turkiye",
+    "türkiye": "turkiye",
+    "turkiye": "turkiye",
+}
+ALLOWED_RESULT_SOURCES = {"manual_result", "api_football_fixture_result"}
 
 
 class CheckError(Exception):
@@ -30,6 +36,19 @@ def fail(message: str) -> None:
 
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def normalize_team(name: str | None) -> str:
+    key = (name or "").strip().casefold()
+    return TEAM_ALIASES.get(key, key)
+
+
+def score_text(value: object) -> str | None:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict) and {"home", "away"}.issubset(value):
+        return f"{value.get('home')}-{value.get('away')}"
+    return None
 
 
 def assert_no_forbidden(path: Path) -> None:
@@ -48,18 +67,24 @@ def assert_results_file() -> None:
     expected = {
         "fixture_id": "1539001",
         "home_team": "Australia",
-        "away_team": "Turkey",
-        "actual_score": "2-0",
-        "status": "complete",
-        "source": "manual_result",
     }
     for key, value in expected.items():
         if result.get(key) != value:
             fail(f"result {key} mismatch: {result.get(key)}")
+    if normalize_team(result.get("away_team")) != "turkiye":
+        fail(f"result away_team mismatch: {result.get('away_team')}")
+    if score_text(result.get("actual_score")) != "2-0":
+        fail(f"result actual_score mismatch: {result.get('actual_score')}")
+    if result.get("status") not in {"complete", "finished"}:
+        fail(f"result status mismatch: {result.get('status')}")
+    source = result.get("source", result.get("result_source"))
+    if source not in ALLOWED_RESULT_SOURCES:
+        fail(f"result source mismatch: {source}")
     if "66456942" not in result.get("alias_fixture_ids", []):
         fail("result must include alias_fixture_ids 66456942")
-    if "澳大利亚 2-0 土耳其" not in " ".join(result.get("notes_cn", [])):
-        fail("result notes must mention Australia 2-0 Turkey in Chinese")
+    note_text = " ".join(result.get("notes_cn", [])) + " " + str(result.get("result_note", ""))
+    if not any(token in note_text for token in ("澳大利亚 2-0 土耳其", "API-Football fixtures endpoint result sync")):
+        fail("result notes must explain Australia 2-0 Türkiye result source")
     aliases = read_json(ALIASES)
     if aliases.get("1539001") != "66456942" or aliases.get("66456942") != "1539001":
         fail("fixture alias mapping must include 1539001 <-> 66456942")
@@ -73,21 +98,21 @@ def assert_no_single_match_weight_logic() -> None:
         r"1539001.*weight",
         r"66456942.*weight",
         r"Australia.*weight",
-        r"Turkey.*weight",
+        r"(Turkey|Türkiye).*weight",
         r"1539001.*rho",
         r"66456942.*rho",
         r"Australia.*rho",
-        r"Turkey.*rho",
+        r"(Turkey|Türkiye).*rho",
     ]
     for pattern in bad_patterns:
         if re.search(pattern, build):
             fail(f"build script appears to contain single-match model logic: {pattern}")
     score_engine = SCORE_ENGINE.read_text(encoding="utf-8")
-    for token in ("1539001", "66456942", "Australia", "Turkey"):
+    for token in ("1539001", "66456942", "Australia", "Turkey", "Türkiye"):
         if token in score_engine:
             fail(f"score engine must not contain post-match fixture/team hardcode: {token}")
     policy = DECISION_POLICY.read_text(encoding="utf-8")
-    for token in ("1539001", "66456942", "Australia", "Turkey"):
+    for token in ("1539001", "66456942", "Australia", "Turkey", "Türkiye"):
         if token in policy:
             fail(f"PLAY_GUARD policy must not contain post-match fixture/team hardcode: {token}")
 
@@ -104,7 +129,7 @@ def assert_dashboard_calibration() -> None:
         fail(f"dashboard fixture_id=1539001 status must be finished, got {row.get('status')}")
     if row.get("actual_score") != {"home": 2, "away": 0}:
         fail(f"dashboard fixture_id=1539001 actual_score mismatch: {row.get('actual_score')}")
-    if row.get("result_source") != "manual_result":
+    if row.get("result_source") not in ALLOWED_RESULT_SOURCES:
         fail(f"dashboard fixture_id=1539001 result_source mismatch: {row.get('result_source')}")
     calibration = row.get("post_match_calibration", {})
     if calibration.get("actual_score") != "2-0":

@@ -169,6 +169,8 @@ def parse_env_assignment(line: str) -> tuple[str, str] | None:
 
 
 def load_api_key_env_bridge() -> None:
+    if os.environ.get("W1_DISABLE_API_ENV_BRIDGE") == "1":
+        return
     if os.environ.get(ENV_KEY_NAME):
         return
     for path in API_ENV_BRIDGE_FILES:

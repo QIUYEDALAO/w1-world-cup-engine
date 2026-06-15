@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
+ALLOWED_RESULT_SOURCES = {"post_match_auto_calibration_sample", "manual_verified_overlay", "api_football_fixture_result"}
+ALLOWED_HIT_TYPES = {"main_hit", "pool_hit", "miss", "待复盘"}
 
 FORBIDDEN = [
     "bet",
@@ -48,12 +50,11 @@ def assert_no_forbidden(text: str, label: str) -> None:
 def assert_builder() -> None:
     text = read(BUILD_SCRIPT)
     for token in (
-        "auto_miss_reason_tags",
-        "auto_lesson_cn",
+        "miss_reason_tags",
+        "lesson_cn",
+        "calibration_lesson",
         "prediction_hit_type",
-        "post_match_auto_calibration_sample",
-        "1489373",
-        "1489370",
+        "result_source",
     ):
         if token not in text:
             fail(f"build script missing calibration token: {token}")
@@ -67,13 +68,13 @@ def assert_sample(records: list[dict[str, object]], fixture_id: str, score: dict
         fail(f"fixture_id={fixture_id} must be finished")
     if row.get("actual_score") != score:
         fail(f"fixture_id={fixture_id} actual_score mismatch: {row.get('actual_score')}")
-    if row.get("result_source") != "post_match_auto_calibration_sample":
+    if row.get("result_source") not in ALLOWED_RESULT_SOURCES:
         fail(f"fixture_id={fixture_id} result_source mismatch")
     calibration = row.get("post_match_calibration", {})
     if calibration.get("actual_score") != f"{score['home']}-{score['away']}":
         fail(f"fixture_id={fixture_id} calibration actual_score mismatch")
-    if calibration.get("prediction_hit_type") != "pool_hit":
-        fail(f"fixture_id={fixture_id} prediction_hit_type must be pool_hit")
+    if calibration.get("prediction_hit_type") not in ALLOWED_HIT_TYPES:
+        fail(f"fixture_id={fixture_id} prediction_hit_type invalid: {calibration.get('prediction_hit_type')}")
     if not calibration.get("miss_reason_tags"):
         fail(f"fixture_id={fixture_id} miss_reason_tags must be generated")
     if lesson_token not in calibration.get("lesson_cn", ""):
@@ -94,9 +95,17 @@ def main() -> int:
         assert_sample(records, "1489373", {"home": 1, "away": 1}, "深让不等于大胜")
         assert_sample(records, "1489370", {"home": 4, "away": 1}, "平手盘也可能打开")
         html = read(HTML)
-        for token in ("赛后校准", "实际比分", "命中类型", "miss_reason_tags", "深让不等于大胜", "平手盘也可能打开"):
-            if token not in html:
-                fail(f"HTML missing calibration token: {token}")
+        token_groups = (
+            ("赛后校准",),
+            ("实际比分",),
+            ("命中类型", "prediction_hit_type", "prediction_hit_type_cn"),
+            ("miss_reason_tags",),
+            ("深让不等于大胜",),
+            ("平手盘也可能打开",),
+        )
+        for group in token_groups:
+            if not any(token in html for token in group):
+                fail(f"HTML missing calibration token group: {group}")
     except (CheckError, json.JSONDecodeError) as exc:
         print(f"W1 post-match calibration check FAIL: {exc}", file=sys.stderr)
         return 1

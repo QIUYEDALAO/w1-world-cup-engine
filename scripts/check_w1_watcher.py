@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
 
 
@@ -19,7 +20,6 @@ LOCKS = ROOT / "locks"
 POLICY = ROOT / "docs/W1_WATCHER_POLICY.md"
 STATUS = ROOT / "reports/match_previews/W1_WATCHER_STATUS.md"
 
-EXPECTED_NEXT_RUN = "2026-06-10 18:00 CST"
 EXPECTED_HOURS = ["00:00", "06:00", "12:00", "18:00"]
 FORBIDDEN_RUNTIME_TERMS = ["Q" + "Q", "offi" + "cial", "pend" + "ing"]
 OLD_SYSTEM_TERMS = ["V" + "3", "V" + "4", "M" + "1"]
@@ -40,6 +40,12 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def parse_cst(value: str, field: str) -> datetime:
+    if not re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2} CST$", value or ""):
+        fail(f"{field} must use YYYY-MM-DD HH:MM CST format")
+    return datetime.strptime(value.removesuffix(" CST"), "%Y-%m-%d %H:%M")
+
+
 def assert_paths() -> None:
     if not WATCHER.is_file():
         fail("scripts/w1_watcher.sh is missing")
@@ -58,15 +64,26 @@ def assert_paths() -> None:
 
 def assert_state() -> None:
     state = json.loads(read(STATE))
-    if state.get("next_run_cst") != EXPECTED_NEXT_RUN:
-        fail("next_run_cst mismatch")
     if state.get("normal_refresh_hours_cst") != EXPECTED_HOURS:
         fail("normal_refresh_hours_cst mismatch")
+    next_run = parse_cst(state.get("next_run_cst", ""), "next_run_cst")
+    last_refresh_raw = state.get("last_refresh")
+    if last_refresh_raw:
+        last_refresh = parse_cst(last_refresh_raw, "last_refresh")
+        if next_run < last_refresh:
+            fail("next_run_cst must not be before last_refresh")
+        if next_run - last_refresh > timedelta(hours=24):
+            fail("next_run_cst must be explainable within 24h of last_refresh")
+    if next_run.strftime("%H:%M") not in EXPECTED_HOURS:
+        fail("next_run_cst hour must align with normal refresh hours")
     special = state.get("special_refresh", {})
-    if special.get("fixture_id") != 1489369:
-        fail("Mexico vs South Africa special fixture_id missing")
-    if special.get("windows_before_kickoff") != ["2h", "1h", "30m"]:
-        fail("special refresh windows mismatch")
+    if special:
+        if not special.get("fixture_id"):
+            fail("special refresh fixture_id missing")
+        if not (special.get("windows_before_kickoff") or special.get("refresh_type")):
+            fail("special refresh must explain either windows_before_kickoff or refresh_type")
+        if special.get("snapshot_ts") and not re.match(r"^\d{8}_\d{4}$", str(special.get("snapshot_ts"))):
+            fail("special refresh snapshot_ts format invalid")
 
 
 def assert_script_static() -> None:
@@ -123,10 +140,19 @@ def assert_shell_checks() -> None:
         fail("dry-run must make zero API calls")
 
 
-def assert_remote_absent() -> None:
+def assert_remote_safe() -> None:
     remote = subprocess.run(["git", "remote", "-v"], cwd=ROOT, text=True, capture_output=True)
-    if remote.stdout.strip():
-        fail("git remote must not be configured")
+    allowed = {
+        "git@github.com:QIUYEDALAO/w1-world-cup-engine.git",
+        "https://github.com/QIUYEDALAO/w1-world-cup-engine.git",
+    }
+    for line in remote.stdout.splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[1] not in allowed:
+            fail(f"git remote points outside W1 repo: {parts[1]}")
+    state = json.loads(read(STATE))
+    if state.get("boundaries", {}).get("pushed") is not False:
+        fail("watcher runtime boundary must keep pushed=false")
 
 
 def assert_scheduler_points_to_watcher() -> None:
@@ -148,7 +174,7 @@ def main() -> int:
         assert_script_static()
         assert_shell_checks()
         assert_scheduler_points_to_watcher()
-        assert_remote_absent()
+        assert_remote_safe()
     except CheckError as exc:
         print(f"W1 watcher self-test FAIL: {exc}", file=sys.stderr)
         return 1

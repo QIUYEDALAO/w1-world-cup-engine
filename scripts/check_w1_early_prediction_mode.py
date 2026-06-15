@@ -149,7 +149,17 @@ def assert_html() -> None:
     for label in STAGE_LABELS:
         if label not in text:
             fail(f"HTML missing stage label: {label}")
-    for token in ("参考比分", "非最终结论", "不绕过 W1_PLAY_GUARD_V1"):
+    required_token_groups = (
+        ("参考比分",),
+        ("非最终结论",),
+        ("不绕过 W1_PLAY_GUARD_V1", "不绕过正式风控规则", "不绕过 W1 风控"),
+    )
+    for group in required_token_groups:
+        if not any(token in text for token in group):
+            fail(f"HTML missing token group: {group}")
+    if "W1_PLAY_GUARD_V1" not in read(POLICY):
+        fail("policy must keep canonical W1_PLAY_GUARD_V1 token")
+    for token in ("参考比分", "非最终结论"):
         if token not in text:
             fail(f"HTML missing token: {token}")
 

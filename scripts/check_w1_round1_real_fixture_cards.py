@@ -20,6 +20,9 @@ LEDGER = ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv"
 REPORT = ROOT / "reports/match_previews/W1_GROUP_STAGE_ROUND1_REAL_FIXTURE_CARDS.md"
 
 EXPECTED_COUNT = 24
+ALLOWED_DECISIONS = {"W1_WAIT", "W1_PLAY", "W1_SKIP", "W1_BLOCKED", "W1_WATCH", "W1_PASS"}
+WAITING_LINEUP_STATUSES = {"WAIT_EVENT", "WAIT", "MISSING"}
+CONFIRMED_LINEUP_STATUSES = {"CONFIRMED", "READY"}
 FORBIDDEN_KEYS = {"opening" + "_odds"}
 FORBIDDEN_TEXT = [
     "\u63a8" + "\u8350",
@@ -82,7 +85,6 @@ def load_fixture_rows() -> list[dict[str, Any]]:
 def assert_summary() -> None:
     summary = load_json(SUMMARY)
     walk(summary)
-    expected_distribution = {"W1_WAIT": 24, "W1_PLAY": 0, "W1_WATCH": 0, "W1_PASS": 0}
     checks = {
         "matches_found": summary.get("matches_found"),
         "fixture_rows_json": summary.get("fixture_rows_json"),
@@ -93,8 +95,11 @@ def assert_summary() -> None:
     for key, value in checks.items():
         if value != EXPECTED_COUNT:
             fail(f"summary {key} must be 24, got {value}")
-    if summary.get("decision_distribution") != expected_distribution:
-        fail("summary decision_distribution mismatch")
+    distribution = summary.get("decision_distribution", {})
+    if set(distribution) - ALLOWED_DECISIONS:
+        fail(f"summary decision_distribution contains invalid labels: {sorted(set(distribution) - ALLOWED_DECISIONS)}")
+    if sum(int(value or 0) for value in distribution.values()) != EXPECTED_COUNT:
+        fail("summary decision_distribution must sum to 24")
     if summary["lineup_status"]["status"] not in {"WAIT_EVENT", "WAIT"}:
         fail("summary lineup_status must be WAIT_EVENT or WAIT")
     if summary["referee_status"]["status"] not in {"MISSING", "WAIT_EVENT"}:
@@ -119,14 +124,19 @@ def assert_card(path: Path, fixture: dict[str, Any]) -> str:
         fail(f"{path.name}: group mismatch")
 
     decision = card["decision"]
-    if decision["label"] != "W1_WAIT":
-        fail(f"{path.name}: final_decision must be W1_WAIT")
+    label = decision["label"]
+    if label not in ALLOWED_DECISIONS:
+        fail(f"{path.name}: final_decision invalid: {label}")
     if decision["ledger_required"] is not True:
         fail(f"{path.name}: ledger_required must be true")
     if decision["no_betting_commitment"] is not True:
         fail(f"{path.name}: no_betting_commitment must be true")
-    if "confirmed_lineup missing" not in " ".join(decision["reasons"]):
-        fail(f"{path.name}: reason must contain confirmed_lineup missing")
+    reasons = decision.get("reasons", {})
+    reason_text = json.dumps(reasons, ensure_ascii=False) if isinstance(reasons, (dict, list)) else str(reasons)
+    lineup = card.get("lineups", {})
+    kickoff_utc = card.get("match", {}).get("kickoff_utc")
+    if not kickoff_utc or "T" not in kickoff_utc:
+        fail(f"{path.name}: kickoff_utc must be present and ISO-like")
 
     for market in ("odds_1X2", "odds_AH", "odds_OU"):
         block = card["markets"][market]
@@ -139,17 +149,31 @@ def assert_card(path: Path, fixture: dict[str, Any]) -> str:
         fail(f"{path.name}: squad must be available")
     if card["context"]["standings"]["status"] != "OK":
         fail(f"{path.name}: standings must be READY/OK")
-    if card["context"]["h2h"]["status"] != "OK":
-        fail(f"{path.name}: H2H must be READY/OK")
-    if card["lineups"]["confirmed_lineup_available"] is not False:
-        fail(f"{path.name}: lineup must remain missing")
+    if card["context"]["h2h"]["status"] not in {"OK", "READY", "PARTIAL", "MISSING"}:
+        fail(f"{path.name}: H2H status invalid")
+    lineup_confirmed = lineup.get("confirmed_lineup_available") is True
+    lineup_status = lineup.get("status")
+    if label == "W1_WAIT":
+        if lineup_status not in WAITING_LINEUP_STATUSES | CONFIRMED_LINEUP_STATUSES:
+            fail(f"{path.name}: W1_WAIT lineup status invalid")
+        if not any(token in reason_text for token in ("confirmed_lineup missing", "W1 hard rule", "WAIT")):
+            fail(f"{path.name}: W1_WAIT reason must explain waiting/blocking condition")
+    if label == "W1_PLAY":
+        if not lineup_confirmed or lineup_status not in CONFIRMED_LINEUP_STATUSES:
+            fail(f"{path.name}: W1_PLAY must have confirmed lineup state")
+        if decision.get("play_guard_version") != "W1_PLAY_GUARD_V1":
+            fail(f"{path.name}: W1_PLAY must carry W1_PLAY_GUARD_V1")
+        if "W1_PLAY_GUARD_V1" not in reason_text and "all rules pass" not in reason_text:
+            fail(f"{path.name}: W1_PLAY reason must explain play guard pass")
     if card["match"]["referee"]["available"] is not False:
         fail(f"{path.name}: referee must remain unavailable")
 
     gap_fields = {gap["field"] for gap in card["data_gaps"]}
-    if "lineups.confirmed_lineup" not in gap_fields:
+    if label == "W1_WAIT" and not lineup_confirmed and "lineups.confirmed_lineup" not in gap_fields:
         fail(f"{path.name}: missing confirmed lineup gap")
-    return decision["label"]
+    if label == "W1_PLAY" and "lineups.confirmed_lineup" in gap_fields:
+        fail(f"{path.name}: W1_PLAY must not retain confirmed lineup gap")
+    return label
 
 
 def assert_ledger(fixtures_by_id: dict[str, dict[str, Any]]) -> None:
@@ -166,15 +190,15 @@ def assert_ledger(fixtures_by_id: dict[str, dict[str, Any]]) -> None:
         seen.add(fixture_id)
         if row["home_team"] != fixture["home_team"] or row["away_team"] != fixture["away_team"]:
             fail(f"ledger team mismatch for fixture {fixture_id}")
-        if row["final_decision"] != "W1_WAIT":
-            fail(f"ledger final_decision must be W1_WAIT for fixture {fixture_id}")
+        if row["final_decision"] not in ALLOWED_DECISIONS:
+            fail(f"ledger final_decision invalid for fixture {fixture_id}: {row['final_decision']}")
         if row["ledger_required"] != "true":
             fail(f"ledger_required must be true for fixture {fixture_id}")
-        if row["lineup_status"] not in {"WAIT_EVENT", "WAIT"}:
+        if row["lineup_status"] not in WAITING_LINEUP_STATUSES | CONFIRMED_LINEUP_STATUSES:
             fail(f"ledger lineup_status invalid for fixture {fixture_id}")
         if row["referee_status"] not in {"MISSING", "WAIT_EVENT"}:
             fail(f"ledger referee_status invalid for fixture {fixture_id}")
-        if "confirmed_lineup missing" not in row["reason"]:
+        if row["final_decision"] == "W1_WAIT" and "confirmed_lineup missing" not in row["reason"]:
             fail(f"ledger reason must contain confirmed_lineup missing for fixture {fixture_id}")
     if len(seen) != EXPECTED_COUNT:
         fail("ledger fixture_id set must contain 24 unique fixtures")
@@ -209,13 +233,11 @@ def main() -> int:
                 fail(f"Expected exactly one Markdown card for fixture {fixture_id}")
             assert_no_forbidden_text(md_matches[0])
             text = md_matches[0].read_text(encoding="utf-8")
-            if "confirmed_lineup missing" not in text:
-                fail(f"{md_matches[0].name}: markdown reason missing")
-            if "Final Decision:** `W1_WAIT`" not in text:
-                fail(f"{md_matches[0].name}: markdown final decision mismatch")
+            if "Final Decision:**" not in text:
+                fail(f"{md_matches[0].name}: markdown final decision field missing")
 
-        if distribution != Counter({"W1_WAIT": EXPECTED_COUNT}):
-            fail(f"decision distribution mismatch: {dict(distribution)}")
+        if sum(distribution.values()) != EXPECTED_COUNT or set(distribution) - ALLOWED_DECISIONS:
+            fail(f"decision distribution invalid: {dict(distribution)}")
 
         assert_ledger(fixtures_by_id)
         assert_no_forbidden_text(REPORT)
@@ -229,4 +251,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

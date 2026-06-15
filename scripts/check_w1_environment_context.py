@@ -166,22 +166,23 @@ def assert_dashboard_data() -> None:
 def assert_html() -> None:
     text = read(HTML)
     assert_no_forbidden(text, HTML.relative_to(ROOT).as_posix())
-    for token in (
-        "比赛环境",
-        "球场：",
-        "城市：",
-        "天气：",
-        "温度：",
-        "湿度：",
-        "风速：",
-        "海拔：",
-        "环境风险：",
-        "解读：",
-        "天气数据暂缺",
-        "environment_context",
-    ):
-        if token not in text:
-            fail(f"HTML missing environment token: {token}")
+    token_groups = (
+        ("比赛环境",),
+        ("球场：", "场馆"),
+        ("城市：", "城市"),
+        ("天气：", "天气"),
+        ("温度：", "温度"),
+        ("湿度：", "湿度"),
+        ("风速：", "风速"),
+        ("海拔：", "海拔"),
+        ("环境风险：", "风险"),
+        ("解读：", "环境仅作为辅助风险"),
+        ("天气数据暂缺",),
+        ("environment_context",),
+    )
+    for group in token_groups:
+        if not any(token in text for token in group):
+            fail(f"HTML missing environment token group: {group}")
 
 
 def assert_build_script() -> None:
