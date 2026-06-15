@@ -428,6 +428,11 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_lineup_api_binding.py`
 - `scripts/check_w1_odds_movement_status_consistency.py`（W1_P0_CONSISTENCY_AND_AUDIT_REFRESH_V1：odds_movement.status 枚举/前缀/门控一致性，THIN_MARKET_SKIP 仅 WARN）
 - `scripts/check_w1_output_safe_view.py`（W1_S0_SAFE_OUTPUT_AND_S1B_SEED_V1：safe_view 区间/尾部字段、主≤1/备≤1、热门输与净胜≥3 分离、专家区默认折叠、无促性表达）
+- `scripts/check_w1_international_dataset.py`（S1B：国际赛数据 schema/90min/finished 推导/覆盖/pipeline_mode；数据缺失安全 SKIP）
+- `scripts/check_w1_team_name_reconciliation.py`（S1B BLOCKER：队名未映射/alias 一对多 FAIL；校验别名表 + W1 fixtures）
+- `scripts/check_w1_host_no_qualifier_history.py`（S1B WARN：USA/Mexico/Canada 东道主缺预选历史，gate 正式 S2）
+- `scripts/check_w1_team_sample_sparsity.py`（S1B 报告：每队样本量/最近比赛日期/低样本，生成数据质量报告）
+- `scripts/check_w1_backtest_spine.py`（S1B：1X2_ONLY 标签、leakage guard、walk-forward 不重叠，不冒称完整管线）
 
 ## 8. 当前 WARN_ONLY / 限制
 

@@ -1,0 +1,241 @@
+{
+  "schema_version": "W1_BACKTEST_1X2_ONLY_V1",
+  "pipeline_mode": "1X2_ONLY",
+  "w1_full_pipeline_validated": false,
+  "leakage_guard": {
+    "allowed_features": [
+      "odds_1x2_away",
+      "odds_1x2_draw",
+      "odds_1x2_home"
+    ],
+    "label_fields_excluded_from_prediction": [
+      "away_goals_90",
+      "finish_type",
+      "home_goals_90",
+      "home_goals_et",
+      "home_penalties"
+    ],
+    "status": "ok (prediction uses devigged closing 1X2 only; outcome read only for scoring)"
+  },
+  "scope_note_cn": "仅市场 1X2 校准基准；无 OU 故无比分矩阵，不验证完整 W1 管线、总进球或 AH。",
+  "overall": {
+    "n": 1074,
+    "direction_accuracy": 0.635,
+    "mean_rps": 0.2977,
+    "mean_logloss": 0.7883,
+    "mean_brier": 0.4597,
+    "rps_uniform_baseline": 0.4817,
+    "beats_uniform_rps": true
+  },
+  "calibration": {
+    "home_win_reliability": [
+      {
+        "bin_mid": 0.055,
+        "empirical": 0.023,
+        "count": 132
+      },
+      {
+        "bin_mid": 0.151,
+        "empirical": 0.139,
+        "count": 137
+      },
+      {
+        "bin_mid": 0.247,
+        "empirical": 0.241,
+        "count": 133
+      },
+      {
+        "bin_mid": 0.355,
+        "empirical": 0.337,
+        "count": 104
+      },
+      {
+        "bin_mid": 0.451,
+        "empirical": 0.455,
+        "count": 112
+      },
+      {
+        "bin_mid": 0.551,
+        "empirical": 0.556,
+        "count": 90
+      },
+      {
+        "bin_mid": 0.648,
+        "empirical": 0.631,
+        "count": 111
+      },
+      {
+        "bin_mid": 0.748,
+        "empirical": 0.814,
+        "count": 113
+      },
+      {
+        "bin_mid": 0.847,
+        "empirical": 0.883,
+        "count": 94
+      },
+      {
+        "bin_mid": 0.926,
+        "empirical": 1.0,
+        "count": 48
+      }
+    ],
+    "ece_home_win": 0.0241
+  },
+  "slices": {
+    "by_phase": {
+      "finals": {
+        "n": 192,
+        "direction_accuracy": 0.5781,
+        "mean_rps": 0.3976,
+        "mean_logloss": 0.9472,
+        "mean_brier": 0.5561,
+        "rps_uniform_baseline": 0.4896,
+        "beats_uniform_rps": true
+      },
+      "qualifier": {
+        "n": 882,
+        "direction_accuracy": 0.6474,
+        "mean_rps": 0.276,
+        "mean_logloss": 0.7537,
+        "mean_brier": 0.4387,
+        "rps_uniform_baseline": 0.48,
+        "beats_uniform_rps": true
+      }
+    },
+    "by_competition": {
+      "World Cup 2014": {
+        "n": 64,
+        "direction_accuracy": 0.6406,
+        "mean_rps": 0.3905,
+        "mean_logloss": 0.9016,
+        "mean_brier": 0.5277,
+        "rps_uniform_baseline": 0.5087,
+        "beats_uniform_rps": true
+      },
+      "World Cup 2018": {
+        "n": 64,
+        "direction_accuracy": 0.5625,
+        "mean_rps": 0.3874,
+        "mean_logloss": 0.9416,
+        "mean_brier": 0.5572,
+        "rps_uniform_baseline": 0.4826,
+        "beats_uniform_rps": true
+      },
+      "World Cup 2022": {
+        "n": 64,
+        "direction_accuracy": 0.5312,
+        "mean_rps": 0.4149,
+        "mean_logloss": 0.9984,
+        "mean_brier": 0.5836,
+        "rps_uniform_baseline": 0.4774,
+        "beats_uniform_rps": true
+      },
+      "WorldCup2026Qualifiers": {
+        "n": 882,
+        "direction_accuracy": 0.6474,
+        "mean_rps": 0.276,
+        "mean_logloss": 0.7537,
+        "mean_brier": 0.4387,
+        "rps_uniform_baseline": 0.48,
+        "beats_uniform_rps": true
+      }
+    },
+    "by_neutral_site": {
+      "neutral=False": {
+        "n": 897,
+        "direction_accuracy": 0.6477,
+        "mean_rps": 0.2765,
+        "mean_logloss": 0.7545,
+        "mean_brier": 0.4393,
+        "rps_uniform_baseline": 0.4801,
+        "beats_uniform_rps": true
+      },
+      "neutral=True": {
+        "n": 177,
+        "direction_accuracy": 0.5706,
+        "mean_rps": 0.4053,
+        "mean_logloss": 0.9596,
+        "mean_brier": 0.5634,
+        "rps_uniform_baseline": 0.4896,
+        "beats_uniform_rps": true
+      }
+    },
+    "by_favorite_strength": {
+      "fav 0.50-0.70": {
+        "n": 367,
+        "direction_accuracy": 0.5913,
+        "mean_rps": 0.3473,
+        "mean_logloss": 0.9169,
+        "mean_brier": 0.5453,
+        "rps_uniform_baseline": 0.4629,
+        "beats_uniform_rps": true
+      },
+      "fav<0.50 (close)": {
+        "n": 321,
+        "direction_accuracy": 0.3988,
+        "mean_rps": 0.4427,
+        "mean_logloss": 1.076,
+        "mean_brier": 0.6511,
+        "rps_uniform_baseline": 0.4559,
+        "beats_uniform_rps": true
+      },
+      "fav>=0.70": {
+        "n": 386,
+        "direction_accuracy": 0.8731,
+        "mean_rps": 0.13,
+        "mean_logloss": 0.4268,
+        "mean_brier": 0.2192,
+        "rps_uniform_baseline": 0.521,
+        "beats_uniform_rps": true
+      }
+    }
+  },
+  "walk_forward": {
+    "policy": "chronological 60/20/20 (train past -> test future); market baseline has no fit params, split is for S2 reuse + honest test-set reporting",
+    "train": {
+      "range": [
+        "2014-06-12",
+        "2025-03-25"
+      ],
+      "n": 644,
+      "direction_accuracy": 0.6258,
+      "mean_rps": 0.3101,
+      "mean_logloss": 0.813,
+      "mean_brier": 0.4752,
+      "rps_uniform_baseline": 0.4805,
+      "beats_uniform_rps": true
+    },
+    "val": {
+      "range": [
+        "2025-03-25",
+        "2025-09-09"
+      ],
+      "n": 215,
+      "direction_accuracy": 0.6977,
+      "mean_rps": 0.2463,
+      "mean_logloss": 0.6851,
+      "mean_brier": 0.3904,
+      "rps_uniform_baseline": 0.4889,
+      "beats_uniform_rps": true
+    },
+    "test": {
+      "range": [
+        "2025-09-09",
+        "2026-04-01"
+      ],
+      "n": 215,
+      "direction_accuracy": 0.6,
+      "mean_rps": 0.312,
+      "mean_logloss": 0.8177,
+      "mean_brier": 0.4827,
+      "rps_uniform_baseline": 0.478,
+      "beats_uniform_rps": true
+    }
+  },
+  "notes_cn": [
+    "市场基准=收盘 1X2 去水概率；方向准确率/RPS/log/Brier 衡量市场本身，不是 W1 独立模型。",
+    "国家队强度模型(S2)的增量必须相对此基准、用 walk-forward 样本外证明。",
+    "不构成投注/资金建议，不承诺命中率。"
+  ]
+}

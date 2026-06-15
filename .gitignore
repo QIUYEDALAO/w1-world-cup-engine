@@ -13,3 +13,5 @@ data/snapshots/
 # 运行时状态缓存
 state/w1_live_refresh_state.json
 state/w1_weather_cache.json
+data/raw/
+data/processed/international/

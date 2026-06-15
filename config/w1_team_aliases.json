@@ -1,0 +1,2080 @@
+{
+  "schema_version": "W1_TEAM_ALIASES_V1",
+  "note": "Auto-seeded from S1B seed workbook + W1 fixtures; canonical merges in normalizer SYNONYMS. Unmapped names are a hard error in the normalizer (no silent fallback).",
+  "teams": {
+    "afghanistan": {
+      "team_id": "afghanistan",
+      "canonical_name": "Afghanistan",
+      "aliases": [
+        "Afghanistan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "albania": {
+      "team_id": "albania",
+      "canonical_name": "Albania",
+      "aliases": [
+        "Albania"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "algeria": {
+      "team_id": "algeria",
+      "canonical_name": "Algeria",
+      "aliases": [
+        "Algeria"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "andorra": {
+      "team_id": "andorra",
+      "canonical_name": "Andorra",
+      "aliases": [
+        "Andorra"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "angola": {
+      "team_id": "angola",
+      "canonical_name": "Angola",
+      "aliases": [
+        "Angola"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "anguilla": {
+      "team_id": "anguilla",
+      "canonical_name": "Anguilla",
+      "aliases": [
+        "Anguilla"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "antigua_and_barbuda": {
+      "team_id": "antigua_and_barbuda",
+      "canonical_name": "Antigua And Barbuda",
+      "aliases": [
+        "Antigua and Barbuda"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "argentina": {
+      "team_id": "argentina",
+      "canonical_name": "Argentina",
+      "aliases": [
+        "Argentina"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "armenia": {
+      "team_id": "armenia",
+      "canonical_name": "Armenia",
+      "aliases": [
+        "Armenia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "aruba": {
+      "team_id": "aruba",
+      "canonical_name": "Aruba",
+      "aliases": [
+        "Aruba"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "australia": {
+      "team_id": "australia",
+      "canonical_name": "Australia",
+      "aliases": [
+        "Australia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "austria": {
+      "team_id": "austria",
+      "canonical_name": "Austria",
+      "aliases": [
+        "Austria"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "azerbaijan": {
+      "team_id": "azerbaijan",
+      "canonical_name": "Azerbaijan",
+      "aliases": [
+        "Azerbaijan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "bahamas": {
+      "team_id": "bahamas",
+      "canonical_name": "Bahamas",
+      "aliases": [
+        "Bahamas"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "bahrain": {
+      "team_id": "bahrain",
+      "canonical_name": "Bahrain",
+      "aliases": [
+        "Bahrain"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "bangladesh": {
+      "team_id": "bangladesh",
+      "canonical_name": "Bangladesh",
+      "aliases": [
+        "Bangladesh"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "barbados": {
+      "team_id": "barbados",
+      "canonical_name": "Barbados",
+      "aliases": [
+        "Barbados"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "belarus": {
+      "team_id": "belarus",
+      "canonical_name": "Belarus",
+      "aliases": [
+        "Belarus"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "belgium": {
+      "team_id": "belgium",
+      "canonical_name": "Belgium",
+      "aliases": [
+        "Belgium"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "belize": {
+      "team_id": "belize",
+      "canonical_name": "Belize",
+      "aliases": [
+        "Belize"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "benin": {
+      "team_id": "benin",
+      "canonical_name": "Benin",
+      "aliases": [
+        "Benin"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "bermuda": {
+      "team_id": "bermuda",
+      "canonical_name": "Bermuda",
+      "aliases": [
+        "Bermuda"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "bhutan": {
+      "team_id": "bhutan",
+      "canonical_name": "Bhutan",
+      "aliases": [
+        "Bhutan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "bolivia": {
+      "team_id": "bolivia",
+      "canonical_name": "Bolivia",
+      "aliases": [
+        "Bolivia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "bosnia_herzegovina": {
+      "team_id": "bosnia_herzegovina",
+      "canonical_name": "Bosnia & Herzegovina",
+      "aliases": [
+        "Bosnia & Herzegovina"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "botswana": {
+      "team_id": "botswana",
+      "canonical_name": "Botswana",
+      "aliases": [
+        "Botswana"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "brazil": {
+      "team_id": "brazil",
+      "canonical_name": "Brazil",
+      "aliases": [
+        "Brazil"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "british_virgin_islands": {
+      "team_id": "british_virgin_islands",
+      "canonical_name": "British Virgin Islands",
+      "aliases": [
+        "British Virgin Islands"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "brunei": {
+      "team_id": "brunei",
+      "canonical_name": "Brunei",
+      "aliases": [
+        "Brunei"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "bulgaria": {
+      "team_id": "bulgaria",
+      "canonical_name": "Bulgaria",
+      "aliases": [
+        "Bulgaria"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "burkina_faso": {
+      "team_id": "burkina_faso",
+      "canonical_name": "Burkina Faso",
+      "aliases": [
+        "Burkina Faso"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "burundi": {
+      "team_id": "burundi",
+      "canonical_name": "Burundi",
+      "aliases": [
+        "Burundi"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "cambodia": {
+      "team_id": "cambodia",
+      "canonical_name": "Cambodia",
+      "aliases": [
+        "Cambodia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "cameroon": {
+      "team_id": "cameroon",
+      "canonical_name": "Cameroon",
+      "aliases": [
+        "Cameroon"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "canada": {
+      "team_id": "canada",
+      "canonical_name": "Canada",
+      "aliases": [
+        "Canada"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": true
+    },
+    "cape_verde": {
+      "team_id": "cape_verde",
+      "canonical_name": "Cape Verde",
+      "aliases": [
+        "Cape Verde",
+        "Cape Verde Islands"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "cayman_islands": {
+      "team_id": "cayman_islands",
+      "canonical_name": "Cayman Islands",
+      "aliases": [
+        "Cayman Islands"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "central_africa": {
+      "team_id": "central_africa",
+      "canonical_name": "Central Africa",
+      "aliases": [
+        "Central Africa"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "chad": {
+      "team_id": "chad",
+      "canonical_name": "Chad",
+      "aliases": [
+        "Chad"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "chile": {
+      "team_id": "chile",
+      "canonical_name": "Chile",
+      "aliases": [
+        "Chile"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "china": {
+      "team_id": "china",
+      "canonical_name": "China",
+      "aliases": [
+        "China"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "chinese_taipei": {
+      "team_id": "chinese_taipei",
+      "canonical_name": "Chinese Taipei",
+      "aliases": [
+        "Chinese Taipei"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "colombia": {
+      "team_id": "colombia",
+      "canonical_name": "Colombia",
+      "aliases": [
+        "Colombia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "comoros": {
+      "team_id": "comoros",
+      "canonical_name": "Comoros",
+      "aliases": [
+        "Comoros"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "congo": {
+      "team_id": "congo",
+      "canonical_name": "Congo",
+      "aliases": [
+        "Congo"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "cook_islands": {
+      "team_id": "cook_islands",
+      "canonical_name": "Cook Islands",
+      "aliases": [
+        "Cook Islands"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "costa_rica": {
+      "team_id": "costa_rica",
+      "canonical_name": "Costa Rica",
+      "aliases": [
+        "Costa Rica"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "croatia": {
+      "team_id": "croatia",
+      "canonical_name": "Croatia",
+      "aliases": [
+        "Croatia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "cuba": {
+      "team_id": "cuba",
+      "canonical_name": "Cuba",
+      "aliases": [
+        "Cuba"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "curacao": {
+      "team_id": "curacao",
+      "canonical_name": "Curacao",
+      "aliases": [
+        "Curacao",
+        "Curaçao"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "cyprus": {
+      "team_id": "cyprus",
+      "canonical_name": "Cyprus",
+      "aliases": [
+        "Cyprus"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "czech_republic": {
+      "team_id": "czech_republic",
+      "canonical_name": "Czech Republic",
+      "aliases": [
+        "Czech Republic"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "denmark": {
+      "team_id": "denmark",
+      "canonical_name": "Denmark",
+      "aliases": [
+        "Denmark"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "djibouti": {
+      "team_id": "djibouti",
+      "canonical_name": "Djibouti",
+      "aliases": [
+        "Djibouti"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "dominica": {
+      "team_id": "dominica",
+      "canonical_name": "Dominica",
+      "aliases": [
+        "Dominica"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "dominican_republic": {
+      "team_id": "dominican_republic",
+      "canonical_name": "Dominican Republic",
+      "aliases": [
+        "Dominican Republic"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "dr_congo": {
+      "team_id": "dr_congo",
+      "canonical_name": "Dr Congo",
+      "aliases": [
+        "Congo DR",
+        "D.R. Congo"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "ecuador": {
+      "team_id": "ecuador",
+      "canonical_name": "Ecuador",
+      "aliases": [
+        "Ecuador"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "egypt": {
+      "team_id": "egypt",
+      "canonical_name": "Egypt",
+      "aliases": [
+        "Egypt"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "el_salvador": {
+      "team_id": "el_salvador",
+      "canonical_name": "El Salvador",
+      "aliases": [
+        "El Salvador"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "england": {
+      "team_id": "england",
+      "canonical_name": "England",
+      "aliases": [
+        "England"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "equatorial_guinea": {
+      "team_id": "equatorial_guinea",
+      "canonical_name": "Equatorial Guinea",
+      "aliases": [
+        "Equatorial Guinea"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "estonia": {
+      "team_id": "estonia",
+      "canonical_name": "Estonia",
+      "aliases": [
+        "Estonia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "eswatini": {
+      "team_id": "eswatini",
+      "canonical_name": "Eswatini",
+      "aliases": [
+        "Eswatini"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "ethiopia": {
+      "team_id": "ethiopia",
+      "canonical_name": "Ethiopia",
+      "aliases": [
+        "Ethiopia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "faroe_islands": {
+      "team_id": "faroe_islands",
+      "canonical_name": "Faroe Islands",
+      "aliases": [
+        "Faroe Islands"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "fiji": {
+      "team_id": "fiji",
+      "canonical_name": "Fiji",
+      "aliases": [
+        "Fiji"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "finland": {
+      "team_id": "finland",
+      "canonical_name": "Finland",
+      "aliases": [
+        "Finland"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "france": {
+      "team_id": "france",
+      "canonical_name": "France",
+      "aliases": [
+        "France"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "gabon": {
+      "team_id": "gabon",
+      "canonical_name": "Gabon",
+      "aliases": [
+        "Gabon"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "gambia": {
+      "team_id": "gambia",
+      "canonical_name": "Gambia",
+      "aliases": [
+        "Gambia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "georgia": {
+      "team_id": "georgia",
+      "canonical_name": "Georgia",
+      "aliases": [
+        "Georgia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "germany": {
+      "team_id": "germany",
+      "canonical_name": "Germany",
+      "aliases": [
+        "Germany"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "ghana": {
+      "team_id": "ghana",
+      "canonical_name": "Ghana",
+      "aliases": [
+        "Ghana"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "gibraltar": {
+      "team_id": "gibraltar",
+      "canonical_name": "Gibraltar",
+      "aliases": [
+        "Gibraltar"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "greece": {
+      "team_id": "greece",
+      "canonical_name": "Greece",
+      "aliases": [
+        "Greece"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "grenada": {
+      "team_id": "grenada",
+      "canonical_name": "Grenada",
+      "aliases": [
+        "Grenada"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "guam": {
+      "team_id": "guam",
+      "canonical_name": "Guam",
+      "aliases": [
+        "Guam"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "guatemala": {
+      "team_id": "guatemala",
+      "canonical_name": "Guatemala",
+      "aliases": [
+        "Guatemala"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "guinea": {
+      "team_id": "guinea",
+      "canonical_name": "Guinea",
+      "aliases": [
+        "Guinea"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "guinea_bissau": {
+      "team_id": "guinea_bissau",
+      "canonical_name": "Guinea Bissau",
+      "aliases": [
+        "Guinea Bissau"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "guyana": {
+      "team_id": "guyana",
+      "canonical_name": "Guyana",
+      "aliases": [
+        "Guyana"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "haiti": {
+      "team_id": "haiti",
+      "canonical_name": "Haiti",
+      "aliases": [
+        "Haiti"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "honduras": {
+      "team_id": "honduras",
+      "canonical_name": "Honduras",
+      "aliases": [
+        "Honduras"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "hong_kong": {
+      "team_id": "hong_kong",
+      "canonical_name": "Hong Kong",
+      "aliases": [
+        "Hong Kong"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "hungary": {
+      "team_id": "hungary",
+      "canonical_name": "Hungary",
+      "aliases": [
+        "Hungary"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "iceland": {
+      "team_id": "iceland",
+      "canonical_name": "Iceland",
+      "aliases": [
+        "Iceland"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "india": {
+      "team_id": "india",
+      "canonical_name": "India",
+      "aliases": [
+        "India"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "indonesia": {
+      "team_id": "indonesia",
+      "canonical_name": "Indonesia",
+      "aliases": [
+        "Indonesia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "iran": {
+      "team_id": "iran",
+      "canonical_name": "Iran",
+      "aliases": [
+        "Iran"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "iraq": {
+      "team_id": "iraq",
+      "canonical_name": "Iraq",
+      "aliases": [
+        "Iraq"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "ireland": {
+      "team_id": "ireland",
+      "canonical_name": "Ireland",
+      "aliases": [
+        "Ireland"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "israel": {
+      "team_id": "israel",
+      "canonical_name": "Israel",
+      "aliases": [
+        "Israel"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "italy": {
+      "team_id": "italy",
+      "canonical_name": "Italy",
+      "aliases": [
+        "Italy"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "ivory_coast": {
+      "team_id": "ivory_coast",
+      "canonical_name": "Ivory Coast",
+      "aliases": [
+        "Ivory Coast"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "jamaica": {
+      "team_id": "jamaica",
+      "canonical_name": "Jamaica",
+      "aliases": [
+        "Jamaica"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "japan": {
+      "team_id": "japan",
+      "canonical_name": "Japan",
+      "aliases": [
+        "Japan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "jordan": {
+      "team_id": "jordan",
+      "canonical_name": "Jordan",
+      "aliases": [
+        "Jordan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "kazakhstan": {
+      "team_id": "kazakhstan",
+      "canonical_name": "Kazakhstan",
+      "aliases": [
+        "Kazakhstan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "kenya": {
+      "team_id": "kenya",
+      "canonical_name": "Kenya",
+      "aliases": [
+        "Kenya"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "kosovo": {
+      "team_id": "kosovo",
+      "canonical_name": "Kosovo",
+      "aliases": [
+        "Kosovo"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "kuwait": {
+      "team_id": "kuwait",
+      "canonical_name": "Kuwait",
+      "aliases": [
+        "Kuwait"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "kyrgyzstan": {
+      "team_id": "kyrgyzstan",
+      "canonical_name": "Kyrgyzstan",
+      "aliases": [
+        "Kyrgyzstan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "laos": {
+      "team_id": "laos",
+      "canonical_name": "Laos",
+      "aliases": [
+        "Laos"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "latvia": {
+      "team_id": "latvia",
+      "canonical_name": "Latvia",
+      "aliases": [
+        "Latvia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "lebanon": {
+      "team_id": "lebanon",
+      "canonical_name": "Lebanon",
+      "aliases": [
+        "Lebanon"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "lesotho": {
+      "team_id": "lesotho",
+      "canonical_name": "Lesotho",
+      "aliases": [
+        "Lesotho"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "liberia": {
+      "team_id": "liberia",
+      "canonical_name": "Liberia",
+      "aliases": [
+        "Liberia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "libya": {
+      "team_id": "libya",
+      "canonical_name": "Libya",
+      "aliases": [
+        "Libya"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "liechtenstein": {
+      "team_id": "liechtenstein",
+      "canonical_name": "Liechtenstein",
+      "aliases": [
+        "Liechtenstein"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "lithuania": {
+      "team_id": "lithuania",
+      "canonical_name": "Lithuania",
+      "aliases": [
+        "Lithuania"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "luxembourg": {
+      "team_id": "luxembourg",
+      "canonical_name": "Luxembourg",
+      "aliases": [
+        "Luxembourg"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "macau": {
+      "team_id": "macau",
+      "canonical_name": "Macau",
+      "aliases": [
+        "Macau"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "madagascar": {
+      "team_id": "madagascar",
+      "canonical_name": "Madagascar",
+      "aliases": [
+        "Madagascar"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "malawi": {
+      "team_id": "malawi",
+      "canonical_name": "Malawi",
+      "aliases": [
+        "Malawi"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "malaysia": {
+      "team_id": "malaysia",
+      "canonical_name": "Malaysia",
+      "aliases": [
+        "Malaysia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "maldives": {
+      "team_id": "maldives",
+      "canonical_name": "Maldives",
+      "aliases": [
+        "Maldives"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "mali": {
+      "team_id": "mali",
+      "canonical_name": "Mali",
+      "aliases": [
+        "Mali"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "malta": {
+      "team_id": "malta",
+      "canonical_name": "Malta",
+      "aliases": [
+        "Malta"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "mauritania": {
+      "team_id": "mauritania",
+      "canonical_name": "Mauritania",
+      "aliases": [
+        "Mauritania"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "mauritius": {
+      "team_id": "mauritius",
+      "canonical_name": "Mauritius",
+      "aliases": [
+        "Mauritius"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "mexico": {
+      "team_id": "mexico",
+      "canonical_name": "Mexico",
+      "aliases": [
+        "Mexico"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": true
+    },
+    "moldova": {
+      "team_id": "moldova",
+      "canonical_name": "Moldova",
+      "aliases": [
+        "Moldova"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "mongolia": {
+      "team_id": "mongolia",
+      "canonical_name": "Mongolia",
+      "aliases": [
+        "Mongolia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "montenegro": {
+      "team_id": "montenegro",
+      "canonical_name": "Montenegro",
+      "aliases": [
+        "Montenegro"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "montserrat": {
+      "team_id": "montserrat",
+      "canonical_name": "Montserrat",
+      "aliases": [
+        "Montserrat"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "morocco": {
+      "team_id": "morocco",
+      "canonical_name": "Morocco",
+      "aliases": [
+        "Morocco"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "mozambique": {
+      "team_id": "mozambique",
+      "canonical_name": "Mozambique",
+      "aliases": [
+        "Mozambique"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "myanmar": {
+      "team_id": "myanmar",
+      "canonical_name": "Myanmar",
+      "aliases": [
+        "Myanmar"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "namibia": {
+      "team_id": "namibia",
+      "canonical_name": "Namibia",
+      "aliases": [
+        "Namibia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "nepal": {
+      "team_id": "nepal",
+      "canonical_name": "Nepal",
+      "aliases": [
+        "Nepal"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "netherlands": {
+      "team_id": "netherlands",
+      "canonical_name": "Netherlands",
+      "aliases": [
+        "Netherlands"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "new_caledonia": {
+      "team_id": "new_caledonia",
+      "canonical_name": "New Caledonia",
+      "aliases": [
+        "New Caledonia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "new_zealand": {
+      "team_id": "new_zealand",
+      "canonical_name": "New Zealand",
+      "aliases": [
+        "New Zealand"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "nicaragua": {
+      "team_id": "nicaragua",
+      "canonical_name": "Nicaragua",
+      "aliases": [
+        "Nicaragua"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "niger": {
+      "team_id": "niger",
+      "canonical_name": "Niger",
+      "aliases": [
+        "Niger"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "nigeria": {
+      "team_id": "nigeria",
+      "canonical_name": "Nigeria",
+      "aliases": [
+        "Nigeria"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "north_korea": {
+      "team_id": "north_korea",
+      "canonical_name": "North Korea",
+      "aliases": [
+        "North Korea"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "north_macedonia": {
+      "team_id": "north_macedonia",
+      "canonical_name": "North Macedonia",
+      "aliases": [
+        "North Macedonia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "northern_ireland": {
+      "team_id": "northern_ireland",
+      "canonical_name": "Northern Ireland",
+      "aliases": [
+        "Northern Ireland"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "norway": {
+      "team_id": "norway",
+      "canonical_name": "Norway",
+      "aliases": [
+        "Norway"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "oman": {
+      "team_id": "oman",
+      "canonical_name": "Oman",
+      "aliases": [
+        "Oman"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "pakistan": {
+      "team_id": "pakistan",
+      "canonical_name": "Pakistan",
+      "aliases": [
+        "Pakistan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "palestine": {
+      "team_id": "palestine",
+      "canonical_name": "Palestine",
+      "aliases": [
+        "Palestine"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "panama": {
+      "team_id": "panama",
+      "canonical_name": "Panama",
+      "aliases": [
+        "Panama"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "papua_new_guinea": {
+      "team_id": "papua_new_guinea",
+      "canonical_name": "Papua New Guinea",
+      "aliases": [
+        "Papua New Guinea"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "paraguay": {
+      "team_id": "paraguay",
+      "canonical_name": "Paraguay",
+      "aliases": [
+        "Paraguay"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "peru": {
+      "team_id": "peru",
+      "canonical_name": "Peru",
+      "aliases": [
+        "Peru"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "philippines": {
+      "team_id": "philippines",
+      "canonical_name": "Philippines",
+      "aliases": [
+        "Philippines"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "poland": {
+      "team_id": "poland",
+      "canonical_name": "Poland",
+      "aliases": [
+        "Poland"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "portugal": {
+      "team_id": "portugal",
+      "canonical_name": "Portugal",
+      "aliases": [
+        "Portugal"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "puerto_rico": {
+      "team_id": "puerto_rico",
+      "canonical_name": "Puerto Rico",
+      "aliases": [
+        "Puerto Rico"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "qatar": {
+      "team_id": "qatar",
+      "canonical_name": "Qatar",
+      "aliases": [
+        "Qatar"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "romania": {
+      "team_id": "romania",
+      "canonical_name": "Romania",
+      "aliases": [
+        "Romania"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "russia": {
+      "team_id": "russia",
+      "canonical_name": "Russia",
+      "aliases": [
+        "Russia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "rwanda": {
+      "team_id": "rwanda",
+      "canonical_name": "Rwanda",
+      "aliases": [
+        "Rwanda"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "saint_kitts_and_nevis": {
+      "team_id": "saint_kitts_and_nevis",
+      "canonical_name": "Saint Kitts And Nevis",
+      "aliases": [
+        "Saint Kitts and Nevis"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "saint_lucia": {
+      "team_id": "saint_lucia",
+      "canonical_name": "Saint Lucia",
+      "aliases": [
+        "Saint Lucia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "saint_vincent_and_the_grenadines": {
+      "team_id": "saint_vincent_and_the_grenadines",
+      "canonical_name": "Saint Vincent And The Grenadines",
+      "aliases": [
+        "Saint Vincent and the Grenadines"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "samoa": {
+      "team_id": "samoa",
+      "canonical_name": "Samoa",
+      "aliases": [
+        "Samoa"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "san_marino": {
+      "team_id": "san_marino",
+      "canonical_name": "San Marino",
+      "aliases": [
+        "San Marino"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "sao_tome_and_principe": {
+      "team_id": "sao_tome_and_principe",
+      "canonical_name": "Sao Tome And Principe",
+      "aliases": [
+        "Sao Tome and Principe"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "saudi_arabia": {
+      "team_id": "saudi_arabia",
+      "canonical_name": "Saudi Arabia",
+      "aliases": [
+        "Saudi Arabia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "scotland": {
+      "team_id": "scotland",
+      "canonical_name": "Scotland",
+      "aliases": [
+        "Scotland"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "senegal": {
+      "team_id": "senegal",
+      "canonical_name": "Senegal",
+      "aliases": [
+        "Senegal"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "serbia": {
+      "team_id": "serbia",
+      "canonical_name": "Serbia",
+      "aliases": [
+        "Serbia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "seychelles": {
+      "team_id": "seychelles",
+      "canonical_name": "Seychelles",
+      "aliases": [
+        "Seychelles"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "sierra_leone": {
+      "team_id": "sierra_leone",
+      "canonical_name": "Sierra Leone",
+      "aliases": [
+        "Sierra Leone"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "singapore": {
+      "team_id": "singapore",
+      "canonical_name": "Singapore",
+      "aliases": [
+        "Singapore"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "slovakia": {
+      "team_id": "slovakia",
+      "canonical_name": "Slovakia",
+      "aliases": [
+        "Slovakia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "slovenia": {
+      "team_id": "slovenia",
+      "canonical_name": "Slovenia",
+      "aliases": [
+        "Slovenia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "solomon_islands": {
+      "team_id": "solomon_islands",
+      "canonical_name": "Solomon Islands",
+      "aliases": [
+        "Solomon Islands"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "somalia": {
+      "team_id": "somalia",
+      "canonical_name": "Somalia",
+      "aliases": [
+        "Somalia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "south_africa": {
+      "team_id": "south_africa",
+      "canonical_name": "South Africa",
+      "aliases": [
+        "South Africa"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "south_korea": {
+      "team_id": "south_korea",
+      "canonical_name": "South Korea",
+      "aliases": [
+        "South Korea"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "south_sudan": {
+      "team_id": "south_sudan",
+      "canonical_name": "South Sudan",
+      "aliases": [
+        "South Sudan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "spain": {
+      "team_id": "spain",
+      "canonical_name": "Spain",
+      "aliases": [
+        "Spain"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "sri_lanka": {
+      "team_id": "sri_lanka",
+      "canonical_name": "Sri Lanka",
+      "aliases": [
+        "Sri Lanka"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "sudan": {
+      "team_id": "sudan",
+      "canonical_name": "Sudan",
+      "aliases": [
+        "Sudan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "suriname": {
+      "team_id": "suriname",
+      "canonical_name": "Suriname",
+      "aliases": [
+        "Suriname"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "sweden": {
+      "team_id": "sweden",
+      "canonical_name": "Sweden",
+      "aliases": [
+        "Sweden"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "switzerland": {
+      "team_id": "switzerland",
+      "canonical_name": "Switzerland",
+      "aliases": [
+        "Switzerland"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "syria": {
+      "team_id": "syria",
+      "canonical_name": "Syria",
+      "aliases": [
+        "Syria"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "tahiti": {
+      "team_id": "tahiti",
+      "canonical_name": "Tahiti",
+      "aliases": [
+        "Tahiti"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "tajikistan": {
+      "team_id": "tajikistan",
+      "canonical_name": "Tajikistan",
+      "aliases": [
+        "Tajikistan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "tanzania": {
+      "team_id": "tanzania",
+      "canonical_name": "Tanzania",
+      "aliases": [
+        "Tanzania"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "thailand": {
+      "team_id": "thailand",
+      "canonical_name": "Thailand",
+      "aliases": [
+        "Thailand"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "timor_leste": {
+      "team_id": "timor_leste",
+      "canonical_name": "Timor-leste",
+      "aliases": [
+        "Timor-Leste"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "togo": {
+      "team_id": "togo",
+      "canonical_name": "Togo",
+      "aliases": [
+        "Togo"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "tonga": {
+      "team_id": "tonga",
+      "canonical_name": "Tonga",
+      "aliases": [
+        "Tonga"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "trinidad_tobago": {
+      "team_id": "trinidad_tobago",
+      "canonical_name": "Trinidad & Tobago",
+      "aliases": [
+        "Trinidad & Tobago"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "tunisia": {
+      "team_id": "tunisia",
+      "canonical_name": "Tunisia",
+      "aliases": [
+        "Tunisia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "turkey": {
+      "team_id": "turkey",
+      "canonical_name": "Turkey",
+      "aliases": [
+        "Turkey",
+        "Türkiye"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "turkmenistan": {
+      "team_id": "turkmenistan",
+      "canonical_name": "Turkmenistan",
+      "aliases": [
+        "Turkmenistan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "uganda": {
+      "team_id": "uganda",
+      "canonical_name": "Uganda",
+      "aliases": [
+        "Uganda"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "ukraine": {
+      "team_id": "ukraine",
+      "canonical_name": "Ukraine",
+      "aliases": [
+        "Ukraine"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "united_arab_emirates": {
+      "team_id": "united_arab_emirates",
+      "canonical_name": "United Arab Emirates",
+      "aliases": [
+        "United Arab Emirates"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "uruguay": {
+      "team_id": "uruguay",
+      "canonical_name": "Uruguay",
+      "aliases": [
+        "Uruguay"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "usa": {
+      "team_id": "usa",
+      "canonical_name": "Usa",
+      "aliases": [
+        "USA"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": true
+    },
+    "uzbekistan": {
+      "team_id": "uzbekistan",
+      "canonical_name": "Uzbekistan",
+      "aliases": [
+        "Uzbekistan"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "vanuatu": {
+      "team_id": "vanuatu",
+      "canonical_name": "Vanuatu",
+      "aliases": [
+        "Vanuatu"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "venezuela": {
+      "team_id": "venezuela",
+      "canonical_name": "Venezuela",
+      "aliases": [
+        "Venezuela"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "vietnam": {
+      "team_id": "vietnam",
+      "canonical_name": "Vietnam",
+      "aliases": [
+        "Vietnam"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "wales": {
+      "team_id": "wales",
+      "canonical_name": "Wales",
+      "aliases": [
+        "Wales"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "yemen": {
+      "team_id": "yemen",
+      "canonical_name": "Yemen",
+      "aliases": [
+        "Yemen"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "zambia": {
+      "team_id": "zambia",
+      "canonical_name": "Zambia",
+      "aliases": [
+        "Zambia"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    },
+    "zimbabwe": {
+      "team_id": "zimbabwe",
+      "canonical_name": "Zimbabwe",
+      "aliases": [
+        "Zimbabwe"
+      ],
+      "fifa_code": null,
+      "confederation": null,
+      "host_auto_qualified_2026": false
+    }
+  }
+}
