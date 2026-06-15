@@ -84,7 +84,7 @@ def assert_record(row: dict) -> None:
         if key not in movement:
             fail(f"{row.get('fixture_id')}: odds_movement missing {key}")
     status = movement["status"]
-    if status not in {"MARKET_STABLE", "MARKET_MOVING", "MARKET_ALERT", "MARKET_CONFLICT", "THIN_MARKET_SKIP"}:
+    if status not in {"MARKET_STABLE", "MARKET_MOVING", "MARKET_ALERT", "MARKET_CONFLICT", "THIN_MARKET_SKIP", "HARD_THIN", "SOFT_THIN"}:
         fail(f"{row.get('fixture_id')}: invalid movement status {status}")
     liquidity = movement["liquidity"]
     for key in ("book_count_latest", "min_book_count_seen", "cross_book_spread_home_prob", "staleness_minutes", "markets_present"):
@@ -103,8 +103,13 @@ def assert_record(row: dict) -> None:
         if all(v is not None for v in probs) and abs(sum(float(v) for v in probs) - 1.0) > 0.001:
             fail(f"{row.get('fixture_id')}: 1X2 probabilities must be devigged before comparison")
     play_guard = movement["play_guard_input"]
-    if status == "THIN_MARKET_SKIP" and play_guard.get("recommended_gate") != "SKIP":
-        fail(f"{row.get('fixture_id')}: THIN_MARKET_SKIP must trigger SKIP")
+    if status in {"THIN_MARKET_SKIP", "HARD_THIN"} and play_guard.get("recommended_gate") != "SKIP":
+        fail(f"{row.get('fixture_id')}: HARD_THIN must trigger SKIP")
+    if status == "SOFT_THIN":
+        if play_guard.get("recommended_gate") == "SKIP":
+            fail(f"{row.get('fixture_id')}: SOFT_THIN must not trigger SKIP")
+        if movement.get("calibration", {}).get("gate_effect") != "WARN_ONLY":
+            fail(f"{row.get('fixture_id')}: SOFT_THIN must be WARN_ONLY")
     if status == "MARKET_MOVING" and movement.get("calibration", {}).get("gate_effect") != "WARN_ONLY":
         fail(f"{row.get('fixture_id')}: MARKET_MOVING must remain WARN_ONLY")
     if movement.get("calibration", {}).get("tier") != "A" and status in {"MARKET_ALERT", "MARKET_CONFLICT"}:
@@ -115,6 +120,11 @@ def assert_record(row: dict) -> None:
     for outlier in movement.get("single_book_outliers", []):
         if "忽略" not in outlier.get("note_cn", ""):
             fail(f"{row.get('fixture_id')}: single book outlier must be marked ignored")
+    sentence = movement.get("display", {}).get("normal_sentence_cn", "")
+    if status == "HARD_THIN" and "盘口核心数据不足" not in sentence:
+        fail(f"{row.get('fixture_id')}: HARD_THIN copy missing")
+    if status == "SOFT_THIN" and "盘口样本偏薄/偏旧" not in sentence:
+        fail(f"{row.get('fixture_id')}: SOFT_THIN copy missing")
 
 
 def assert_html() -> None:

@@ -99,6 +99,60 @@ def assert_data() -> None:
             fail(f"{fid}: secondary_score must be a single value or null")
         if primary and secondary and primary == secondary:
             fail(f"{fid}: secondary_score must not duplicate primary_score")
+        score_dist = row.get("score_distribution", {})
+        top_scores = score_dist.get("top_scores") or row.get("score_matrix_summary", {}).get("top_scores") or []
+        model_hda = (score_dist.get("matrix_model", {}) or {}).get("model_hda") or [
+            row.get("score_matrix_summary", {}).get("home_win_prob") or 0,
+            row.get("score_matrix_summary", {}).get("draw_prob") or 0,
+            row.get("score_matrix_summary", {}).get("away_win_prob") or 0,
+        ]
+
+        def bucket(score: str | None) -> str | None:
+            if not score or "-" not in str(score):
+                return None
+            home, away = [int(part) for part in str(score).split("-", 1)]
+            return "H" if home > away else ("D" if home == away else "A")
+
+        ranked = [
+            bucket_name
+            for bucket_name, _ in sorted(
+                {"H": float(model_hda[0]), "D": float(model_hda[1]), "A": float(model_hda[2])}.items(),
+                key=lambda item: item[1],
+                reverse=True,
+            )
+        ]
+
+        risk_scores = set()
+        for item in score_dist.get("score_pool", []):
+            path = str(item.get("path") or "")
+            reason = str(item.get("reason_cn") or "")
+            if any(token in path + reason for token in ("打开", "打穿", "崩盘", "尾部", "极端")) and item.get("score"):
+                risk_scores.add(item["score"])
+
+        def first_in_bucket(bucket_name: str) -> str | None:
+            for item in top_scores:
+                score = item.get("score")
+                if score not in risk_scores and bucket(score) == bucket_name:
+                    return score
+            return None
+
+        expected_primary = first_in_bucket(ranked[0])
+        expected_secondary = first_in_bucket(ranked[1])
+        if expected_primary and primary != expected_primary:
+            fail(f"{fid}: primary_score must be first outcome bucket mode")
+        if secondary and expected_secondary and secondary != expected_secondary:
+            fail(f"{fid}: secondary_score must be second outcome bucket mode")
+        if secondary:
+            if view.get("secondary_score_source") != "score_matrix":
+                fail(f"{fid}: secondary_score must come from score_matrix")
+            if not view.get("secondary_outcome_bucket"):
+                fail(f"{fid}: secondary_outcome_bucket missing")
+        else:
+            reason = view.get("secondary_score_reason_cn")
+            if not reason:
+                fail(f"{fid}: missing secondary_score_reason_cn when secondary_score is empty")
+            if not any(token in reason for token in ("无合格备选", "未达阈值", "风险路径不列为备选")):
+                fail(f"{fid}: secondary_score_reason_cn must explain the filter reason")
         if view.get("display_score_limit") != 2:
             fail(f"{fid}: display_score_limit must be 2")
         if view.get("primary_basis") != "most_likely_result_conditional_mode":

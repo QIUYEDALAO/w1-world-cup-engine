@@ -2,9 +2,9 @@
   "schema_version": "w1_refresh_state.v2",
   "watcher_version": "v2",
   "watcher_status": "READY",
-  "last_refresh": null,
-  "last_refresh_mode": null,
-  "next_run_cst": "2026-06-10 18:00 CST",
+  "last_refresh": "2026-06-12 09:53 CST",
+  "last_refresh_mode": "emergency_live_api",
+  "next_run_cst": "2026-06-12 12:00 CST",
   "normal_refresh_hours_cst": [
     "00:00",
     "06:00",
@@ -12,13 +12,10 @@
     "18:00"
   ],
   "special_refresh": {
-    "fixture_id": 1489369,
-    "match": "Mexico vs South Africa",
-    "windows_before_kickoff": [
-      "2h",
-      "1h",
-      "30m"
-    ]
+    "fixture_id": 1538999,
+    "match": "South Korea vs Czech Republic",
+    "refresh_type": "W1_EMERGENCY_PREMATCH",
+    "snapshot_ts": "20260612_0953"
   },
   "paths": {
     "script": "scripts/w1_watcher.sh",
@@ -40,7 +37,7 @@
     "runtime_log"
   ],
   "boundaries": {
-    "external_api_called_by_validation": false,
+    "external_api_called_by_validation": true,
     "old_system_modified": false,
     "disallowed_channel_or_status_written": false,
     "remote_configured": false,

@@ -1,0 +1,330 @@
+{
+  "schema_version": "W1_YESTERDAY_4_MATCH_POSTMATCH_AUDIT_V1",
+  "audit_date_cst": "2026-06-15",
+  "target_match_date_cst": "2026-06-14",
+  "source": "reports/dashboard/assets/w1_dashboard_data.json",
+  "yesterday_matches_count": 4,
+  "completed_count": 2,
+  "missing_result_count": 2,
+  "metrics": {
+    "primary_score_hits": 0,
+    "secondary_score_hits": 1,
+    "primary_score_accuracy": 0.0,
+    "secondary_score_accuracy": 0.5,
+    "primary_or_secondary_accuracy": 0.5,
+    "direction_hit_display_only_rate": 0.0,
+    "top8_coverage": 0.5,
+    "ou_2_5_hit_rate": 0.5,
+    "market_1x2_highest_hit_rate": 0.0,
+    "mean_actual_score_probability": 0.0531,
+    "mean_rps_1x2": 0.77895,
+    "mean_exact_score_log_loss": 3.0341
+  },
+  "notes_cn": [
+    "本报告只做赛后审计，不改模型、不改阈值、不改展示。",
+    "方向命中只展示，不作为调整依据。",
+    "样本量很小，不能据此调整模型。",
+    "缺赛果场次标记 MISSING_RESULT，不补写比分。"
+  ],
+  "matches": [
+    {
+      "fixture_id": "1489373",
+      "match": "卡塔尔 vs 瑞士",
+      "kickoff": "2026-06-14 03:00 CST",
+      "status": "finished",
+      "actual_score_display_cn": "卡塔尔 1-1 瑞士",
+      "actual_score": "1-1",
+      "reference_direction": "谨慎观察",
+      "recommendation_view": {
+        "primary_score": "0-2",
+        "secondary_score": "1-1",
+        "primary_outcome_bucket": "A",
+        "secondary_outcome_bucket": "D"
+      },
+      "market_probability_panel": {
+        "one_x_two": {
+          "home_win": 0.0641,
+          "draw": 0.1631,
+          "away_win": 0.7729,
+          "sum_check": 1.0
+        },
+        "totals_default": {
+          "line": 2.5,
+          "over_win_prob": 0.5398,
+          "push_prob": 0.0,
+          "under_win_prob": 0.4602,
+          "sum_check": 1.0
+        }
+      },
+      "score_matrix_top3": [
+        {
+          "score": "0-2",
+          "probability": 0.1561
+        },
+        {
+          "score": "0-1",
+          "probability": 0.131
+        },
+        {
+          "score": "0-3",
+          "probability": 0.1203
+        }
+      ],
+      "game_open_mass": 0.3168,
+      "market_vs_score_risk_summary_cn": "市场期望净胜球 δ=-1.78, 但热门取胜仅 77%、平局 16%; AH 是期望不是保证。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+      "post_match_calibration": {
+        "actual_score_probability": 0.0755,
+        "actual_score_rank": 5,
+        "rps_1x2": 0.6013,
+        "exact_score_log_loss": 2.5834,
+        "prediction_hit_type_cn": "pool_hit",
+        "miss_reason_tags": [
+          "MATRIX_OPEN_GAME_MASS",
+          "FAVORITE_WIN_NOT_COVER_SEPARATION"
+        ],
+        "lesson_cn": "赛后校准：比分池命中，说明多路径比分分布比单一比分更稳。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。"
+      },
+      "audit_judgment": {
+        "result_state": "READY",
+        "primary_score_hit": false,
+        "secondary_score_hit": true,
+        "direction_hit_display_only": false,
+        "actual_score_in_top8": true,
+        "ou_2_5_pick": "OVER",
+        "actual_ou_2_5": "UNDER",
+        "ou_2_5_hit": false,
+        "market_1x2_highest": "A",
+        "actual_1x2": "D",
+        "market_1x2_highest_hit": false,
+        "open_or_tail_path": true,
+        "risk_context": [
+          "SOFT_THIN",
+          "盘口过旧"
+        ]
+      }
+    },
+    {
+      "fixture_id": "1489371",
+      "match": "巴西 vs 摩洛哥",
+      "kickoff": "2026-06-14 06:00 CST",
+      "status": "not_started",
+      "actual_score_display_cn": null,
+      "actual_score": null,
+      "reference_direction": "巴西不败",
+      "recommendation_view": {
+        "primary_score": "1-0",
+        "secondary_score": "1-1",
+        "primary_outcome_bucket": "H",
+        "secondary_outcome_bucket": "D"
+      },
+      "market_probability_panel": {
+        "one_x_two": {
+          "home_win": 0.5748,
+          "draw": 0.2588,
+          "away_win": 0.1664,
+          "sum_check": 1.0
+        },
+        "totals_default": {
+          "line": 2.5,
+          "over_win_prob": 0.4274,
+          "push_prob": 0.0,
+          "under_win_prob": 0.5726,
+          "sum_check": 1.0
+        }
+      },
+      "score_matrix_top3": [
+        {
+          "score": "1-0",
+          "probability": 0.1429
+        },
+        {
+          "score": "2-0",
+          "probability": 0.1218
+        },
+        {
+          "score": "1-1",
+          "probability": 0.1201
+        }
+      ],
+      "game_open_mass": 0.2189,
+      "market_vs_score_risk_summary_cn": "市场期望净胜球 δ=0.87, 但热门取胜仅 57%、平局 26%; AH 是期望不是保证。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+      "post_match_calibration": {
+        "actual_score_probability": null,
+        "actual_score_rank": null,
+        "rps_1x2": null,
+        "exact_score_log_loss": null,
+        "prediction_hit_type_cn": "待复盘",
+        "miss_reason_tags": [],
+        "lesson_cn": "等待赛后校准；RPS/log score 将在实际比分写入后计算。"
+      },
+      "audit_judgment": {
+        "result_state": "MISSING_RESULT",
+        "primary_score_hit": null,
+        "secondary_score_hit": null,
+        "direction_hit_display_only": null,
+        "actual_score_in_top8": null,
+        "ou_2_5_pick": "UNDER",
+        "actual_ou_2_5": null,
+        "ou_2_5_hit": null,
+        "market_1x2_highest": "H",
+        "actual_1x2": null,
+        "market_1x2_highest_hit": null,
+        "open_or_tail_path": true,
+        "risk_context": [
+          "首发未确认",
+          "SOFT_THIN",
+          "盘口过旧"
+        ]
+      }
+    },
+    {
+      "fixture_id": "1489372",
+      "match": "海地 vs 苏格兰",
+      "kickoff": "2026-06-14 09:00 CST",
+      "status": "not_started",
+      "actual_score_display_cn": null,
+      "actual_score": null,
+      "reference_direction": "谨慎观察",
+      "recommendation_view": {
+        "primary_score": "0-1",
+        "secondary_score": "1-1",
+        "primary_outcome_bucket": "A",
+        "secondary_outcome_bucket": "D"
+      },
+      "market_probability_panel": {
+        "one_x_two": {
+          "home_win": 0.1465,
+          "draw": 0.2392,
+          "away_win": 0.6143,
+          "sum_check": 1.0
+        },
+        "totals_default": {
+          "line": 2.5,
+          "over_win_prob": 0.4641,
+          "push_prob": 0.0,
+          "under_win_prob": 0.5359,
+          "sum_check": 1.0
+        }
+      },
+      "score_matrix_top3": [
+        {
+          "score": "0-1",
+          "probability": 0.1357
+        },
+        {
+          "score": "0-2",
+          "probability": 0.1263
+        },
+        {
+          "score": "1-1",
+          "probability": 0.1124
+        }
+      ],
+      "game_open_mass": 0.249,
+      "market_vs_score_risk_summary_cn": "市场期望净胜球 δ=-1.03, 但热门取胜仅 61%、平局 24%; AH 是期望不是保证。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+      "post_match_calibration": {
+        "actual_score_probability": null,
+        "actual_score_rank": null,
+        "rps_1x2": null,
+        "exact_score_log_loss": null,
+        "prediction_hit_type_cn": "待复盘",
+        "miss_reason_tags": [],
+        "lesson_cn": "等待赛后校准；RPS/log score 将在实际比分写入后计算。"
+      },
+      "audit_judgment": {
+        "result_state": "MISSING_RESULT",
+        "primary_score_hit": null,
+        "secondary_score_hit": null,
+        "direction_hit_display_only": null,
+        "actual_score_in_top8": null,
+        "ou_2_5_pick": "UNDER",
+        "actual_ou_2_5": null,
+        "ou_2_5_hit": null,
+        "market_1x2_highest": "A",
+        "actual_1x2": null,
+        "market_1x2_highest_hit": null,
+        "open_or_tail_path": true,
+        "risk_context": [
+          "首发未确认",
+          "SOFT_THIN",
+          "盘口过旧"
+        ]
+      }
+    },
+    {
+      "fixture_id": "1539001",
+      "match": "澳大利亚 vs 土耳其",
+      "kickoff": "2026-06-14 12:00 CST",
+      "status": "finished",
+      "actual_score_display_cn": "澳大利亚 2-0 土耳其",
+      "actual_score": "2-0",
+      "reference_direction": "谨慎观察",
+      "recommendation_view": {
+        "primary_score": "0-1",
+        "secondary_score": "1-1",
+        "primary_outcome_bucket": "A",
+        "secondary_outcome_bucket": "D"
+      },
+      "market_probability_panel": {
+        "one_x_two": {
+          "home_win": 0.1878,
+          "draw": 0.2669,
+          "away_win": 0.5452,
+          "sum_check": 1.0
+        },
+        "totals_default": {
+          "line": 2.5,
+          "over_win_prob": 0.4272,
+          "push_prob": 0.0,
+          "under_win_prob": 0.5728,
+          "sum_check": 1.0
+        }
+      },
+      "score_matrix_top3": [
+        {
+          "score": "0-1",
+          "probability": 0.1374
+        },
+        {
+          "score": "1-1",
+          "probability": 0.1247
+        },
+        {
+          "score": "0-2",
+          "probability": 0.1133
+        }
+      ],
+      "game_open_mass": 0.2189,
+      "market_vs_score_risk_summary_cn": "市场期望净胜球 δ=-0.75, 但热门取胜仅 55%、平局 27%; AH 是期望不是保证。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+      "post_match_calibration": {
+        "actual_score_probability": 0.0307,
+        "actual_score_rank": 11,
+        "rps_1x2": 0.9566,
+        "exact_score_log_loss": 3.4848,
+        "prediction_hit_type_cn": "miss",
+        "miss_reason_tags": [
+          "FAVORITE_WIN_NOT_COVER_SEPARATION"
+        ],
+        "lesson_cn": "赛后校准：实际比分未进入比分池，需要检查市场先验、打开局质量和尾部概率。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。"
+      },
+      "audit_judgment": {
+        "result_state": "READY",
+        "primary_score_hit": false,
+        "secondary_score_hit": false,
+        "direction_hit_display_only": false,
+        "actual_score_in_top8": false,
+        "ou_2_5_pick": "UNDER",
+        "actual_ou_2_5": "UNDER",
+        "ou_2_5_hit": true,
+        "market_1x2_highest": "A",
+        "actual_1x2": "H",
+        "market_1x2_highest_hit": false,
+        "open_or_tail_path": true,
+        "risk_context": [
+          "SOFT_THIN",
+          "盘口过旧"
+        ]
+      }
+    }
+  ]
+}

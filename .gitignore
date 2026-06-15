@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+.env
+*.egg-info/
+
+# 运行时产物 - 不推
+data/historical/raw/
+data/odds_snapshots/
+data/snapshots/
+
+# 运行时状态缓存
+state/w1_live_refresh_state.json
+state/w1_weather_cache.json

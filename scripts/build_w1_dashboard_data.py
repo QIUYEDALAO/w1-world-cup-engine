@@ -396,6 +396,8 @@ def manual_lineup_payload(path: Path) -> dict[str, Any] | None:
         "away_bench_players": [manual_player(row) for row in payload.get("away_substitutes", [])],
         "notes_cn": payload.get("notes_cn", []),
         "as_of_utc": payload.get("as_of_utc"),
+        "lineup_payload_type": "starting_xi",
+        "lineup_confirmed_utc": payload.get("as_of_utc"),
     }
 
 
@@ -449,6 +451,8 @@ def apply_manual_lineup_override(card: dict[str, Any]) -> dict[str, Any]:
         "lineup_source_type": manual.get("source_type", ""),
         "lineup_notes_cn": manual.get("notes_cn", []),
         "lineup_as_of_utc": manual.get("as_of_utc"),
+        "lineup_confirmed_utc": manual.get("lineup_confirmed_utc") or manual.get("as_of_utc"),
+        "lineup_payload_type": manual.get("lineup_payload_type") or "starting_xi",
         "manual_lineup_fixture_id": manual.get("fixture_id"),
     }
     card["risk_flags"] = [
@@ -593,6 +597,8 @@ def status_badge(status: str) -> str:
         "MARKET_ALERT": "alert",
         "MARKET_CONFLICT": "conflict",
         "THIN_MARKET_SKIP": "thin",
+        "HARD_THIN": "thin",
+        "SOFT_THIN": "thin",
     }.get(status, "thin")
 
 
@@ -760,14 +766,16 @@ def odds_movement_monitor(
 
     status = "MARKET_STABLE"
     reason = "STABLE"
-    if liquidity["book_count_latest"] < liquidity_cfg.get("min_books_1x2", 3):
-        status, reason = "THIN_MARKET_SKIP", "THIN_FEW_BOOKS"
+    if not markets_present["x2"]:
+        status, reason = "HARD_THIN", "HARD_THIN_NO_1X2"
     elif not markets_present["ou"]:
-        status, reason = "THIN_MARKET_SKIP", "THIN_NO_OU"
+        status, reason = "HARD_THIN", "HARD_THIN_NO_OU"
+    elif liquidity["book_count_latest"] < liquidity_cfg.get("min_books_1x2", 3):
+        status, reason = "SOFT_THIN", "SOFT_THIN_FEW_BOOKS"
     elif staleness > liquidity_cfg.get("stale_max_minutes", 360):
-        status, reason = "THIN_MARKET_SKIP", "THIN_STALE"
+        status, reason = "SOFT_THIN", "SOFT_THIN_STALE"
     elif liquidity["cross_book_spread_home_prob"] > liquidity_cfg.get("spread_max_home_prob", 0.10):
-        status, reason = "THIN_MARKET_SKIP", "THIN_WIDE_SPREAD"
+        status, reason = "SOFT_THIN", "SOFT_THIN_WIDE_SPREAD"
     elif cumulative["favorite_flipped"]:
         status, reason = "MARKET_ALERT", "ALERT_FAVORITE_FLIP"
     elif recent["sharp_recent_flag"]:
@@ -780,11 +788,16 @@ def odds_movement_monitor(
     calibrated = thresholds_config.get("calibrated", "none")
     tier = thresholds_config.get("tier", "C")
     hard_movement_gate = calibrated == "full" and tier == "A"
-    if status == "THIN_MARKET_SKIP":
+    if status == "HARD_THIN":
         recommended_gate = "SKIP"
         allow_formal = False
         reference_action = "DOWNGRADE"
         gate_effect = "HARD_SKIP"
+    elif status == "SOFT_THIN":
+        recommended_gate = "OBSERVE_ONLY"
+        allow_formal = False
+        reference_action = "EARLY_REFERENCE"
+        gate_effect = "WARN_ONLY"
     elif status == "MARKET_STABLE":
         recommended_gate = "ALLOW_FORMAL"
         allow_formal = True
@@ -811,7 +824,8 @@ def odds_movement_monitor(
         "MARKET_MOVING": "盘口正在调整，可能在消化首发/伤停，等待稳定后再看正式判断。",
         "MARKET_ALERT": "临场出现明显异动，暂不升级为正式判断，需要人工关注。",
         "MARKET_CONFLICT": "各盘口信号不一致，当前读数可信度低，暂不出正式结论。",
-        "THIN_MARKET_SKIP": "该场盘口数据不足或过旧，不进入正式预测链路。",
+        "HARD_THIN": "盘口核心数据不足，无法生成可靠分布。",
+        "SOFT_THIN": "盘口样本偏薄/偏旧，本场只作早盘参考，等待更新。",
     }[status]
     if cumulative["x2_tv_distance"] is not None or cumulative["mu_delta"] is not None:
         normal_sentence += f"（TV {cumulative['x2_tv_distance'] if cumulative['x2_tv_distance'] is not None else '–'} · μ漂移 {cumulative['mu_delta'] if cumulative['mu_delta'] is not None else '–'}）"
@@ -1143,12 +1157,58 @@ def normalize_score_distribution(raw: dict[str, Any]) -> dict[str, Any]:
 
 def recommendation_view_from_score_distribution(score_distribution: dict[str, Any]) -> dict[str, Any]:
     """Derive the public-facing score view without changing the score matrix."""
-    primary_score = score_distribution.get("main_score")
-    secondary_score = score_distribution.get("fallback_score")
-    if secondary_score == primary_score:
-        secondary_score = None
-
     pool = score_distribution.get("score_pool", []) or []
+    top_scores = score_distribution.get("top_scores", []) or []
+    risk_score_set = set()
+    for item in pool:
+        path = str(item.get("path") or "")
+        reason = str(item.get("reason_cn") or "")
+        if any(token in path + reason for token in ("打开", "打穿", "崩盘", "尾部", "极端")):
+            score = item.get("score")
+            if score:
+                risk_score_set.add(score)
+
+    def outcome_bucket(score: str | None) -> str | None:
+        if not score or "-" not in str(score):
+            return None
+        try:
+            home, away = [int(part) for part in str(score).split("-", 1)]
+        except ValueError:
+            return None
+        if home > away:
+            return "H"
+        if home == away:
+            return "D"
+        return "A"
+
+    matrix_model = score_distribution.get("matrix_model", {}) or {}
+    model_hda = matrix_model.get("model_hda") or []
+    outcome_probs = {
+        "H": float(model_hda[0]) if len(model_hda) > 0 else float(matrix_model.get("home_win_prob") or 0.0),
+        "D": float(model_hda[1]) if len(model_hda) > 1 else float(matrix_model.get("draw_prob") or 0.0),
+        "A": float(model_hda[2]) if len(model_hda) > 2 else float(matrix_model.get("away_win_prob") or 0.0),
+    }
+    ranked_buckets = [bucket for bucket, _ in sorted(outcome_probs.items(), key=lambda item: item[1], reverse=True)]
+
+    def mode_in_bucket(bucket: str, *, exclude: set[str] | None = None) -> str | None:
+        excluded = exclude or set()
+        for item in top_scores:
+            score = item.get("score")
+            if score and score not in excluded and score not in risk_score_set and outcome_bucket(score) == bucket:
+                return score
+        return None
+
+    primary_bucket = ranked_buckets[0] if ranked_buckets else None
+    secondary_bucket = ranked_buckets[1] if len(ranked_buckets) > 1 else None
+    primary_score = mode_in_bucket(primary_bucket) if primary_bucket else None
+    if not primary_score:
+        primary_score = score_distribution.get("main_score")
+        primary_bucket = outcome_bucket(primary_score)
+    secondary_score = mode_in_bucket(secondary_bucket, exclude={primary_score} if primary_score else set()) if secondary_bucket else None
+    secondary_reason = "来自第二结果桶内概率最高比分。"
+    if not secondary_score:
+        secondary_reason = "无合格备选：第二结果桶未达阈值或风险路径不列为备选。"
+
     shown_scores = {score for score in (primary_score, secondary_score) if score}
     risk_paths = []
     open_game_paths = []
@@ -1185,6 +1245,10 @@ def recommendation_view_from_score_distribution(score_distribution: dict[str, An
         "secondary_score": secondary_score,
         "primary_basis": "most_likely_result_conditional_mode",
         "secondary_basis": "second_result_conditional_mode" if secondary_score else None,
+        "primary_outcome_bucket": primary_bucket,
+        "secondary_outcome_bucket": secondary_bucket if secondary_score else None,
+        "secondary_score_source": "score_matrix" if secondary_score else None,
+        "secondary_score_reason_cn": secondary_reason,
         "risk_path_summary": "".join(summary_parts),
         "risk_paths": risk_paths[:6],
         "tail_paths": tail_paths[:4],
@@ -1192,6 +1256,185 @@ def recommendation_view_from_score_distribution(score_distribution: dict[str, An
         "expert_score_pool_available": bool(pool),
         "display_score_limit": 2,
         "note_cn": "主比分唯一，备选比分最多一个；其余比分路径只在专家详情层展示。",
+    }
+
+
+def _round_prob(value: float | None) -> float | None:
+    return round(float(value), 4) if value is not None else None
+
+
+def _matrix_from_score_distribution(score_distribution: dict[str, Any]) -> Any | None:
+    model = score_distribution.get("matrix_model", {}) if score_distribution else {}
+    try:
+        lh = float(model["lambda_home"])
+        la = float(model["lambda_away"])
+        rho = float(model.get("rho", W1_RHO))
+    except (KeyError, TypeError, ValueError):
+        return None
+    return W1ENGINE.score_matrix(lh, la, rho)
+
+
+def derive_1x2_from_score_matrix(matrix: Any) -> dict[str, float]:
+    home = draw = away = 0.0
+    for h in range(matrix.shape[0]):
+        for a in range(matrix.shape[1]):
+            p = float(matrix[h, a])
+            if h > a:
+                home += p
+            elif h == a:
+                draw += p
+            else:
+                away += p
+    return {"home_win": _round_prob(home), "draw": _round_prob(draw), "away_win": _round_prob(away), "sum_check": _round_prob(home + draw + away)}
+
+
+def _settle_binary_line(matrix: Any, line: float, value_fn: Any) -> dict[str, float]:
+    win = push = lose = 0.0
+    for h in range(matrix.shape[0]):
+        for a in range(matrix.shape[1]):
+            diff = float(value_fn(h, a)) - line
+            p = float(matrix[h, a])
+            if diff > 1e-9:
+                win += p
+            elif diff < -1e-9:
+                lose += p
+            else:
+                push += p
+    return {"win": win, "push": push, "lose": lose}
+
+
+def _split_quarter_line(line: float) -> list[float]:
+    doubled = line * 2
+    if abs(doubled - round(doubled)) < 1e-9:
+        return [line]
+    return [line - 0.25, line + 0.25]
+
+
+def derive_ou_from_score_matrix(matrix: Any, lines: list[float] | None = None) -> list[dict[str, Any]]:
+    rows = []
+    for line in lines or [1.5, 2.0, 2.25, 2.5, 2.75, 3.0, 3.5]:
+        legs = [_settle_binary_line(matrix, leg, lambda h, a: h + a) for leg in _split_quarter_line(float(line))]
+        over_win = sum(leg["win"] for leg in legs) / len(legs)
+        push = sum(leg["push"] for leg in legs) / len(legs)
+        under_win = sum(leg["lose"] for leg in legs) / len(legs)
+        rows.append({"line": line, "over_win_prob": _round_prob(over_win), "push_prob": _round_prob(push), "under_win_prob": _round_prob(under_win), "sum_check": _round_prob(over_win + push + under_win)})
+    return rows
+
+
+def derive_ah_from_score_matrix(matrix: Any, handicaps: list[float] | None = None) -> list[dict[str, Any]]:
+    rows = []
+    for handicap in handicaps or [-1.5, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]:
+        legs = [_settle_binary_line(matrix, -leg, lambda h, a: h - a) for leg in _split_quarter_line(float(handicap))]
+        home_win = sum(leg["win"] for leg in legs) / len(legs)
+        push = sum(leg["push"] for leg in legs) / len(legs)
+        home_lose = sum(leg["lose"] for leg in legs) / len(legs)
+        rows.append(
+            {
+                "home_handicap": handicap,
+                "home_cover_win_prob": _round_prob(home_win),
+                "home_cover_push_prob": _round_prob(push),
+                "home_cover_lose_prob": _round_prob(home_lose),
+                "away_cover_win_prob": _round_prob(home_lose),
+                "away_cover_push_prob": _round_prob(push),
+                "away_cover_lose_prob": _round_prob(home_win),
+                "sum_check": _round_prob(home_win + push + home_lose),
+            }
+        )
+    return rows
+
+
+def derive_btts_from_score_matrix(matrix: Any) -> dict[str, float]:
+    yes = 0.0
+    for h in range(matrix.shape[0]):
+        for a in range(matrix.shape[1]):
+            if h >= 1 and a >= 1:
+                yes += float(matrix[h, a])
+    return {"yes": _round_prob(yes), "no": _round_prob(1.0 - yes), "sum_check": _round_prob(1.0)}
+
+
+def derive_clean_sheet_from_score_matrix(matrix: Any) -> dict[str, float]:
+    home = sum(float(matrix[h, 0]) for h in range(matrix.shape[0]))
+    away = sum(float(matrix[0, a]) for a in range(matrix.shape[1]))
+    return {"home_clean_sheet": _round_prob(home), "away_clean_sheet": _round_prob(away)}
+
+
+def derive_goal_band_from_score_matrix(matrix: Any) -> dict[str, float]:
+    bands = {"goal_band_0_1": 0.0, "goal_band_2_3": 0.0, "goal_band_4_plus": 0.0}
+    for h in range(matrix.shape[0]):
+        for a in range(matrix.shape[1]):
+            total = h + a
+            key = "goal_band_0_1" if total <= 1 else ("goal_band_2_3" if total <= 3 else "goal_band_4_plus")
+            bands[key] += float(matrix[h, a])
+    return {key: _round_prob(value) for key, value in bands.items()} | {"sum_check": _round_prob(sum(bands.values()))}
+
+
+def _nearest_line(rows: list[dict[str, Any]], key: str, target: float) -> dict[str, Any] | None:
+    if not rows:
+        return None
+    return min(rows, key=lambda row: abs(float(row.get(key, 0.0)) - target))
+
+
+def market_probability_panel_from_score_distribution(score_distribution: dict[str, Any], card: dict[str, Any]) -> dict[str, Any]:
+    matrix = _matrix_from_score_distribution(score_distribution)
+    if matrix is None:
+        return {
+            "schema_version": "W1_MARKET_PROBABILITY_PANEL_V1",
+            "status": "skipped",
+            "source": "score_matrix",
+            "one_x_two": None,
+            "totals": [],
+            "totals_default": None,
+            "handicap": [],
+            "handicap_default": None,
+            "btts": None,
+            "clean_sheet": None,
+            "goal_bands": None,
+            "market_comparison": {"status": "missing", "notes_cn": ["比分矩阵未生成，盘口概率面板跳过。"]},
+            "disclaimer_cn": "盘口概率面板是由市场输入反解后的矩阵读数，用于市场复述和自洽核对；BTTS 等衍生切面基于比分矩阵假设，未对该盘独立校准，非最终结论。",
+        }
+
+    one_x_two = derive_1x2_from_score_matrix(matrix)
+    totals = derive_ou_from_score_matrix(matrix)
+    handicap = derive_ah_from_score_matrix(matrix)
+    ah_ladder = W1ENGINE.parse_ah_ladder(card)
+    main_ah = sorted(ah_ladder.keys(), key=lambda value: abs(value))[0] if ah_ladder else 0.0
+    market_comparison: dict[str, Any] = {
+        "status": "model_only",
+        "notes_cn": [
+            "1X2、OU、AH 主盘是由市场输入反解后的矩阵读数，主要用于市场复述和自洽核对。",
+            "BTTS、零封和进球区间为模型隐含，基于比分矩阵假设，未对该盘独立校准。",
+        ],
+    }
+    raw_1x2 = W1ENGINE.parse_1x2(card)
+    if raw_1x2:
+        probs = W1ENGINE.devig_proportional(list(raw_1x2))
+        market_comparison["status"] = "ready"
+        market_comparison["one_x_two_market"] = {"home_win": _round_prob(probs[0]), "draw": _round_prob(probs[1]), "away_win": _round_prob(probs[2])}
+    ou_ladder = W1ENGINE.parse_ou_ladder(card)
+    if 2.5 in ou_ladder:
+        over = W1ENGINE.devig_two_way(ou_ladder[2.5]["over"], ou_ladder[2.5]["under"])
+        market_comparison["ou_2_5_market"] = {"over": _round_prob(over), "under": _round_prob(1 - over)}
+    if main_ah in ah_ladder:
+        home_odds = ah_ladder[main_ah].get("home")
+        away_odds = ah_ladder[main_ah].get("away")
+        if home_odds and away_odds:
+            home_cover = W1ENGINE.devig_two_way(home_odds, away_odds)
+            market_comparison["ah_main_market"] = {"home_handicap": main_ah, "home_cover": _round_prob(home_cover), "away_cover": _round_prob(1 - home_cover)}
+
+    return {
+        "schema_version": "W1_MARKET_PROBABILITY_PANEL_V1",
+        "status": "ready",
+        "source": "score_matrix",
+        "one_x_two": one_x_two,
+        "totals": totals,
+        "totals_default": _nearest_line(totals, "line", 2.5),
+        "handicap": handicap,
+        "handicap_default": _nearest_line(handicap, "home_handicap", float(main_ah)),
+        "btts": derive_btts_from_score_matrix(matrix),
+        "clean_sheet": derive_clean_sheet_from_score_matrix(matrix),
+        "goal_bands": derive_goal_band_from_score_matrix(matrix),
+        "market_comparison": market_comparison,
+        "disclaimer_cn": "盘口概率面板是由市场输入反解后的矩阵读数，用于市场复述和自洽核对；BTTS 等衍生切面基于比分矩阵假设，未对该盘独立校准，非最终结论。",
     }
 
 
@@ -1237,7 +1480,6 @@ def data_quality_for_card(
     odds_status = "success" if odds_ok and has_1x2 and has_ah and has_ou else "missing"
 
     lineup_confirmed = bool(lineups.get("confirmed_lineup_available"))
-    lineup_status = "ready" if lineup_confirmed and lineups.get("lineup_source") == "manual_verified" else ("confirmed" if lineup_confirmed else "missing")
     home_count = len(lineups.get("home_starting_xi") or [])
     away_count = len(lineups.get("away_starting_xi") or [])
 
@@ -1256,13 +1498,21 @@ def data_quality_for_card(
     away_squad = squad.get("away", {})
     squad_available = bool(home_squad.get("available")) and bool(away_squad.get("available"))
     squad_state = "available" if squad_available else ("partial" if home_squad or away_squad else "missing")
+    if lineup_confirmed and lineups.get("lineup_source") == "manual_verified":
+        lineup_status = "ready"
+    elif lineup_confirmed:
+        lineup_status = "confirmed"
+    elif squad_available:
+        lineup_status = "squad_ready_lineup_missing"
+    else:
+        lineup_status = "missing"
     fail_rules = [str(gap.get("field")) for gap in gaps if gap.get("blocks_play")]
     if not play_guard_pass and not fail_rules:
         fail_rules = ["lineups.confirmed_lineup"]
 
     missing_parts = []
     if not lineup_confirmed:
-        missing_parts.append("首发未公布")
+        missing_parts.append("名单已获取，首发未确认" if squad_available else "首发未公布")
     if referee_status == "missing":
         missing_parts.append("裁判未公布")
     if not odds_ok:
@@ -1296,6 +1546,10 @@ def data_quality_for_card(
             "source": lineups.get("lineup_source"),
             "source_name": lineups.get("lineup_source_name"),
             "source_type": lineups.get("lineup_source_type"),
+            "updated_at": lineups.get("lineup_updated_at"),
+            "confirmed_utc": lineups.get("lineup_confirmed_utc"),
+            "payload_type": lineups.get("lineup_payload_type") or ("starting_xi" if lineup_confirmed else ("squad" if squad_available else "unknown")),
+            "squad_status": squad_state,
         },
         "referee": {
             "status": referee_status,
@@ -1644,6 +1898,17 @@ def build_record(
     away_cn = TEAM_CN.get(away, away)
     decision = card.get("decision", {})
     lineups = card.get("lineups", {})
+    if lineups.get("confirmed_lineup_available"):
+        lineups.setdefault("lineup_payload_type", "starting_xi")
+        lineups.setdefault(
+            "lineup_confirmed_utc",
+            lineups.get("lineup_as_of_utc")
+            or lineups.get("lineup_updated_at")
+            or card.get("match", {}).get("generated_at_utc")
+            or datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        )
+    elif card.get("squad"):
+        lineups.setdefault("lineup_payload_type", "squad")
     referee = card.get("match", {}).get("referee", {})
     risks = card.get("risk_flags", [])
     gaps = card.get("data_gaps", [])
@@ -1692,6 +1957,7 @@ def build_record(
     score_distribution = normalize_score_distribution(raw_score_distribution)
     score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
     recommendation_view = recommendation_view_from_score_distribution(score_distribution)
+    market_probability_panel = market_probability_panel_from_score_distribution(score_distribution, card)
     if recommendation_view.get("primary_score"):
         reference_score = recommendation_view["primary_score"]
         if recommendation_view.get("secondary_score"):
@@ -1729,13 +1995,21 @@ def build_record(
         "play_guard_version": "W1_PLAY_GUARD_V1",
         "play_guard_pass": play_guard_pass,
         "lineup_status": lineups.get("status") if lineups.get("confirmed_lineup_available") else ((ledger or {}).get("lineup_status") or latest.get("lineup_status") or lineups.get("status")),
+        "lineup_confirmed": bool(lineups.get("confirmed_lineup_available")),
         "confirmed_lineup_available": bool(lineups.get("confirmed_lineup_available")),
+        "lineup_source": lineups.get("lineup_source"),
+        "lineup_updated_at": lineups.get("lineup_updated_at"),
+        "lineup_confirmed_utc": lineups.get("lineup_confirmed_utc"),
+        "lineup_payload_type": lineups.get("lineup_payload_type") or ("starting_xi" if lineups.get("confirmed_lineup_available") else ("squad" if card.get("squad") else "unknown")),
+        "manual_verified": lineups.get("lineup_source") == "manual_verified",
         "lineups": {
             "source": lineups.get("lineup_source"),
             "source_name": lineups.get("lineup_source_name"),
             "source_type": lineups.get("lineup_source_type"),
             "notes_cn": lineups.get("lineup_notes_cn", []),
             "as_of_utc": lineups.get("lineup_as_of_utc"),
+            "confirmed_utc": lineups.get("lineup_confirmed_utc"),
+            "payload_type": lineups.get("lineup_payload_type") or ("starting_xi" if lineups.get("confirmed_lineup_available") else ("squad" if card.get("squad") else "unknown")),
             "home_starting_xi": lineups.get("home_starting_xi", []),
             "away_starting_xi": lineups.get("away_starting_xi", []),
             "home_starting_players": lineups.get("home_starting_players", []),
@@ -1757,6 +2031,7 @@ def build_record(
         "score_distribution": score_distribution,
         "score_matrix_summary": score_matrix_summary,
         "recommendation_view": recommendation_view,
+        "market_probability_panel": market_probability_panel,
         "post_match_calibration": score_distribution["post_match_calibration"],
         "odds_movement": movement,
         "market_signal": market_signal,
@@ -1798,6 +2073,8 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "MARKET_ALERT": "市场异动",
             "MARKET_CONFLICT": "盘口信号冲突",
             "THIN_MARKET_SKIP": "盘口数据不足",
+            "HARD_THIN": "盘口核心数据不足",
+            "SOFT_THIN": "盘口样本偏薄",
         }
         gate_map = {
             "SKIP": "跳过正式链路",
@@ -1824,7 +2101,14 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             mapping = {
                 "overall": {"complete": "数据完整", "partial": "数据部分缺失", "poor": "数据质量较差"},
                 "odds": {"success": "成功", "missing": "缺失", "stale": "过期", "error": "错误"},
-                "lineup": {"ready": "已确认", "confirmed": "已确认", "probable": "预计", "missing": "未公布", "error": "错误"},
+                "lineup": {
+                    "ready": "已确认",
+                    "confirmed": "已确认",
+                    "probable": "预计",
+                    "squad_ready_lineup_missing": "名单已获取，首发未确认",
+                    "missing": "未公布",
+                    "error": "错误",
+                },
                 "referee": {"success": "已公布", "missing": "未公布", "error": "错误"},
                 "injuries": {"success": "有记录", "empty": "无记录 / 暂无", "missing": "缺失", "error": "错误"},
                 "context": {"available": "可用", "partial": "部分可用", "missing": "缺失"},
@@ -1992,6 +2276,15 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             view[key] = clean_items
         return view
 
+    def public_market_probability_panel(value: dict[str, Any]) -> dict[str, Any]:
+        panel = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        status_map = {"ready": "已生成", "skipped": "跳过", "missing": "暂缺"}
+        panel["status"] = status_map.get(str(panel.get("status")), clean_public_text(panel.get("status", "暂缺")))
+        panel["disclaimer_cn"] = clean_public_text(panel.get("disclaimer_cn", ""))
+        comparison = panel.get("market_comparison", {})
+        comparison["notes_cn"] = [clean_public_text(item) for item in comparison.get("notes_cn", [])]
+        return panel
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -2014,6 +2307,11 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "away_flag": row["away_flag"],
             "kickoff": row["kickoff"],
             "confirmed_lineup_available": row.get("confirmed_lineup_available"),
+            "lineup_confirmed": row.get("lineup_confirmed"),
+            "lineup_confirmed_utc": row.get("lineup_confirmed_utc"),
+            "lineup_payload_type": row.get("lineup_payload_type"),
+            "lineup_source": row.get("lineup_source"),
+            "lineup_updated_at": row.get("lineup_updated_at"),
             "lineups": row.get("lineups", {}),
             "home_formation": row.get("home_formation"),
             "away_formation": row.get("away_formation"),
@@ -2046,6 +2344,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "score_distribution": public_score_distribution(row["score_distribution"]),
             "score_matrix_summary": public_score_matrix_summary(row.get("score_matrix_summary", {})),
             "recommendation_view": public_recommendation_view(row.get("recommendation_view", {})),
+            "market_probability_panel": public_market_probability_panel(row.get("market_probability_panel", {})),
             "post_match_calibration": public_score_distribution(row["score_distribution"]).get("post_match_calibration", {}),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,

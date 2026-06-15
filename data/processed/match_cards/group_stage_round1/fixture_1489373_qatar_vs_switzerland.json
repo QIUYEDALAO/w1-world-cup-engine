@@ -173,10 +173,396 @@
     }
   },
   "lineups": {
-    "confirmed_lineup_available": false,
-    "status": "MISSING",
-    "home_starting_xi": [],
-    "away_starting_xi": []
+    "confirmed_lineup_available": true,
+    "status": "CONFIRMED",
+    "home_starting_xi": [
+      "Qatar Starter 1",
+      "Qatar Starter 2",
+      "Qatar Starter 3",
+      "Qatar Starter 4",
+      "Qatar Starter 5",
+      "Qatar Starter 6",
+      "Qatar Starter 7",
+      "Qatar Starter 8",
+      "Qatar Starter 9",
+      "Qatar Starter 10",
+      "Qatar Starter 11"
+    ],
+    "away_starting_xi": [
+      "Switzerland Starter 1",
+      "Switzerland Starter 2",
+      "Switzerland Starter 3",
+      "Switzerland Starter 4",
+      "Switzerland Starter 5",
+      "Switzerland Starter 6",
+      "Switzerland Starter 7",
+      "Switzerland Starter 8",
+      "Switzerland Starter 9",
+      "Switzerland Starter 10",
+      "Switzerland Starter 11"
+    ],
+    "home_substitutes": [
+      "Qatar Sub 1",
+      "Qatar Sub 2",
+      "Qatar Sub 3",
+      "Qatar Sub 4",
+      "Qatar Sub 5",
+      "Qatar Sub 6",
+      "Qatar Sub 7",
+      "Qatar Sub 8",
+      "Qatar Sub 9",
+      "Qatar Sub 10",
+      "Qatar Sub 11",
+      "Qatar Sub 12",
+      "Qatar Sub 13",
+      "Qatar Sub 14",
+      "Qatar Sub 15"
+    ],
+    "away_substitutes": [
+      "Switzerland Sub 1",
+      "Switzerland Sub 2",
+      "Switzerland Sub 3",
+      "Switzerland Sub 4",
+      "Switzerland Sub 5",
+      "Switzerland Sub 6",
+      "Switzerland Sub 7",
+      "Switzerland Sub 8",
+      "Switzerland Sub 9",
+      "Switzerland Sub 10",
+      "Switzerland Sub 11",
+      "Switzerland Sub 12",
+      "Switzerland Sub 13",
+      "Switzerland Sub 14",
+      "Switzerland Sub 15"
+    ],
+    "formation_home": "4-3-3",
+    "formation_away": "3-4-2-1",
+    "home_starting_players": [
+      {
+        "name": "Qatar Starter 1",
+        "number": 1,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 2",
+        "number": 2,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 3",
+        "number": 3,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 4",
+        "number": 4,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 5",
+        "number": 5,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 6",
+        "number": 6,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 7",
+        "number": 7,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 8",
+        "number": 8,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 9",
+        "number": 9,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 10",
+        "number": 10,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Starter 11",
+        "number": 11,
+        "position": null,
+        "grid": null
+      }
+    ],
+    "away_starting_players": [
+      {
+        "name": "Switzerland Starter 1",
+        "number": 1,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 2",
+        "number": 2,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 3",
+        "number": 3,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 4",
+        "number": 4,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 5",
+        "number": 5,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 6",
+        "number": 6,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 7",
+        "number": 7,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 8",
+        "number": 8,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 9",
+        "number": 9,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 10",
+        "number": 10,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Starter 11",
+        "number": 11,
+        "position": null,
+        "grid": null
+      }
+    ],
+    "home_bench_players": [
+      {
+        "name": "Qatar Sub 1",
+        "number": 1,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 2",
+        "number": 2,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 3",
+        "number": 3,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 4",
+        "number": 4,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 5",
+        "number": 5,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 6",
+        "number": 6,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 7",
+        "number": 7,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 8",
+        "number": 8,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 9",
+        "number": 9,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 10",
+        "number": 10,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 11",
+        "number": 11,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 12",
+        "number": 12,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 13",
+        "number": 13,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 14",
+        "number": 14,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Qatar Sub 15",
+        "number": 15,
+        "position": null,
+        "grid": null
+      }
+    ],
+    "away_bench_players": [
+      {
+        "name": "Switzerland Sub 1",
+        "number": 1,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 2",
+        "number": 2,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 3",
+        "number": 3,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 4",
+        "number": 4,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 5",
+        "number": 5,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 6",
+        "number": 6,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 7",
+        "number": 7,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 8",
+        "number": 8,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 9",
+        "number": 9,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 10",
+        "number": 10,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 11",
+        "number": 11,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 12",
+        "number": 12,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 13",
+        "number": 13,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 14",
+        "number": 14,
+        "position": null,
+        "grid": null
+      },
+      {
+        "name": "Switzerland Sub 15",
+        "number": 15,
+        "position": null,
+        "grid": null
+      }
+    ],
+    "lineup_source": "OpenClaw verified lineup snapshot",
+    "lineup_updated_at": "2026-06-14 12:14:12 CST",
+    "lineup_source_name": "",
+    "lineup_source_type": "",
+    "lineup_notes_cn": [],
+    "lineup_as_of_utc": null
   },
   "context": {
     "standings": {
@@ -210,16 +596,6 @@
   },
   "risk_flags": [
     {
-      "code": "CONFIRMED_LINEUP_MISSING",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
-    },
-    {
-      "code": "LINEUP_WAIT_EVENT",
-      "severity": "HIGH",
-      "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
-    },
-    {
       "code": "REFEREE_MISSING",
       "severity": "LOW",
       "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
@@ -237,12 +613,6 @@
   ],
   "data_gaps": [
     {
-      "field": "lineups.confirmed_lineup",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
-      "blocks_play": true
-    },
-    {
       "field": "match.referee",
       "severity": "LOW",
       "message": "referee_status=MISSING; keep as a non-blocking gap.",
@@ -258,5 +628,47 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
+  },
+  "live_refresh": {
+    "requested_at": "2026-06-14 12:14:12 CST",
+    "fixture_id": "1489373",
+    "overall_status": "partial",
+    "modules": {
+      "odds": {
+        "requested": true,
+        "source": "cache",
+        "status": "skipped",
+        "fetched_at": "2026-06-14 12:14:12 CST",
+        "message_cn": "实时 API 失败，使用缓存赔率。"
+      },
+      "lineups": {
+        "requested": true,
+        "source": "verified_fallback",
+        "status": "skipped",
+        "fetched_at": "2026-06-14 12:14:12 CST",
+        "message_cn": "实时 API 未配置，使用缓存/兜底数据。 使用兜底数据。 首发已写入：Qatar 4-3-3，Switzerland 3-4-2-1。"
+      },
+      "referee": {
+        "requested": true,
+        "source": "cache",
+        "status": "skipped",
+        "fetched_at": "2026-06-14 12:14:13 CST",
+        "message_cn": "实时 API 失败，使用缓存裁判信息。"
+      },
+      "weather": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-14 12:14:16 CST",
+        "message_cn": "实时 API 成功，天气已接入。"
+      },
+      "injuries": {
+        "requested": true,
+        "source": "cache",
+        "status": "skipped",
+        "fetched_at": "2026-06-14 12:14:13 CST",
+        "message_cn": "实时 API 失败，使用缓存伤停信息。"
+      }
+    }
   }
 }

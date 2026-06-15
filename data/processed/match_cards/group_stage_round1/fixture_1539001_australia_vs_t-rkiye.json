@@ -165,10 +165,187 @@
     }
   },
   "lineups": {
-    "confirmed_lineup_available": false,
-    "status": "MISSING",
-    "home_starting_xi": [],
-    "away_starting_xi": []
+    "confirmed_lineup_available": true,
+    "status": "CONFIRMED",
+    "home_starting_xi": [
+      "P. Beach",
+      "Circati",
+      "Souttar",
+      "Burgess",
+      "Italiano",
+      "A. O'Neill",
+      "P. Okon",
+      "J. Bos",
+      "Irankunda",
+      "Metcalfe",
+      "M. Touré"
+    ],
+    "away_starting_xi": [
+      "U. Cakir",
+      "Zeki Celik",
+      "Demiral",
+      "Bardakci",
+      "Kadioglu",
+      "Calhanoglu",
+      "I. Yüksek",
+      "A. Guler",
+      "O. Kokcu",
+      "B. Yilmaz",
+      "Akturkoglu"
+    ],
+    "home_substitutes": [],
+    "away_substitutes": [],
+    "formation_home": "3-4-2-1",
+    "formation_away": "4-2-3-1",
+    "home_starting_players": [
+      {
+        "name": "P. Beach",
+        "number": 18,
+        "position": "GK",
+        "grid": null
+      },
+      {
+        "name": "Circati",
+        "number": 3,
+        "position": "CB",
+        "grid": null
+      },
+      {
+        "name": "Souttar",
+        "number": 19,
+        "position": "CB",
+        "grid": null
+      },
+      {
+        "name": "Burgess",
+        "number": 21,
+        "position": "CB",
+        "grid": null
+      },
+      {
+        "name": "Italiano",
+        "number": 4,
+        "position": "RWB",
+        "grid": null
+      },
+      {
+        "name": "A. O'Neill",
+        "number": 13,
+        "position": "CM",
+        "grid": null
+      },
+      {
+        "name": "P. Okon",
+        "number": 24,
+        "position": "CM",
+        "grid": null
+      },
+      {
+        "name": "J. Bos",
+        "number": 5,
+        "position": "LWB",
+        "grid": null
+      },
+      {
+        "name": "Irankunda",
+        "number": 17,
+        "position": "AM",
+        "grid": null
+      },
+      {
+        "name": "Metcalfe",
+        "number": 8,
+        "position": "AM",
+        "grid": null
+      },
+      {
+        "name": "M. Touré",
+        "number": 9,
+        "position": "ST",
+        "grid": null
+      }
+    ],
+    "away_starting_players": [
+      {
+        "name": "U. Cakir",
+        "number": 23,
+        "position": "GK",
+        "grid": null
+      },
+      {
+        "name": "Zeki Celik",
+        "number": 2,
+        "position": "RB",
+        "grid": null
+      },
+      {
+        "name": "Demiral",
+        "number": 3,
+        "position": "CB",
+        "grid": null
+      },
+      {
+        "name": "Bardakci",
+        "number": 14,
+        "position": "CB",
+        "grid": null
+      },
+      {
+        "name": "Kadioglu",
+        "number": 20,
+        "position": "LB",
+        "grid": null
+      },
+      {
+        "name": "Calhanoglu",
+        "number": 10,
+        "position": "DM",
+        "grid": null
+      },
+      {
+        "name": "I. Yüksek",
+        "number": 16,
+        "position": "DM",
+        "grid": null
+      },
+      {
+        "name": "A. Guler",
+        "number": 8,
+        "position": "RW",
+        "grid": null
+      },
+      {
+        "name": "O. Kokcu",
+        "number": 6,
+        "position": "AM",
+        "grid": null
+      },
+      {
+        "name": "B. Yilmaz",
+        "number": 21,
+        "position": "LW",
+        "grid": null
+      },
+      {
+        "name": "Akturkoglu",
+        "number": 7,
+        "position": "ST",
+        "grid": null
+      }
+    ],
+    "home_bench_players": [],
+    "away_bench_players": [],
+    "lineup_source": "manual_verified",
+    "lineup_source_name": "Sky Sports",
+    "lineup_source_type": "manual_verified",
+    "lineup_notes_cn": [
+      "Sky Sports 官方首发，人工验证写入。",
+      "土耳其 Kenan Yildiz 未首发，在替补席。",
+      "澳大利亚 P. Beach 首发，Mathew Ryan 替补。",
+      "BC Place 屋顶关闭。"
+    ],
+    "lineup_as_of_utc": "2026-06-14T03:58:25Z",
+    "lineup_updated_at": "2026-06-14 15:22:01 CST"
   },
   "context": {
     "standings": {
@@ -202,16 +379,6 @@
   },
   "risk_flags": [
     {
-      "code": "CONFIRMED_LINEUP_MISSING",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
-    },
-    {
-      "code": "LINEUP_WAIT_EVENT",
-      "severity": "HIGH",
-      "message": "lineup_status=WAIT_EVENT; refresh near team sheet release."
-    },
-    {
       "code": "REFEREE_MISSING",
       "severity": "LOW",
       "message": "referee_status=MISSING; referee not available in fixture detail snapshot."
@@ -229,12 +396,6 @@
   ],
   "data_gaps": [
     {
-      "field": "lineups.confirmed_lineup",
-      "severity": "HIGH",
-      "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
-      "blocks_play": true
-    },
-    {
       "field": "match.referee",
       "severity": "LOW",
       "message": "referee_status=MISSING; keep as a non-blocking gap.",
@@ -250,5 +411,47 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
+  },
+  "live_refresh": {
+    "requested_at": "2026-06-14 15:22:00 CST",
+    "fixture_id": "1539001",
+    "overall_status": "partial",
+    "modules": {
+      "odds": {
+        "requested": true,
+        "source": "cache",
+        "status": "skipped",
+        "fetched_at": "2026-06-14 15:22:01 CST",
+        "message_cn": "实时 API 失败，使用缓存赔率。"
+      },
+      "lineups": {
+        "requested": true,
+        "source": "manual_verified",
+        "status": "success",
+        "fetched_at": "2026-06-14 15:22:01 CST",
+        "message_cn": "manual_verified / Sky Sports：官方首发已确认。 Australia 3-4-2-1，Turkey 4-2-3-1。"
+      },
+      "referee": {
+        "requested": true,
+        "source": "cache",
+        "status": "skipped",
+        "fetched_at": "2026-06-14 15:22:01 CST",
+        "message_cn": "实时 API 失败，使用缓存裁判信息。"
+      },
+      "weather": {
+        "requested": true,
+        "source": "live_api",
+        "status": "success",
+        "fetched_at": "2026-06-14 15:22:04 CST",
+        "message_cn": "实时 API 成功，天气已接入。"
+      },
+      "injuries": {
+        "requested": true,
+        "source": "cache",
+        "status": "skipped",
+        "fetched_at": "2026-06-14 15:22:02 CST",
+        "message_cn": "实时 API 失败，使用缓存伤停信息。"
+      }
+    }
   }
 }

@@ -937,6 +937,9 @@
     },
     "score_matrix_summary": {
       "$ref": "#/$defs/score_matrix_summary"
+    },
+    "market_probability_panel": {
+      "$ref": "#/$defs/market_probability_panel"
     }
   },
   "$defs": {
@@ -1699,6 +1702,71 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "market_probability_panel": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema_version",
+        "source",
+        "one_x_two",
+        "totals",
+        "handicap",
+        "btts",
+        "disclaimer_cn"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "W1_MARKET_PROBABILITY_PANEL_V1"
+        },
+        "status": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "const": "score_matrix"
+        },
+        "one_x_two": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "totals": {
+          "type": "array"
+        },
+        "handicap": {
+          "type": "array"
+        },
+        "btts": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "clean_sheet": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "goal_bands": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "market_comparison": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "disclaimer_cn": {
+          "type": "string"
         }
       }
     }
