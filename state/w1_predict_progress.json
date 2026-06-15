@@ -1,36 +1,36 @@
 {
   "schema_version": "w1_predict_progress.v1",
-  "job_id": "13d22ccd36e1",
+  "job_id": "b3cd6839fc21",
   "status": "done",
   "total_steps": 10,
   "step_index": 10,
   "step_label": "返回 progress",
   "message_cn": "查询完成：实时刷新 partial，已更新 dashboard。",
   "match": {
-    "fixture_id": "1489380",
+    "fixture_id": "1539001",
     "requested_fixture_id": "",
     "api_fixture_id": "",
-    "match": "西班牙 vs 佛得角",
-    "home_team": "Spain",
-    "away_team": "Cape Verde Islands",
-    "home_team_cn": "西班牙",
-    "away_team_cn": "佛得角",
-    "kickoff": "2026-06-16 00:00 CST",
-    "kickoff_utc": "2026-06-15T16:00:00Z",
-    "stage_cn": "赛前观察"
+    "match": "澳大利亚 vs 土耳其",
+    "home_team": "Australia",
+    "away_team": "Türkiye",
+    "home_team_cn": "澳大利亚",
+    "away_team_cn": "土耳其",
+    "kickoff": "2026-06-14 12:00 CST",
+    "kickoff_utc": "2026-06-14T04:00:00Z",
+    "stage_cn": "早盘参考"
   },
   "current_match": {
-    "fixture_id": "1489380",
+    "fixture_id": "1539001",
     "requested_fixture_id": "",
     "api_fixture_id": "",
-    "match": "西班牙 vs 佛得角",
-    "home_team": "Spain",
-    "away_team": "Cape Verde Islands",
-    "home_team_cn": "西班牙",
-    "away_team_cn": "佛得角",
-    "kickoff": "2026-06-16 00:00 CST",
-    "kickoff_utc": "2026-06-15T16:00:00Z",
-    "stage_cn": "赛前观察"
+    "match": "澳大利亚 vs 土耳其",
+    "home_team": "Australia",
+    "away_team": "Türkiye",
+    "home_team_cn": "澳大利亚",
+    "away_team_cn": "土耳其",
+    "kickoff": "2026-06-14 12:00 CST",
+    "kickoff_utc": "2026-06-14T04:00:00Z",
+    "stage_cn": "早盘参考"
   },
   "steps": [
     {
@@ -86,5 +86,5 @@
   ],
   "error_cn": null,
   "dashboard_data_path": "reports/dashboard/assets/w1_dashboard_data.json",
-  "updated_at": "2026-06-15 17:51:32 CST"
+  "updated_at": "2026-06-15 12:32:30 CST"
 }
