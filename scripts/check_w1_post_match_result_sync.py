@@ -48,6 +48,7 @@ def check_server_wiring() -> None:
         "is_finished_fixture_status",
         "parse_finished_score",
         "skipped_not_finished",
+        "skipped_not_due",
         "refresh_result_sync_module",
         '"result_sync"',
     ]
@@ -56,6 +57,8 @@ def check_server_wiring() -> None:
             fail(f"server missing result sync wiring: {needle}")
     if "fixtures?id=66457070" in source or 'if fixture_id == "66457070"' in source:
         fail("server contains Germany local alias hardcode for API result sync")
+    if "kickoff_utc" not in source or "timedelta(hours=2)" not in source:
+        fail("result sync must skip future/not-due fixtures before calling final-score API")
     result_fn = source[source.find("def api_fixture_id_candidates_for_result") : source.find("def write_result_to_card")]
     if result_fn.find('match.get("fixture_id")') > result_fn.find('match.get("api_fixture_id")'):
         fail("result sync must prefer match fixture_id before api_fixture_id/request alias")

@@ -14,7 +14,7 @@ import subprocess
 import threading
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -77,6 +77,21 @@ def now_ts() -> str:
 
 def now_utc() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def parse_utc_datetime(value: Any) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 def write_progress(payload: dict[str, Any]) -> None:
@@ -409,6 +424,8 @@ def progress_match(row: dict[str, Any], stage_cn: str = "") -> dict[str, Any]:
         "away_team": row.get("away_team") or "",
         "home_team_cn": row.get("home_team_cn") or "",
         "away_team_cn": row.get("away_team_cn") or "",
+        "kickoff": row.get("kickoff") or "",
+        "kickoff_utc": row.get("kickoff_utc") or "",
         "stage_cn": stage_cn or row.get("prediction_stage_cn") or "",
     }
 
@@ -800,6 +817,14 @@ def write_result_overlay(match: dict[str, Any], api_fixture_id: str, score: dict
 
 
 def refresh_result_sync_module(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any]:
+    kickoff_utc = parse_utc_datetime(match.get("kickoff_utc"))
+    if kickoff_utc and datetime.now(timezone.utc) < kickoff_utc.replace(microsecond=0) + timedelta(hours=2):
+        return live_module(
+            source="not_due",
+            status="skipped_not_due",
+            message_cn="比赛未完赛，赛果同步未到时间。",
+        )
+
     candidates = api_fixture_id_candidates_for_result(match)
     if not candidates:
         return live_module(source="missing", status="error", message_cn="缺少 fixture_id，无法同步赛果。")
