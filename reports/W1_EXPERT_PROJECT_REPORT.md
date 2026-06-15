@@ -427,6 +427,7 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_weather_integration.py`
 - `scripts/check_w1_lineup_api_binding.py`
 - `scripts/check_w1_odds_movement_status_consistency.py`（W1_P0_CONSISTENCY_AND_AUDIT_REFRESH_V1：odds_movement.status 枚举/前缀/门控一致性，THIN_MARKET_SKIP 仅 WARN）
+- `scripts/check_w1_output_safe_view.py`（W1_S0_SAFE_OUTPUT_AND_S1B_SEED_V1：safe_view 区间/尾部字段、主≤1/备≤1、热门输与净胜≥3 分离、专家区默认折叠、无促性表达）
 
 ## 8. 当前 WARN_ONLY / 限制
 

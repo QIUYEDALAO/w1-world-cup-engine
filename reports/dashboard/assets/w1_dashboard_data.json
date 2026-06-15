@@ -2043,7 +2043,7 @@
       "away": "🇵🇾 巴拉圭"
     }
   ],
-  "generated_at_utc": "2026-06-15T12:32:31+00:00",
+  "generated_at_utc": "2026-06-15T14:44:03+00:00",
   "match_records": [
     {
       "match": "墨西哥 vs 南非",
@@ -2467,6 +2467,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.175,
+        "outcome": {
+          "home_win": 0.672,
+          "draw": 0.23,
+          "away_win": 0.098
+        },
+        "total_goals_range": {
+          "band_0_1": 0.3306,
+          "band_2_3": 0.4732,
+          "band_4_plus": 0.1962,
+          "most_likely_band": "2-3",
+          "expected_total": 2.278
+        },
+        "goal_difference_range": {
+          "draw": 0.23,
+          "favorite_win_by_1": 0.2707,
+          "favorite_win_by_2": 0.2128,
+          "favorite_win_by_3_plus": 0.1885,
+          "favorite_win_any": 0.672,
+          "most_likely_margin_cn": "主队净胜1球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.1962,
+          "blowout_margin_3_plus": 0.1919,
+          "favorite_loss": 0.0977
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 40%、总进球≥4 20%；单一比分概率上限仅 17%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -2814,7 +2848,7 @@
           "book_count_latest": 14,
           "min_book_count_seen": 14,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -3594,6 +3628,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-1",
+        "primary_score_prob": 0.1422,
+        "outcome": {
+          "home_win": 0.355,
+          "draw": 0.309,
+          "away_win": 0.335
+        },
+        "total_goals_range": {
+          "band_0_1": 0.3547,
+          "band_2_3": 0.4709,
+          "band_4_plus": 0.1744,
+          "most_likely_band": "2-3",
+          "expected_total": 2.168
+        },
+        "goal_difference_range": {
+          "draw": 0.309,
+          "favorite_win_by_1": 0.2088,
+          "favorite_win_by_2": 0.1014,
+          "favorite_win_by_3_plus": 0.0454,
+          "favorite_win_any": 0.3555,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.1744,
+          "blowout_margin_3_plus": 0.0855,
+          "favorite_loss": 0.3352
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 15%、总进球≥4 17%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -3950,7 +4018,7 @@
           "book_count_latest": 14,
           "min_book_count_seen": 14,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -4526,6 +4594,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1504,
+        "outcome": {
+          "home_win": 0.52,
+          "draw": 0.284,
+          "away_win": 0.196
+        },
+        "total_goals_range": {
+          "band_0_1": 0.3453,
+          "band_2_3": 0.4722,
+          "band_4_plus": 0.1824,
+          "most_likely_band": "2-3",
+          "expected_total": 2.209
+        },
+        "goal_difference_range": {
+          "draw": 0.284,
+          "favorite_win_by_1": 0.2557,
+          "favorite_win_by_2": 0.161,
+          "favorite_win_by_3_plus": 0.1034,
+          "favorite_win_any": 0.5201,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.1824,
+          "blowout_margin_3_plus": 0.117,
+          "favorite_loss": 0.1956
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 26%、总进球≥4 18%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -4870,7 +4972,7 @@
           "book_count_latest": 14,
           "min_book_count_seen": 14,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -5485,6 +5587,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1446,
+        "outcome": {
+          "home_win": 0.474,
+          "draw": 0.297,
+          "away_win": 0.229
+        },
+        "total_goals_range": {
+          "band_0_1": 0.3551,
+          "band_2_3": 0.4705,
+          "band_4_plus": 0.1744,
+          "most_likely_band": "2-3",
+          "expected_total": 2.168
+        },
+        "goal_difference_range": {
+          "draw": 0.297,
+          "favorite_win_by_1": 0.2466,
+          "favorite_win_by_2": 0.144,
+          "favorite_win_by_3_plus": 0.083,
+          "favorite_win_any": 0.4737,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.1744,
+          "blowout_margin_3_plus": 0.1014,
+          "favorite_loss": 0.2292
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 23%、总进球≥4 17%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -5839,7 +5975,7 @@
           "book_count_latest": 14,
           "min_book_count_seen": 14,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -6627,6 +6763,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "away",
+        "primary_score": "0-2",
+        "primary_score_prob": 0.1562,
+        "outcome": {
+          "home_win": 0.064,
+          "draw": 0.163,
+          "away_win": 0.773
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2204,
+          "band_2_3": 0.4629,
+          "band_4_plus": 0.3167,
+          "most_likely_band": "2-3",
+          "expected_total": 2.839
+        },
+        "goal_difference_range": {
+          "draw": 0.163,
+          "favorite_win_by_1": 0.2321,
+          "favorite_win_by_2": 0.2302,
+          "favorite_win_by_3_plus": 0.3106,
+          "favorite_win_any": 0.7729,
+          "most_likely_margin_cn": "客队净胜3+球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.3167,
+          "blowout_margin_3_plus": 0.3128,
+          "favorite_loss": 0.0641
+        },
+        "distribution_shape_summary_cn": "客队胜面：净胜≥2 54%、总进球≥4 32%；单一比分概率上限仅 16%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "0-2",
@@ -6969,7 +7139,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -7565,6 +7735,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1429,
+        "outcome": {
+          "home_win": 0.575,
+          "draw": 0.259,
+          "away_win": 0.166
+        },
+        "total_goals_range": {
+          "band_0_1": 0.3043,
+          "band_2_3": 0.4767,
+          "band_4_plus": 0.219,
+          "most_likely_band": "2-3",
+          "expected_total": 2.388
+        },
+        "goal_difference_range": {
+          "draw": 0.259,
+          "favorite_win_by_1": 0.2565,
+          "favorite_win_by_2": 0.1804,
+          "favorite_win_by_3_plus": 0.1379,
+          "favorite_win_any": 0.5748,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.219,
+          "blowout_margin_3_plus": 0.1489,
+          "favorite_loss": 0.1664
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 32%、总进球≥4 22%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -7904,7 +8108,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -8506,6 +8710,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "away",
+        "primary_score": "0-1",
+        "primary_score_prob": 0.1357,
+        "outcome": {
+          "home_win": 0.147,
+          "draw": 0.239,
+          "away_win": 0.614
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2749,
+          "band_2_3": 0.4761,
+          "band_4_plus": 0.2491,
+          "most_likely_band": "2-3",
+          "expected_total": 2.531
+        },
+        "goal_difference_range": {
+          "draw": 0.239,
+          "favorite_win_by_1": 0.2539,
+          "favorite_win_by_2": 0.1928,
+          "favorite_win_by_3_plus": 0.1676,
+          "favorite_win_any": 0.6143,
+          "most_likely_margin_cn": "客队净胜1球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.2491,
+          "blowout_margin_3_plus": 0.1769,
+          "favorite_loss": 0.1465
+        },
+        "distribution_shape_summary_cn": "客队胜面：净胜≥2 36%、总进球≥4 25%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "0-1",
@@ -8845,7 +9083,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -9639,6 +9877,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "away",
+        "primary_score": "0-1",
+        "primary_score_prob": 0.1374,
+        "outcome": {
+          "home_win": 0.188,
+          "draw": 0.267,
+          "away_win": 0.545
+        },
+        "total_goals_range": {
+          "band_0_1": 0.3043,
+          "band_2_3": 0.477,
+          "band_4_plus": 0.2188,
+          "most_likely_band": "2-3",
+          "expected_total": 2.388
+        },
+        "goal_difference_range": {
+          "draw": 0.267,
+          "favorite_win_by_1": 0.2521,
+          "favorite_win_by_2": 0.1703,
+          "favorite_win_by_3_plus": 0.1229,
+          "favorite_win_any": 0.5452,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.2188,
+          "blowout_margin_3_plus": 0.1369,
+          "favorite_loss": 0.1878
+        },
+        "distribution_shape_summary_cn": "客队胜面：净胜≥2 29%、总进球≥4 22%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "0-1",
@@ -9986,7 +10258,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -10774,6 +11046,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "3-0",
+        "primary_score_prob": 0.1218,
+        "outcome": {
+          "home_win": 0.912,
+          "draw": 0.066,
+          "away_win": 0.022
+        },
+        "total_goals_range": {
+          "band_0_1": 0.075,
+          "band_2_3": 0.3168,
+          "band_4_plus": 0.6083,
+          "most_likely_band": "4+",
+          "expected_total": 4.223
+        },
+        "goal_difference_range": {
+          "draw": 0.066,
+          "favorite_win_by_1": 0.1277,
+          "favorite_win_by_2": 0.1846,
+          "favorite_win_by_3_plus": 0.5997,
+          "favorite_win_any": 0.912,
+          "most_likely_margin_cn": "主队净胜3+球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.6083,
+          "blowout_margin_3_plus": 0.6004,
+          "favorite_loss": 0.0222
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 78%、总进球≥4 61%；单一比分概率上限仅 12%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "3-0",
@@ -11124,7 +11430,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -11916,6 +12222,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-1",
+        "primary_score_prob": 0.1317,
+        "outcome": {
+          "home_win": 0.474,
+          "draw": 0.278,
+          "away_win": 0.248
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2895,
+          "band_2_3": 0.4777,
+          "band_4_plus": 0.2328,
+          "most_likely_band": "2-3",
+          "expected_total": 2.455
+        },
+        "goal_difference_range": {
+          "draw": 0.278,
+          "favorite_win_by_1": 0.2347,
+          "favorite_win_by_2": 0.1456,
+          "favorite_win_by_3_plus": 0.0937,
+          "favorite_win_any": 0.474,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.2328,
+          "blowout_margin_3_plus": 0.119,
+          "favorite_loss": 0.2481
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 24%、总进球≥4 23%；单一比分概率上限仅 13%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -12271,7 +12611,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -13052,6 +13392,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "away",
+        "primary_score": "0-0",
+        "primary_score_prob": 0.1696,
+        "outcome": {
+          "home_win": 0.264,
+          "draw": 0.338,
+          "away_win": 0.398
+        },
+        "total_goals_range": {
+          "band_0_1": 0.4493,
+          "band_2_3": 0.4388,
+          "band_4_plus": 0.1119,
+          "most_likely_band": "0-1",
+          "expected_total": 1.82
+        },
+        "goal_difference_range": {
+          "draw": 0.338,
+          "favorite_win_by_1": 0.2377,
+          "favorite_win_by_2": 0.1124,
+          "favorite_win_by_3_plus": 0.0475,
+          "favorite_win_any": 0.3976,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.1119,
+          "blowout_margin_3_plus": 0.0672,
+          "favorite_loss": 0.2641
+        },
+        "distribution_shape_summary_cn": "客队胜面：净胜≥2 16%、总进球≥4 11%；单一比分概率上限仅 17%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "0-1",
@@ -13404,7 +13778,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -14188,6 +14562,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1483,
+        "outcome": {
+          "home_win": 0.491,
+          "draw": 0.294,
+          "away_win": 0.215
+        },
+        "total_goals_range": {
+          "band_0_1": 0.3552,
+          "band_2_3": 0.4704,
+          "band_4_plus": 0.1744,
+          "most_likely_band": "2-3",
+          "expected_total": 2.168
+        },
+        "goal_difference_range": {
+          "draw": 0.294,
+          "favorite_win_by_1": 0.251,
+          "favorite_win_by_2": 0.1503,
+          "favorite_win_by_3_plus": 0.0897,
+          "favorite_win_any": 0.491,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.1744,
+          "blowout_margin_3_plus": 0.1058,
+          "favorite_loss": 0.2153
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 24%、总进球≥4 17%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -14542,7 +14950,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -15151,6 +15559,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "2-0",
+        "primary_score_prob": 0.1361,
+        "outcome": {
+          "home_win": 0.858,
+          "draw": 0.105,
+          "away_win": 0.037
+        },
+        "total_goals_range": {
+          "band_0_1": 0.1367,
+          "band_2_3": 0.4072,
+          "band_4_plus": 0.4561,
+          "most_likely_band": "4+",
+          "expected_total": 3.467
+        },
+        "goal_difference_range": {
+          "draw": 0.105,
+          "favorite_win_by_1": 0.1795,
+          "favorite_win_by_2": 0.2195,
+          "favorite_win_by_3_plus": 0.4588,
+          "favorite_win_any": 0.8578,
+          "most_likely_margin_cn": "主队净胜3+球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.4561,
+          "blowout_margin_3_plus": 0.46,
+          "favorite_loss": 0.0368
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 68%、总进球≥4 46%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "2-0",
@@ -15490,7 +15932,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -16094,6 +16536,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1363,
+        "outcome": {
+          "home_win": 0.563,
+          "draw": 0.26,
+          "away_win": 0.177
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2947,
+          "band_2_3": 0.4771,
+          "band_4_plus": 0.2282,
+          "most_likely_band": "2-3",
+          "expected_total": 2.433
+        },
+        "goal_difference_range": {
+          "draw": 0.26,
+          "favorite_win_by_1": 0.2528,
+          "favorite_win_by_2": 0.1764,
+          "favorite_win_by_3_plus": 0.1341,
+          "favorite_win_any": 0.5633,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.2282,
+          "blowout_margin_3_plus": 0.1468,
+          "favorite_loss": 0.1771
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 31%、总进球≥4 23%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -16433,7 +16909,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -17037,6 +17513,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "away",
+        "primary_score": "0-1",
+        "primary_score_prob": 0.1544,
+        "outcome": {
+          "home_win": 0.112,
+          "draw": 0.227,
+          "away_win": 0.661
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2957,
+          "band_2_3": 0.4761,
+          "band_4_plus": 0.2282,
+          "most_likely_band": "2-3",
+          "expected_total": 2.433
+        },
+        "goal_difference_range": {
+          "draw": 0.227,
+          "favorite_win_by_1": 0.2614,
+          "favorite_win_by_2": 0.208,
+          "favorite_win_by_3_plus": 0.1911,
+          "favorite_win_any": 0.6605,
+          "most_likely_margin_cn": "客队净胜1球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.2282,
+          "blowout_margin_3_plus": 0.1961,
+          "favorite_loss": 0.1121
+        },
+        "distribution_shape_summary_cn": "客队胜面：净胜≥2 40%、总进球≥4 23%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "0-1",
@@ -17376,7 +17886,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -17981,6 +18491,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1483,
+        "outcome": {
+          "home_win": 0.491,
+          "draw": 0.294,
+          "away_win": 0.215
+        },
+        "total_goals_range": {
+          "band_0_1": 0.3552,
+          "band_2_3": 0.4704,
+          "band_4_plus": 0.1744,
+          "most_likely_band": "2-3",
+          "expected_total": 2.168
+        },
+        "goal_difference_range": {
+          "draw": 0.294,
+          "favorite_win_by_1": 0.251,
+          "favorite_win_by_2": 0.1503,
+          "favorite_win_by_3_plus": 0.0897,
+          "favorite_win_any": 0.491,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.1744,
+          "blowout_margin_3_plus": 0.1058,
+          "favorite_loss": 0.2153
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 24%、总进球≥4 17%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -18325,7 +18869,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -18929,6 +19473,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1429,
+        "outcome": {
+          "home_win": 0.655,
+          "draw": 0.225,
+          "away_win": 0.12
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2755,
+          "band_2_3": 0.4757,
+          "band_4_plus": 0.2489,
+          "most_likely_band": "2-3",
+          "expected_total": 2.531
+        },
+        "goal_difference_range": {
+          "draw": 0.225,
+          "favorite_win_by_1": 0.2561,
+          "favorite_win_by_2": 0.2055,
+          "favorite_win_by_3_plus": 0.1934,
+          "favorite_win_any": 0.6549,
+          "most_likely_margin_cn": "主队净胜1球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.2489,
+          "blowout_margin_3_plus": 0.1996,
+          "favorite_loss": 0.12
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 40%、总进球≥4 25%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -19268,7 +19846,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -19872,6 +20450,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "away",
+        "primary_score": "0-2",
+        "primary_score_prob": 0.145,
+        "outcome": {
+          "home_win": 0.069,
+          "draw": 0.159,
+          "away_win": 0.772
+        },
+        "total_goals_range": {
+          "band_0_1": 0.1968,
+          "band_2_3": 0.4531,
+          "band_4_plus": 0.3501,
+          "most_likely_band": "2-3",
+          "expected_total": 2.988
+        },
+        "goal_difference_range": {
+          "draw": 0.159,
+          "favorite_win_by_1": 0.2248,
+          "favorite_win_by_2": 0.2266,
+          "favorite_win_by_3_plus": 0.3208,
+          "favorite_win_any": 0.7722,
+          "most_likely_margin_cn": "客队净胜3+球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.3501,
+          "blowout_margin_3_plus": 0.3235,
+          "favorite_loss": 0.0685
+        },
+        "distribution_shape_summary_cn": "客队胜面：净胜≥2 55%、总进球≥4 35%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "0-2",
@@ -20205,7 +20817,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -20809,6 +21421,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1534,
+        "outcome": {
+          "home_win": 0.678,
+          "draw": 0.219,
+          "away_win": 0.103
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2877,
+          "band_2_3": 0.4759,
+          "band_4_plus": 0.2365,
+          "most_likely_band": "2-3",
+          "expected_total": 2.471
+        },
+        "goal_difference_range": {
+          "draw": 0.219,
+          "favorite_win_by_1": 0.2596,
+          "favorite_win_by_2": 0.213,
+          "favorite_win_by_3_plus": 0.2055,
+          "favorite_win_any": 0.6781,
+          "most_likely_margin_cn": "主队净胜1球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.2365,
+          "blowout_margin_3_plus": 0.21,
+          "favorite_loss": 0.1033
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 42%、总进球≥4 24%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -21148,7 +21794,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -21752,6 +22398,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "2-0",
+        "primary_score_prob": 0.136,
+        "outcome": {
+          "home_win": 0.719,
+          "draw": 0.186,
+          "away_win": 0.095
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2122,
+          "band_2_3": 0.4608,
+          "band_4_plus": 0.327,
+          "most_likely_band": "2-3",
+          "expected_total": 2.886
+        },
+        "goal_difference_range": {
+          "draw": 0.186,
+          "favorite_win_by_1": 0.2368,
+          "favorite_win_by_2": 0.2179,
+          "favorite_win_by_3_plus": 0.2644,
+          "favorite_win_any": 0.7191,
+          "most_likely_margin_cn": "主队净胜3+球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.327,
+          "blowout_margin_3_plus": 0.2693,
+          "favorite_loss": 0.0949
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 48%、总进球≥4 33%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "2-0",
@@ -22085,7 +22765,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -22690,6 +23370,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "2-0",
+        "primary_score_prob": 0.1486,
+        "outcome": {
+          "home_win": 0.751,
+          "draw": 0.173,
+          "away_win": 0.076
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2194,
+          "band_2_3": 0.463,
+          "band_4_plus": 0.3176,
+          "most_likely_band": "2-3",
+          "expected_total": 2.842
+        },
+        "goal_difference_range": {
+          "draw": 0.173,
+          "favorite_win_by_1": 0.2353,
+          "favorite_win_by_2": 0.2258,
+          "favorite_win_by_3_plus": 0.2899,
+          "favorite_win_any": 0.7509,
+          "most_likely_margin_cn": "主队净胜3+球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.3176,
+          "blowout_margin_3_plus": 0.293,
+          "favorite_loss": 0.0757
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 52%、总进球≥4 32%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "2-0",
@@ -23023,7 +23737,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -23628,6 +24342,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1472,
+        "outcome": {
+          "home_win": 0.543,
+          "draw": 0.273,
+          "away_win": 0.183
+        },
+        "total_goals_range": {
+          "band_0_1": 0.327,
+          "band_2_3": 0.475,
+          "band_4_plus": 0.198,
+          "most_likely_band": "2-3",
+          "expected_total": 2.288
+        },
+        "goal_difference_range": {
+          "draw": 0.273,
+          "favorite_win_by_1": 0.2565,
+          "favorite_win_by_2": 0.1696,
+          "favorite_win_by_3_plus": 0.1175,
+          "favorite_win_any": 0.5436,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.198,
+          "blowout_margin_3_plus": 0.1299,
+          "favorite_loss": 0.183
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 29%、总进球≥4 20%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -23967,7 +24715,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -24571,6 +25319,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home",
+        "primary_score": "1-0",
+        "primary_score_prob": 0.1406,
+        "outcome": {
+          "home_win": 0.461,
+          "draw": 0.298,
+          "away_win": 0.241
+        },
+        "total_goals_range": {
+          "band_0_1": 0.352,
+          "band_2_3": 0.4712,
+          "band_4_plus": 0.1767,
+          "most_likely_band": "2-3",
+          "expected_total": 2.18
+        },
+        "goal_difference_range": {
+          "draw": 0.298,
+          "favorite_win_by_1": 0.2427,
+          "favorite_win_by_2": 0.1395,
+          "favorite_win_by_3_plus": 0.0788,
+          "favorite_win_any": 0.4609,
+          "most_likely_margin_cn": "平局"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.1767,
+          "blowout_margin_3_plus": 0.0992,
+          "favorite_loss": 0.2406
+        },
+        "distribution_shape_summary_cn": "主队胜面：净胜≥2 22%、总进球≥4 18%；单一比分概率上限仅 14%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "1-0",
@@ -24915,7 +25697,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,
@@ -25520,6 +26302,40 @@
           "崩盘路径来自比分矩阵尾部质量。"
         ]
       },
+      "safe_view": {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "away",
+        "primary_score": "0-1",
+        "primary_score_prob": 0.1459,
+        "outcome": {
+          "home_win": 0.109,
+          "draw": 0.218,
+          "away_win": 0.672
+        },
+        "total_goals_range": {
+          "band_0_1": 0.2755,
+          "band_2_3": 0.4754,
+          "band_4_plus": 0.2491,
+          "most_likely_band": "2-3",
+          "expected_total": 2.531
+        },
+        "goal_difference_range": {
+          "draw": 0.218,
+          "favorite_win_by_1": 0.2564,
+          "favorite_win_by_2": 0.2107,
+          "favorite_win_by_3_plus": 0.2053,
+          "favorite_win_any": 0.6724,
+          "most_likely_margin_cn": "客队净胜1球"
+        },
+        "tail_mass": {
+          "total_over_3_5": 0.2491,
+          "blowout_margin_3_plus": 0.2105,
+          "favorite_loss": 0.1093
+        },
+        "distribution_shape_summary_cn": "客队胜面：净胜≥2 42%、总进球≥4 25%；单一比分概率上限仅 15%，建议看区间而非单一比分。",
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。"
+      },
       "recommendation_view": {
         "policy_version": "W1_RECOMMENDATION_OUTPUT_POLICY_V1",
         "primary_score": "0-1",
@@ -25859,7 +26675,7 @@
           "book_count_latest": 13,
           "min_book_count_seen": 13,
           "cross_book_spread_home_prob": 0.0,
-          "staleness_minutes": 4959,
+          "staleness_minutes": 5091,
           "markets_present": {
             "x2": true,
             "ou": true,

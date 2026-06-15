@@ -1425,6 +1425,99 @@ def _nearest_line(rows: list[dict[str, Any]], key: str, target: float) -> dict[s
     return min(rows, key=lambda row: abs(float(row.get(key, 0.0)) - target))
 
 
+def build_safe_view(score_distribution: dict[str, Any]) -> dict[str, Any]:
+    """W1_S0 safe view: range/scenario reads derived from the SAME score matrix.
+
+    Display-only. Does NOT change lambda/rho/mu/delta/score-matrix or any model
+    field; it only re-summarizes the existing matrix so the dashboard headline can
+    show outcome + goal/margin bands instead of a single (always-small) modal score.
+    """
+    sd = score_distribution or {}
+    matrix = _matrix_from_score_distribution(sd)
+    if matrix is None:
+        return {
+            "schema_version": "W1_SAFE_VIEW_V1",
+            "status": "skipped",
+            "disclaimer_cn": "比分矩阵未生成，安全视图跳过。",
+        }
+    np = W1ENGINE.np
+    M = matrix
+    n = M.shape[0]
+    idx = np.arange(n)
+    total = np.add.outer(idx, idx)
+    diff = np.subtract.outer(idx, idx)  # home - away
+    model = sd.get("matrix_model", {}) or {}
+    hda = model.get("model_hda") or []
+    home_p = float(hda[0]) if len(hda) > 0 else float(np.tril(M, -1).sum())
+    draw_p = float(hda[1]) if len(hda) > 1 else float(np.trace(M))
+    away_p = float(hda[2]) if len(hda) > 2 else float(np.triu(M, 1).sum())
+    fav_home = home_p >= away_p
+    sign = 1 if fav_home else -1
+    favd = diff * sign  # favorite goal margin (>0 favorite ahead)
+    fav_cn = "主队" if fav_home else "客队"
+
+    band01 = float(M[total <= 1].sum())
+    band23 = float(M[(total >= 2) & (total <= 3)].sum())
+    band4 = float(M[total >= 4].sum())
+    bands = {"0-1": band01, "2-3": band23, "4+": band4}
+    most_band = max(bands, key=lambda k: bands[k])
+
+    fav_by1 = float(M[favd == 1].sum())
+    fav_by2 = float(M[favd == 2].sum())
+    fav_by3 = float(M[favd >= 3].sum())
+    fav_win = float(M[favd > 0].sum())
+    fav_loss = float(M[favd < 0].sum())
+    blowout = float(M[np.abs(diff) >= 3].sum())
+
+    margins = {"平局": draw_p, f"{fav_cn}净胜1球": fav_by1, f"{fav_cn}净胜2球": fav_by2, f"{fav_cn}净胜3+球": fav_by3}
+    most_margin = max(margins, key=lambda k: margins[k])
+
+    pri = sd.get("main_score")
+    pri_prob = None
+    if pri and "-" in str(pri):
+        try:
+            h, a = (int(x) for x in str(pri).split("-", 1))
+            if h < n and a < n:
+                pri_prob = float(M[h, a])
+        except ValueError:
+            pri_prob = None
+
+    shape = (
+        f"{fav_cn}胜面：净胜≥2 {fav_by2 + fav_by3:.0%}、总进球≥4 {band4:.0%}；"
+        f"单一比分概率上限仅 {(pri_prob or 0):.0%}，建议看区间而非单一比分。"
+    )
+    return {
+        "schema_version": "W1_SAFE_VIEW_V1",
+        "status": "ready",
+        "favorite_side": "home" if fav_home else "away",
+        "primary_score": pri,
+        "primary_score_prob": round(pri_prob, 4) if pri_prob is not None else None,
+        "outcome": {"home_win": round(home_p, 4), "draw": round(draw_p, 4), "away_win": round(away_p, 4)},
+        "total_goals_range": {
+            "band_0_1": round(band01, 4),
+            "band_2_3": round(band23, 4),
+            "band_4_plus": round(band4, 4),
+            "most_likely_band": most_band,
+            "expected_total": model.get("mu"),
+        },
+        "goal_difference_range": {
+            "draw": round(draw_p, 4),
+            "favorite_win_by_1": round(fav_by1, 4),
+            "favorite_win_by_2": round(fav_by2, 4),
+            "favorite_win_by_3_plus": round(fav_by3, 4),
+            "favorite_win_any": round(fav_win, 4),
+            "most_likely_margin_cn": most_margin,
+        },
+        "tail_mass": {
+            "total_over_3_5": round(band4, 4),
+            "blowout_margin_3_plus": round(blowout, 4),
+            "favorite_loss": round(fav_loss, 4),
+        },
+        "distribution_shape_summary_cn": shape,
+        "disclaimer_cn": "区间与场景为比分矩阵派生读数，用于赛前分析参考；单一比分概率天然很低，非最终结论、不构成收益承诺。",
+    }
+
+
 def market_probability_panel_from_score_distribution(score_distribution: dict[str, Any], card: dict[str, Any]) -> dict[str, Any]:
     matrix = _matrix_from_score_distribution(score_distribution)
     if matrix is None:
@@ -2009,6 +2102,7 @@ def build_record(
     score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
     recommendation_view = recommendation_view_from_score_distribution(score_distribution)
     market_probability_panel = market_probability_panel_from_score_distribution(score_distribution, card)
+    safe_view = build_safe_view(score_distribution)
     if recommendation_view.get("primary_score"):
         reference_score = recommendation_view["primary_score"]
         if recommendation_view.get("secondary_score"):
@@ -2081,6 +2175,7 @@ def build_record(
         "live_refresh": live_refresh,
         "score_distribution": score_distribution,
         "score_matrix_summary": score_matrix_summary,
+        "safe_view": safe_view,
         "recommendation_view": recommendation_view,
         "market_probability_panel": market_probability_panel,
         "post_match_calibration": score_distribution["post_match_calibration"],
@@ -2394,6 +2489,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "live_refresh": public_live_refresh(row["live_refresh"]),
             "score_distribution": public_score_distribution(row["score_distribution"]),
             "score_matrix_summary": public_score_matrix_summary(row.get("score_matrix_summary", {})),
+            "safe_view": row.get("safe_view", {}),
             "recommendation_view": public_recommendation_view(row.get("recommendation_view", {})),
             "market_probability_panel": public_market_probability_panel(row.get("market_probability_panel", {})),
             "post_match_calibration": public_score_distribution(row["score_distribution"]).get("post_match_calibration", {}),
