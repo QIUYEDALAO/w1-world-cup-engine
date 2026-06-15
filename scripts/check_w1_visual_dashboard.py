@@ -71,6 +71,25 @@ def assert_no_forbidden_terms(path: Path) -> None:
             fail(f"Forbidden term found in {path.relative_to(ROOT)}: {term}")
 
 
+def assert_no_user_facing_market_forbidden(text: str) -> None:
+    """Precise scan for market-panel wording without false hits in devig/evaluation/level."""
+    for term in ("投注", "下注", "资金", "稳赚", "必胜", "保证命中", "盈利"):
+        if term in text:
+            fail(f"Forbidden user-facing wording found in HTML: {term}")
+    market_chunks = []
+    for marker in ("function pCore", "function pMarketProbabilityPanel", "function pMarketProbabilityExpert", "function pMarketMove"):
+        if marker in text:
+            market_chunks.append(text.split(marker, 1)[1].split("\nfunction ", 1)[0])
+    market_text = "\n".join(market_chunks)
+    for pattern, label in (
+        (r"(?<![A-Za-z])EV(?![A-Za-z])", "EV"),
+        (r"(?<![A-Za-z])value(?![A-Za-z])", "value"),
+        (r"价值", "价值"),
+    ):
+        if re.search(pattern, market_text, re.I):
+            fail(f"Forbidden market panel wording found: {label}")
+
+
 def current_fixture_teams() -> set[str]:
     with LEDGER.open("r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
@@ -227,6 +246,7 @@ def assert_html(data: dict) -> None:
         fail("HTML dashboard is missing")
     assert_no_forbidden_terms(HTML)
     text = read(HTML)
+    assert_no_user_facing_market_forbidden(text)
     if "backendConnected=false" in text and "fetchBackendDashboardData" in text:
         required_new = [
             "W1 世界杯赛前预测控制台",
@@ -258,6 +278,27 @@ def assert_html(data: dict) -> None:
         for token in required_new:
             if token not in text:
                 fail(f"HTML missing backend dashboard token: {token}")
+        if '<select id="teamA"' in text or '<select id="teamB"' in text:
+            fail("HTML must not render fake team select controls")
+        for token in ("class=\"statebar\"", "pMarketStateBar", "本场参考摘要", "市场复述", "自洽核对", "未对该盘独立校准"):
+            if token not in text:
+                fail(f"HTML missing expert UI patch token: {token}")
+        boss_idx = text.find("function renderBoss")
+        if boss_idx < 0:
+            fail("renderBoss function missing")
+        boss_body = text[boss_idx:text.find("function renderReportLinks", boss_idx)]
+        if "D.boss_view" in boss_body:
+            fail("renderBoss must follow active match and not depend on D.boss_view")
+        panel_idx = text.find("function renderPanel")
+        if panel_idx < 0:
+            fail("renderPanel function missing")
+        panel_body = text[panel_idx:text.find("function toggleExpert", panel_idx)]
+        if "pCore(r)+pPredict(r)" not in panel_body:
+            fail("Recommendation card must render before predict controls")
+        if panel_body.find("pMarketProbabilityPanel(r)") < panel_body.find('`<div id="expert"'):
+            fail("Full market probability panel must live inside expert section")
+        if "pBanner()+pHeader(r)+pPredict(r)+pCore(r)" in panel_body:
+            fail("Predict controls must not render before recommendation card")
         if "fetch('/api/predict" in text or 'fetch("/api/predict' in text or "worldcup.youliaoyun.com/api" in text:
             fail("HTML must not call the original site prediction API")
         embedded = re.search(r'<script id="w1-data" type="application/json">(.*?)</script>', text, re.S)
@@ -278,6 +319,11 @@ def assert_html(data: dict) -> None:
         view = qatar.get("recommendation_view", {})
         if view.get("display_score_limit") != 2:
             fail("recommendation_view.display_score_limit must be 2")
+        secondary = view.get("secondary_score")
+        if secondary and secondary == view.get("primary_score"):
+            fail("recommendation_view secondary_score must not duplicate primary_score")
+        if not secondary and not view.get("secondary_score_reason_cn"):
+            fail("recommendation_view missing secondary_score_reason_cn when secondary_score is empty")
         return
     required = [
         "W1 世界杯赛前预测总控台",
@@ -295,6 +341,9 @@ def assert_html(data: dict) -> None:
         "详细解读",
         "风险提示",
         "关键缺口",
+        "no-secondary",
+        "secondary_score_reason_cn",
+        "scoreProb",
         "数据质量",
         "赔率：",
         "首发：",
@@ -352,6 +401,8 @@ def assert_html(data: dict) -> None:
     for token in required:
         if token not in text:
             fail(f"HTML missing token: {token}")
+    if "${esc(rv.secondary_score||'–')}" in text or "${esc(rv.secondary_score||'—')}" in text:
+        fail("备选比分区域 must not render an unexplained dash fallback")
     for original_api in ("fetch('/api/predict", 'fetch("/api/predict', "worldcup.youliaoyun.com/api"):
         if original_api in text:
             fail("HTML must not call the original site prediction API")
@@ -424,6 +475,12 @@ def assert_html(data: dict) -> None:
     qatar = next((row for row in embedded_data.get("match_records", []) if row.get("fixture_id") == "1489373"), None)
     if not qatar or "data_quality" not in qatar:
         fail("Embedded match_records must expose data_quality for fixture_id=1489373")
+    view = qatar.get("recommendation_view", {})
+    secondary = view.get("secondary_score")
+    if secondary and secondary == view.get("primary_score"):
+        fail("Embedded recommendation_view secondary_score must not duplicate primary_score")
+    if not secondary and not view.get("secondary_score_reason_cn"):
+        fail("Embedded recommendation_view missing secondary_score_reason_cn when secondary_score is empty")
     if "environment_context" not in qatar:
         fail("Embedded match_records must expose environment_context for fixture_id=1489373")
     if "lineup_effect" not in qatar:
