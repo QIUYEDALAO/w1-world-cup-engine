@@ -1,0 +1,148 @@
+{
+  "schema_version": "W1_TEAM_STRENGTH_PROTOTYPE_V1",
+  "prototype": true,
+  "production_validated": false,
+  "production_wired": false,
+  "model": "time-decayed Poisson attack/defense + L2 shrinkage (independent Poisson 1X2)",
+  "hyperparams": {
+    "half_life_days": 400.0,
+    "l2_shrinkage": 2.0,
+    "lr": 0.4,
+    "iters": 600
+  },
+  "walk_forward": {
+    "policy": "chronological 80/20; fit on train (all earlier than test), evaluate on later test (no future leakage)",
+    "train_range": [
+      "2014-06-12",
+      "2025-09-09"
+    ],
+    "train_n": 864,
+    "test_range": [
+      "2025-09-09",
+      "2026-04-01"
+    ],
+    "test_n": 217,
+    "no_future_leakage": true,
+    "cold_start_test_skipped": 0
+  },
+  "test_metrics": {
+    "n_evaluated": 217,
+    "model": {
+      "rps": 0.3507,
+      "logloss": 0.892,
+      "brier": 0.526,
+      "direction_accuracy": 0.576,
+      "beats_uniform_rps": true
+    },
+    "market_on_same_subset": {
+      "n": 214,
+      "model_rps": 0.3556,
+      "market_rps": 0.3134,
+      "model_dir": 0.5701,
+      "market_dir": 0.5981
+    }
+  },
+  "host_fallback": {
+    "hosts": [
+      "canada",
+      "mexico",
+      "usa"
+    ],
+    "note_cn": "东道主无预选历史，评分仅来自少量正赛/友谊，置信低；不可当可靠强度，需后续补友谊赛/Elo。",
+    "host_in_train": {
+      "canada": true,
+      "mexico": true,
+      "usa": true
+    }
+  },
+  "ratings_top10": [
+    {
+      "team_id": "israel",
+      "net_strength": 0.974
+    },
+    {
+      "team_id": "bermuda",
+      "net_strength": 0.71
+    },
+    {
+      "team_id": "qatar",
+      "net_strength": 0.701
+    },
+    {
+      "team_id": "belgium",
+      "net_strength": 0.655
+    },
+    {
+      "team_id": "turkey",
+      "net_strength": 0.627
+    },
+    {
+      "team_id": "new_zealand",
+      "net_strength": 0.623
+    },
+    {
+      "team_id": "portugal",
+      "net_strength": 0.605
+    },
+    {
+      "team_id": "italy",
+      "net_strength": 0.572
+    },
+    {
+      "team_id": "bahamas",
+      "net_strength": 0.571
+    },
+    {
+      "team_id": "netherlands",
+      "net_strength": 0.534
+    }
+  ],
+  "ratings_bottom10": [
+    {
+      "team_id": "egypt",
+      "net_strength": -0.575
+    },
+    {
+      "team_id": "rwanda",
+      "net_strength": -0.59
+    },
+    {
+      "team_id": "saudi_arabia",
+      "net_strength": -0.622
+    },
+    {
+      "team_id": "faroe_islands",
+      "net_strength": -0.672
+    },
+    {
+      "team_id": "tunisia",
+      "net_strength": -0.684
+    },
+    {
+      "team_id": "paraguay",
+      "net_strength": -0.693
+    },
+    {
+      "team_id": "peru",
+      "net_strength": -0.73
+    },
+    {
+      "team_id": "guinea",
+      "net_strength": -0.781
+    },
+    {
+      "team_id": "ivory_coast",
+      "net_strength": -0.893
+    },
+    {
+      "team_id": "ecuador",
+      "net_strength": -1.217
+    }
+  ],
+  "notes_cn": [
+    "prototype：仅研究对照，不接入线上 λ，不改任何生产配置。",
+    "结论看能否优于 uniform、能否接近市场；不得宣称跑赢市场或可生产。",
+    "正式 S2 验收须等 S1B 数据增强(连续国际赛 + OU/AH)。",
+    "不构成投注/资金建议，不承诺命中率。"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "W1_OU_COVERAGE_PROBE_V1",
+  "external_fetch_performed": false,
+  "data_collected": false,
+  "scope": "gap analysis + priority only; NO fetch / scrape / purchase / new source",
+  "totals": {
+    "matches": 1081,
+    "ou_available": 0,
+    "ah_available": 0,
+    "ou_gap": 1081,
+    "ah_gap": 1081,
+    "odds_1x2_available": 1074
+  },
+  "gap_by_phase": {
+    "qualifier": {
+      "matches": 889,
+      "ou_gap": 889
+    },
+    "finals": {
+      "matches": 192,
+      "ou_gap": 192
+    }
+  },
+  "gap_by_competition": {
+    "World Cup 2014": 64,
+    "World Cup 2018": 64,
+    "World Cup 2022": 64,
+    "WorldCup2026Qualifiers": 889
+  },
+  "recommended_priority": [
+    {
+      "tier": 1,
+      "target": "finals (2014/2018/2022)",
+      "matches": 192,
+      "rationale_cn": "场次少、来源好补、信息密度高；先解锁正赛 OU→μ→λ 与总进球校准。"
+    },
+    {
+      "tier": 2,
+      "target": "recent strong-confederation qualifiers",
+      "matches": "subset of 889",
+      "rationale_cn": "主流区(欧/南美)近季预选 OU 较可得；扩样本但避免小国尾部。"
+    },
+    {
+      "tier": 3,
+      "target": "minnow-vs-minnow qualifiers",
+      "matches": "tail",
+      "rationale_cn": "覆盖稀疏、常付费、边际收益低；暂不投入。"
+    }
+  ],
+  "notes_cn": [
+    "当前 OU/AH 覆盖为 0，全部需补；本探测不抓取、不采购，只给缺口与优先级。",
+    "正式 Odds-Extension 采集需单独立项确认数据源与授权。",
+    "不构成投注/资金建议，不承诺命中率。"
+  ]
+}
