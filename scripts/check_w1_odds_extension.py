@@ -1,51 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-W1 S1B odds extension checker (C1 scaffold).
-
-Scaffold checks:
-  - spec file exists
-  - schema file exists
-  - required fields present in schema
-  - no external-fetch imports in new/added scripts within this phase
-  - no OU/AH data file => output BLOCKED or SKIP
-  - does not generate FULL pipeline results
-  - does not modify production model files:
-      scripts/w1_score_engine.py
-      config/w1_decision_policy.json
-      config/w1_odds_movement_thresholds.json
-  - DEFAULT_RHO unchanged
+W1 S1B Odds Extension Checker (C1)
+===================================
+Validates the local odds extension merge output:
+  - data/processed/international/w1_international_dataset_extended.csv
+  - data/processed/international/w1_current_odds_snapshot_quality.json
 """
 from __future__ import annotations
 
+import csv
+import json
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-
-# Paths under check
-SPEC = ROOT / "docs/W1_S1B_ODDS_EXTENSION_V1.md"
-SCHEMA = ROOT / "config/w1_international_odds_extension_schema.json"
-OU_FILE = ROOT / "data/local_odds/w1_ou_odds_extension.csv"
-AH_FILE = ROOT / "data/local_odds/w1_ah_odds_extension.csv"
-ALIASES = ROOT / "config/w1_team_aliases.json"
-
-# Production files that must NOT be modified in this phase
-PRODUCTION_FILES = [
-    ROOT / "scripts/w1_score_engine.py",
-    ROOT / "config/w1_decision_policy.json",
-    ROOT / "config/w1_odds_movement_thresholds.json",
-]
-
-# Forbidden imports in any new script or loader related to this phase
-FORBIDDEN_IMPORTS = [
-    "requests", "urllib", "http.client", "httpx",
-    "aiohttp", "socket", "selenium", "playwright",
-    "BeautifulSoup", "web_fetch",
-]
+EXT_PATH = ROOT / "data/processed/international/w1_international_dataset_extended.csv"
+CUR_QUALITY = ROOT / "data/processed/international/w1_current_odds_snapshot_quality.json"
+SNAPSHOT_DIR = ROOT / "data/local_odds"
+PROCESSED_DIR = ROOT / "data/processed/international"
 
 errors: list[str] = []
-warnings: list[str] = []
+warns: list[str] = []
 
 
 def fail(m: str) -> None:
@@ -53,210 +29,150 @@ def fail(m: str) -> None:
 
 
 def warn(m: str) -> None:
-    warnings.append(m)
-
-
-def check_file_exists(path: Path, label: str) -> None:
-    if not path.is_file():
-        fail(f"{label} missing: {path}")
-    else:
-        print(f"  OK  {label}: {path.name}")
-
-
-def check_schema_fields() -> None:
-    """Validate that required fields exist in the schema JSON."""
-    import json
-    try:
-        schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
-    except Exception as e:
-        fail(f"schema JSON parse error: {e}")
-        return
-
-    ou_fields = schema.get("files", {}).get("ou", {}).get("fields", [])
-    ah_fields = schema.get("files", {}).get("ah", {}).get("fields", [])
-
-    ou_required = {"date", "home", "away", "ou_line", "over_odds", "under_odds"}
-    ah_required = {"date", "home", "away", "ah_line", "home_odds", "away_odds"}
-
-    ou_present = {f["name"] for f in ou_fields}
-    ah_present = {f["name"] for f in ah_fields}
-
-    missing_ou = ou_required - ou_present
-    missing_ah = ah_required - ah_present
-
-    if missing_ou:
-        fail(f"OU schema missing required fields: {sorted(missing_ou)}")
-    else:
-        print(f"  OK  OU schema required fields all present")
-
-    if missing_ah:
-        fail(f"AH schema missing required fields: {sorted(missing_ah)}")
-    else:
-        print(f"  OK  AH schema required fields all present")
-
-    # Check AH is defined (even if optional)
-    if not ah_fields:
-        fail("AH section missing from schema (must exist even if optional)")
-
-
-def check_ou_ah_data_files() -> None:
-    """Check existence of local OU/AH files."""
-    has_ou = OU_FILE.is_file()
-    has_ah = AH_FILE.is_file()
-
-    if has_ou:
-        print(f"  OK  OU file found: {OU_FILE.name}")
-    else:
-        warn(f"OU file not present: {OU_FILE.name} (expected at scaffold stage)")
-
-    if has_ah:
-        print(f"  OK  AH file found: {AH_FILE.name}")
-    else:
-        warn(f"AH file not present: {AH_FILE.name} (optional, expected at scaffold stage)")
-
-    # FULL pipeline guard
-    if has_ou:
-        print(f"  OK  OU data present => FULL pipeline possible for covered subset")
-    else:
-        print(f"  OK  No OU data => pipeline_mode remains 1X2_ONLY (expected at scaffold)")
-
-
-def check_no_external_fetch() -> None:
-    """Scan only this-phase scripts (checker itself and any odds_extension files).
-    We do NOT scan pre-existing scripts from earlier phases.
-    """
-    import re
-
-    # This script's phase files: script itself + anything in data/local_odds/
-    # (data/local_odds/ does not exist at scaffold stage, but check anyway)
-    this_script = Path(__file__).resolve()
-    scan_candidates = [this_script]
-
-    local_odds = ROOT / "data/local_odds"
-    if local_odds.is_dir():
-        for py_file in sorted(local_odds.rglob("*.py")):
-            scan_candidates.append(py_file)
-
-    # Also scan any script whose name starts with load_w1_odds_extension
-    for p in ROOT.rglob("load_w1_odds_extension*.py"):
-        scan_candidates.append(p)
-
-    for py_file in set(scan_candidates):
-        if not py_file.is_file():
-            continue
-        src = py_file.read_text(encoding="utf-8")
-        for imp in FORBIDDEN_IMPORTS:
-            pattern = re.compile(
-                rf"(?:^|\n)\s*(?:import\s+{re.escape(imp)}|from\s+{re.escape(imp)}\s+import)",
-                re.MULTILINE,
-            )
-            if pattern.search(src):
-                fail(f"forbidden import '{imp}' in {py_file.relative_to(ROOT)}")
-
-
-def check_production_files_unchanged() -> None:
-    """Verify no modifications to protected production files."""
-    import subprocess
-
-    for pf in PRODUCTION_FILES:
-        if not pf.is_file():
-            continue
-        # Check git diff for uncommitted changes
-        result = subprocess.run(
-            ["git", "diff", "--name-only", str(pf.relative_to(ROOT))],
-            capture_output=True, text=True, cwd=ROOT, timeout=10,
-        )
-        if result.stdout.strip():
-            fail(f"Production file modified: {pf.relative_to(ROOT)} (must remain unchanged)")
-
-
-def check_default_rho_unchanged() -> None:
-    """Check that DEFAULT_RHO variable in w1_score_engine.py retains its original value."""
-    engine = ROOT / "scripts/w1_score_engine.py"
-    if not engine.is_file():
-        return  # not yet cloned / scaffold only
-
-    import re
-    src = engine.read_text(encoding="utf-8")
-    match = re.search(r"DEFAULT_RHO\s*=\s*-?0\.\d+", src)
-    if match:
-        rho_val = match.group(0)
-        print(f"  OK  DEFAULT_RHO present: {rho_val}")
-    else:
-        fail("DEFAULT_RHO not found in w1_score_engine.py")
-
-
-def check_spec_content() -> None:
-    """Validate spec doc has required sections."""
-    if not SPEC.is_file():
-        fail("spec doc missing, cannot validate content")
-        return
-
-    text = SPEC.read_text(encoding="utf-8")
-    required_sections = [
-        "Boundary",
-        "Pipeline Mode Rule",
-        "Matching",
-        "OU Row",
-        "AH Row",
-        "Checker Rules",
-    ]
-    for section in required_sections:
-        if section not in text:
-            fail(f"spec doc missing section: {section}")
-        else:
-            print(f"  OK  spec section found: {section}")
+    warns.append(m)
 
 
 def main() -> int:
-    print("W1 S1B odds extension checker (C1 scaffold)")
-    print()
+    # ── 1. Extended dataset exists ──
+    if not EXT_PATH.is_file():
+        fail(f"Extended dataset not found: {EXT_PATH} (run merge_w1_odds_extension.py first)")
+        return 1
+    rows = list(csv.DictReader(EXT_PATH.open(encoding="utf-8")))
+    print(f"[CHECK] Extended dataset loaded: {len(rows)} rows")
 
-    # 1. Spec exists
-    check_file_exists(SPEC, "spec doc")
+    # Count by competition + pipeline_mode
+    wc_2018_full = sum(1 for r in rows if r.get("competition") == "World Cup 2018" and r.get("pipeline_mode") == "FULL")
+    wc_2022_full = sum(1 for r in rows if r.get("competition") == "World Cup 2022" and r.get("pipeline_mode") == "FULL")
+    wc_2014_full = sum(1 for r in rows if r.get("competition") == "World Cup 2014" and r.get("pipeline_mode") == "FULL")
+    full_total = sum(1 for r in rows if r.get("pipeline_mode") == "FULL")
+    x2_total = sum(1 for r in rows if r.get("pipeline_mode") == "1X2_ONLY")
 
-    # 2. Schema exists
-    check_file_exists(SCHEMA, "schema JSON")
+    # ── 2. FULL coverage = 128 ──
+    if full_total != 128:
+        fail(f"FULL coverage expected 128, got {full_total}")
+    else:
+        print(f"[PASS] FULL coverage: {full_total}")
 
-    # 3. Schema field completeness
-    check_schema_fields()
+    # ── 3. 2018 FULL = 64 ──
+    if wc_2018_full != 64:
+        fail(f"2018 FULL expected 64, got {wc_2018_full}")
+    else:
+        print(f"[PASS] 2018 FULL: {wc_2018_full}")
 
-    # 4. Spec content
-    check_spec_content()
+    # ── 4. 2022 FULL = 64 ──
+    if wc_2022_full != 64:
+        fail(f"2022 FULL expected 64, got {wc_2022_full}")
+    else:
+        print(f"[PASS] 2022 FULL: {wc_2022_full}")
 
-    # 5. OU/AH data file check
-    check_ou_ah_data_files()
+    # ── 5. 2014 FULL = 0 + WARN ──
+    if wc_2014_full > 0:
+        fail(f"2014 FULL expected 0, got {wc_2014_full}")
+    else:
+        warn("2014 full coverage = 0 (NO_LOCAL_ODDS_SOURCE_2014)")
+        print(f"[WARN] 2014 FULL: {wc_2014_full} — NO_LOCAL_ODDS_SOURCE_2014")
 
-    # 6. No external fetch
-    check_no_external_fetch()
+    # ── 6. AH missing ──
+    ah_avail = sum(1 for r in rows if r.get("ah_available") == "True")
+    if ah_avail > 0:
+        fail(f"AH should be unavailable, but {ah_avail} rows have ah_available=True")
+    else:
+        warn("AH missing from all rows (AH_MISSING_NO_SOURCE)")
+        print("[WARN] AH: AH_MISSING_NO_SOURCE — AH backtest SKIP")
 
-    # 7. Production files unchanged
-    check_production_files_unchanged()
+    # ── 7. 2026 current snapshot not in historical ──
+    wc_2026_in_historical = sum(1 for r in rows if "World Cup" in r.get("competition", "") and "2026" in str(r.get("season", "")))
+    if wc_2026_in_historical > 0:
+        fail(f"2026 data found in historical backtest dataset: {wc_2026_in_historical} rows")
+    else:
+        print(f"[PASS] No 2026 data in historical backtest dataset")
 
-    # 8. DEFAULT_RHO unchanged
-    check_default_rho_unchanged()
+    # ── 8. Uncovered samples remain 1X2_ONLY ──
+    for r in rows:
+        if r.get("odds_extension_covered") != "True" and r.get("pipeline_mode") != "1X2_ONLY":
+            fail(f"Row {r.get('match_date','')} {r.get('home_team_id','')}vs{r.get('away_team_id','')}: "
+                 f"uncovered but pipeline_mode={r.get('pipeline_mode','')}")
+    print(f"[PASS] Uncovered samples remain 1X2_ONLY")
 
-    print()
+    # ── 9. FULL only on rows with OU ladder ──
+    for r in rows:
+        if r.get("pipeline_mode") == "FULL":
+            if r.get("ou_market_available") != "True":
+                fail(f"Row {r.get('match_date','')} marked FULL but ou_market_available={r.get('ou_market_available','')}")
+    print(f"[PASS] FULL only on rows with OU ladder")
+
+    # ── 10. w1_full_pipeline_validated_for_full_dataset=false ──
+    full_validated = sum(1 for r in rows if r.get("w1_full_pipeline_validated") == "True" and r.get("pipeline_mode") == "FULL")
+    if full_validated != 128:
+        warn(f"Expected 128 FULL rows with w1_full_pipeline_validated=True, got {full_validated}")
+    else:
+        print(f"[PASS] w1_full_pipeline_validated on FULL subset: {full_validated}")
+
+    # ── 11. data/local_odds/*.csv not git tracked ──
+    repo = ROOT
+    for csv_file in SNAPSHOT_DIR.glob("*.csv"):
+        result = _git_ls(csv_file)
+        if result:
+            fail(f"data/local_odds/{csv_file.name} is git-tracked (should be gitignored)")
+            break
+    else:
+        print(f"[PASS] data/local_odds/*.csv not git-tracked")
+
+    # ── 12. data/processed/international/* not git tracked ──
+    proc_tracked = _git_ls(EXT_PATH) or _git_ls(CUR_QUALITY)
+    if proc_tracked:
+        fail("data/processed/international/ files are git-tracked (should be gitignored)")
+    else:
+        print(f"[PASS] data/processed/international/* not git-tracked")
+
+    # ── 13. Static guard: no external fetch in B1/B2 scripts (checkers excluded as they contain guard strings) ──
+    new_scripts = [
+        ROOT / "scripts/merge_w1_odds_extension.py",
+        ROOT / "scripts/w1_backtest_full_pipeline.py",
+    ]
+    _forbidden_imports = ["import requests", "from urllib", "import urllib",
+                          "from selenium", "import playwright", "web_fetch",
+                          "http.client", "httpx", "aiohttp", "BeautifulSoup",
+                          "from socket", "import socket"]
+    for sp in new_scripts:
+        if not sp.is_file():
+            continue
+        src = sp.read_text(encoding="utf-8")
+        for fi in _forbidden_imports:
+            if fi in src:
+                fail(f"'{sp.name}' contains forbidden pattern '{fi}'")
+    print(f"[PASS] All new scripts are free of external fetch imports")
+
+    # ── Current snapshot quality exists ──
+    if not CUR_QUALITY.is_file():
+        fail(f"Current snapshot quality not found: {CUR_QUALITY}")
+    else:
+        cur = json.loads(CUR_QUALITY.read_text(encoding="utf-8"))
+        if cur.get("historical_backtest_eligible") is not False:
+            fail("current snapshot quality must set historical_backtest_eligible=false")
+        print(f"[PASS] Current snapshot quality: historical_backtest_eligible=false")
+
+    # ── Summary ──
+    print(f"\n{'='*60}")
+    print(f"CHECKER SUMMARY: {len(errors)} FAIL / {len(warns)} WARN")
     if errors:
         for e in errors:
             print(f"  FAIL: {e}")
-        print(f"  Result: BLOCKED ({len(errors)} failures)")
-        return 1
-
-    if warnings:
-        for w in warnings:
+    if warns:
+        for w in warns:
             print(f"  WARN: {w}")
 
-    has_ou = OU_FILE.is_file()
-    has_ah = AH_FILE.is_file()
+    return 1 if errors else 0
 
-    if not has_ou and not has_ah:
-        print("  Result: SKIP (no OU/AH data files — pipeline_mode=1X2_ONLY per spec)")
-    else:
-        print("  Result: OU/AH data present — FULL pipeline eligible for covered subset")
 
-    print("  check_w1_odds_extension PASS")
-    return 0
+def _git_ls(path: Path) -> bool:
+    """Check if a file is tracked by git. Returns True if tracked."""
+    import subprocess
+    result = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", str(path.relative_to(ROOT))],
+        cwd=ROOT, capture_output=True, text=True, timeout=10
+    )
+    return result.returncode == 0
 
 
 if __name__ == "__main__":

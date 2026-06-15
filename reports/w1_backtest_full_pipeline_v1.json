@@ -1,0 +1,172 @@
+{
+  "n": 128,
+  "scope": "World Cup 2018 + 2022 (128 matches with OU ladder)",
+  "pipeline_mode": "FULL",
+  "w1_full_pipeline_validated": true,
+  "direction_accuracy": 0.5391,
+  "mean_rps": 0.4027,
+  "mean_logloss_1x2": 0.9787,
+  "mean_brier": 0.5739,
+  "mean_logloss_exact_score": 2.8762,
+  "rps_uniform_baseline": 0.48,
+  "beats_uniform_rps": true,
+  "ou_calibration": {
+    "over_1.5": {
+      "reliability": [
+        {
+          "bin_mid": 0.576,
+          "empirical": 0.6,
+          "count": 10
+        },
+        {
+          "bin_mid": 0.654,
+          "empirical": 0.727,
+          "count": 66
+        },
+        {
+          "bin_mid": 0.747,
+          "empirical": 0.727,
+          "count": 44
+        },
+        {
+          "bin_mid": 0.829,
+          "empirical": 1,
+          "count": 8
+        }
+      ],
+      "ece": 0.057,
+      "line": 1.5,
+      "n_matches": 128
+    },
+    "over_2.5": {
+      "reliability": [
+        {
+          "bin_mid": 0.278,
+          "empirical": 0.25,
+          "count": 4
+        },
+        {
+          "bin_mid": 0.365,
+          "empirical": 0.475,
+          "count": 59
+        },
+        {
+          "bin_mid": 0.446,
+          "empirical": 0.395,
+          "count": 38
+        },
+        {
+          "bin_mid": 0.542,
+          "empirical": 0.591,
+          "count": 22
+        },
+        {
+          "bin_mid": 0.613,
+          "empirical": 0.5,
+          "count": 4
+        },
+        {
+          "bin_mid": 0.702,
+          "empirical": 1,
+          "count": 1
+        }
+      ],
+      "ece": 0.0807,
+      "line": 2.5,
+      "n_matches": 128
+    }
+  },
+  "btts_calibration": {
+    "reliability": [
+      {
+        "bin_mid": 0.278,
+        "empirical": 0.5,
+        "count": 4
+      },
+      {
+        "bin_mid": 0.372,
+        "empirical": 0.447,
+        "count": 47
+      },
+      {
+        "bin_mid": 0.438,
+        "empirical": 0.478,
+        "count": 67
+      },
+      {
+        "bin_mid": 0.532,
+        "empirical": 0.7,
+        "count": 10
+      }
+    ],
+    "ece": 0.0686,
+    "n_matches": 128
+  },
+  "market_reproduction": {
+    "max_abs_err_threshold": 0.02,
+    "n_within_threshold": 117,
+    "n_total": 128,
+    "pass_rate": 0.9141,
+    "mean_abs_err": 0.0091
+  },
+  "pipeline_mode_distribution": {
+    "FULL": 128,
+    "1X2_ONLY": null,
+    "note": "FULL subset only; full dataset 1081 has mixed modes"
+  },
+  "coverage": {
+    "full_subset_2018_2022": 128,
+    "season_2014_covered": false,
+    "season_2014_reason": "NO_LOCAL_ODDS_SOURCE_2014",
+    "ah_available": false,
+    "ah_missing_reason": "AH_MISSING_NO_SOURCE — AH backtest SKIP",
+    "w1_full_pipeline_validated_for_full_dataset": false,
+    "w1_full_pipeline_validated_only_for_2018_2022_wc_subset": true,
+    "note_cn": "Only 2018+2022 WC 128 matches with OU ladder are fully validated. Not valid for 1081 total, 2014, AH, or 2026 current snapshot."
+  },
+  "walk_forward": {
+    "policy": "chronological 60/20/20 (no future leakage; past → future ordering strictly by match_date)",
+    "train": {
+      "n": 76,
+      "range": [
+        "2018-06-14",
+        "2022-11-23"
+      ],
+      "direction_accuracy": 0.5395,
+      "mean_rps": 0.3932,
+      "mean_logloss_1x2": 0.9742,
+      "market_reproduction_pass_rate": 0.9079
+    },
+    "val": {
+      "n": 26,
+      "range": [
+        "2022-11-24",
+        "2022-11-30"
+      ],
+      "direction_accuracy": 0.5769,
+      "mean_rps": 0.3654,
+      "mean_logloss_1x2": 0.8963,
+      "market_reproduction_pass_rate": 0.9615
+    },
+    "test": {
+      "n": 26,
+      "range": [
+        "2022-11-30",
+        "2022-12-18"
+      ],
+      "direction_accuracy": 0.5,
+      "mean_rps": 0.468,
+      "mean_logloss_1x2": 1.0741,
+      "market_reproduction_pass_rate": 0.8846
+    }
+  },
+  "notes_cn": [
+    "FULL pipeline: 1X2 devig + OU ladder mu + solve lambda + Dixon-Coles score matrix",
+    "AH: SKIP/WARN — no AH data in local odds source",
+    "2014: SKIP/WARN — no local odds data for 2014 World Cup",
+    "2026 current snapshot: excluded from historical backtest",
+    "W1 remains a probability-modeling / pre-match analysis / risk-reading system",
+    "No betting advice, no money allocation, no hit-rate promise",
+    "Model-market divergence is a diagnostic signal, not a betting opportunity"
+  ]
+}
