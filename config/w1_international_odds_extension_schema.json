@@ -1,0 +1,107 @@
+{
+  "schema_id": "W1_INTERNATIONAL_ODDS_EXTENSION_SCHEMA_V1",
+  "description": "Schema for local OU/AH odds extension files. These files must be placed manually under data/local_odds/. No network fetch is allowed.",
+  "version": "1.0.0",
+  "stage": "scaffold",
+  "files": {
+    "ou": {
+      "path": "data/local_odds/w1_ou_odds_extension.csv",
+      "required": true,
+      "fields": [
+        {
+          "name": "date",
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "required": true,
+          "description": "Match date in YYYY-MM-DD format"
+        },
+        {
+          "name": "home",
+          "type": "string",
+          "required": true,
+          "description": "Home team name (normalized via w1_team_aliases.json)"
+        },
+        {
+          "name": "away",
+          "type": "string",
+          "required": true,
+          "description": "Away team name (normalized via w1_team_aliases.json)"
+        },
+        {
+          "name": "ou_line",
+          "type": "number",
+          "required": true,
+          "description": "Over/under line, e.g. 2.5"
+        },
+        {
+          "name": "over_odds",
+          "type": "number",
+          "required": true,
+          "description": "Decimal odds for Over"
+        },
+        {
+          "name": "under_odds",
+          "type": "number",
+          "required": true,
+          "description": "Decimal odds for Under"
+        }
+      ],
+      "required_fields": ["date", "home", "away", "ou_line", "over_odds", "under_odds"]
+    },
+    "ah": {
+      "path": "data/local_odds/w1_ah_odds_extension.csv",
+      "required": false,
+      "fields": [
+        {
+          "name": "date",
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "required": true,
+          "description": "Match date in YYYY-MM-DD format"
+        },
+        {
+          "name": "home",
+          "type": "string",
+          "required": true,
+          "description": "Home team name (normalized via w1_team_aliases.json)"
+        },
+        {
+          "name": "away",
+          "type": "string",
+          "required": true,
+          "description": "Away team name (normalized via w1_team_aliases.json)"
+        },
+        {
+          "name": "ah_line",
+          "type": "number",
+          "required": true,
+          "description": "Asian handicap line, e.g. -0.5"
+        },
+        {
+          "name": "home_odds",
+          "type": "number",
+          "required": true,
+          "description": "Decimal odds for home side of AH"
+        },
+        {
+          "name": "away_odds",
+          "type": "number",
+          "required": true,
+          "description": "Decimal odds for away side of AH"
+        }
+      ],
+      "required_fields": ["date", "home", "away", "ah_line", "home_odds", "away_odds"]
+    }
+  },
+  "hard_rules": [
+    "OU file is required when pipeline_mode transitions to FULL.",
+    "AH file is optional but must have a defined schema when present.",
+    "No network fetch allowed. Files must be placed by the user.",
+    "date/home/away uniquely identify a match for matching against the international dataset.",
+    "ou_line, over_odds, under_odds all required when OU row is present.",
+    "ah_line, home_odds, away_odds all required when AH row is present.",
+    "All odds values must be decimal (European) format."
+  ]
+}

@@ -10,6 +10,9 @@ data/historical/raw/
 data/odds_snapshots/
 data/snapshots/
 
+# 用户本地 OU/AH 文件（手动放置，不进仓库）
+data/local_odds/
+
 # 运行时状态缓存
 state/w1_live_refresh_state.json
 state/w1_weather_cache.json
