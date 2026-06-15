@@ -1,0 +1,49 @@
+{
+  "schema_version": "W1_FORWARD_LEDGER_V1",
+  "description": "Pre-match snapshot ledger (append-only). One row per (fixture_id, as_of_utc). Captures ONLY pre-match fields from local data / manual entry / null placeholders. No external fetch. No post-match fields (leakage guard).",
+  "store": "data/forward_ledger/w1_forward_ledger.jsonl",
+  "append_only": true,
+  "gitignored": true,
+  "allowed_sources": ["local_card", "manual", "none"],
+  "forbidden_external": ["api", "crawler", "scrape", "purchase", "new_external_source"],
+  "required_fields": ["fixture_id", "as_of_utc", "snapshot_phase", "data_source", "availability"],
+  "prematch_fields": {
+    "fixture_id": "string",
+    "match": "string",
+    "kickoff_utc": "string|null",
+    "as_of_utc": "string (UTC ISO, REQUIRED)",
+    "snapshot_phase": "enum[T-48h,T-24h,T-12h,T-6h,T-2h,T-1h,closing,pre_kickoff,unknown]",
+    "data_source": "enum[local_card,manual,none]",
+    "lineup_status": "string|null",
+    "confirmed_lineup": "bool",
+    "confirmed_lineup_utc": "string|null",
+    "home_starting_xi": "array<string>",
+    "away_starting_xi": "array<string>",
+    "home_formation": "string|null",
+    "away_formation": "string|null",
+    "key_absences": "array<string>",
+    "odds_phase": "string|null",
+    "odds_1x2": {"home": "number|null", "draw": "number|null", "away": "number|null"},
+    "odds_snapshot_utc": "string|null",
+    "market_movement_status": "string|null",
+    "weather_status": "string|null",
+    "temperature_c": "number|null",
+    "wind_kmh": "number|null",
+    "precip_prob": "number|null",
+    "referee_assigned": "bool",
+    "referee_name": "string|null",
+    "tactical_notes": "array<string>",
+    "availability": {"lineup": "bool", "odds": "bool", "weather": "bool", "referee": "bool", "tactical": "bool"}
+  },
+  "forbidden_fields": [
+    "actual_score", "result", "home_goals", "away_goals", "home_goals_90", "away_goals_90",
+    "finish_type", "score", "post_match_calibration", "rps", "rps_1x2", "log_loss",
+    "exact_score_log_loss", "outcome", "hit_status", "actual_score_probability"
+  ],
+  "hard_rules": [
+    "append-only; never rewrite or delete past rows.",
+    "as_of_utc required on every row.",
+    "no forbidden (post-match) field may appear (leakage guard).",
+    "no external fetch in this stage; data_source in allowed_sources only."
+  ]
+}

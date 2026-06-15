@@ -433,6 +433,9 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_host_no_qualifier_history.py`（S1B WARN：USA/Mexico/Canada 东道主缺预选历史，gate 正式 S2）
 - `scripts/check_w1_team_sample_sparsity.py`（S1B 报告：每队样本量/最近比赛日期/低样本，生成数据质量报告）
 - `scripts/check_w1_backtest_spine.py`（S1B：1X2_ONLY 标签、leakage guard、walk-forward 不重叠，不冒称完整管线）
+- `scripts/check_w1_forward_ledger.py`（W1_FORWARD_LEDGER_AND_S2_PROTOTYPE_V1：赛前快照 schema/as_of/append-only，强制无赛后字段 leakage guard）
+- `scripts/check_w1_team_strength_prototype.py`（S2 prototype：prototype 标签、时序无未来泄漏、shrinkage、东道主 fallback、不接线上 λ）
+- `scripts/check_w1_ou_coverage.py`（OU/AH 覆盖率探测：coverage-only、external_fetch_performed=false、无外部抓取）
 
 ## 8. 当前 WARN_ONLY / 限制
 
