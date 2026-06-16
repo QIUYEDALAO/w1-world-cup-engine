@@ -443,6 +443,7 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_visual_dashboard.py` 强化 `assert_embed_deterministic`（W1_DASHBOARD_TEMPLATE_DATA_SPLIT：内嵌 `match_records[].odds_movement.liquidity.staleness_minutes`、`lineup_updated_at`、`live_refresh` 子树 runtime timestamp 必须为 null，阻止 build/runtime 时钟字段烤进 tracked HTML；Option 1 确定性内嵌，保留 file-open，外部 JSON/实时路径仍保留真实值）
 - `scripts/check_w1_predict_overlay_split.py`（W1_PREDICT_OVERLAY_SPLIT_V1：predict 不写源卡、源卡无 live_refresh/result 运行时字段、runtime overlay（`state/`）gitignored、事实账本 `round1_results.json` tracked、build 有 overlay 合并接线；强化）。同阶段更新 `check_w1_click_to_predict` / `check_w1_lineup_api_binding` / `check_w1_post_match_result_sync` 为断言 overlay/账本而非源卡。
 - `scripts/check_w1_draw_calibration_research.py`（W1_DRAW_CALIBRATION_RESEARCH_V1：research_only/prototype/production_wired=false；engine/DEFAULT_RHO/decision_policy/thresholds 未改、未接 dashboard/predict/build；报告含 baseline vs candidates + walk-forward；128 subset scope、不外推 1081/预选赛；无促性表达；skip-safe）
+- `scripts/check_w1_forward_prospective_run.py`（W1_FORWARD_LEDGER_PROSPECTIVE_RUN_V1：pre_match_view 不可变/write-once、lock_as_of≤kickoff（无 hindsight）、audit.locked_prediction==view（不可变）且引用存在的 view、result.source 本地、store gitignored、新脚本无外部抓取、engine/DEFAULT_RHO/configs 未改、无促性表达；skip-safe）
 
 ## 8. 当前 WARN_ONLY / 限制
 
