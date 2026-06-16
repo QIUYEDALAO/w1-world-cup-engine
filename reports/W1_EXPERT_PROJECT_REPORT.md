@@ -440,6 +440,7 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_full_pipeline_backtest.py`（S1B：128 场 FULL replay、scope 限 2018+2022 不外推 1081、market reproduction、OU/BTTS 校准、引擎只读）
 - `scripts/check_w1_anomaly_review.py`（W1_FULL_PIPELINE_ANOMALY_REVIEW_V1：11 个超阈值样本全部归因、诊断 only、引擎/ρ 未改、无 refetch、未来修法不在本阶段实现）
 - `scripts/check_w1_runtime_artifact_policy.py`（W1_RUNTIME_ARTIFACT_TRIAGE_V1：dashboard_data.json + state/ 不被跟踪;cards/HTML/results 仍跟踪;local/processed gitignored;QC 证据在仓）
+- `scripts/check_w1_visual_dashboard.py` 强化 `assert_embed_deterministic`（W1_DASHBOARD_TEMPLATE_DATA_SPLIT：内嵌 `match_records[].odds_movement.liquidity.staleness_minutes`、`lineup_updated_at`、`live_refresh` 子树 runtime timestamp 必须为 null，阻止 build/runtime 时钟字段烤进 tracked HTML；Option 1 确定性内嵌，保留 file-open，外部 JSON/实时路径仍保留真实值）
 
 ## 8. 当前 WARN_ONLY / 限制
 
