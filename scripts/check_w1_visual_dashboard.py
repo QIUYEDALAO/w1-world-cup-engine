@@ -241,6 +241,46 @@ def assert_dashboard_data(data: dict) -> None:
             fail(f"Missing Chinese status label: {label}")
 
 
+def assert_embed_deterministic(embedded_data: dict) -> None:
+    """W1_DASHBOARD_TEMPLATE_DATA_SPLIT: build-time wall-clock fields must not be
+    baked into the tracked HTML embed, or every rebuild dirties a committed file.
+    The external gitignored JSON / live server path keep the real runtime values.
+    This is an added assertion: it strengthens, never weakens, the suite."""
+    for row in embedded_data.get("match_records", []):
+        liq = row.get("odds_movement", {}).get("liquidity", {})
+        if liq.get("staleness_minutes") is not None:
+            fail(
+                "Embedded staleness_minutes must be null for deterministic embed "
+                f"(fixture {row.get('fixture_id')}): {liq.get('staleness_minutes')}"
+            )
+        if row.get("lineup_updated_at") is not None:
+            fail(
+                "Embedded lineup_updated_at must be null for deterministic embed "
+                f"(fixture {row.get('fixture_id')}): {row.get('lineup_updated_at')}"
+            )
+        live_refresh = row.get("live_refresh", {})
+        for path, value in walk_live_refresh_timestamps(live_refresh):
+            if value is not None:
+                fail(
+                    "Embedded live_refresh runtime timestamp must be null for deterministic embed "
+                    f"(fixture {row.get('fixture_id')} {path}): {value}"
+                )
+
+
+def walk_live_refresh_timestamps(value: object, path: str = "live_refresh") -> list[tuple[str, object]]:
+    found: list[tuple[str, object]] = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            child_path = f"{path}.{key}"
+            if key in {"requested_at", "fetched_at", "updated_at"}:
+                found.append((child_path, child))
+            found.extend(walk_live_refresh_timestamps(child, child_path))
+    elif isinstance(value, list):
+        for idx, child in enumerate(value):
+            found.extend(walk_live_refresh_timestamps(child, f"{path}[{idx}]"))
+    return found
+
+
 def assert_html(data: dict) -> None:
     if not HTML.is_file():
         fail("HTML dashboard is missing")
@@ -310,6 +350,7 @@ def assert_html(data: dict) -> None:
             fail(f"Embedded dashboard JSON is not parseable: {exc}")
         if len(embedded_data.get("match_records", [])) < 24:
             fail("Embedded dashboard JSON must include at least 24 match_records")
+        assert_embed_deterministic(embedded_data)
         qatar = next((row for row in embedded_data.get("match_records", []) if row.get("fixture_id") == "1489373"), None)
         if not qatar:
             fail("Embedded match_records must include fixture_id=1489373")
@@ -462,6 +503,7 @@ def assert_html(data: dict) -> None:
     except json.JSONDecodeError as exc:
         fail(f"Embedded dashboard JSON is not parseable: {exc}")
     embedded_text = embedded.group(1)
+    assert_embed_deterministic(embedded_data)
     for raw_key in ("play_guard_pass", "lineup_status", "W1_WAIT"):
         if raw_key in embedded_text:
             fail(f"Embedded dashboard JSON must not expose raw key: {raw_key}")

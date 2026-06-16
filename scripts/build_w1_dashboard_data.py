@@ -2540,8 +2540,46 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# ── Deterministic embed (W1_DASHBOARD_TEMPLATE_DATA_SPLIT, Option 1) ────────────
+# The tracked HTML embeds a copy of the dashboard data so it still renders when
+# opened directly (file://) with no local server. That file-open embed must not
+# carry runtime timestamps that change on every no-op rebuild. We null only the
+# embedded copy; the external gitignored JSON and the live /dashboard-data server
+# path keep the real runtime values.
+VOLATILE_EMBED_PATHS = {
+    ("odds_movement", "liquidity", "staleness_minutes"),
+    ("lineup_updated_at",),
+}
+VOLATILE_LIVE_REFRESH_KEYS = {"requested_at", "fetched_at", "updated_at"}
+
+
+def is_volatile_embed_path(path: tuple[str, ...]) -> bool:
+    if any(path[-len(volatile):] == volatile for volatile in VOLATILE_EMBED_PATHS):
+        return True
+    if "live_refresh" in path and path[-1:] and path[-1] in VOLATILE_LIVE_REFRESH_KEYS:
+        return True
+    return False
+
+
+def strip_volatile_for_embed(obj: Any, path: tuple[str, ...] = ()) -> Any:
+    """Return a deep copy of *obj* with build-time wall-clock fields nulled, so the
+    embedded file-open copy is deterministic across no-op rebuilds."""
+    if isinstance(obj, dict):
+        return {
+            key: (
+                None
+                if is_volatile_embed_path(path + (key,))
+                else strip_volatile_for_embed(value, path + (key,))
+            )
+            for key, value in obj.items()
+        }
+    if isinstance(obj, list):
+        return [strip_volatile_for_embed(item, path) for item in obj]
+    return obj
+
+
 def update_embedded_html(data: dict[str, Any]) -> None:
-    public = public_dashboard_data(data)
+    public = strip_volatile_for_embed(public_dashboard_data(data))
     html = DASHBOARD_HTML.read_text(encoding="utf-8")
     replacement = (
         '<script id="w1-data" type="application/json">'
