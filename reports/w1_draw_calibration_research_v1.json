@@ -1,0 +1,260 @@
+{
+  "stage": "W1_DRAW_CALIBRATION_RESEARCH_V1",
+  "research_only": true,
+  "prototype": true,
+  "production_wired": false,
+  "scope": "World Cup 2018 + 2022 FULL subset (OU ladder), n=128; NOT 1081, NOT qualifiers, NOT AH/2014",
+  "n": 128,
+  "engine_unchanged": {
+    "DEFAULT_RHO": -0.057766,
+    "rho_grid": [
+      -0.3,
+      0.08
+    ]
+  },
+  "draw_tension_outliers_baseline": 11,
+  "candidates": {
+    "B0_baseline_fixed_rho": {
+      "overall": {
+        "n": 128,
+        "rps": 0.4027,
+        "logloss_1x2": 0.9787,
+        "brier": 0.5739,
+        "exact_score_logloss": 2.8762,
+        "draw_calibration_ece": 0.0281,
+        "draw_logloss": 0.5219,
+        "draw_brier": 0.1712,
+        "ou_over_1.5_ece": 0.057,
+        "ou_over_2.5_ece": 0.0807,
+        "btts_ece": 0.0686,
+        "market_reproduction_mean_abs_err": 0.0091,
+        "market_reproduction_pass_rate": 0.9141,
+        "direction_accuracy": 0.5391
+      },
+      "note": "production as-is (fixed DEFAULT_RHO)"
+    },
+    "C1_diagnostic_draw_fit_rho": {
+      "overall": {
+        "n": 128,
+        "rps": 0.402,
+        "logloss_1x2": 0.972,
+        "brier": 0.5717,
+        "exact_score_logloss": 2.872,
+        "draw_calibration_ece": 0.0323,
+        "draw_logloss": 0.5177,
+        "draw_brier": 0.1697,
+        "ou_over_1.5_ece": 0.0678,
+        "ou_over_2.5_ece": 0.0807,
+        "btts_ece": 0.0688,
+        "market_reproduction_mean_abs_err": 0.0006,
+        "market_reproduction_pass_rate": 1.0,
+        "direction_accuracy": 0.5391
+      },
+      "oracle_like": true,
+      "market_reconciliation_only": true,
+      "note": "per-match rho fit to market_draw — UPPER BOUND / diagnostic, NOT a production candidate",
+      "rho_fit_summary": {
+        "min": -0.3,
+        "max": 0.08,
+        "mean": -0.0348
+      }
+    },
+    "C2_draw_calibration_layer": {
+      "overall": {
+        "n": 128,
+        "rps": 0.402,
+        "logloss_1x2": 0.9741,
+        "brier": 0.5716,
+        "exact_score_logloss": 2.8716,
+        "draw_calibration_ece": 0.0319,
+        "draw_logloss": 0.5173,
+        "draw_brier": 0.1696,
+        "ou_over_1.5_ece": 0.0571,
+        "ou_over_2.5_ece": 0.0842,
+        "btts_ece": 0.0695,
+        "market_reproduction_mean_abs_err": 0.0046,
+        "market_reproduction_pass_rate": 0.9688,
+        "direction_accuracy": 0.5391
+      },
+      "research_only": true,
+      "note": "post-hoc draw-mass scaling to market_draw; preserves H/A ratio & sums to 1"
+    },
+    "C3_parametric_walkforward_rho": {
+      "overall": {
+        "n": 128,
+        "rps": 0.4024,
+        "logloss_1x2": 0.9743,
+        "brier": 0.5728,
+        "exact_score_logloss": 2.8743,
+        "draw_calibration_ece": 0.0331,
+        "draw_logloss": 0.5198,
+        "draw_brier": 0.1705,
+        "ou_over_1.5_ece": 0.0491,
+        "ou_over_2.5_ece": 0.0807,
+        "btts_ece": 0.0686,
+        "market_reproduction_mean_abs_err": 0.0045,
+        "market_reproduction_pass_rate": 1.0,
+        "direction_accuracy": 0.5391
+      },
+      "walk_forward": {
+        "policy": "chronological 60/20/20 by match_date; fit on train, judged on test (out-of-sample)",
+        "train": {
+          "n": 76,
+          "rps": 0.3929,
+          "logloss_1x2": 0.9686,
+          "brier": 0.5682,
+          "exact_score_logloss": 2.91,
+          "draw_calibration_ece": 0.029,
+          "draw_logloss": 0.53,
+          "draw_brier": 0.1752,
+          "ou_over_1.5_ece": 0.0554,
+          "ou_over_2.5_ece": 0.0978,
+          "btts_ece": 0.0865,
+          "market_reproduction_mean_abs_err": 0.0044,
+          "market_reproduction_pass_rate": 1.0,
+          "direction_accuracy": 0.5395
+        },
+        "val": {
+          "n": 26,
+          "rps": 0.3652,
+          "logloss_1x2": 0.8948,
+          "brier": 0.5235,
+          "exact_score_logloss": 2.6795,
+          "draw_calibration_ece": 0.0626,
+          "draw_logloss": 0.4957,
+          "draw_brier": 0.1583,
+          "ou_over_1.5_ece": 0.0407,
+          "ou_over_2.5_ece": 0.0849,
+          "btts_ece": 0.0748,
+          "market_reproduction_mean_abs_err": 0.0044,
+          "market_reproduction_pass_rate": 1.0,
+          "direction_accuracy": 0.5769
+        },
+        "test": {
+          "n": 26,
+          "rps": 0.4671,
+          "logloss_1x2": 1.0706,
+          "brier": 0.6359,
+          "exact_score_logloss": 2.9648,
+          "draw_calibration_ece": 0.0435,
+          "draw_logloss": 0.5141,
+          "draw_brier": 0.1687,
+          "ou_over_1.5_ece": 0.1224,
+          "ou_over_2.5_ece": 0.1626,
+          "btts_ece": 0.139,
+          "market_reproduction_mean_abs_err": 0.0052,
+          "market_reproduction_pass_rate": 1.0,
+          "direction_accuracy": 0.5
+        },
+        "baseline_test": {
+          "n": 26,
+          "rps": 0.468,
+          "logloss_1x2": 1.0741,
+          "brier": 0.6357,
+          "exact_score_logloss": 2.972,
+          "draw_calibration_ece": 0.0712,
+          "draw_logloss": 0.512,
+          "draw_brier": 0.1677,
+          "ou_over_1.5_ece": 0.1241,
+          "ou_over_2.5_ece": 0.1626,
+          "btts_ece": 0.1384,
+          "market_reproduction_mean_abs_err": 0.01,
+          "market_reproduction_pass_rate": 0.8846,
+          "direction_accuracy": 0.5
+        },
+        "coef_feature_order": [
+          "bias",
+          "mu",
+          "market_draw",
+          "favorite_strength",
+          "knockout"
+        ],
+        "coef": [
+          1.84848,
+          -0.23851,
+          -3.41651,
+          -0.8112,
+          0.01171
+        ]
+      },
+      "research_only": true,
+      "note": "only generalizable candidate; linear rho(features) trained walk-forward"
+    }
+  },
+  "comparison_vs_baseline": {
+    "C1_diagnostic_draw_fit_rho": {
+      "beats_baseline": {
+        "rps": true,
+        "logloss_1x2": true,
+        "brier": true,
+        "exact_score_logloss": true,
+        "draw_calibration_ece": false,
+        "draw_logloss": true,
+        "draw_brier": true,
+        "ou_over_1.5_ece": false,
+        "ou_over_2.5_ece": false,
+        "btts_ece": false,
+        "market_reproduction_mean_abs_err": true
+      },
+      "draw_improved": true,
+      "outcome_skill_improved_rps": true,
+      "tradeoff_other_worse": true
+    },
+    "C2_draw_calibration_layer": {
+      "beats_baseline": {
+        "rps": true,
+        "logloss_1x2": true,
+        "brier": true,
+        "exact_score_logloss": true,
+        "draw_calibration_ece": false,
+        "draw_logloss": true,
+        "draw_brier": true,
+        "ou_over_1.5_ece": false,
+        "ou_over_2.5_ece": false,
+        "btts_ece": false,
+        "market_reproduction_mean_abs_err": true
+      },
+      "draw_improved": true,
+      "outcome_skill_improved_rps": true,
+      "tradeoff_other_worse": true
+    },
+    "C3_parametric_walkforward_rho": {
+      "beats_baseline": {
+        "rps": true,
+        "logloss_1x2": true,
+        "brier": true,
+        "exact_score_logloss": true,
+        "draw_calibration_ece": false,
+        "draw_logloss": true,
+        "draw_brier": true,
+        "ou_over_1.5_ece": true,
+        "ou_over_2.5_ece": false,
+        "btts_ece": false,
+        "market_reproduction_mean_abs_err": true
+      },
+      "draw_improved": true,
+      "outcome_skill_improved_rps": true,
+      "tradeoff_other_worse": false
+    },
+    "C3_out_of_sample_test": {
+      "rps_test": 0.4671,
+      "rps_test_baseline": 0.468,
+      "rps_gain_test_vs_baseline": 0.0009,
+      "noise_margin": 0.005,
+      "c3_beats_baseline_on_test_rps": true,
+      "c3_beats_baseline_on_test_draw_logloss": false,
+      "train_vs_test_rps_gap": 0.0742,
+      "robust_out_of_sample_signal": false
+    }
+  },
+  "recommendation": {
+    "production_change_recommended": false,
+    "next_stage_recommended": null,
+    "robust_out_of_sample_signal": false,
+    "reason_cn": "无候选在样本外**稳定**优于 baseline：C3 test RPS 仅领先 0.0009（< 噪声阈值 0.005）且 draw_logloss 未同向改善；C1 oracle 上界即便把 market-reproduction 打到近 0，outcome RPS 也只改善 0.0007——说明 11/128 的 draw 残差主要是 **market-reproduction 工件**而非预测缺陷。不建议进入下一阶段，更不接生产。",
+    "hard_constraint_cn": "本研究为信号，128 场 finals-only 样本小，绝不可直接上线、不可改 DEFAULT_RHO、不可替换 score engine。",
+    "c1_is_oracle_upper_bound": true,
+    "c1_oracle_rps_gain_over_baseline": 0.0007,
+    "tradeoff_observed_cn": "C2 把 draw 对齐市场，但 OU2.5 ECE 变差（draw 后处理扰动了总进球结构）——典型 tradeoff。"
+  }
+}
