@@ -99,7 +99,7 @@ def assert_server() -> None:
         "current_match",
         "fetch_live_lineups_from_api",
         "fixtures/lineups",
-        "write_lineups_to_card",
+        "write_lineups_overlay",
         "refresh_lineups",
         "live_refresh",
         "verified_fallback",

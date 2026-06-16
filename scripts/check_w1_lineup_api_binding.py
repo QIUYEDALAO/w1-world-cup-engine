@@ -60,8 +60,8 @@ def main() -> int:
         lineup_block = refresh_lineups_source()
         if "api_fixture_id_candidates(match)" not in lineup_block:
             fail("refresh_lineups must try request/alias API fixture ids")
-        if "write_lineups_to_card(fixture_id, lineups)" not in lineup_block:
-            fail("refresh_lineups must write back to the local match card fixture id")
+        if "write_lineups_overlay(fixture_id, lineups)" not in lineup_block:
+            fail("refresh_lineups must write refreshed lineups to the runtime overlay (not the source card)")
         if "lambda" in lineup_block.lower():
             fail("lineup refresh must not directly adjust lambda")
 

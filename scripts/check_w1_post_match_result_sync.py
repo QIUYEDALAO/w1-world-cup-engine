@@ -59,7 +59,7 @@ def check_server_wiring() -> None:
         fail("server contains Germany local alias hardcode for API result sync")
     if "kickoff_utc" not in source or "timedelta(hours=2)" not in source:
         fail("result sync must skip future/not-due fixtures before calling final-score API")
-    result_fn = source[source.find("def api_fixture_id_candidates_for_result") : source.find("def write_result_to_card")]
+    result_fn = source[source.find("def api_fixture_id_candidates_for_result") : source.find("def write_result_overlay")]
     if result_fn.find('match.get("fixture_id")') > result_fn.find('match.get("api_fixture_id")'):
         fail("result sync must prefer match fixture_id before api_fixture_id/request alias")
 
@@ -78,12 +78,17 @@ def check_dashboard_data() -> None:
 
 
 def check_card_and_results() -> None:
+    # W1_PREDICT_OVERLAY_SPLIT_V1: results live in the overlay (round1_results.json),
+    # not in the tracked source card. The source card must NOT carry runtime result
+    # fields (predict writes only the overlay; build reads results from the overlay).
     card = read_json(GERMANY_CARD)
-    if card.get("status") != "finished":
-        fail(f"Germany card status is not finished: {card.get('status')}")
-    assert_score_record(card, "Germany card")
-    if not card.get("result_synced_at_utc"):
-        fail("Germany card missing result_synced_at_utc")
+    leaked = [
+        key
+        for key in ("status", "actual_score", "actual_score_display_cn", "result_source", "result_note", "result_synced_at_utc")
+        if key in card
+    ]
+    if leaked:
+        fail(f"Germany source card must not carry runtime result fields (now in overlay): {leaked}")
 
     results = read_json(RESULTS_JSON).get("results", {})
     row = results.get("1489374")

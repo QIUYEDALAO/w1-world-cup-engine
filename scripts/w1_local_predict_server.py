@@ -35,6 +35,7 @@ PORT = int(os.environ.get("W1_DASHBOARD_PORT", "8765"))
 PROGRESS = ROOT / "state/w1_predict_progress.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
+LINEUP_RUNTIME_OVERLAY = ROOT / "state/w1_lineup_runtime_overlay.json"
 MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
@@ -334,20 +335,6 @@ def write_live_refresh_state(fixture_id: str, live_refresh: dict[str, Any]) -> N
     write_json(LIVE_REFRESH_STATE, state)
 
 
-def write_live_refresh_to_card(fixture_id: str, live_refresh: dict[str, Any]) -> bool:
-    path = card_path_for_fixture_id(fixture_id)
-    if not path:
-        manual = manual_lineup_payload(fixture_id)
-        if manual:
-            path = card_path_for_manual_lineup(manual)
-    if not path:
-        return False
-    card = load_json(path)
-    card["live_refresh"] = live_refresh
-    write_json(path, card)
-    return True
-
-
 def match_records() -> list[dict[str, Any]]:
     if not DASHBOARD_DATA.is_file():
         return []
@@ -569,21 +556,18 @@ def fetch_api_football_lineups(fixture_id: str, env: dict[str, str]) -> dict[str
     return lineups if module.get("source") == "live_api" and module.get("status") == "success" else None
 
 
-def write_lineups_to_card(fixture_id: str, lineups: dict[str, Any]) -> bool:
-    path = card_path_for_fixture_id(fixture_id)
-    if not path and lineups.get("source") == "manual_verified":
-        path = card_path_for_manual_lineup(lineups)
-    if not path:
-        return False
-    card = load_json(path)
+def build_lineups_runtime(lineups: dict[str, Any]) -> dict[str, Any]:
+    """Shape a refreshed-lineup payload (same structure that used to be written into
+    card['lineups']). W1_PREDICT_OVERLAY_SPLIT_V1: this now goes to a gitignored
+    runtime overlay instead of the tracked source card."""
     home_starting = lineups.get("home_starting_players") or []
     away_starting = lineups.get("away_starting_players") or []
     home_bench = lineups.get("home_bench_players") or []
     away_bench = lineups.get("away_bench_players") or []
-    card["lineups"] = {
-        **card.get("lineups", {}),
-        "confirmed_lineup_available": len(home_starting) >= 11 and len(away_starting) >= 11,
-        "status": "CONFIRMED" if len(home_starting) >= 11 and len(away_starting) >= 11 else "PARTIAL",
+    confirmed = len(home_starting) >= 11 and len(away_starting) >= 11
+    return {
+        "confirmed_lineup_available": confirmed,
+        "status": "CONFIRMED" if confirmed else "PARTIAL",
         "home_starting_xi": [player_name(player) for player in home_starting],
         "away_starting_xi": [player_name(player) for player in away_starting],
         "home_substitutes": [player_name(player) for player in home_bench],
@@ -601,28 +585,26 @@ def write_lineups_to_card(fixture_id: str, lineups: dict[str, Any]) -> bool:
         "lineup_as_of_utc": lineups.get("as_of_utc"),
         "lineup_updated_at": now_ts(),
         "lineup_confirmed_utc": lineups.get("lineup_confirmed_utc") or lineups.get("as_of_utc") or now_ts(),
-        "lineup_payload_type": lineups.get("lineup_payload_type") or ("starting_xi" if len(home_starting) >= 11 and len(away_starting) >= 11 else "unknown"),
+        "lineup_payload_type": lineups.get("lineup_payload_type") or ("starting_xi" if confirmed else "unknown"),
     }
-    if card["lineups"]["confirmed_lineup_available"]:
-        card["risk_flags"] = [
-            flag
-            for flag in card.get("risk_flags", [])
-            if flag.get("code") not in {"CONFIRMED_LINEUP_MISSING", "LINEUP_WAIT_EVENT"}
-        ]
-        card["data_gaps"] = [
-            gap
-            for gap in card.get("data_gaps", [])
-            if gap.get("field") != "lineups.confirmed_lineup"
-        ]
-        reasons = card.get("decision", {}).get("reasons", {})
-        if isinstance(reasons, dict) and isinstance(reasons.get("counter_factors"), list):
-            reasons["counter_factors"] = [
-                item
-                for item in reasons["counter_factors"]
-                if "confirmed_lineup missing" not in str(item)
-                and "lineup_status=WAIT" not in str(item)
-            ]
-    write_json(path, card)
+
+
+def write_lineups_overlay(fixture_id: str, lineups: dict[str, Any]) -> bool:
+    """W1_PREDICT_OVERLAY_SPLIT_V1: write refreshed lineups to a gitignored runtime
+    overlay (state/w1_lineup_runtime_overlay.json) keyed by fixture id — NOT back
+    into the tracked source card. build merges this overlay at render time; authored
+    manual lineups in data/manual_lineups/ still take priority. The confirmed-lineup
+    filtering of risk_flags/data_gaps now happens in build (apply_manual_lineup_override
+    / apply_runtime_lineup_overlay), never by mutating the source card."""
+    if not fixture_id:
+        return False
+    state = load_json(LINEUP_RUNTIME_OVERLAY) if LINEUP_RUNTIME_OVERLAY.is_file() else {"schema_version": "w1_lineup_runtime_overlay.v1", "fixtures": {}}
+    state.setdefault("schema_version", "w1_lineup_runtime_overlay.v1")
+    state.setdefault("fixtures", {})
+    payload = build_lineups_runtime(lineups)
+    for candidate in fixture_id_candidates(fixture_id) or [str(fixture_id)]:
+        state["fixtures"][candidate] = payload
+    write_json(LINEUP_RUNTIME_OVERLAY, state)
     return True
 
 
@@ -665,8 +647,8 @@ def refresh_lineups(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any
         return live_module(source="missing", status="error", message_cn="缺少 fixture_id，无法刷新首发。")
     manual = manual_lineup_payload_for_match(fixture_id, match)
     if manual:
-        if not write_lineups_to_card(fixture_id, manual):
-            return live_module(source="manual_verified", status="error", message_cn="找到人工验证首发，但未找到对应本地 match card。")
+        if not write_lineups_overlay(fixture_id, manual):
+            return live_module(source="manual_verified", status="error", message_cn="找到人工验证首发，但缺少 fixture_id，未写入 runtime overlay。")
         return live_module(
             source="manual_verified",
             status="success",
@@ -694,8 +676,8 @@ def refresh_lineups(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any
             module = live_module(source="cache", status=module.get("status", "empty"), message_cn=f"{module.get('message_cn', '实时 API 暂无首发')} 使用缓存，保留上一版。")
     if not lineups:
         return module
-    if not write_lineups_to_card(fixture_id, lineups):
-        return live_module(source=module.get("source", "missing"), status="error", message_cn="未找到对应 match card，首发未写入。")
+    if not write_lineups_overlay(fixture_id, lineups):
+        return live_module(source=module.get("source", "missing"), status="error", message_cn="缺少 fixture_id，首发未写入 runtime overlay。")
     module["message_cn"] = (
         f"{module.get('message_cn', '')} 首发已写入：{lineups.get('home_team') or match.get('home_team')} "
         f"{lineups.get('home_formation')}，{lineups.get('away_team') or match.get('away_team')} "
@@ -779,23 +761,6 @@ def api_fixture_id_candidates_for_result(match: dict[str, Any]) -> list[str]:
     return out
 
 
-def write_result_to_card(fixture_id: str, match: dict[str, Any], score: dict[str, int], synced_at: str) -> bool:
-    path = card_path_for_fixture_id(fixture_id)
-    if not path:
-        path = card_path_for_fixture_id(match.get("fixture_id"))
-    if not path:
-        return False
-    card = load_json(path)
-    card["status"] = "finished"
-    card["actual_score"] = {"home": score["home"], "away": score["away"]}
-    card["actual_score_display_cn"] = result_display_cn(match, score)
-    card["result_source"] = "api_football_fixture_result"
-    card["result_note"] = "API-Football fixtures endpoint result sync"
-    card["result_synced_at_utc"] = synced_at
-    write_json(path, card)
-    return True
-
-
 def write_result_overlay(match: dict[str, Any], api_fixture_id: str, score: dict[str, int], synced_at: str) -> None:
     payload = load_json(RESULTS_JSON) if RESULTS_JSON.is_file() else {"results": {}}
     payload.setdefault("results", {})
@@ -861,8 +826,6 @@ def refresh_result_sync_module(match: dict[str, Any], env: dict[str, str]) -> di
             )
 
         synced_at = now_utc()
-        if not write_result_to_card(str(match.get("fixture_id") or api_fixture_id), match, score, synced_at):
-            return live_module(source="live_api", status="error", message_cn="赛果已获取，但未找到对应 match card，未写入。")
         write_result_overlay(match, api_fixture_id, score, synced_at)
         return live_module(
             source="live_api",
@@ -1032,8 +995,7 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
             if idx == 7:
                 finalise_live_refresh(live_refresh)
                 write_live_refresh_state(fixture_id, live_refresh)
-                write_live_refresh_to_card(fixture_id, live_refresh)
-                write_progress(progress_payload(job_id=job_id, status="running", step_index=idx, message="本次实时刷新状态已写入 match card runtime。", match=match))
+                write_progress(progress_payload(job_id=job_id, status="running", step_index=idx, message="本次实时刷新状态已写入 runtime overlay（不回写源卡）。", match=match))
 
         build = run_command(["python3", str(BUILD_SCRIPT)], env)
         if build.returncode != 0:

@@ -23,6 +23,7 @@ DASHBOARD_HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 STATE_JSON = ROOT / "state/w1_refresh_state.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
+LINEUP_RUNTIME_OVERLAY = ROOT / "state/w1_lineup_runtime_overlay.json"
 MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
 ODDS_MOVEMENT_THRESHOLDS = ROOT / "config/w1_odds_movement_thresholds.json"
@@ -361,6 +362,20 @@ def live_refresh_cache() -> dict[str, dict[str, Any]]:
     return by_fixture
 
 
+def lineup_overlay_cache() -> dict[str, dict[str, Any]]:
+    """W1_PREDICT_OVERLAY_SPLIT_V1: refreshed lineups predict writes to the gitignored
+    runtime overlay (predict no longer writes them into source cards). Authored manual
+    lineups in data/manual_lineups/ still take priority during build."""
+    if not LINEUP_RUNTIME_OVERLAY.is_file():
+        return {}
+    data = read_json(LINEUP_RUNTIME_OVERLAY)
+    by_fixture: dict[str, dict[str, Any]] = {}
+    for fid, row in data.get("fixtures", {}).items():
+        for candidate in fixture_id_candidates(fid) or [str(fid)]:
+            by_fixture[candidate] = row
+    return by_fixture
+
+
 def manual_player(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "name": str(row.get("name") or "Unknown Player"),
@@ -465,6 +480,34 @@ def apply_manual_lineup_override(card: dict[str, Any]) -> dict[str, Any]:
         for gap in card.get("data_gaps", [])
         if gap.get("field") != "lineups.confirmed_lineup"
     ]
+    return card
+
+
+def apply_runtime_lineup_overlay(card: dict[str, Any], fid: str, overlay_by_fixture: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """W1_PREDICT_OVERLAY_SPLIT_V1: merge predict's refreshed lineups from the gitignored
+    runtime overlay onto the (frozen) source card, in memory only. Authored manual
+    lineups (data/manual_lineups/, marked by manual_lineup_fixture_id) win and are left
+    untouched. Mirrors apply_manual_lineup_override's confirmed-lineup filtering of
+    risk_flags/data_gaps so build output matches the old behaviour where predict wrote
+    these into the card — but the tracked source card is never mutated."""
+    if card.get("lineups", {}).get("manual_lineup_fixture_id"):
+        return card
+    payload = overlay_by_fixture.get(fid)
+    if not payload:
+        return card
+    card = json.loads(json.dumps(card, ensure_ascii=False))
+    card["lineups"] = {**card.get("lineups", {}), **payload}
+    if card["lineups"].get("confirmed_lineup_available"):
+        card["risk_flags"] = [
+            flag
+            for flag in card.get("risk_flags", [])
+            if flag.get("code") not in {"CONFIRMED_LINEUP_MISSING", "LINEUP_WAIT_EVENT"}
+        ]
+        card["data_gaps"] = [
+            gap
+            for gap in card.get("data_gaps", [])
+            if gap.get("field") != "lineups.confirmed_lineup"
+        ]
     return card
 
 
@@ -2030,11 +2073,13 @@ def build_record(
     venues: dict[str, dict[str, Any]],
     weather_by_fixture: dict[str, dict[str, Any]],
     live_refresh_by_fixture: dict[str, dict[str, Any]],
+    lineup_overlay_by_fixture: dict[str, dict[str, Any]],
     results: dict[str, dict[str, Any]],
     thresholds_config: dict[str, Any],
 ) -> dict[str, Any]:
     card = apply_manual_lineup_override(read_json(card_path))
     fid = fixture_id_from_card(card)
+    card = apply_runtime_lineup_overlay(card, fid, lineup_overlay_by_fixture)
     teams = card.get("teams", {})
     home = teams.get("home", {}).get("name", latest.get("home_team", ""))
     away = teams.get("away", {}).get("name", latest.get("away_team", ""))
@@ -2096,7 +2141,7 @@ def build_record(
     environment_context = environment_context_for_card(fid, card, latest, venues, weather_by_fixture)
     lineup_effect = lineup_effect_for_card(card)
     tactical_effect = tactical_effect_for_card(card, lineup_effect)
-    live_refresh = card.get("live_refresh") or live_refresh_by_fixture.get(fid) or default_live_refresh(fid)
+    live_refresh = live_refresh_by_fixture.get(fid) or card.get("live_refresh") or default_live_refresh(fid)
     raw_score_distribution = W1ENGINE.build_score_distribution(card, actual=actual_tuple(score), rho=W1_RHO) if W1_SCORE_ENGINE_ON else {"status": "skipped", "skip_reason": "W1_SCORE_ENGINE=off"}
     score_distribution = normalize_score_distribution(raw_score_distribution)
     score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
@@ -2607,6 +2652,7 @@ def main() -> int:
     venues = venue_context()
     weather_by_fixture = weather_cache()
     live_refresh_by_fixture = live_refresh_cache()
+    lineup_overlay_by_fixture = lineup_overlay_cache()
     results = result_overlay()
     thresholds_config = odds_threshold_config()
     next_refresh = state.get("next_run_cst") or ""
@@ -2626,6 +2672,7 @@ def main() -> int:
                 venues=venues,
                 weather_by_fixture=weather_by_fixture,
                 live_refresh_by_fixture=live_refresh_by_fixture,
+                lineup_overlay_by_fixture=lineup_overlay_by_fixture,
                 results=results,
                 thresholds_config=thresholds_config,
             )
