@@ -1162,7 +1162,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489369",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -1191,13 +1191,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -1210,7 +1219,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -1834,7 +1843,7 @@ button{font:inherit;cursor:pointer}
       "kickoff": "2026-06-12 10:00 CST",
       "confirmed_lineup_available": true,
       "lineup_confirmed": true,
-      "lineup_confirmed_utc": "2026-06-15 13:22:05 CST",
+      "lineup_confirmed_utc": null,
       "lineup_payload_type": "starting_xi",
       "lineup_source": "api-football fixtures/lineups",
       "lineup_updated_at": null,
@@ -1844,7 +1853,7 @@ button{font:inherit;cursor:pointer}
         "source_type": "",
         "notes_cn": [],
         "as_of_utc": null,
-        "confirmed_utc": "2026-06-15 13:22:05 CST",
+        "confirmed_utc": null,
         "payload_type": "starting_xi",
         "home_starting_xi": [
           "Kim Seung-Gyu",
@@ -2199,7 +2208,7 @@ button{font:inherit;cursor:pointer}
           "source_name": "",
           "source_type": "",
           "updated_at": "2026-06-15 13:22:05 CST",
-          "confirmed_utc": "2026-06-15 13:22:05 CST",
+          "confirmed_utc": null,
           "payload_type": "starting_xi",
           "squad_status": "available"
         },
@@ -2226,22 +2235,23 @@ button{font:inherit;cursor:pointer}
         "city": "Guadalajara",
         "country": "USA",
         "kickoff_local_time": "2026-06-11 20:00 CST",
-        "weather_status": "已接入",
-        "weather_code": 2,
-        "temperature_c": 23.3,
-        "humidity_pct": 68,
-        "wind_speed_kmh": 11.0,
-        "precipitation_mm": 0.0,
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-15T05:22:11+00:00",
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 1560,
         "roof_status": "露天",
         "environment_risk_level": "高",
         "environment_risk_flags": [
-          "高海拔"
+          "高海拔",
+          "天气数据暂缺"
         ],
-        "environment_summary_cn": "赛时天气已接入：温度 23.3°C，湿度 68%，风速 11.0 km/h。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "已就绪",
@@ -2293,55 +2303,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1538999",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1493。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，fixture_id=1538999 首发已确认。 首发已写入：South Korea 3-4-2-1，Czechia 3-4-2-1。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无裁判。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
+          },
+          "result_sync": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -3252,7 +3271,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1539000",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -3281,13 +3300,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -3300,7 +3328,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -4205,7 +4233,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489370",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -4234,13 +4262,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -4253,7 +4290,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -4886,7 +4923,7 @@ button{font:inherit;cursor:pointer}
       "kickoff": "2026-06-14 03:00 CST",
       "confirmed_lineup_available": true,
       "lineup_confirmed": true,
-      "lineup_confirmed_utc": "2026-06-14 12:14:12 CST",
+      "lineup_confirmed_utc": null,
       "lineup_payload_type": "starting_xi",
       "lineup_source": "OpenClaw verified lineup snapshot",
       "lineup_updated_at": null,
@@ -4896,7 +4933,7 @@ button{font:inherit;cursor:pointer}
         "source_type": "",
         "notes_cn": [],
         "as_of_utc": null,
-        "confirmed_utc": "2026-06-14 12:14:12 CST",
+        "confirmed_utc": null,
         "payload_type": "starting_xi",
         "home_starting_xi": [
           "Qatar Starter 1",
@@ -5251,7 +5288,7 @@ button{font:inherit;cursor:pointer}
           "source_name": "",
           "source_type": "",
           "updated_at": "2026-06-14 12:14:12 CST",
-          "confirmed_utc": "2026-06-14 12:14:12 CST",
+          "confirmed_utc": null,
           "payload_type": "starting_xi",
           "squad_status": "available"
         },
@@ -5287,8 +5324,8 @@ button{font:inherit;cursor:pointer}
         "wind_speed_kmh": null,
         "precipitation_mm": null,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-16T07:43:08+00:00",
-        "weather_reason_cn": "天气查询失败：<urlopen error Tunnel connection failed: 403 Forbidden>",
+        "weather_snapshot_time": null,
+        "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "露天",
         "environment_risk_level": "低",
@@ -5346,55 +5383,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489373",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存赔率。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "使用兜底数据",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 未配置，使用缓存/兜底数据。 使用兜底数据。 首发已写入：Qatar 4-3-3，Switzerland 3-4-2-1。",
-            "source_label_cn": "使用兜底数据",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存裁判信息。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "result_sync": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
-            "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
-          },
-          "injuries": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存伤停信息。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "injuries": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -6247,22 +6293,22 @@ button{font:inherit;cursor:pointer}
         "city": "New York New Jersey",
         "country": "USA",
         "kickoff_local_time": "2026-06-13 18:00 EDT",
-        "weather_status": "已接入",
-        "weather_code": 1,
-        "temperature_c": 31.1,
-        "humidity_pct": 30,
-        "wind_speed_kmh": 13.0,
-        "precipitation_mm": 0.0,
-        "precipitation_probability_pct": 0,
-        "weather_snapshot_time": "2026-06-13T21:16:37+00:00",
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "precipitation_probability_pct": null,
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "露天",
-        "environment_risk_level": "高",
+        "environment_risk_level": "低",
         "environment_risk_flags": [
-          "高温"
+          "天气数据暂缺"
         ],
-        "environment_summary_cn": "赛时天气已接入：温度 31.1°C，湿度 30%，风速 13.0 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "暂不能判断",
@@ -6302,7 +6348,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489371",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -6331,13 +6377,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -6350,7 +6405,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -7194,20 +7249,22 @@ button{font:inherit;cursor:pointer}
         "city": "Boston",
         "country": "USA",
         "kickoff_local_time": "2026-06-13 21:00 EDT",
-        "weather_status": "已接入",
-        "weather_code": 0,
-        "temperature_c": 23.9,
-        "humidity_pct": 42,
-        "wind_speed_kmh": 8.4,
-        "precipitation_mm": 0.0,
-        "precipitation_probability_pct": 0,
-        "weather_snapshot_time": "2026-06-14T00:11:48+00:00",
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "precipitation_probability_pct": null,
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 62,
         "roof_status": "露天",
         "environment_risk_level": "低",
-        "environment_risk_flags": [],
-        "environment_summary_cn": "赛时天气已接入：温度 23.9°C，湿度 42%，风速 8.4 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_risk_flags": [
+          "天气数据暂缺"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "暂不能判断",
@@ -7247,7 +7304,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489372",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -7276,13 +7333,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -7295,7 +7361,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -8309,8 +8375,8 @@ button{font:inherit;cursor:pointer}
         "wind_speed_kmh": null,
         "precipitation_mm": null,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-16T07:43:12+00:00",
-        "weather_reason_cn": "天气查询失败：<urlopen error Tunnel connection failed: 403 Forbidden>",
+        "weather_snapshot_time": null,
+        "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "闭合/可闭合",
         "environment_risk_level": "低",
@@ -8369,64 +8435,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1539001",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存赔率。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "manual_verified / Sky Sports",
-            "status": "成功",
-            "fetched_at": null,
-            "message_cn": "manual_verified / Sky Sports：官方首发已确认。 Australia 3-4-2-1，Turkey 4-2-3-1。",
-            "source_label_cn": "manual_verified / Sky Sports",
-            "status_label_cn": "成功"
-          },
-          "referee": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存裁判信息。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "referee": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "失败",
-            "fetched_at": null,
-            "message_cn": "实时 API 未配置，使用缓存/兜底数据。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "失败"
-          },
-          "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "失败",
-            "fetched_at": null,
-            "message_cn": "天气查询失败：<urlopen error Tunnel connection failed: 403 Forbidden>",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "失败"
-          },
-          "injuries": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存伤停信息。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "injuries": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -9047,7 +9113,7 @@ button{font:inherit;cursor:pointer}
       "kickoff": "2026-06-15 01:00 CST",
       "confirmed_lineup_available": true,
       "lineup_confirmed": true,
-      "lineup_confirmed_utc": "2026-06-15 16:57:41 CST",
+      "lineup_confirmed_utc": null,
       "lineup_payload_type": "starting_xi",
       "lineup_source": "api-football fixtures/lineups",
       "lineup_updated_at": null,
@@ -9057,7 +9123,7 @@ button{font:inherit;cursor:pointer}
         "source_type": "",
         "notes_cn": [],
         "as_of_utc": null,
-        "confirmed_utc": "2026-06-15 16:57:41 CST",
+        "confirmed_utc": null,
         "payload_type": "starting_xi",
         "home_starting_xi": [
           "Manuel Neuer",
@@ -9412,7 +9478,7 @@ button{font:inherit;cursor:pointer}
           "source_name": "",
           "source_type": "",
           "updated_at": "2026-06-15 16:57:41 CST",
-          "confirmed_utc": "2026-06-15 16:57:41 CST",
+          "confirmed_utc": null,
           "payload_type": "starting_xi",
           "squad_status": "available"
         },
@@ -9441,24 +9507,23 @@ button{font:inherit;cursor:pointer}
         "city": "Houston",
         "country": "USA",
         "kickoff_local_time": "2026-06-14 12:00 CDT",
-        "weather_status": "已接入",
-        "weather_code": 53,
-        "temperature_c": 29.5,
-        "humidity_pct": 73,
-        "wind_speed_kmh": 14.6,
-        "precipitation_mm": 0.6,
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-15T08:57:47+00:00",
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 15,
         "roof_status": "闭合/可闭合",
-        "environment_risk_level": "中",
+        "environment_risk_level": "低",
         "environment_risk_flags": [
-          "高湿度",
-          "降雨",
-          "屋顶降低天气影响"
+          "屋顶降低天气影响",
+          "天气数据暂缺"
         ],
-        "environment_summary_cn": "赛时天气已接入：温度 29.5°C，湿度 73%，风速 14.6 km/h。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "已就绪",
@@ -9505,64 +9570,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489374",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1656。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，fixture_id=1489374 首发已确认。 首发已写入：Germany 4-2-3-1，Curaçao 4-3-1-2。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无裁判。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，已同步完赛比分：德国 7-1 库拉索。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -10189,7 +10254,7 @@ button{font:inherit;cursor:pointer}
       "kickoff": "2026-06-15 04:00 CST",
       "confirmed_lineup_available": true,
       "lineup_confirmed": true,
-      "lineup_confirmed_utc": "2026-06-15 17:05:55 CST",
+      "lineup_confirmed_utc": null,
       "lineup_payload_type": "starting_xi",
       "lineup_source": "api-football fixtures/lineups",
       "lineup_updated_at": null,
@@ -10199,7 +10264,7 @@ button{font:inherit;cursor:pointer}
         "source_type": "",
         "notes_cn": [],
         "as_of_utc": null,
-        "confirmed_utc": "2026-06-15 17:05:55 CST",
+        "confirmed_utc": null,
         "payload_type": "starting_xi",
         "home_starting_xi": [
           "Bart Verbruggen",
@@ -10554,7 +10619,7 @@ button{font:inherit;cursor:pointer}
           "source_name": "",
           "source_type": "",
           "updated_at": "2026-06-15 17:05:55 CST",
-          "confirmed_utc": "2026-06-15 17:05:55 CST",
+          "confirmed_utc": null,
           "payload_type": "starting_xi",
           "squad_status": "available"
         },
@@ -10583,23 +10648,23 @@ button{font:inherit;cursor:pointer}
         "city": "Dallas",
         "country": "USA",
         "kickoff_local_time": "2026-06-14 15:00 CDT",
-        "weather_status": "已接入",
-        "weather_code": 3,
-        "temperature_c": 28.6,
-        "humidity_pct": 70,
-        "wind_speed_kmh": 13.0,
-        "precipitation_mm": 0.0,
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-15T09:06:04+00:00",
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 173,
         "roof_status": "闭合/可闭合",
-        "environment_risk_level": "中",
+        "environment_risk_level": "低",
         "environment_risk_flags": [
-          "高湿度",
-          "屋顶降低天气影响"
+          "屋顶降低天气影响",
+          "天气数据暂缺"
         ],
-        "environment_summary_cn": "赛时天气已接入：温度 28.6°C，湿度 70%，风速 13.0 km/h。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "已就绪",
@@ -10650,64 +10715,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489376",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1527。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，fixture_id=1489376 首发已确认。 首发已写入：Netherlands 4-3-3，Japan 3-4-2-1。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无裁判。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，已同步完赛比分：荷兰 2-2 日本。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -11339,7 +11404,7 @@ button{font:inherit;cursor:pointer}
       "kickoff": "2026-06-15 07:00 CST",
       "confirmed_lineup_available": true,
       "lineup_confirmed": true,
-      "lineup_confirmed_utc": "2026-06-15 17:06:10 CST",
+      "lineup_confirmed_utc": null,
       "lineup_payload_type": "starting_xi",
       "lineup_source": "api-football fixtures/lineups",
       "lineup_updated_at": null,
@@ -11349,7 +11414,7 @@ button{font:inherit;cursor:pointer}
         "source_type": "",
         "notes_cn": [],
         "as_of_utc": null,
-        "confirmed_utc": "2026-06-15 17:06:10 CST",
+        "confirmed_utc": null,
         "payload_type": "starting_xi",
         "home_starting_xi": [
           "Yahia Fofana",
@@ -11704,7 +11769,7 @@ button{font:inherit;cursor:pointer}
           "source_name": "",
           "source_type": "",
           "updated_at": "2026-06-15 17:06:10 CST",
-          "confirmed_utc": "2026-06-15 17:06:10 CST",
+          "confirmed_utc": null,
           "payload_type": "starting_xi",
           "squad_status": "available"
         },
@@ -11733,20 +11798,22 @@ button{font:inherit;cursor:pointer}
         "city": "Philadelphia",
         "country": "USA",
         "kickoff_local_time": "2026-06-14 19:00 EDT",
-        "weather_status": "已接入",
-        "weather_code": 3,
-        "temperature_c": 28.3,
-        "humidity_pct": 47,
-        "wind_speed_kmh": 19.5,
-        "precipitation_mm": 0.0,
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-15T09:06:18+00:00",
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 3,
         "roof_status": "露天",
         "environment_risk_level": "低",
-        "environment_risk_flags": [],
-        "environment_summary_cn": "赛时天气已接入：温度 28.3°C，湿度 47%，风速 19.5 km/h。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_risk_flags": [
+          "天气数据暂缺"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "已就绪",
@@ -11794,64 +11861,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489375",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1420。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，fixture_id=1489375 首发已确认。 首发已写入：Ivory Coast 4-4-2，Ecuador 4-4-2。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无裁判。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，已同步完赛比分：科特迪瓦 1-0 厄瓜多尔。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -12477,7 +12544,7 @@ button{font:inherit;cursor:pointer}
       "kickoff": "2026-06-15 10:00 CST",
       "confirmed_lineup_available": true,
       "lineup_confirmed": true,
-      "lineup_confirmed_utc": "2026-06-15 17:06:24 CST",
+      "lineup_confirmed_utc": null,
       "lineup_payload_type": "starting_xi",
       "lineup_source": "api-football fixtures/lineups",
       "lineup_updated_at": null,
@@ -12487,7 +12554,7 @@ button{font:inherit;cursor:pointer}
         "source_type": "",
         "notes_cn": [],
         "as_of_utc": null,
-        "confirmed_utc": "2026-06-15 17:06:24 CST",
+        "confirmed_utc": null,
         "payload_type": "starting_xi",
         "home_starting_xi": [
           "Kristoffer Nordfeldt",
@@ -12842,7 +12909,7 @@ button{font:inherit;cursor:pointer}
           "source_name": "",
           "source_type": "",
           "updated_at": "2026-06-15 17:06:24 CST",
-          "confirmed_utc": "2026-06-15 17:06:24 CST",
+          "confirmed_utc": null,
           "payload_type": "starting_xi",
           "squad_status": "available"
         },
@@ -12871,22 +12938,22 @@ button{font:inherit;cursor:pointer}
         "city": "Monterrey",
         "country": "Mexico",
         "kickoff_local_time": "2026-06-14 20:00 CST",
-        "weather_status": "已接入",
-        "weather_code": 1,
-        "temperature_c": 28.9,
-        "humidity_pct": 70,
-        "wind_speed_kmh": 9.8,
-        "precipitation_mm": 0.0,
-        "precipitation_probability_pct": 8,
-        "weather_snapshot_time": "2026-06-15T09:06:32+00:00",
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "precipitation_probability_pct": null,
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 540,
         "roof_status": "露天",
-        "environment_risk_level": "中",
+        "environment_risk_level": "低",
         "environment_risk_flags": [
-          "高湿度"
+          "天气数据暂缺"
         ],
-        "environment_summary_cn": "赛时天气已接入：温度 28.9°C，湿度 70%，风速 9.8 km/h，降雨概率 8%。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "已就绪",
@@ -12933,64 +13000,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1539002",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1482。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，fixture_id=1539002 首发已确认。 首发已写入：Sweden 3-1-4-2，Tunisia 5-3-2。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无裁判。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，已同步完赛比分：瑞典 5-1 突尼斯。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -13856,22 +13923,23 @@ button{font:inherit;cursor:pointer}
         "city": "Atlanta",
         "country": "USA",
         "kickoff_local_time": "2026-06-15 12:00 EDT",
-        "weather_status": "已接入",
-        "weather_code": 0,
-        "temperature_c": 26.0,
-        "humidity_pct": 52,
-        "wind_speed_kmh": 18.9,
-        "precipitation_mm": 0.0,
-        "precipitation_probability_pct": 0,
-        "weather_snapshot_time": "2026-06-15T09:51:31+00:00",
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "precipitation_probability_pct": null,
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 320,
         "roof_status": "闭合/可闭合",
         "environment_risk_level": "低",
         "environment_risk_flags": [
-          "屋顶降低天气影响"
+          "屋顶降低天气影响",
+          "天气数据暂缺"
         ],
-        "environment_summary_cn": "赛时天气已接入：温度 26.0°C，湿度 52%，风速 18.9 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "暂不能判断",
@@ -13911,64 +13979,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489380",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1598。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "使用缓存",
-            "status": "暂无",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无完整首发，使用缓存/兜底数据。 使用缓存，保留上一版。",
-            "source_label_cn": "使用缓存",
-            "status_label_cn": "暂无"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无裁判。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "not_due",
-            "status": "skipped_not_due",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "比赛未完赛，赛果同步未到时间。",
-            "source_label_cn": "not_due",
-            "status_label_cn": "skipped_not_due"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -14812,20 +14880,22 @@ button{font:inherit;cursor:pointer}
         "city": "Seattle",
         "country": "USA",
         "kickoff_local_time": "2026-06-15 12:00 PDT",
-        "weather_status": "已接入",
-        "weather_code": 3,
-        "temperature_c": 26.9,
-        "humidity_pct": 38,
-        "wind_speed_kmh": 6.4,
-        "precipitation_mm": 0.0,
-        "precipitation_probability_pct": 0,
-        "weather_snapshot_time": "2026-06-15T18:22:38+00:00",
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "precipitation_probability_pct": null,
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 4,
         "roof_status": "露天",
         "environment_risk_level": "低",
-        "environment_risk_flags": [],
-        "environment_summary_cn": "赛时天气已接入：温度 26.9°C，湿度 38%，风速 6.4 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_risk_flags": [
+          "天气数据暂缺"
+        ],
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "暂不能判断",
@@ -14865,64 +14935,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489377",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存赔率。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存/兜底数据：<urlopen error [Errno 54] Connection reset by peer> 使用缓存，保留上一版。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
-            "source": "使用缓存",
+            "requested": false,
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 失败，使用缓存裁判信息。",
-            "source_label_cn": "使用缓存",
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "not_due",
-            "status": "skipped_not_due",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "比赛未完赛，赛果同步未到时间。",
-            "source_label_cn": "not_due",
-            "status_label_cn": "skipped_not_due"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -15821,7 +15891,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489379",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -15850,13 +15920,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -15869,7 +15948,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -16713,23 +16792,23 @@ button{font:inherit;cursor:pointer}
         "city": "Los Angeles",
         "country": "USA",
         "kickoff_local_time": "2026-06-15 18:00 PDT",
-        "weather_status": "已接入",
-        "weather_code": 0,
-        "temperature_c": 19.4,
-        "humidity_pct": 79,
-        "wind_speed_kmh": 16.6,
-        "precipitation_mm": 0.0,
-        "precipitation_probability_pct": 0,
-        "weather_snapshot_time": "2026-06-16T00:10:21+00:00",
+        "weather_status": "暂缺",
+        "weather_code": null,
+        "temperature_c": null,
+        "humidity_pct": null,
+        "wind_speed_kmh": null,
+        "precipitation_mm": null,
+        "precipitation_probability_pct": null,
+        "weather_snapshot_time": null,
         "weather_reason_cn": "",
         "altitude_m": 22,
         "roof_status": "闭合/可闭合",
-        "environment_risk_level": "中",
+        "environment_risk_level": "低",
         "environment_risk_flags": [
-          "高湿度",
-          "屋顶降低天气影响"
+          "屋顶降低天气影响",
+          "天气数据暂缺"
         ],
-        "environment_summary_cn": "赛时天气已接入：温度 19.4°C，湿度 79%，风速 16.6 km/h，降雨概率 0%。环境仅作为辅助风险，不直接触发正式风控。"
+        "environment_summary_cn": "天气数据暂缺"
       },
       "lineup_effect": {
         "status": "暂不能判断",
@@ -16769,64 +16848,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489378",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-16/odds_snapshots.jsonl，records=1454。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "使用缓存",
-            "status": "暂无",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无完整首发，使用缓存/兜底数据。 使用缓存，保留上一版。",
-            "source_label_cn": "使用缓存",
-            "status_label_cn": "暂无"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无裁判。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "not_due",
-            "status": "skipped_not_due",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "比赛未完赛，赛果同步未到时间。",
-            "source_label_cn": "not_due",
-            "status_label_cn": "skipped_not_due"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，天气已接入。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -17682,8 +17761,8 @@ button{font:inherit;cursor:pointer}
         "wind_speed_kmh": null,
         "precipitation_mm": null,
         "precipitation_probability_pct": null,
-        "weather_snapshot_time": "2026-06-16T07:52:25+00:00",
-        "weather_reason_cn": "天气查询失败：<urlopen error timed out>",
+        "weather_snapshot_time": null,
+        "weather_reason_cn": "",
         "altitude_m": 2,
         "roof_status": "露天",
         "environment_risk_level": "低",
@@ -17730,64 +17809,64 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489383",
-        "overall_status": "partial",
+        "overall_status": "idle",
         "modules": {
           "odds": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "成功",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-16/odds_snapshots.jsonl，records=1490。",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "成功"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "lineups": {
-            "requested": true,
-            "source": "使用缓存",
-            "status": "暂无",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无完整首发，使用缓存/兜底数据。 使用缓存，保留上一版。",
-            "source_label_cn": "使用缓存",
-            "status_label_cn": "暂无"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "referee": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无裁判。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           },
           "result_sync": {
-            "requested": true,
-            "source": "not_due",
-            "status": "skipped_not_due",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "比赛未完赛，赛果同步未到时间。",
-            "source_label_cn": "not_due",
-            "status_label_cn": "skipped_not_due"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "weather": {
-            "requested": true,
-            "source": "实时 API 成功",
-            "status": "失败",
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "天气查询失败：<urlopen error timed out>",
-            "source_label_cn": "实时 API 成功",
-            "status_label_cn": "失败"
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
           },
           "injuries": {
-            "requested": true,
+            "requested": false,
             "source": "实时 API 暂无",
-            "status": "暂无",
+            "status": "跳过",
             "fetched_at": null,
-            "message_cn": "实时 API 暂无伤停。",
+            "message_cn": "尚未点击开始预测。",
             "source_label_cn": "实时 API 暂无",
-            "status_label_cn": "暂无"
+            "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "部分实时成功"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -18686,7 +18765,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1539016",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -18715,13 +18794,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -18734,7 +18822,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -19627,7 +19715,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489381",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -19656,13 +19744,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -19675,7 +19772,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -20574,7 +20671,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489382",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -20603,13 +20700,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -20622,7 +20728,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -21516,7 +21622,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1539003",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -21545,13 +21651,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -21564,7 +21679,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -22458,7 +22573,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489384",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -22487,13 +22602,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -22506,7 +22630,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -23405,7 +23529,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489385",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -23434,13 +23558,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -23453,7 +23586,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",
@@ -24358,7 +24491,7 @@ button{font:inherit;cursor:pointer}
       "live_refresh": {
         "requested_at": null,
         "fixture_id": "1489386",
-        "overall_status": "failed",
+        "overall_status": "idle",
         "modules": {
           "odds": {
             "requested": false,
@@ -24387,13 +24520,22 @@ button{font:inherit;cursor:pointer}
             "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
-          "weather": {
+          "result_sync": {
             "requested": false,
-            "source": "实时 API 成功",
+            "source": "实时 API 暂无",
             "status": "跳过",
             "fetched_at": null,
             "message_cn": "尚未点击开始预测。",
-            "source_label_cn": "实时 API 成功",
+            "source_label_cn": "实时 API 暂无",
+            "status_label_cn": "跳过"
+          },
+          "weather": {
+            "requested": false,
+            "source": "实时 API 暂无",
+            "status": "跳过",
+            "fetched_at": null,
+            "message_cn": "尚未点击开始预测。",
+            "source_label_cn": "实时 API 暂无",
             "status_label_cn": "跳过"
           },
           "injuries": {
@@ -24406,7 +24548,7 @@ button{font:inherit;cursor:pointer}
             "status_label_cn": "跳过"
           }
         },
-        "overall_status_cn": "实时刷新失败"
+        "overall_status_cn": "idle"
       },
       "score_distribution": {
         "status": "已生成",

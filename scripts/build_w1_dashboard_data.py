@@ -533,6 +533,29 @@ def default_live_refresh(fid: str) -> dict[str, Any]:
     }
 
 
+def embedded_baseline_live_refresh(fid: str) -> dict[str, Any]:
+    module = {
+        "requested": False,
+        "source": "missing",
+        "status": "skipped",
+        "fetched_at": None,
+        "message_cn": "尚未点击开始预测。",
+    }
+    return {
+        "requested_at": None,
+        "fixture_id": fid,
+        "overall_status": "idle",
+        "modules": {
+            "odds": dict(module),
+            "lineups": dict(module),
+            "referee": dict(module),
+            "result_sync": dict(module),
+            "weather": dict(module),
+            "injuries": dict(module),
+        },
+    }
+
+
 def odds_available(card: dict[str, Any]) -> bool:
     markets = card.get("markets", {})
     return all(markets.get(key, {}).get("available") for key in ("odds_1X2", "odds_AH", "odds_OU"))
@@ -1987,6 +2010,7 @@ def environment_context_for_card(
     latest: dict[str, Any],
     venues: dict[str, dict[str, Any]],
     weather_by_fixture: dict[str, dict[str, Any]],
+    include_runtime_state: bool = True,
 ) -> dict[str, Any]:
     match = card.get("match", {})
     venue = match.get("venue", {})
@@ -1995,7 +2019,7 @@ def environment_context_for_card(
     city = venue.get("city") or latest.get("city") or static.get("city") or "暂缺"
     country = venue.get("country") or latest.get("country") or static.get("country") or "暂缺"
     context_weather = card.get("context", {}).get("weather", {})
-    weather = weather_by_fixture.get(fid) or VERIFIED_WEATHER_SAMPLES.get(fid) or {}
+    weather = (weather_by_fixture.get(fid) or VERIFIED_WEATHER_SAMPLES.get(fid) or {}) if include_runtime_state else {}
 
     temperature_c = weather.get("temperature_c", context_weather.get("temperature_c"))
     humidity_pct = weather.get("humidity_pct", context_weather.get("humidity_pct"))
@@ -2076,10 +2100,12 @@ def build_record(
     lineup_overlay_by_fixture: dict[str, dict[str, Any]],
     results: dict[str, dict[str, Any]],
     thresholds_config: dict[str, Any],
+    include_runtime_state: bool = True,
 ) -> dict[str, Any]:
     card = apply_manual_lineup_override(read_json(card_path))
     fid = fixture_id_from_card(card)
-    card = apply_runtime_lineup_overlay(card, fid, lineup_overlay_by_fixture)
+    if include_runtime_state:
+        card = apply_runtime_lineup_overlay(card, fid, lineup_overlay_by_fixture)
     teams = card.get("teams", {})
     home = teams.get("home", {}).get("name", latest.get("home_team", ""))
     away = teams.get("away", {}).get("name", latest.get("away_team", ""))
@@ -2087,15 +2113,18 @@ def build_record(
     away_cn = TEAM_CN.get(away, away)
     decision = card.get("decision", {})
     lineups = card.get("lineups", {})
+    if not include_runtime_state and lineups.get("lineup_source") != "manual_verified":
+        lineups["lineup_confirmed_utc"] = None
     if lineups.get("confirmed_lineup_available"):
         lineups.setdefault("lineup_payload_type", "starting_xi")
-        lineups.setdefault(
-            "lineup_confirmed_utc",
-            lineups.get("lineup_as_of_utc")
-            or lineups.get("lineup_updated_at")
-            or card.get("match", {}).get("generated_at_utc")
-            or datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        )
+        if include_runtime_state or lineups.get("lineup_source") == "manual_verified":
+            lineups.setdefault(
+                "lineup_confirmed_utc",
+                lineups.get("lineup_as_of_utc")
+                or lineups.get("lineup_updated_at")
+                or card.get("match", {}).get("generated_at_utc")
+                or datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            )
     elif card.get("squad"):
         lineups.setdefault("lineup_payload_type", "squad")
     referee = card.get("match", {}).get("referee", {})
@@ -2138,10 +2167,21 @@ def build_record(
         boss_summary = f"{home_cn} vs {away_cn}：通过 W1 风控，可正式分析"
 
     data_quality = data_quality_for_card(card, latest, play_guard_pass, odds_ok, risks, gaps)
-    environment_context = environment_context_for_card(fid, card, latest, venues, weather_by_fixture)
+    environment_context = environment_context_for_card(
+        fid,
+        card,
+        latest,
+        venues,
+        weather_by_fixture if include_runtime_state else {},
+        include_runtime_state=include_runtime_state,
+    )
     lineup_effect = lineup_effect_for_card(card)
     tactical_effect = tactical_effect_for_card(card, lineup_effect)
-    live_refresh = live_refresh_by_fixture.get(fid) or card.get("live_refresh") or default_live_refresh(fid)
+    live_refresh = (
+        live_refresh_by_fixture.get(fid) or card.get("live_refresh") or default_live_refresh(fid)
+        if include_runtime_state
+        else embedded_baseline_live_refresh(fid)
+    )
     raw_score_distribution = W1ENGINE.build_score_distribution(card, actual=actual_tuple(score), rho=W1_RHO) if W1_SCORE_ENGINE_ON else {"status": "skipped", "skip_reason": "W1_SCORE_ENGINE=off"}
     score_distribution = normalize_score_distribution(raw_score_distribution)
     score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
@@ -2585,6 +2625,45 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def build_records(
+    latest: dict[str, dict[str, Any]],
+    previous: dict[str, dict[str, Any]],
+    ledger_rows: dict[str, dict[str, Any]],
+    next_refresh: str,
+    snapshot_at: datetime | None,
+    venues: dict[str, dict[str, Any]],
+    weather_by_fixture: dict[str, dict[str, Any]],
+    live_refresh_by_fixture: dict[str, dict[str, Any]],
+    lineup_overlay_by_fixture: dict[str, dict[str, Any]],
+    results: dict[str, dict[str, Any]],
+    thresholds_config: dict[str, Any],
+    include_runtime_state: bool,
+) -> list[dict[str, Any]]:
+    records = []
+    for card_path in sorted(CARDS_DIR.glob("*.json")):
+        card = read_json(card_path)
+        fid = fixture_id_from_card(card)
+        records.append(
+            build_record(
+                card_path=card_path,
+                latest=latest.get(fid, {}),
+                previous=previous.get(fid),
+                ledger=ledger_rows.get(fid),
+                next_refresh=next_refresh,
+                snapshot_at=snapshot_at,
+                venues=venues,
+                weather_by_fixture=weather_by_fixture,
+                live_refresh_by_fixture=live_refresh_by_fixture,
+                lineup_overlay_by_fixture=lineup_overlay_by_fixture,
+                results=results,
+                thresholds_config=thresholds_config,
+                include_runtime_state=include_runtime_state,
+            )
+        )
+    records.sort(key=lambda row: (row.get("kickoff") or "", row["fixture_id"]))
+    return records
+
+
 # ── Deterministic embed (W1_DASHBOARD_TEMPLATE_DATA_SPLIT, Option 1) ────────────
 # The tracked HTML embeds a copy of the dashboard data so it still renders when
 # opened directly (file://) with no local server. That file-open embed must not
@@ -2657,27 +2736,34 @@ def main() -> int:
     thresholds_config = odds_threshold_config()
     next_refresh = state.get("next_run_cst") or ""
 
-    records = []
-    for card_path in sorted(CARDS_DIR.glob("*.json")):
-        card = read_json(card_path)
-        fid = fixture_id_from_card(card)
-        records.append(
-            build_record(
-                card_path=card_path,
-                latest=latest.get(fid, {}),
-                previous=previous.get(fid),
-                ledger=ledger_rows.get(fid),
-                next_refresh=next_refresh,
-                snapshot_at=snapshot_at,
-                venues=venues,
-                weather_by_fixture=weather_by_fixture,
-                live_refresh_by_fixture=live_refresh_by_fixture,
-                lineup_overlay_by_fixture=lineup_overlay_by_fixture,
-                results=results,
-                thresholds_config=thresholds_config,
-            )
-        )
-    records.sort(key=lambda row: (row.get("kickoff") or "", row["fixture_id"]))
+    records = build_records(
+        latest=latest,
+        previous=previous,
+        ledger_rows=ledger_rows,
+        next_refresh=next_refresh,
+        snapshot_at=snapshot_at,
+        venues=venues,
+        weather_by_fixture=weather_by_fixture,
+        live_refresh_by_fixture=live_refresh_by_fixture,
+        lineup_overlay_by_fixture=lineup_overlay_by_fixture,
+        results=results,
+        thresholds_config=thresholds_config,
+        include_runtime_state=True,
+    )
+    embedded_records = build_records(
+        latest=latest,
+        previous=previous,
+        ledger_rows=ledger_rows,
+        next_refresh=next_refresh,
+        snapshot_at=snapshot_at,
+        venues=venues,
+        weather_by_fixture={},
+        live_refresh_by_fixture={},
+        lineup_overlay_by_fixture={},
+        results=results,
+        thresholds_config=thresholds_config,
+        include_runtime_state=False,
+    )
 
     first = records[0] if records else {}
     data["schema_version"] = "W1_VISUAL_DASHBOARD_DATA_BOUND_V1"
@@ -2760,7 +2846,9 @@ def main() -> int:
     }
 
     write_json(DASHBOARD_JSON, data)
-    update_embedded_html(data)
+    embedded_data = json.loads(json.dumps(data, ensure_ascii=False))
+    embedded_data["match_records"] = embedded_records
+    update_embedded_html(embedded_data)
     print(f"W1 dashboard data binding built: records={len(records)} latest_snapshot={latest_path}")
     return 0
 
