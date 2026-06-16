@@ -19,3 +19,5 @@ state/w1_weather_cache.json
 data/raw/
 data/processed/international/
 data/forward_ledger/
+reports/dashboard/assets/w1_dashboard_data.json
+state/
