@@ -281,6 +281,32 @@ def walk_live_refresh_timestamps(value: object, path: str = "live_refresh") -> l
     return found
 
 
+def _func_body(text: str, name: str) -> str:
+    idx = text.find(name)
+    return text[idx:text.find("\nfunction ", idx + 1)] if idx >= 0 else ""
+
+
+def assert_first_screen(text: str) -> None:
+    """W1_DASHBOARD_DECLUTTER_V1: the main card (pCore) leads with the 一眼决策 first
+    screen — 谁占优 / 进球 / 首发 / 数据可信度 / 盘口异动 / 现在该干嘛. The peak exact
+    score stays only as a weakened reference line labelled 分布峰值 / 别当真, never as the
+    primary visual. The left list (renderRail) keeps the peak score but must also show a
+    形态/区间 (total-goals band). Added/strengthened; weakens no safety check."""
+    pcore = _func_body(text, "function pCore(")
+    if not pcore:
+        fail("pCore function missing")
+    for need in ("第一屏", "谁占优", "进球多", "首发", "数据可信度", "盘口异动", "现在该干嘛"):
+        if need not in pcore:
+            fail(f"main card (pCore) first screen missing block: {need}")
+    if "分布峰值" not in pcore or "别当真" not in pcore:
+        fail("main card exact-score line must stay a weakened reference labelled 分布峰值·别当真")
+    rail = _func_body(text, "function renderRail(")
+    if not rail:
+        fail("renderRail function missing")
+    if "most_likely_band" not in rail:
+        fail("left list (renderRail) must show 形态/区间 (total-goals band) alongside the peak score")
+
+
 def assert_html(data: dict) -> None:
     if not HTML.is_file():
         fail("HTML dashboard is missing")
@@ -333,12 +359,16 @@ def assert_html(data: dict) -> None:
         if panel_idx < 0:
             fail("renderPanel function missing")
         panel_body = text[panel_idx:text.find("function toggleExpert", panel_idx)]
-        if "pCore(r)+pPredict(r)" not in panel_body:
+        if "pCore(r)+pCandidateConsensus(r)+pPredict(r)" not in panel_body and "pCore(r)+pPredict(r)" not in panel_body:
             fail("Recommendation card must render before predict controls")
         if panel_body.find("pMarketProbabilityPanel(r)") < panel_body.find('`<div id="expert"'):
             fail("Full market probability panel must live inside expert section")
         if "pBanner()+pHeader(r)+pPredict(r)+pCore(r)" in panel_body:
             fail("Predict controls must not render before recommendation card")
+        assert_first_screen(text)
+        for token in ("function pCandidateConsensus", "function pCandidateExpert", "候选共识", "同源矩阵", "market_implied_score_matrix"):
+            if token not in text:
+                fail(f"HTML missing Phase A candidate token: {token}")
         if "fetch('/api/predict" in text or 'fetch("/api/predict' in text or "worldcup.youliaoyun.com/api" in text:
             fail("HTML must not call the original site prediction API")
         embedded = re.search(r'<script id="w1-data" type="application/json">(.*?)</script>', text, re.S)

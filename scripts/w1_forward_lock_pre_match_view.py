@@ -105,6 +105,7 @@ def main() -> int:
                 "lock_as_of_utc": snap.get("as_of_utc"),
                 "snapshot_phase": snap.get("snapshot_phase"),
                 "locked_prediction": {"source": "market_implied_1x2", **pred},
+                "candidates_snapshot": snap.get("candidates_snapshot", {}),
                 "availability": snap.get("availability", {}),
                 "locked_at_utc": now_utc(),
             }

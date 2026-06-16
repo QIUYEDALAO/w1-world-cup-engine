@@ -30,6 +30,8 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+import w1_candidate_builder as CAND  # noqa: E402
 VIEW = ROOT / "data/forward_ledger/w1_pre_match_view.jsonl"
 AUDIT = ROOT / "data/forward_ledger/w1_post_match_audit.jsonl"
 SCHEMA = ROOT / "config/w1_prospective_audit_schema.json"
@@ -124,6 +126,10 @@ def main() -> int:
         s = sum(pred.get(k, 0) for k in ("p_home", "p_draw", "p_away"))
         if not (0.98 <= s <= 1.02):
             fail(f"pre_match_view {fid}: locked 1X2 must sum ~1, got {s}")
+        cand = v.get("candidates_snapshot")
+        if cand:
+            for err in CAND.validate_candidates(cand):
+                fail(f"pre_match_view {fid}: candidates_snapshot invalid: {err}")
         views[fid] = v
 
     # ── post_match_audit ──

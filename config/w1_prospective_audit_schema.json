@@ -25,6 +25,7 @@
       "p_draw": "number (0..1)",
       "p_away": "number (0..1)"
     },
+    "candidates_snapshot": "object (optional for rows locked before W1_OPPORTUNITY_SELECTOR_PHASE_A; future locks copy the same read-only candidate payload from the pre-match snapshot without rewriting old fixtures)",
     "availability": "object (context availability copied from the locked snapshot)",
     "locked_at_utc": "string (provenance: when the view was locked)"
   },

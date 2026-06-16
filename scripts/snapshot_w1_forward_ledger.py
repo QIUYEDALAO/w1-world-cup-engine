@@ -89,6 +89,7 @@ def build_snapshot(r: dict[str, Any], as_of: str) -> dict[str, Any]:
         "key_absences": (r.get("lineup_effect", {}) or {}).get("key_absences", []),
         "odds_phase": r.get("prediction_stage_cn") or r.get("prediction_stage"),
         "odds_1x2": {"home": oxt.get("home_win"), "draw": oxt.get("draw"), "away": oxt.get("away_win")},
+        "candidates_snapshot": r.get("candidates_snapshot", {}),
         "odds_snapshot_utc": odds_q.get("snapshot_time"),
         "market_movement_status": om.get("status"),
         "weather_status": env.get("weather_status"),
