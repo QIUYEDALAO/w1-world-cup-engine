@@ -33,12 +33,12 @@ dashboard_data.json 每次 build 都会变(含 `generated_at_utc` 等),提交它
 
 ## 5. 已知未尽（需后续阶段）
 
-完整"运行后 git 仍 clean"原列两处真重构。**HTML 一侧已于 `W1_DASHBOARD_TEMPLATE_DATA_SPLIT` 完成**，现仅剩一处：
+完整"运行后 git 仍 clean"原列两处真重构，现**两处均已完成**：
 
 - ✅ **`W1_DASHBOARD_TEMPLATE_DATA_SPLIT`（已完成）**：实测内嵌 churn 根因不是 `generated_at_utc`（该字段只在外部 gitignored JSON，从不进内嵌）。第一轮定位到 `odds_movement.liquidity.staleness_minutes`；no-op build 进一步暴露 `lineup_updated_at`、`live_refresh.requested_at`、`live_refresh.modules.*.fetched_at` 等 embedded runtime timestamp。采用 Option 1 确定性内嵌：内嵌副本把这些运行时 timestamp 字段置 null（外部 JSON / `/dashboard-data` 实时路径仍保留真实值），保留 file-open，并强化 checker 断言。no-op rebuild 不再改脏 tracked HTML。详见 `reports/W1_DASHBOARD_TEMPLATE_DATA_SPLIT_RESULT.md`。
-- ⏳ **`W1_PREDICT_OVERLAY_SPLIT`（待办）**：`predict`/`build` 仍会把 `live_refresh` 写回**被跟踪的源卡**。治本=运行态写到单独的 gitignored overlay,不碰源卡。
+- ✅ **`W1_PREDICT_OVERLAY_SPLIT`（已完成）**：predict 改为只写 gitignored overlay（`state/w1_live_refresh_state.json`、`state/w1_lineup_runtime_overlay.json`）与 tracked 事实账本（`data/results/round1_results.json`）；build 在内存合并（`apply_runtime_lineup_overlay` / `lineup_overlay_cache` / live_refresh overlay 优先），源卡冻结。已一次性清掉源卡里的 `live_refresh`（8 张）与 result 字段（4 张），`lineups`/`decision`/`risk_flags`/`data_gaps` 冻结保留。详见 `reports/W1_PREDICT_OVERLAY_SPLIT_V1_RESULT.md`。
 
-在 `W1_PREDICT_OVERLAY_SPLIT` 完成前,predict 路径仍会改脏被刷新的 card——这是有意保留的源数据,不强行 untrack。HTML 侧已不再因 build 变脏。
+**两处均完成 →「任意 predict/build/checker 运行后，被跟踪的源卡与 HTML 保持 clean」已达成。** runtime 全部落在 gitignored overlay（`state/`）与 tracked 事实账本（`round1_results.json`，仅在有新赛果时变化）。已实证：真实 `/predict` 前后 24 张源卡组合哈希不变。
 
 ## 6. 边界
 
