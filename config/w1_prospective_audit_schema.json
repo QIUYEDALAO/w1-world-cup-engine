@@ -1,0 +1,65 @@
+{
+  "schema_version": "W1_PROSPECTIVE_AUDIT_V1",
+  "stage": "W1_FORWARD_LEDGER_PROSPECTIVE_RUN_V1",
+  "description": "Prospective pre-match -> post-match closed loop on top of the pre-match forward ledger. Pre-match prediction is LOCKED before kickoff (immutable, write-once), the match is played without touching it, and post-match an audit row is APPENDED that scores the locked prediction against the local result. No model change, no external fetch.",
+  "stores": {
+    "pre_match_ledger": "data/forward_ledger/w1_forward_ledger.jsonl (existing, pre-match-only, append-only, gitignored)",
+    "pre_match_view": "data/forward_ledger/w1_pre_match_view.jsonl (NEW, immutable/write-once per fixture, append-only, gitignored)",
+    "post_match_audit": "data/forward_ledger/w1_post_match_audit.jsonl (NEW, append-only, one row per fixture once result known, gitignored)",
+    "prospective_report": "data/forward_ledger/w1_prospective_calibration_v1.json (NEW, gitignored live aggregate; RESULT.md keeps a point-in-time snapshot)"
+  },
+  "result_source": "data/results/round1_results.json (tracked local facts ledger) ONLY — no external fetch",
+  "lock_scope_v1": "market-implied 1X2 probabilities only (the pre-match ledger has no OU ladder; exact-score/OU/BTTS prospective is deferred to a future V2 that would add OU to the snapshot)",
+
+  "pre_match_view_fields": {
+    "schema_version": "W1_PROSPECTIVE_AUDIT_V1",
+    "record_type": "pre_match_view",
+    "fixture_id": "string (REQUIRED)",
+    "match": "string|null",
+    "kickoff_utc": "string|null",
+    "lock_as_of_utc": "string (UTC ISO, REQUIRED, MUST be <= kickoff_utc when kickoff known)",
+    "snapshot_phase": "string",
+    "locked_prediction": {
+      "source": "market_implied_1x2",
+      "p_home": "number (0..1)",
+      "p_draw": "number (0..1)",
+      "p_away": "number (0..1)"
+    },
+    "availability": "object (context availability copied from the locked snapshot)",
+    "locked_at_utc": "string (provenance: when the view was locked)"
+  },
+
+  "post_match_audit_fields": {
+    "schema_version": "W1_PROSPECTIVE_AUDIT_V1",
+    "record_type": "post_match_audit",
+    "fixture_id": "string (REQUIRED, must reference an existing pre_match_view)",
+    "match": "string|null",
+    "kickoff_utc": "string|null",
+    "lock_as_of_utc": "string (copied from view; MUST be <= kickoff_utc when kickoff known)",
+    "locked_prediction": "object (copied verbatim from the view; MUST equal the view — immutability)",
+    "result": {"home": "int", "away": "int", "outcome": "enum[H,D,A]", "source": "local_round1_results"},
+    "prospective_calibration": {
+      "evaluation_method": "prospective_locked_pre_match_1x2",
+      "rps_1x2": "number",
+      "logloss_1x2": "number",
+      "brier_1x2": "number",
+      "prob_of_actual_outcome": "number"
+    },
+    "audited_at_utc": "string (provenance)"
+  },
+
+  "hard_rules": [
+    "pre_match_view is immutable & write-once per fixture: never rewrite or delete; if a view exists for a fixture, the lock script skips it.",
+    "lock_as_of_utc MUST be <= kickoff_utc (genuine prospective, no hindsight). Snapshots taken after kickoff are NOT eligible to lock.",
+    "post_match_audit MUST copy locked_prediction verbatim from the view and MUST NOT alter it (immutability).",
+    "post_match_audit only when a LOCAL result exists (data/results/round1_results.json); no external fetch.",
+    "append-only on every store; all prospective stores are gitignored.",
+    "no model change: w1_score_engine / DEFAULT_RHO / decision_policy / odds thresholds untouched.",
+    "no betting / money / hit-rate language; model-market divergence is not phrased as an opportunity."
+  ],
+  "forbidden_fields_in_pre_match_view": [
+    "actual_score", "result", "home_goals", "away_goals", "home_goals_90", "away_goals_90",
+    "finish_type", "score", "post_match_calibration", "rps", "rps_1x2", "log_loss",
+    "exact_score_log_loss", "outcome", "hit_status", "actual_score_probability", "prospective_calibration"
+  ]
+}
