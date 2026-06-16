@@ -444,6 +444,8 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_predict_overlay_split.py`（W1_PREDICT_OVERLAY_SPLIT_V1：predict 不写源卡、源卡无 live_refresh/result 运行时字段、runtime overlay（`state/`）gitignored、事实账本 `round1_results.json` tracked、build 有 overlay 合并接线；强化）。同阶段更新 `check_w1_click_to_predict` / `check_w1_lineup_api_binding` / `check_w1_post_match_result_sync` 为断言 overlay/账本而非源卡。
 - `scripts/check_w1_draw_calibration_research.py`（W1_DRAW_CALIBRATION_RESEARCH_V1：research_only/prototype/production_wired=false；engine/DEFAULT_RHO/decision_policy/thresholds 未改、未接 dashboard/predict/build；报告含 baseline vs candidates + walk-forward；128 subset scope、不外推 1081/预选赛；无促性表达；skip-safe）
 - `scripts/check_w1_forward_prospective_run.py`（W1_FORWARD_LEDGER_PROSPECTIVE_RUN_V1：pre_match_view 不可变/write-once、lock_as_of≤kickoff（无 hindsight）、audit.locked_prediction==view（不可变）且引用存在的 view、result.source 本地、store gitignored、新脚本无外部抓取、engine/DEFAULT_RHO/configs 未改、无促性表达；skip-safe）
+- `scripts/check_w1_visual_dashboard.py` 强化 `assert_first_screen`（W1_DASHBOARD_DECLUTTER_V1：主卡 `pCore` 第一屏必含 谁占优/进球/首发/数据可信度/盘口异动/现在该干嘛;exact-score 比分行只能作弱化参考(`分布峰值`+`别当真`);左侧 `renderRail` 峰值比分须同时带总进球区间。纯展示三层重排,未改模型/build 计算/API。第二三层沿用既有"专家视图"折叠区）
+- `scripts/check_w1_opportunity_phase_a.py`（W1_OPPORTUNITY_SELECTOR_PHASE_A：同源 candidates_snapshot 覆盖 1X2/OU/AH/BTTS/score_pool；强制 `basis=market_implied_score_matrix`、`independent_edge=false`、`calibrated=false`；离线 eval 限 128 FULL subset；dashboard 仅展示候选共识/专家表，无单一主结论；prospective future lock 支持 candidates_snapshot 且不重写既有 view；engine/DEFAULT_RHO/decision_policy/thresholds 未改，无外部抓取）
 
 ## 8. 当前 WARN_ONLY / 限制
 
