@@ -413,54 +413,5 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
-  },
-  "live_refresh": {
-    "requested_at": "2026-06-15 12:32:27 CST",
-    "fixture_id": "1539001",
-    "overall_status": "partial",
-    "modules": {
-      "odds": {
-        "requested": true,
-        "source": "cache",
-        "status": "skipped",
-        "fetched_at": "2026-06-15 12:32:27 CST",
-        "message_cn": "实时 API 失败，使用缓存赔率。"
-      },
-      "lineups": {
-        "requested": true,
-        "source": "manual_verified",
-        "status": "success",
-        "fetched_at": "2026-06-15 12:32:27 CST",
-        "message_cn": "manual_verified / Sky Sports：官方首发已确认。 Australia 3-4-2-1，Turkey 4-2-3-1。"
-      },
-      "referee": {
-        "requested": true,
-        "source": "cache",
-        "status": "skipped",
-        "fetched_at": "2026-06-15 12:32:28 CST",
-        "message_cn": "实时 API 失败，使用缓存裁判信息。"
-      },
-      "result_sync": {
-        "requested": true,
-        "source": "live_api",
-        "status": "error",
-        "fetched_at": "2026-06-15 12:32:28 CST",
-        "message_cn": "实时 API 未配置，使用缓存/兜底数据。"
-      },
-      "weather": {
-        "requested": true,
-        "source": "live_api",
-        "status": "error",
-        "fetched_at": "2026-06-15 12:32:28 CST",
-        "message_cn": "天气查询失败：<urlopen error Tunnel connection failed: 403 Forbidden>"
-      },
-      "injuries": {
-        "requested": true,
-        "source": "cache",
-        "status": "skipped",
-        "fetched_at": "2026-06-15 12:32:28 CST",
-        "message_cn": "实时 API 失败，使用缓存伤停信息。"
-      }
-    }
   }
 }

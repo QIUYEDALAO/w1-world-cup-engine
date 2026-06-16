@@ -628,47 +628,5 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
-  },
-  "live_refresh": {
-    "requested_at": "2026-06-14 12:14:12 CST",
-    "fixture_id": "1489373",
-    "overall_status": "partial",
-    "modules": {
-      "odds": {
-        "requested": true,
-        "source": "cache",
-        "status": "skipped",
-        "fetched_at": "2026-06-14 12:14:12 CST",
-        "message_cn": "实时 API 失败，使用缓存赔率。"
-      },
-      "lineups": {
-        "requested": true,
-        "source": "verified_fallback",
-        "status": "skipped",
-        "fetched_at": "2026-06-14 12:14:12 CST",
-        "message_cn": "实时 API 未配置，使用缓存/兜底数据。 使用兜底数据。 首发已写入：Qatar 4-3-3，Switzerland 3-4-2-1。"
-      },
-      "referee": {
-        "requested": true,
-        "source": "cache",
-        "status": "skipped",
-        "fetched_at": "2026-06-14 12:14:13 CST",
-        "message_cn": "实时 API 失败，使用缓存裁判信息。"
-      },
-      "weather": {
-        "requested": true,
-        "source": "live_api",
-        "status": "success",
-        "fetched_at": "2026-06-14 12:14:16 CST",
-        "message_cn": "实时 API 成功，天气已接入。"
-      },
-      "injuries": {
-        "requested": true,
-        "source": "cache",
-        "status": "skipped",
-        "fetched_at": "2026-06-14 12:14:13 CST",
-        "message_cn": "实时 API 失败，使用缓存伤停信息。"
-      }
-    }
   }
 }

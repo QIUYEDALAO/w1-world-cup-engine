@@ -659,47 +659,5 @@
     },
     "play_guard_version": "W1_PLAY_GUARD_V1",
     "no_betting_commitment": true
-  },
-  "live_refresh": {
-    "requested_at": "2026-06-15 13:21:59 CST",
-    "fixture_id": "1538999",
-    "overall_status": "partial",
-    "modules": {
-      "odds": {
-        "requested": true,
-        "source": "live_api",
-        "status": "success",
-        "fetched_at": "2026-06-15 13:22:03 CST",
-        "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1493。"
-      },
-      "lineups": {
-        "requested": true,
-        "source": "live_api",
-        "status": "success",
-        "fetched_at": "2026-06-15 13:22:05 CST",
-        "message_cn": "实时 API 成功，fixture_id=1538999 首发已确认。 首发已写入：South Korea 3-4-2-1，Czechia 3-4-2-1。"
-      },
-      "referee": {
-        "requested": true,
-        "source": "missing",
-        "status": "empty",
-        "fetched_at": "2026-06-15 13:22:07 CST",
-        "message_cn": "实时 API 暂无裁判。"
-      },
-      "weather": {
-        "requested": true,
-        "source": "live_api",
-        "status": "success",
-        "fetched_at": "2026-06-15 13:22:12 CST",
-        "message_cn": "实时 API 成功，天气已接入。"
-      },
-      "injuries": {
-        "requested": true,
-        "source": "missing",
-        "status": "empty",
-        "fetched_at": "2026-06-15 13:22:09 CST",
-        "message_cn": "实时 API 暂无伤停。"
-      }
-    }
   }
 }

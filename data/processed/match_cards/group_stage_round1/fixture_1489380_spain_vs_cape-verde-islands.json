@@ -258,54 +258,5 @@
       "lineup_status=WAIT_EVENT; referee_status=MISSING."
     ],
     "no_betting_commitment": true
-  },
-  "live_refresh": {
-    "requested_at": "2026-06-15 17:51:22 CST",
-    "fixture_id": "1489380",
-    "overall_status": "partial",
-    "modules": {
-      "odds": {
-        "requested": true,
-        "source": "live_api",
-        "status": "success",
-        "fetched_at": "2026-06-15 17:51:25 CST",
-        "message_cn": "实时 API 成功，赔率返回 1 条。 原始逐家赔率快照已写入 data/odds_snapshots/raw/2026-06-15/odds_snapshots.jsonl，records=1598。"
-      },
-      "lineups": {
-        "requested": true,
-        "source": "cache",
-        "status": "empty",
-        "fetched_at": "2026-06-15 17:51:26 CST",
-        "message_cn": "实时 API 暂无完整首发，使用缓存/兜底数据。 使用缓存，保留上一版。"
-      },
-      "referee": {
-        "requested": true,
-        "source": "missing",
-        "status": "empty",
-        "fetched_at": "2026-06-15 17:51:27 CST",
-        "message_cn": "实时 API 暂无裁判。"
-      },
-      "result_sync": {
-        "requested": true,
-        "source": "not_due",
-        "status": "skipped_not_due",
-        "fetched_at": "2026-06-15 17:51:27 CST",
-        "message_cn": "比赛未完赛，赛果同步未到时间。"
-      },
-      "weather": {
-        "requested": true,
-        "source": "live_api",
-        "status": "success",
-        "fetched_at": "2026-06-15 17:51:31 CST",
-        "message_cn": "实时 API 成功，天气已接入。"
-      },
-      "injuries": {
-        "requested": true,
-        "source": "missing",
-        "status": "empty",
-        "fetched_at": "2026-06-15 17:51:29 CST",
-        "message_cn": "实时 API 暂无伤停。"
-      }
-    }
   }
 }
