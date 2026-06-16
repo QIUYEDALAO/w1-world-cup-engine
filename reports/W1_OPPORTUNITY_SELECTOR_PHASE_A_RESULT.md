@@ -40,9 +40,10 @@ W1_OPPORTUNITY_SELECTOR_PHASE_A 已按最小阶段 A 落地：只做 read-only c
 
 tracked `reports/dashboard/W1_VISUAL_DASHBOARD.html` 保留 file-open 能力，并展示稳定 embedded baseline 中的 candidates。
 
-- Director view: `候选共识`
+- Director view: 中性 hero + 四灯 + `候选共识`
 - Analyst view: `候选共识 · 专家表`
 - 文案明确：同源矩阵、未校准、非独立优势、非推介。
+- A3 mockup 5 项修正已补齐：hero 去强预测词；Header chip 只显示比赛生命周期；`盘口跟踪` 替代旧市场变化标签；BTTS 仅在有信息量时显示；动作行改为 `当前观察建议`。
 
 ## Prospective Ledger
 

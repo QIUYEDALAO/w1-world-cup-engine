@@ -59,20 +59,31 @@
 
 ---
 
-## 任务 A3 — Dashboard 视图分离：Director View / Analyst Debug View（纯展示）
+## 任务 A3 — Dashboard 视图分离 + Director View 重设计（纯展示，mockup 已定稿）
 
-**目标**：把展示分成"总监一眼看结论"与"分析员追溯全量"两态。
+**目标**：分成 Director View（总监一眼看结论）与 Analyst Debug View（分析员追溯全量）；Director View 按已定稿 mockup 重排为"**一句话 + 四个灯 + 一块共识**"。
 
-**升级思路**：
-- **Director View** = 复用已落地的 `W1_DASHBOARD_DECLUTTER_V1` 第一屏（谁占优 / 进球多少 / 首发 / 数据可信度 / 盘口异动 / 现在该干嘛 + 弱化比分行），**再加一块"市场各方向共识（校准前）"**：把 candidates 按 `raw_probability` 排序展示，**显著标注**"≈市场共识 · 未校准 · 非独立优势 · 非推介"。**不做单一高亮/TOP_PICK**。
-- **Analyst Debug View** = 现有"专家视图"折叠区 + **完整 candidates 表**（含 `expected_result_score`、`basis`、各市场全量）。
-- 纯展示重排，**不接 API、不改 build 计算**。
+**Director View 版式（单卡，从上到下）**：
+1. **标识行**：主队 vs 客队 · 开球时间(CST) · 右上角 **chip 只放比赛状态**（早盘 / 赛前观察 / 赛中 / 已完赛 等生命周期；**不放** 数据可信度 / PLAY_GUARD / 盘口快照）。
+2. **Hero 一句话（语气收敛）**：中性市场读数 + 副行区间。**禁用强预测词**（预计 / 将 / 必 / 一定）；用"倾向 / 偏 / 面较大"，语义是"市场倾向"而非系统预测。例：标题「法国不败 · 偏小胜」，副行「最可能净胜 1 球 · 进球均衡 2–3 · 数据可信度偏弱」。
+3. **四个独立信号灯（一行）**：首发 / 数据可信度 / **盘口跟踪** / 阶段。（绿=可用，黄=偏弱，灰=数据不足）
+4. **市场各方向共识块（校准前）**：胜负分段条（主/平/客）+ 大小球（偏向 + 主线%）+ 让球（主盘 + 过/未过%）；**BTTS 条件显示**——仅当有信息量时出现（建议 `|P_BTTS_yes − 0.5| ≥ 0.10` 或被标记 informative），否则隐藏以保持简洁。整块**显著标注**「未校准 · 非独立优势 · 非推介」；数据源 = 阶段 A `candidates`（按 `raw_probability`）。
+5. **比分峰值脚注**：小字「比分峰值 1-0 / 1-1 — 分布峰值 · 参考 · 别当真 · 单格概率天然低」。
+6. **当前观察建议**（一行，中性研究语气；原"现在该干嘛"已**改名为「当前观察建议」**）。
+7. **专家视图折叠入口**（Analyst Debug View）。
+8. **页脚一句免责**（同一信号多切片 + 研究参考、非最终结论）。
 
-**输入**：record.candidates（A2）。
-**输出**：`reports/dashboard/W1_VISUAL_DASHBOARD.html` 渲染层改动（pCore/专家区）。
+**5 项定稿修正（必须落实）**：① Hero 语气收敛（去强预测词）；② 右上 chip 只保留比赛状态；③ 「盘口异动」→ **「盘口跟踪」**；④ BTTS **条件显示**；⑤ 「现在该干嘛」→ **「当前观察建议」**。
 
-**红线**：纯展示；无投注/入场/命中率语言；候选块必带"非推介/未校准/非独立优势"标注；不接 API。
-**验收**：Director View 出现候选共识块且带标注；Analyst 区有完整 candidates；`check_w1_visual_dashboard` / `check_w1_recommendation_output_policy` PASS；无投注语言。
+**Analyst Debug View** = 现有"专家视图"折叠区 + **完整 candidates 表**（`expected_result_score` / `basis` / 各市场全量）+ 矩阵 / Top8 / 市场vs模型 / 因子 / 校准。
+
+**升级思路**：第一屏从"信息平铺"变成"5 秒读懂这场"——hero 给结论、四灯给唯一独立信息、共识块把"同一市场信号的多切片"折成一块并诚实标注、比分降为脚注；砍掉与第一屏重复的顶部"本场参考摘要"条和多余徽章/免责。纯展示重排，不接 API、不改 build 计算。
+
+**输入**：`record.candidates`（A2）+ 既有 safe_view / market_probability_panel / odds_movement。
+**输出**：`reports/dashboard/W1_VISUAL_DASHBOARD.html` 渲染层（pCore = Director View；专家区 = Analyst View）。
+
+**红线**：纯展示；无投注/入场/命中率/edge 语言；共识块必带「未校准 · 非独立优势 · 非推介」；不接 API；不改 build λ/矩阵。
+**验收**：① Director View 含 hero（无强预测词）+ 四灯（含「盘口跟踪」）+ 共识块（带标注）+ 比分脚注 + 「当前观察建议」；② 右上 chip 只显示比赛状态；③ BTTS 仅在满足条件时出现；④ Analyst 区有完整 candidates；⑤ **同步更新 `check_w1_visual_dashboard.assert_first_screen`** 到新标签（「盘口跟踪」/「当前观察建议」），并新增"chip 仅比赛状态 / hero 无强预测词 / 共识块带非推介标注"断言（仅加强）；⑥ `check_w1_visual_dashboard` / `check_w1_recommendation_output_policy` PASS，无投注语言。
 
 ---
 

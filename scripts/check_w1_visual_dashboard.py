@@ -287,19 +287,35 @@ def _func_body(text: str, name: str) -> str:
 
 
 def assert_first_screen(text: str) -> None:
-    """W1_DASHBOARD_DECLUTTER_V1: the main card (pCore) leads with the 一眼决策 first
-    screen — 谁占优 / 进球 / 首发 / 数据可信度 / 盘口异动 / 现在该干嘛. The peak exact
-    score stays only as a weakened reference line labelled 分布峰值 / 别当真, never as the
-    primary visual. The left list (renderRail) keeps the peak score but must also show a
-    形态/区间 (total-goals band). Added/strengthened; weakens no safety check."""
+    """W1_OPPORTUNITY_SELECTOR_PHASE_A: Director View leads with a neutral hero,
+    four independent lights, candidate consensus, weakened score peak footnote,
+    and 当前观察建议. It must not fall back to old pCore labels."""
     pcore = _func_body(text, "function pCore(")
     if not pcore:
         fail("pCore function missing")
-    for need in ("第一屏", "谁占优", "进球多", "首发", "数据可信度", "盘口异动", "现在该干嘛"):
+    for need in ("Director View", "一句话 + 四灯 + 共识", "首发", "数据可信度", "盘口跟踪", "阶段", "当前观察建议"):
         if need not in pcore:
             fail(f"main card (pCore) first screen missing block: {need}")
+    for old in ("盘口异动", "现在该干嘛"):
+        if old in pcore:
+            fail(f"Director View must not use old label: {old}")
+    for strong in ("预计", "一定", "必胜", "必中"):
+        if strong in pcore:
+            fail(f"Director View hero/function body contains strong prediction wording: {strong}")
     if "分布峰值" not in pcore or "别当真" not in pcore:
         fail("main card exact-score line must stay a weakened reference labelled 分布峰值·别当真")
+    header = _func_body(text, "function pHeader(")
+    if not header:
+        fail("pHeader function missing")
+    for old in ("PLAY_GUARD", "pMarketStateBar", "decision", "W1_PASS", "W1_WAIT"):
+        if old in header:
+            fail(f"Header right chip must only show match lifecycle, found old token: {old}")
+    consensus = _func_body(text, "function pCandidateConsensus(")
+    if not consensus:
+        fail("pCandidateConsensus function missing")
+    for need in ("≈市场共识", "未校准", "非独立优势", "非推介", "BTTS", "Math.abs((bY.raw_probability||0)-0.5)>=0.10"):
+        if need not in consensus:
+            fail(f"Candidate consensus missing Phase A token: {need}")
     rail = _func_body(text, "function renderRail(")
     if not rail:
         fail("renderRail function missing")
@@ -346,9 +362,14 @@ def assert_html(data: dict) -> None:
                 fail(f"HTML missing backend dashboard token: {token}")
         if '<select id="teamA"' in text or '<select id="teamB"' in text:
             fail("HTML must not render fake team select controls")
-        for token in ("class=\"statebar\"", "pMarketStateBar", "本场参考摘要", "市场复述", "自洽核对", "未对该盘独立校准"):
+        for token in ("pMarketStateBar", "市场复述", "自洽核对", "未对该盘独立校准"):
             if token not in text:
                 fail(f"HTML missing expert UI patch token: {token}")
+        boss = _func_body(text, "function renderBoss(")
+        if "Director 摘要" not in boss or "当前观察建议" not in boss:
+            fail("renderBoss must use Director 摘要 and 当前观察建议 labels")
+        if "本场参考摘要" in boss or "现在该做" in boss:
+            fail("renderBoss must not use old summary/action labels")
         boss_idx = text.find("function renderBoss")
         if boss_idx < 0:
             fail("renderBoss function missing")
@@ -359,7 +380,7 @@ def assert_html(data: dict) -> None:
         if panel_idx < 0:
             fail("renderPanel function missing")
         panel_body = text[panel_idx:text.find("function toggleExpert", panel_idx)]
-        if "pCore(r)+pCandidateConsensus(r)+pPredict(r)" not in panel_body and "pCore(r)+pPredict(r)" not in panel_body:
+        if "pCore(r)+pCandidateConsensus(r)+pPredict(r)" not in panel_body:
             fail("Recommendation card must render before predict controls")
         if panel_body.find("pMarketProbabilityPanel(r)") < panel_body.find('`<div id="expert"'):
             fail("Full market probability panel must live inside expert section")

@@ -315,7 +315,7 @@ button{font:inherit;cursor:pointer}
     "huge_title_top": "WHO",
     "huge_title_bottom": "WINS?",
     "yellow_tag": "当前你只需要看这里",
-    "intro": "第一场先看参考倾向、参考比分、风险提示和现在该干嘛。W1 风控没过，不下最终结论。"
+    "intro": "第一场先看市场读数、比分峰值脚注、风险提示和当前观察建议。W1 风控没过，不下最终结论。"
   },
   "focus_fixtures_cn": [
     {
@@ -518,7 +518,8 @@ button{font:inherit;cursor:pointer}
         "FAVORITE_WIN_NOT_COVER_SEPARATION"
       ],
       "lesson_cn": "赛后校准：比分池命中，说明多路径比分分布比单一比分更稳。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。"
-    }
+    },
+    "intro": "第一场先看市场读数、比分峰值脚注、风险提示和当前观察建议。W1 风控没过，不下最终结论。"
   },
   "groups": [
     {
@@ -31404,14 +31405,8 @@ function renderStatusCards(){
     `<span class="sc ${c.class}" title="${esc(c.hint)}"><b>${c.count}</b><span class="lb">${esc(c.label)}</span></span>`).join('');
 }
 function renderBoss(){
-  const r=RECS[active]||{};const rv=r.recommendation_view||{};const gate=stageGate(r);const el=$('#boss');
-  el.innerHTML=`<span class="bt">本场参考摘要</span>
-    <span class="bi">对阵 <b>${esc(r.home_team_cn||'')} vs ${esc(r.away_team_cn||'')}</b></span>
-    <span class="bi">参考倾向 <b>${esc(r.reference_direction||'—')}</b></span>
-    <span class="bi">参考比分 <b>${esc(rv.primary_score||'—')}</b></span>
-    <span class="bi">当前阶段 <b>${esc(gate.label_cn||'—')}</b></span>
-    <span class="bi">现在该做 <b>${esc(r.current_action_cn||rv.risk_path_summary||'—')}</b></span>
-    <button class="x" onclick="this.parentElement.style.display='none'">收起</button>`;
+  // 顶部「Director 摘要 / 当前观察建议」条已并入下方 Director View 主卡，避免与第一屏重复占用空间，这里不再单独渲染。
+  const el=$('#boss');if(el){el.innerHTML='';el.style.display='none';}
 }
 function renderReportLinks(){
   $('#reportLinks').innerHTML=(D.report_entrypoints_cn||[]).map(r=>`<a href="${esc(r.path)}" title="${esc(r.path)}">${esc(r.label)}</a>`).join(' · ');
@@ -31473,17 +31468,10 @@ function stageActionText(gate){
   return `当前处于${gate.label_cn}阶段；若首发、盘口、天气等关键数据未齐，仍不进入最终结论。`;
 }
 function pHeader(r){
-  const guard=r.data_quality&&r.data_quality.play_guard||{};
-  const gOk=guard.pass===true;
-  const stateOk=/通过/.test(r.w1_state||'');
-  const gate=stageGate(r);
-  const guardNote=gOk?'':`<div class="guardnote">PLAY_GUARD 未通过：${esc(stageActionText(gate))} 这<b>不影响</b>连接后端后触发 /predict 抓取。</div>`;
   return `<div class="ph">
     <div class="teams">${r.home_flag||''} ${esc(r.home_team_cn)}<span class="vs">vs</span>${r.away_flag||''} ${esc(r.away_team_cn)}</div>
     <span class="ko">${esc(r.kickoff||'')}</span>
-    <span class="badge ${stateOk?'pass':'wait'}">${esc(r.decision||(stateOk?'W1_PASS':'W1_WAIT'))}</span>
-    <span class="badge ${gOk?'guard-ok':'guard-no'}" title="未通过=未进入正式预测链路；仅展示早盘参考，不影响连接后端触发 /predict">PLAY_GUARD ${gOk?'✓':'✕'}</span>
-  </div>${pMarketStateBar(r)}${guardNote}`;
+  </div>`;
 }
 function pPredict(r){
   const gate=stageGate(r),cur=gate.label_cn;if(selStage==null)selStage=cur;
@@ -31510,42 +31498,51 @@ function pPredict(r){
 function pCore(r){
   const rv=r.recommendation_view||{};const sms=r.score_matrix_summary||{};const sv=r.safe_view||{};
   const mp=r.market_probability_panel||{},mx=mp.one_x_two||{},mou=mp.totals_default||{};
-  const tg=sv.total_goals_range||{},gd=sv.goal_difference_range||{};
+  const tg=sv.total_goals_range||{},gd=sv.goal_difference_range||{};const RR=readsOf(mp);
   const tops=sms.top_scores||[];const pool=(r.score_distribution&&r.score_distribution.score_pool)||[];
   const scoreProb=(s)=>{const t=tops.find(t=>t.score===s);if(t&&t.probability!=null)return t.probability;const p=pool.find(x=>x.score===s);return p&&(p.probability!=null?p.probability:p.weight);};
   const om=r.odds_movement||{};const S=String(om.status||'').toUpperCase();
   const trust=/HARD_THIN/.test(S)?['var(--red)','不可靠']:/THIN|STALE|SKIP|CONFLICT/.test(S)?['var(--amber)','偏弱']:/STABLE|MOVING|ALERT/.test(S)?['var(--green)','可用']:['var(--mut)','未知'];
-  const move=/ALERT/.test(S)?['var(--red)','异动·提高观察']:/MOVING/.test(S)?['var(--amber)','盘口在动']:/STABLE/.test(S)?['var(--mut)','暂稳定']:['var(--mut)','数据不足'];
+  const move=/ALERT/.test(S)?['var(--red)','需持续观察']:/MOVING/.test(S)?['var(--amber)','盘口在动']:/STABLE/.test(S)?['var(--mut)','暂稳定']:['var(--mut)','数据不足'];
   const lu=r.confirmed_lineup_available?['var(--green)','已确认']:['var(--amber)','未确认'];
   const liq=om.liquidity||{};const odq=(r.data_quality&&r.data_quality.odds)||{};
   const books=liq.book_count_latest||odq.bookmakers_count;const snap=odq.snapshot_time||'';const stale=liq.staleness_minutes;
   const mu=sms.mu_total_goals;const goalsCn=mu==null?'–':(mu<2.4?'偏少':mu>2.8?'偏多':'均衡');
   const gate=stageGate(r);
+  const hero=`${esc(RR.x2||r.reference_direction||'市场读数暂缺')} · ${esc(goalsCn==='偏少'?'偏小球':goalsCn==='偏多'?'偏开放':'进球均衡')}`;
+  const subline=`最可能净胜 ${esc(gd.most_likely_margin_cn||'–')} · 进球区间 ${esc(tg.most_likely_band||'–')} · 数据可信度${esc(trust[1])}`;
   const dot=(c)=>`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:5px"></span>`;
   const pill=(lab,a,sub)=>`<div class="market-mini" style="margin:0;padding:8px 10px"><div style="font-size:11px;opacity:.6">${lab}</div><div style="font-size:13px;font-weight:500;margin-top:2px">${dot(a[0])}${a[1]}</div>${sub?`<div style="font-size:11px;opacity:.6;margin-top:1px">${sub}</div>`:''}</div>`;
   const snapTxt=snap?`盘口 ${fmtSnapCST(snap)}${stale!=null?' · '+fmtStale(stale):''}${books!=null?' · '+books+'家':''}`:(books!=null?books+' 家':'');
-  return `<div style="font-size:11px;color:var(--mut);letter-spacing:.5px;margin-bottom:7px">第一屏 · 一眼决策</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:9px">
-    <div class="market-mini" style="margin:0"><div class="k" style="font-size:12px">谁占优 · 多大</div><div style="font-size:16px;font-weight:500;margin:2px 0">${esc(r.reference_direction||'–')}</div><div style="font-size:12px;opacity:.8">主胜 ${fmtP(mx.home_win)} / 平 ${fmtP(mx.draw)} / 客胜 ${fmtP(mx.away_win)} · 最可能净胜 ${esc(gd.most_likely_margin_cn||'–')}</div></div>
-    <div class="market-mini" style="margin:0"><div class="k" style="font-size:12px">进球多 / 少</div><div style="font-size:16px;font-weight:500;margin:2px 0">${goalsCn}</div><div style="font-size:12px;opacity:.8">总进球 ${esc(tg.most_likely_band||'–')} 最可能 · 大小球 O2.5 ${fmtP(mou.over_win_prob)}</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:9px">${pill('首发',lu,'')}${pill('数据可信度',trust,snapTxt)}${pill('盘口异动',move,'')}</div>
-  <div class="market-mini">现在该干嘛：<b>${esc(gate.label_cn)}</b> 阶段 · ${esc(r.current_action_cn||(r.play_guard_pass?'可进入正式赛前分析':'关键数据未齐，暂不下最终结论，只作赛前参考'))}</div>
-  <div class="market-mini" style="font-size:12px;opacity:.85">主比分 <b>${esc(rv.primary_score||'–')}</b>（${fmtP(scoreProb(rv.primary_score))}）· 备选比分 ${rv.secondary_score?`<b>${esc(rv.secondary_score)}</b>（${fmtP(scoreProb(rv.secondary_score))}）`:esc(rv.secondary_score_reason_cn||'无合格备选')} — <span style="opacity:.75">分布峰值·参考·别当真·单格概率天然低</span></div>
-  <div class="market-mini" style="font-size:12px"><b>风险路径摘要</b><span style="opacity:.6">（开放/冷门路径）</span>：${esc(rv.risk_path_summary||r.current_action_cn||'—')}</div>
-  <div class="market-mini" style="font-size:11px;opacity:.7">本页大部分数字来自同一市场赔率反解，是同一判断（市场复述）的不同切片；真正独立的信息＝首发 / 数据可信度 / 盘口异动 / 进球与净胜区间。完整盘口与比分矩阵在专家视图，非最终结论。</div>`;
+  return `<div style="font-size:10px;color:var(--mut);letter-spacing:.5px;margin-bottom:4px">Director View · 一句话 + 四灯 + 共识</div>
+  <div style="font-size:18px;font-weight:500;line-height:1.25">${hero}</div>
+  <div style="font-size:12px;opacity:.8;margin:2px 0 8px">${subline}</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;align-items:start;margin-bottom:4px">${pill('首发',lu,'')}${pill('数据可信度',trust,'')}${pill('盘口跟踪',move,'')}${pill('阶段',[gate.delta_hours!=null&&gate.delta_hours<1?'var(--amber)':'var(--mut)',gate.label_cn],'')}</div>
+  ${snapTxt?`<div style="font-size:10.5px;opacity:.55;margin-bottom:8px">${snapTxt}</div>`:''}
+  <div style="font-size:12px;opacity:.9;margin-bottom:3px">当前观察建议：<b>${esc(gate.label_cn)}</b> · ${esc(r.current_action_cn||(r.play_guard_pass?'可进入正式赛前分析':'关键数据未齐，只作赛前参考'))}　｜　比分峰值 <b>${esc(rv.primary_score||'–')}</b>${rv.secondary_score?` / <b>${esc(rv.secondary_score)}</b>`:''} <span style="opacity:.65">（分布峰值·参考·别当真·单格概率天然低）</span></div>
+  <div style="font-size:11.5px;opacity:.75;margin-bottom:3px"><b>风险路径摘要</b><span style="opacity:.6">（开放/冷门）</span>：${esc(rv.risk_path_summary||r.current_action_cn||'—')}</div>
+  <div style="font-size:10.5px;opacity:.6">本页多为同一市场赔率反解（市场复述）的切片；独立信息＝首发 / 数据可信度 / 盘口跟踪 / 进球与净胜区间。完整盘口与比分矩阵在专家视图，非最终结论。</div>`;
 }
 function pCandidateConsensus(r){
   const snap=r.candidates_snapshot||{};const items=(snap.items||[]).filter(x=>x&&x.raw_probability!=null);
   if(!items.length)return '';
   const pc=v=>v==null?'–':(v*100).toFixed(1)+'%';
-  const lab=x=>`${x.market}${x.line!=null?' '+x.line:''} · ${x.selection}`;
-  const rows=items.slice().sort((a,b)=>(b.raw_probability||0)-(a.raw_probability||0)).slice(0,6).map(x=>
-    `<div class="mprob"><span class="name">${esc(lab(x))}</span><span class="pct">${pc(x.raw_probability)}</span></div><div class="mbar"><i style="width:${Math.max(2,(x.raw_probability||0)*100).toFixed(0)}%"></i></div>`
-  ).join('');
-  return `<div class="card mpanel"><h3>候选共识<span class="r">同源矩阵 · 阶段A</span></h3>
-    <div class="readsum">这些候选都来自同一市场隐含比分矩阵；未校准、非独立优势、非推介，不产生单一高亮结论。</div>
-    <div class="mgrid" style="grid-template-columns:1fr 1fr">${rows}</div>
+  const pick=(m,s,line)=>items.find(x=>x.market===m&&x.selection===s&&(line==null||Math.abs((x.line||0)-line)<1e-9));
+  const xH=pick('1X2','home_win'),xD=pick('1X2','draw'),xA=pick('1X2','away_win');
+  const ouO=pick('OU','over',2.5)||items.find(x=>x.market==='OU'&&x.selection==='over');
+  const ouU=ouO&&items.find(x=>x.market==='OU'&&x.selection==='under'&&Math.abs((x.line||0)-(ouO.line||0))<1e-9);
+  const ahH=pick('AH','home_cover',0)||items.find(x=>x.market==='AH'&&x.selection==='home_cover');
+  const ahA=ahH&&items.find(x=>x.market==='AH'&&x.selection==='away_cover'&&Math.abs((x.line||0)+(ahH.line||0))<1e-9);
+  const bY=pick('BTTS','yes'),bN=pick('BTTS','no');const showB=bY&&Math.abs((bY.raw_probability||0)-0.5)>=0.10;
+  const segC='display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap';
+  const seg=()=>{const h=(xH&&xH.raw_probability)||0,d=(xD&&xD.raw_probability)||0,a=(xA&&xA.raw_probability)||0,t=h+d+a||1;const w=x=>(x/t*100).toFixed(0);
+    return `<span style="display:flex;flex:1;height:18px;border-radius:5px;overflow:hidden;font-size:11px"><span style="${segC};width:${w(h)}%;background:#B5D4F4;color:#0C447C">主 ${pc(h)}</span><span style="${segC};width:${w(d)}%;background:#D3D1C7;color:#2C2C2A">平 ${pc(d)}</span><span style="${segC};width:${w(a)}%;background:#F7C1C1;color:#791F1F">客 ${pc(a)}</span></span>`;};
+  const ouL=ouO&&ouO.line!=null?ouO.line:'';const ahL=ahH&&ahH.line!=null?((ahH.line>0?'+':'')+ahH.line):'';
+  const inline=`大小球 ${ouL} <b>大 ${pc(ouO&&ouO.raw_probability)}</b> / 小 ${pc(ouU&&ouU.raw_probability)}　·　让球 ${ahL} <b>过 ${pc(ahH&&ahH.raw_probability)}</b> / 未过 ${pc(ahA&&ahA.raw_probability)}`+(showB?`　·　BTTS <b>Yes ${pc(bY&&bY.raw_probability)}</b> / No ${pc(bN&&bN.raw_probability)}`:'');
+  return `<div class="card mpanel" style="padding:9px 12px"><h3 style="margin:0 0 6px">候选共识<span class="r">同源矩阵 · 阶段A</span></h3>
+    <div class="readsum" style="margin:0 0 7px">≈市场共识 · 未校准 · 非独立优势 · 非推介；这些候选都来自同一市场隐含比分矩阵。</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:11px;opacity:.6;width:28px;flex:none">胜负</span>${seg()}</div>
+    <div style="font-size:12px;opacity:.9;line-height:1.5">${inline}</div>
   </div>`;
 }
 function pCandidateExpert(r){

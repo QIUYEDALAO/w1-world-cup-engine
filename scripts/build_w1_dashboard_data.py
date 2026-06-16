@@ -2820,6 +2820,7 @@ def main() -> int:
     }
     data["status_cards"]["play_guard_version"] = "W1_PLAY_GUARD_V1"
     data["status_cards"]["next_refresh"] = next_refresh
+    data.setdefault("hero", {})["intro"] = "第一场先看市场读数、比分峰值脚注、风险提示和当前观察建议。W1 风控没过，不下最终结论。"
     data["boss_view"] = {
         **data.get("boss_view", {}),
         "current_status": "24 场 W1 数据已绑定",
@@ -2835,6 +2836,7 @@ def main() -> int:
     data["first_match_cn"] = {
         **data.get("first_match_cn", {}),
         "fixture_id": first["fixture_id"],
+        "intro": "第一场先看市场读数、比分峰值脚注、风险提示和当前观察建议。W1 风控没过，不下最终结论。",
         "match": first["match"],
         "home": f"{first['home_flag']} {first['home_team_cn']}",
         "away": f"{first['away_flag']} {first['away_team_cn']}",
