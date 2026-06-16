@@ -1,0 +1,172 @@
+{
+  "schema_version": "W1_CANDIDATE_OFFLINE_EVAL_V1",
+  "stage": "W1_OPPORTUNITY_SELECTOR_PHASE_A",
+  "research_only": true,
+  "production_wired": false,
+  "calibrated": false,
+  "basis": "market_implied_score_matrix",
+  "scope": "World Cup 2018 + 2022 FULL subset only",
+  "n_matches": 128,
+  "candidate_groups": [
+    {
+      "market": "1X2",
+      "selection": "away_win",
+      "line": null,
+      "n": 128,
+      "mean_raw_probability": 0.327135,
+      "mean_expected_result_score": 0.327135,
+      "mean_realized_result_score": 0.351562
+    },
+    {
+      "market": "1X2",
+      "selection": "draw",
+      "line": null,
+      "n": 128,
+      "mean_raw_probability": 0.254677,
+      "mean_expected_result_score": 0.254677,
+      "mean_realized_result_score": 0.226562
+    },
+    {
+      "market": "1X2",
+      "selection": "home_win",
+      "line": null,
+      "n": 128,
+      "mean_raw_probability": 0.418189,
+      "mean_expected_result_score": 0.418189,
+      "mean_realized_result_score": 0.421875
+    },
+    {
+      "market": "AH",
+      "selection": "away_cover",
+      "line": -0.0,
+      "n": 128,
+      "mean_raw_probability": 0.327135,
+      "mean_expected_result_score": -0.091054,
+      "mean_realized_result_score": -0.070312
+    },
+    {
+      "market": "AH",
+      "selection": "away_cover",
+      "line": -0.5,
+      "n": 128,
+      "mean_raw_probability": 0.327135,
+      "mean_expected_result_score": -0.34573,
+      "mean_realized_result_score": 0.15625
+    },
+    {
+      "market": "AH",
+      "selection": "away_cover",
+      "line": 0.5,
+      "n": 128,
+      "mean_raw_probability": 0.581811,
+      "mean_expected_result_score": 0.163623,
+      "mean_realized_result_score": -0.296875
+    },
+    {
+      "market": "AH",
+      "selection": "home_cover",
+      "line": -0.5,
+      "n": 128,
+      "mean_raw_probability": 0.418189,
+      "mean_expected_result_score": -0.163623,
+      "mean_realized_result_score": -0.15625
+    },
+    {
+      "market": "AH",
+      "selection": "home_cover",
+      "line": 0.0,
+      "n": 128,
+      "mean_raw_probability": 0.418189,
+      "mean_expected_result_score": 0.091054,
+      "mean_realized_result_score": 0.070312
+    },
+    {
+      "market": "AH",
+      "selection": "home_cover",
+      "line": 0.5,
+      "n": 128,
+      "mean_raw_probability": 0.672865,
+      "mean_expected_result_score": 0.34573,
+      "mean_realized_result_score": 0.296875
+    },
+    {
+      "market": "BTTS",
+      "selection": "no",
+      "line": null,
+      "n": 128,
+      "mean_raw_probability": 0.584233,
+      "mean_expected_result_score": 0.584233,
+      "mean_realized_result_score": 0.515625
+    },
+    {
+      "market": "BTTS",
+      "selection": "yes",
+      "line": null,
+      "n": 128,
+      "mean_raw_probability": 0.415767,
+      "mean_expected_result_score": 0.415767,
+      "mean_realized_result_score": 0.484375
+    },
+    {
+      "market": "OU",
+      "selection": "over",
+      "line": 1.5,
+      "n": 128,
+      "mean_raw_probability": 0.69057,
+      "mean_expected_result_score": 0.38114,
+      "mean_realized_result_score": 0.46875
+    },
+    {
+      "market": "OU",
+      "selection": "over",
+      "line": 2.5,
+      "n": 128,
+      "mean_raw_probability": 0.427186,
+      "mean_expected_result_score": -0.145629,
+      "mean_realized_result_score": -0.0625
+    },
+    {
+      "market": "OU",
+      "selection": "over",
+      "line": 3.5,
+      "n": 128,
+      "mean_raw_probability": 0.223476,
+      "mean_expected_result_score": -0.553048,
+      "mean_realized_result_score": -0.5625
+    },
+    {
+      "market": "OU",
+      "selection": "under",
+      "line": 1.5,
+      "n": 128,
+      "mean_raw_probability": 0.30943,
+      "mean_expected_result_score": -0.38114,
+      "mean_realized_result_score": -0.46875
+    },
+    {
+      "market": "OU",
+      "selection": "under",
+      "line": 2.5,
+      "n": 128,
+      "mean_raw_probability": 0.572814,
+      "mean_expected_result_score": 0.145629,
+      "mean_realized_result_score": 0.0625
+    },
+    {
+      "market": "OU",
+      "selection": "under",
+      "line": 3.5,
+      "n": 128,
+      "mean_raw_probability": 0.776524,
+      "mean_expected_result_score": 0.553048,
+      "mean_realized_result_score": 0.5625
+    }
+  ],
+  "redline_confirmation": {
+    "score_engine_changed": false,
+    "default_rho_changed": false,
+    "policy_changed": false,
+    "thresholds_changed": false,
+    "no_phase_b_c_d": true
+  }
+}

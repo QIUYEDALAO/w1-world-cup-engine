@@ -14,6 +14,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import w1_score_engine as W1ENGINE
+import w1_candidate_builder as W1CANDIDATES
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -2187,6 +2188,13 @@ def build_record(
     score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
     recommendation_view = recommendation_view_from_score_distribution(score_distribution)
     market_probability_panel = market_probability_panel_from_score_distribution(score_distribution, card)
+    candidates_snapshot = W1CANDIDATES.build_candidates(
+        matrix=W1CANDIDATES.matrix_from_dashboard_record(
+            {"score_distribution": score_distribution, "score_matrix_summary": score_matrix_summary}
+        ),
+        card=card,
+        score_distribution=score_distribution,
+    )
     safe_view = build_safe_view(score_distribution)
     if recommendation_view.get("primary_score"):
         reference_score = recommendation_view["primary_score"]
@@ -2263,6 +2271,7 @@ def build_record(
         "safe_view": safe_view,
         "recommendation_view": recommendation_view,
         "market_probability_panel": market_probability_panel,
+        "candidates_snapshot": candidates_snapshot,
         "post_match_calibration": score_distribution["post_match_calibration"],
         "odds_movement": movement,
         "market_signal": market_signal,
@@ -2516,6 +2525,11 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
         comparison["notes_cn"] = [clean_public_text(item) for item in comparison.get("notes_cn", [])]
         return panel
 
+    def public_candidates(value: dict[str, Any]) -> dict[str, Any]:
+        snap = json.loads(json.dumps(value or {}, ensure_ascii=False))
+        snap["notes_cn"] = [clean_public_text(item) for item in snap.get("notes_cn", [])]
+        return snap
+
     def public_record(row: dict[str, Any]) -> dict[str, Any]:
         clean_risks = []
         for item in row.get("counter_factors", []):
@@ -2577,6 +2591,7 @@ def public_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
             "safe_view": row.get("safe_view", {}),
             "recommendation_view": public_recommendation_view(row.get("recommendation_view", {})),
             "market_probability_panel": public_market_probability_panel(row.get("market_probability_panel", {})),
+            "candidates_snapshot": public_candidates(row.get("candidates_snapshot", {})),
             "post_match_calibration": public_score_distribution(row["score_distribution"]).get("post_match_calibration", {}),
             "supporting_factors": clean_supporting,
             "counter_factors": clean_risks,
