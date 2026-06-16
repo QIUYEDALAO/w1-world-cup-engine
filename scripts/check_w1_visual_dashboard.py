@@ -313,7 +313,7 @@ def assert_first_screen(text: str) -> None:
     consensus = _func_body(text, "function pCandidateConsensus(")
     if not consensus:
         fail("pCandidateConsensus function missing")
-    for need in ("≈市场共识", "未校准", "非独立优势", "非推介", "BTTS", "Math.abs((bY.raw_probability||0)-0.5)>=0.10"):
+    for need in ("≈市场共识", "未校准", "非独立优势", "非推介", "BTTS", "Math.abs((bY.raw_probability||0)-0.5)>=0.10", "胜平负", "push_probability", "走"):
         if need not in consensus:
             fail(f"Candidate consensus missing Phase A token: {need}")
     rail = _func_body(text, "function renderRail(")
