@@ -1,0 +1,45 @@
+{
+  "policy_version": "W1_PRIMARY_READ_V1",
+  "stage": "W1_FIVEDIM_PRIMARY_READ_SELECTOR_F",
+  "purpose": "每场输出一个【单点研究结论】:PRIMARY_READ / WAIT / SKIP / BLOCKED。这是研究结论选择器,不是投注推介。",
+  "not_a_bet": "PRIMARY_READ = 当前数据条件下对该场的研究读数(方向+区间+可信度),≈市场共识、非独立优势、非投注建议、不承诺命中。",
+  "basis": "market_implied",
+  "independent_edge": false,
+  "prob_unchanged": true,
+
+  "decision_priority": ["BLOCKED", "WAIT", "SKIP", "PRIMARY_READ"],
+  "gates": {
+    "BLOCKED": "市场读数不可用或数据异常:无 1X2 市场 / market_view 不可用 / 概率不自洽。",
+    "WAIT": "关键赛前数据未就绪:W1 硬风控未通过(play_guard 非 pass)或 首发未确认且仍在赛前早盘窗口。",
+    "SKIP": "无足够稳定结论:1X2 最大类概率 < skip_min_top_prob(市场太均衡,无清晰倾向)。",
+    "PRIMARY_READ": "以上都不触发:输出单点研究读数。"
+  },
+  "skip_min_top_prob": 0.40,
+
+  "primary_read_composition": [
+    "direction_cn = 市场偏向方(主/客)+ 强弱",
+    "margin_band = 安全视图 goal_difference_range(市场隐含)",
+    "total_band = 安全视图 total_goals_range(市场隐含)",
+    "data_quality = FiveDim/卡片 数据可信度",
+    "factor_note = 阶段D market_vs_factor(insufficient/aligned/divergent;一致不加分)",
+    "disclaimer = ≈市场共识 · 非独立优势 · 非推介 · 别当真"
+  ],
+
+  "hard_rules": {
+    "one_primary_read_per_match": true,
+    "never_change": ["lambda_home", "lambda_away", "score_matrix", "raw_probability", "pH", "pD", "pA", "DEFAULT_RHO"],
+    "no_post_match_input": "决策只用赛前可得字段;actual_score/赛果仅可作事后审计字段,绝不进入决策。",
+    "forbidden_terms": ["建议下注", "推荐投注", "投注建议", "资金", "入场", "稳赚", "必胜", "保证命中", "盈利承诺", "梭哈", "跟机构", "聪明钱", "TOP_PICK", "opportunity_score"]
+  },
+
+  "audit": {
+    "prematch_lock": "每条结论记录 locked_inputs_digest + decided_at,供事后审计是否赛前可得。",
+    "post_match": "若已完赛,附 actual_score 仅作审计对照,标记 used_in_decision=false。"
+  },
+
+  "redlines": [
+    "只读本地;不接 API;不改 w1_score_engine/DEFAULT_RHO/build λ·矩阵/受保护 config/dashboard/已跟踪文件",
+    "输出不含新概率;independent_edge=false;不声明独立优势",
+    "非投注平台、不输出资金/命中率;不进入生产决策路径(本阶段离线研究 + 政策)"
+  ]
+}
