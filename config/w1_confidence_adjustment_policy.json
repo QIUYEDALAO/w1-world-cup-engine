@@ -1,0 +1,46 @@
+{
+  "policy_version": "W1_CONFIDENCE_ADJUSTMENT_V1",
+  "stage": "W1_FIVEDIM_CONFIDENCE_ADJUSTMENT_D",
+  "purpose": "软用层:用 FiveDim 因子只影响 可信度/风险旗标/数据质量/解释文本,绝不改任何概率。",
+  "basis_stage_c": "W1_FIVEDIM_HISTORICAL_VALIDATION",
+  "stage_c_finding": "候选因子相对市场无独立增量(留出集 Δlogloss≈0)。因此:因子与市场一致【不】上调可信度;只用'分歧'作风险提示、用'缺失'作数据质量下调。",
+
+  "hard_rules": {
+    "never_change": ["lambda_home", "lambda_away", "score_matrix", "raw_probability", "pH", "pD", "pA", "odds_derived_probability", "DEFAULT_RHO"],
+    "may_set_only": ["confidence_grade", "risk_flags", "data_quality_note", "market_vs_factor", "explanation_cn"],
+    "independent_edge": false,
+    "prob_unchanged": true
+  },
+
+  "market_vs_factor": {
+    "method": "市场偏向方(pH vs pA 的较大者)与因子方向(elo_diff/ppg_diff/gd_diff 的多数符号)比较",
+    "states": {
+      "insufficient": "实力/战术维数据不足 → 不判分歧;不上调可信度;标注'独立支撑不足'",
+      "aligned": "一致 → 【不】上调可信度(C:一致无增量);仅表示无分歧",
+      "divergent": "背离 → 加风险旗标 RISK_MARKET_FACTOR_DIVERGENCE(仅提示);不改概率",
+      "factor_missing": "无任何因子 → insufficient 同义"
+    }
+  },
+
+  "confidence_grade": {
+    "scale": ["A_high", "B_medium", "C_weak", "D_insufficient"],
+    "derivation": "仅由 数据可得性 + 是否分歧 决定;绝不由'因子与市场一致'抬升。",
+    "rules": [
+      "实力+战术维均缺失 → 至多 C_weak,并标'独立支撑不足'",
+      "出现 market_vs_factor=divergent → 在原 grade 上仅追加风险旗标,不抬升",
+      "数据缺口严重(market_view 不可用)→ D_insufficient"
+    ]
+  },
+
+  "data_quality": {
+    "rule": "只可下调或维持,绝不因因子一致而上调;缺失维度越多,note 越保守。"
+  },
+
+  "redlines": [
+    "不接 API/不爬取;只读本地 FiveDim 卡与市场方向",
+    "不改 w1_score_engine / DEFAULT_RHO / build λ·矩阵 / 受保护 config / dashboard / 已跟踪文件",
+    "输出绝不含任何概率字段;independent_edge=false;prob_unchanged=true",
+    "不进入生产决策路径(本阶段为离线软信号 + 政策);接入展示/决策需另行授权",
+    "不声明独立优势;一致不加分,只对分歧/缺失保守"
+  ]
+}
