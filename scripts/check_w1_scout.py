@@ -146,8 +146,10 @@ def main() -> int:
 
     analyst = ANALYST.read_text(encoding="utf-8")
     for token in (
-        "ANTHROPIC_API_KEY",
-        "https://api.anthropic.com/v1/messages",
+        "DEEPSEEK_API_KEY",
+        "W1_SCOUT_LLM",
+        "W1_SCOUT_BASE_URL",
+        "https://api.deepseek.com/chat/completions",
         "validate_call",
         "state/w1_scout_calls.json",
         "honesty_label",
@@ -159,8 +161,8 @@ def main() -> int:
     for token in ("actual_score", "fulltime", "ft_score", "post_match_calibration", "w1_score_engine", "DEFAULT_RHO"):
         if token in analyst:
             fail(f"analyst must not read/use redline or post-match token: {token}")
-    if "OPENAI_API_KEY" in analyst or "DEEPSEEK_API_KEY" in analyst:
-        fail("analyst must follow the T5 Anthropic route, not OpenAI/DeepSeek routes")
+    if "https://api.anthropic.com" in analyst or "ANTHROPIC_API_KEY" in analyst:
+        fail("analyst must follow the T5 OpenAI-compatible route, not Anthropic-only routes")
 
     # bundle leakage
     leaks = bundle_leak(bundles, forbidden_pm)

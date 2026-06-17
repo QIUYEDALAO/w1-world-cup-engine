@@ -103,37 +103,28 @@ python3 scripts/check_w1_scout.py                     # 必须 PASS;form/xg_roll
 挂一个**每日 Cowork 定时任务**,提示词=「读 `state/w1_scout_bundles.json` + 战绩 + 教训,对全部场按 SCOUT 规则产出 `state/w1_scout_calls.json`,再 `w1_scout_ledger.py lock`,完赛的 `audit`」。由我(Claude)当分析师,无需额外 API key。
 
 ### 路 B — Headless 脚本(可无人值守,生产化)
-新增 `scripts/w1_scout_analyst.py`,调 Anthropic API 自动产 call:
-```python
-# 伪/骨架(技术员补 ANTHROPIC_API_KEY)
-import os, json, anthropic
-from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
-import importlib.util  # 复用 check_w1_scout.validate_call 当闸门
-spec=importlib.util.spec_from_file_location("chk",ROOT/"scripts/check_w1_scout.py")
-chk=importlib.util.module_from_spec(spec); spec.loader.exec_module(chk)
-POLICY=json.loads((ROOT/"config/w1_scout_policy.json").read_text())
-bundles=json.loads((ROOT/"state/w1_scout_bundles.json").read_text())["bundles"]
-track=(ROOT/"state/scout_track_record.json").read_text()
-lessons=(ROOT/"state/scout_lessons.md").read_text()
-client=anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-MODEL="claude-sonnet-4-6"  # 深度要更强用 claude-opus-4-8
+新增 `scripts/w1_scout_analyst.py`,默认调 DeepSeek(OpenAI-compatible chat completions) 自动产 call;需要换供应商时用 `W1_SCOUT_LLM=openai` 或 `W1_SCOUT_LLM=custom`。
 
-calls=[]
-for b in bundles:
-    for attempt in range(2):                      # 不合规重试一次
-        msg=client.messages.create(model=MODEL,max_tokens=900,
-            system=SYSTEM_PROMPT,
-            messages=[{"role":"user","content":USER_PROMPT(b,track,lessons)}])
-        try: call=json.loads(extract_json(msg.content[0].text))
-        except Exception: continue
-        if not chk.validate_call(call,POLICY):     # ★checker 是唯一闸门★
-            calls.append(call); break
-        # 否则带着报错再让模型修一次
-(ROOT/"state/w1_scout_calls.json").write_text(json.dumps(
-   {"stage":"W1_SCOUT","schema_version":"W1_SCOUT_CALL_V1","calls":calls},ensure_ascii=False,indent=2))
+```bash
+# 默认 DeepSeek
+DEEPSEEK_API_KEY=... python3 scripts/w1_scout_analyst.py
+
+# OpenAI-compatible 切换
+W1_SCOUT_LLM=openai OPENAI_API_KEY=... python3 scripts/w1_scout_analyst.py
+
+# 任意 OpenAI-compatible endpoint
+W1_SCOUT_LLM=custom \
+W1_SCOUT_BASE_URL=https://example.com/v1/chat/completions \
+W1_SCOUT_MODEL=your-model \
+W1_SCOUT_API_KEY=... \
+python3 scripts/w1_scout_analyst.py
 ```
-**关键**:模型产出**必须过 `check_w1_scout.validate_call` 才入库**;不过就带报错重试/丢弃。checker 是安全闸,模型再"敢"也越不过红线。
+
+**关键**:
+- 模型产出**必须过 `check_w1_scout.validate_call` 才入库**;不过就带报错重试/丢弃。
+- `honesty_label` 与 `independent_edge=false` 在代码里强制写死,不交给模型自由发挥。
+- 无 key 直接退出,不产假数据。
+- 输出只写 gitignored `state/w1_scout_calls.json`。
 
 ## 2.4 全量重判 + 每日闭环(一条龙)
 
