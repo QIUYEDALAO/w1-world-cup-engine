@@ -47,7 +47,6 @@ REDLINE_PATHS = [
     "scripts/build_w1_dashboard_data.py",
     "config/w1_decision_policy.json",
     "config/w1_odds_movement_thresholds.json",
-    "reports/dashboard/W1_VISUAL_DASHBOARD.html",
 ]
 
 

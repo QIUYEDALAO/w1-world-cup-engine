@@ -220,6 +220,17 @@ def dimension_availability(dim_name: str, missing: list[str], degraded: list[str
     return "available"
 
 
+def environment_availability(environment_view: dict[str, Any], missing: list[str], degraded: list[str]) -> str:
+    base_state = dimension_availability("environment_view", missing, degraded)
+    if base_state != "missing":
+        return base_state
+    has_available_context = any(
+        isinstance(value, dict) and value.get("availability") == "available"
+        for value in environment_view.values()
+    )
+    return "degraded" if has_available_context else "missing"
+
+
 def build_card(card_path: Path, dash_by_fixture: dict[str, dict[str, Any]]) -> dict[str, Any]:
     raw = read_json(card_path)
     fid = fixture_id_from_card(raw)
@@ -267,7 +278,7 @@ def build_card(card_path: Path, dash_by_fixture: dict[str, dict[str, Any]]) -> d
         "strength_view": dimension_availability("strength_view", missing, degraded),
         "tactical_view": dimension_availability("tactical_view", missing, degraded),
         "chemistry_view": dimension_availability("chemistry_view", missing, degraded),
-        "environment_view": dimension_availability("environment_view", missing, degraded),
+        "environment_view": environment_availability(out["environment_view"], missing, degraded),
     }
     return out
 

@@ -51,7 +51,7 @@ Dimension availability across 24 generated cards:
 | strength_view | 0 | 0 | 24 | Team names are present, but ELO/FIFA/recent form support is missing, so the dimension is not treated as independently available. |
 | tactical_view | 0 | 17 | 7 | Lineup status is partially available; formation and historical tactical stats are missing/degraded. |
 | chemistry_view | 0 | 17 | 7 | Squad/lineup counts are partially available; player club/league chemistry is missing. |
-| environment_view | 0 | 0 | 24 | Venue/static pieces exist, but weather/rest-day support remains missing or incomplete, so the dimension stays missing overall. |
+| environment_view | 0 | 24 | 0 | Venue/static pieces exist, while weather/rest-day support remains missing or incomplete, so the dimension is degraded rather than fully missing. |
 
 Leaf-level availability confirms the intended Stage A discipline: the four non-market dimensions expose local facts where available, and otherwise mark fields as `missing` or `degraded` instead of fabricating values.
 
@@ -109,7 +109,7 @@ PASS: W1 FiveDim Lite Stage A
   strength_view: available=0 degraded=0 missing=24
   tactical_view: available=0 degraded=17 missing=7
   chemistry_view: available=0 degraded=17 missing=7
-  environment_view: available=0 degraded=0 missing=24
+  environment_view: available=0 degraded=24 missing=0
   reverse_tests=post_match_only, forbidden_terms, independent_edge
   no_network_import=true
   production_wired=false
