@@ -1,0 +1,109 @@
+{
+  "schema_version": "W1_FIVEDIM_LITE_POLICY_V1",
+  "stage": "W1_FIVEDIM_LITE_STAGE_A",
+  "output_path": "state/w1_fivedim_lite_cards.json",
+  "input_paths": {
+    "match_cards": "data/processed/match_cards/group_stage_round1/*.json",
+    "dashboard_data": "reports/dashboard/assets/w1_dashboard_data.json",
+    "venues_static": "data/static/world_cup_2026_venues.json"
+  },
+  "dimension_sources": {
+    "market_view": {
+      "builder": "scripts/w1_candidate_builder.py",
+      "basis": "market_implied",
+      "notes": "Do not reimplement market derivation. Wrap candidate_builder output."
+    },
+    "strength_view": {
+      "home_team_name": "teams.home.name",
+      "away_team_name": "teams.away.name",
+      "home_fifa_rank": "teams.home.fifa_rank",
+      "away_fifa_rank": "teams.away.fifa_rank",
+      "home_elo_rating": "teams.home.elo_rating",
+      "away_elo_rating": "teams.away.elo_rating"
+    },
+    "tactical_view": {
+      "lineup_status": "lineups.status",
+      "home_formation": "lineups.formation_home",
+      "away_formation": "lineups.formation_away",
+      "confirmed_lineup_available": "lineups.confirmed_lineup_available"
+    },
+    "chemistry_view": {
+      "home_squad_players_count": "squad.home.players_count",
+      "away_squad_players_count": "squad.away.players_count",
+      "home_starting_xi_count": "lineups.home_starting_xi",
+      "away_starting_xi_count": "lineups.away_starting_xi"
+    },
+    "environment_view": {
+      "venue_name": "match.venue.name",
+      "venue_city": "match.venue.city",
+      "venue_country": "match.venue.country",
+      "venue_latitude": "match.venue.latitude",
+      "venue_longitude": "match.venue.longitude",
+      "static_venue_context": "data/static/world_cup_2026_venues.json",
+      "weather_context": "dashboard.environment_context"
+    }
+  },
+  "basis_by_source": {
+    "market": "market_implied",
+    "card": "manual_context",
+    "static": "local_static",
+    "missing": "missing",
+    "degraded": "degraded"
+  },
+  "post_match_only_blacklist": [
+    "xg",
+    "home_xg",
+    "away_xg",
+    "shots",
+    "home_shots",
+    "away_shots",
+    "shots_on_target",
+    "possession",
+    "home_possession",
+    "away_possession",
+    "corners",
+    "home_corners",
+    "away_corners",
+    "final_stats",
+    "halftime_score",
+    "fulltime_score",
+    "final_score",
+    "actual_score",
+    "result",
+    "home_goals",
+    "away_goals",
+    "post_match_calibration",
+    "rps",
+    "log_loss"
+  ],
+  "forbidden_terms": [
+    "投注",
+    "下注",
+    "资金",
+    "入场",
+    "稳赚",
+    "必胜",
+    "保证命中",
+    "最高命中率",
+    "竞彩推荐",
+    "stake",
+    "profit",
+    "guaranteed",
+    "TOP_PICK",
+    "opportunity_score"
+  ],
+  "degrade_rules": {
+    "null": "missing",
+    "empty_list": "missing",
+    "empty_object": "missing",
+    "lineup_missing": "degraded",
+    "weather_missing": "missing"
+  },
+  "redlines": {
+    "independent_edge": false,
+    "calibrated": false,
+    "external_fetch": false,
+    "production_wired": false,
+    "dashboard_wired": false
+  }
+}

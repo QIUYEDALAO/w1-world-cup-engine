@@ -1,0 +1,60 @@
+{
+  "schema_version": "W1_FIVEDIM_CARD_SCHEMA_V1",
+  "stage": "W1_FIVEDIM_LITE_STAGE_A",
+  "description": "Read-only FiveDim Lite card schema. Phase A is a data availability skeleton, not an independent model.",
+  "basis_enum": [
+    "market_implied",
+    "market_implied_score_matrix",
+    "historical_observed",
+    "manual_context",
+    "local_static",
+    "missing",
+    "degraded",
+    "post_match_only"
+  ],
+  "availability_enum": [
+    "available",
+    "degraded",
+    "missing",
+    "post_match_only"
+  ],
+  "required_top_level_keys": [
+    "schema_version",
+    "stage",
+    "metadata",
+    "source_summary",
+    "market_view",
+    "strength_view",
+    "tactical_view",
+    "chemistry_view",
+    "environment_view",
+    "availability_flags",
+    "missing_fields",
+    "degraded_fields",
+    "basis_tags",
+    "redline_flags",
+    "independent_edge"
+  ],
+  "leaf_shape": {
+    "value": "any|null",
+    "source": "string",
+    "basis": "basis_enum",
+    "availability": "availability_enum",
+    "independent_edge": false
+  },
+  "dimension_contract": {
+    "market_view": "Wraps existing w1_candidate_builder output; all candidate items inherit basis=market_implied_score_matrix, independent_edge=false, calibrated=false.",
+    "strength_view": "Local strength facts only. Missing ELO/FIFA/ranking/history must stay missing.",
+    "tactical_view": "Local lineup/tactical context only. No current-match post-match statistics.",
+    "chemistry_view": "Local squad/lineup availability only. No fabricated player chemistry.",
+    "environment_view": "Local venue/weather/static context only. Missing runtime context stays missing or degraded."
+  },
+  "hard_rules": [
+    "Phase A is read-only and offline only.",
+    "Every dimension and leaf must keep independent_edge=false.",
+    "No external fetch or network import.",
+    "No betting, stake, money, hit-rate, or opportunity wording.",
+    "No current-match post-match-only field may appear in pre-match view fields.",
+    "Do not modify w1_score_engine.py, DEFAULT_RHO, build lambda/matrix logic, decision_policy, odds thresholds, dashboard, or result ledger."
+  ]
+}
