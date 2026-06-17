@@ -118,7 +118,13 @@ def user_prompt(bundle: dict[str, Any], track: dict[str, Any], lessons: str, val
     market = bundle.get("market") or {}
     retry_note = ""
     if validator_errors:
-        retry_note = "\n[上次输出未过闸门] " + json.dumps(validator_errors, ensure_ascii=False)
+        retry_note = (
+            "\n[上次输出未过闸门] "
+            + json.dumps(validator_errors, ensure_ascii=False)
+            + "\n必须修正：只输出一个顶层 call JSON 对象；不要输出 analysis/summary/wrapper；"
+            "必须包含 fixture_id, call, market_divergence, key_factors_cn, conviction, "
+            "track_record_context_cn, honesty_label, independent_edge。"
+        )
     return (
         f"[比赛] {bundle.get('home')} vs {bundle.get('away')} (fixture_id={bundle.get('fixture_id')})\n"
         f"[市场读数] p_home={market.get('p_home')} p_draw={market.get('p_draw')} p_away={market.get('p_away')}\n"
@@ -131,13 +137,21 @@ def user_prompt(bundle: dict[str, Any], track: dict[str, Any], lessons: str, val
 
 
 def extract_json_object(text: str) -> dict[str, Any]:
-    match = re.search(r"\{.*\}", text, re.S)
-    if not match:
-        raise ValueError("model response did not contain a JSON object")
-    payload = json.loads(match.group(0))
-    if not isinstance(payload, dict):
-        raise ValueError("model JSON is not an object")
-    return payload
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = re.sub(r"^```(?:json)?", "", cleaned, flags=re.I).strip()
+        cleaned = re.sub(r"```$", "", cleaned).strip()
+    decoder = json.JSONDecoder()
+    for idx, char in enumerate(cleaned):
+        if char != "{":
+            continue
+        try:
+            payload, _end = decoder.raw_decode(cleaned[idx:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict):
+            return payload
+    raise ValueError("model response did not contain a valid JSON object")
 
 
 def provider_config(provider_name: str) -> dict[str, str]:
@@ -159,18 +173,19 @@ def provider_config(provider_name: str) -> dict[str, str]:
     return {"provider": provider_name, "base_url": str(base_url), "model": str(model), "api_key": api_key}
 
 
-def chat_completion(cfg: dict[str, str], prompt: str, max_tokens: int) -> str:
-    body = json.dumps(
-        {
-            "model": cfg["model"],
-            "temperature": 0.3,
-            "max_tokens": max_tokens,
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ],
-        }
-    ).encode("utf-8")
+def chat_completion(cfg: dict[str, str], prompt: str, max_tokens: int, json_mode: bool = True) -> str:
+    body_obj = {
+        "model": cfg["model"],
+        "temperature": 0.3,
+        "max_tokens": max_tokens,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+    }
+    if json_mode:
+        body_obj["response_format"] = {"type": "json_object"}
+    body = json.dumps(body_obj).encode("utf-8")
     req = request.Request(
         cfg["base_url"],
         data=body,
@@ -205,6 +220,11 @@ def build_calls(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[tu
     track = read_json(TRACK_P, {})
     lessons = LESSONS_P.read_text(encoding="utf-8") if LESSONS_P.is_file() else ""
     fixtures = set(args.fixture or []) or None
+    previous_calls = {
+        str(call.get("fixture_id")): call
+        for call in read_json(CALLS_P, {"calls": []}).get("calls", [])
+        if isinstance(call, dict)
+    }
     calls: list[dict[str, Any]] = []
     failed: list[tuple[str, str]] = []
 
@@ -212,12 +232,13 @@ def build_calls(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[tu
         fixture_id = str(bundle.get("fixture_id") or "")
         validator_errors: list[str] | None = None
         accepted: dict[str, Any] | None = None
-        for _attempt in range(args.retries + 1):
+        for attempt in range(args.retries + 1):
             try:
                 text = chat_completion(
                     cfg,
                     user_prompt(bundle, track, lessons, validator_errors),
                     args.max_tokens,
+                    json_mode=(attempt % 2 == 0),
                 )
                 candidate = harden_call(extract_json_object(text), fixture_id)
             except Exception as exc:
@@ -230,7 +251,12 @@ def build_calls(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[tu
         if accepted:
             calls.append(accepted)
         else:
-            failed.append((fixture_id, "; ".join(validator_errors or ["unknown validation failure"])))
+            previous = previous_calls.get(fixture_id)
+            if previous and not checker.validate_call(previous, policy):
+                calls.append(previous)
+                print(f"WARN: fixture {fixture_id}: reused previous valid scout call after model validation failure", file=sys.stderr)
+            else:
+                failed.append((fixture_id, "; ".join(validator_errors or ["unknown validation failure"])))
     return calls, failed, cfg
 
 
@@ -257,8 +283,8 @@ def main() -> int:
     parser.add_argument("--fixture", action="append", help="Fixture id to judge; may be repeated. Defaults to all bundles.")
     parser.add_argument("--limit", type=int, default=None, help="Maximum bundles to judge.")
     parser.add_argument("--provider", default=os.environ.get("W1_SCOUT_LLM", "deepseek"), choices=sorted(PROVIDERS))
-    parser.add_argument("--max-tokens", type=int, default=900)
-    parser.add_argument("--retries", type=int, default=1, help="Validation retry count per fixture.")
+    parser.add_argument("--max-tokens", type=int, default=1600)
+    parser.add_argument("--retries", type=int, default=3, help="Validation retry count per fixture.")
     parser.add_argument("--dry-run", action="store_true", help="Validate setup and selected bundle count without calling the model.")
     args = parser.parse_args()
 

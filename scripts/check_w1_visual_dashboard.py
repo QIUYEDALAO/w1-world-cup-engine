@@ -293,7 +293,7 @@ def assert_first_screen(text: str) -> None:
     pcore = _func_body(text, "function pCore(")
     if not pcore:
         fail("pCore function missing")
-    for need in ("Director View", "一句话 + 四灯 + 共识", "首发", "数据可信度", "盘口跟踪", "阶段", "当前观察建议", "五维就绪度"):
+    for need in ("Director View", "一句话 + 四灯 + 共识", "首发", "数据可信度", "盘口跟踪", "阶段", "当前观察建议", "五维就绪度", "研究结论"):
         if need not in pcore:
             fail(f"main card (pCore) first screen missing block: {need}")
     if "repeat(4,1fr)" in pcore or "market-mini" in pcore:
@@ -385,14 +385,14 @@ def assert_html(data: dict) -> None:
         if panel_idx < 0:
             fail("renderPanel function missing")
         panel_body = text[panel_idx:text.find("function toggleExpert", panel_idx)]
-        if "pCore(r)+pCandidateConsensus(r)+pPredict(r)" not in panel_body:
-            fail("Recommendation card must render before predict controls")
+        if "pCore(r)+pCandidateConsensus(r)+pScoutAnalyst(r)+pPredict(r)" not in panel_body:
+            fail("Recommendation card + scout analyst must render before predict controls")
         if panel_body.find("pMarketProbabilityPanel(r)") < panel_body.find('`<div id="expert"'):
             fail("Full market probability panel must live inside expert section")
         if "pBanner()+pHeader(r)+pPredict(r)+pCore(r)" in panel_body:
             fail("Predict controls must not render before recommendation card")
         assert_first_screen(text)
-        for token in ("function pCandidateConsensus", "function pCandidateExpert", "候选共识", "同源矩阵", "market_implied_score_matrix"):
+        for token in ("function pCandidateConsensus", "function pCandidateExpert", "候选共识", "同源矩阵", "market_implied_score_matrix", "function pScoutAnalyst", "AI 分析师"):
             if token not in text:
                 fail(f"HTML missing Phase A candidate token: {token}")
         if "fetch('/api/predict" in text or 'fetch("/api/predict' in text or "worldcup.youliaoyun.com/api" in text:

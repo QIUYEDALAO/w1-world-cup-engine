@@ -11,17 +11,27 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import ssl
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib import parse, request
+from urllib import error, parse, request
 
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 SCOUT_DIR = ROOT / "data/scout"
 API_BASE = "https://v3.football.api-sports.io"
 ENV_KEY_NAME = "APIFOOTBALL_" + "KEY"
+FORBIDDEN_POSTMATCH_KEYS = {
+    "actual_score",
+    "fulltime",
+    "result_goals",
+    "home_goals_actual",
+    "away_goals_actual",
+    "post_match",
+    "ft_score",
+}
 API_ENV_BRIDGE_FILES = [
     Path.home() / ".openclaw/.env",
     Path.home() / ".openclaw/service-env/ai.openclaw.gateway.env",
@@ -96,9 +106,10 @@ def parse_dt(value: Any) -> datetime | None:
 
 
 class ApiFootball:
-    def __init__(self, key: str, sleep_s: float = 0.25) -> None:
+    def __init__(self, key: str, sleep_s: float = 0.25, retries: int = 3) -> None:
         self.key = key
         self.sleep_s = sleep_s
+        self.retries = max(1, retries)
 
     def get(self, endpoint: str, **params: Any) -> dict[str, Any]:
         query = parse.urlencode({k: v for k, v in params.items() if v is not None})
@@ -106,10 +117,24 @@ class ApiFootball:
         if query:
             url += f"?{query}"
         req = request.Request(url, headers={"x-apisports-key": self.key})
-        with request.urlopen(req, timeout=25) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-        time.sleep(self.sleep_s)
-        return payload
+        last_exc: Exception | None = None
+        for attempt in range(1, self.retries + 1):
+            try:
+                with request.urlopen(req, timeout=25) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+                time.sleep(self.sleep_s)
+                return payload
+            except (TimeoutError, error.URLError, error.HTTPError, ssl.SSLError) as exc:
+                last_exc = exc
+                if isinstance(exc, error.HTTPError) and exc.code in {400, 401, 403, 404}:
+                    raise
+                if attempt >= self.retries:
+                    break
+                delay = min(8.0, self.sleep_s + (2 ** (attempt - 1)))
+                print(f"WARN: api-football retry {attempt}/{self.retries} {endpoint}: {exc}")
+                time.sleep(delay)
+        assert last_exc is not None
+        raise last_exc
 
 
 def load_dashboard_records() -> list[dict[str, Any]]:
@@ -137,6 +162,18 @@ def select_records(records: list[dict[str, Any]], wanted: set[str] | None, inclu
 def response_rows(payload: dict[str, Any]) -> list[dict[str, Any]]:
     rows = payload.get("response")
     return rows if isinstance(rows, list) else []
+
+
+def strip_forbidden_postmatch_fields(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            k: strip_forbidden_postmatch_fields(v)
+            for k, v in value.items()
+            if str(k).lower() not in FORBIDDEN_POSTMATCH_KEYS
+        }
+    if isinstance(value, list):
+        return [strip_forbidden_postmatch_fields(v) for v in value]
+    return value
 
 
 def resolve_fixture(api: ApiFootball, fixture_id: str) -> dict[str, Any] | None:
@@ -378,7 +415,7 @@ def build_rest_days(home_recent: list[dict[str, Any]], away_recent: list[dict[st
 
 def build_api_pred(api: ApiFootball, fixture_id: str) -> dict[str, Any] | None:
     rows = response_rows(api.get("/predictions", fixture=fixture_id))
-    return rows[0] if rows else None
+    return strip_forbidden_postmatch_fields(rows[0]) if rows else None
 
 
 def availability_from_blocks(bundle: dict[str, Any]) -> dict[str, str]:
@@ -460,6 +497,7 @@ def build_fixture_bundle(api: ApiFootball, rec: dict[str, Any]) -> dict[str, Any
 
 
 def write_bundle(bundle: dict[str, Any]) -> Path:
+    bundle = strip_forbidden_postmatch_fields(bundle)
     path = SCOUT_DIR / f"{bundle['fixture_id']}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
@@ -474,6 +512,7 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=None, help="Maximum fixtures to fetch.")
     parser.add_argument("--include-started", action="store_true", help="Allow already-started fixtures. Use only for manual backfill; pre-match flag still requires kickoff in future.")
     parser.add_argument("--sleep", type=float, default=0.25, help="Sleep seconds between API calls.")
+    parser.add_argument("--retries", type=int, default=3, help="Retry count for transient api-football SSL/timeout/5xx failures.")
     args = parser.parse_args()
 
     key = load_api_key()
@@ -486,32 +525,42 @@ def main() -> int:
         print("No eligible pre-match fixtures selected; no data/scout files written.")
         return 0
 
-    api = ApiFootball(key, sleep_s=args.sleep)
+    api = ApiFootball(key, sleep_s=args.sleep, retries=args.retries)
     written = []
     skipped_started = []
+    failed = []
     for rec in records:
         fid = str(rec.get("fixture_id"))
-        fixture_row = resolve_fixture(api, fid)
-        if not fixture_row:
-            print(f"WARN: fixture not found, skipped {fid}")
-            continue
-        kickoff = fixture_kickoff(fixture_row, rec)
-        if not args.include_started and kickoff and kickoff <= now_utc():
-            skipped_started.append(fid)
-            continue
-        # Reuse the resolved fixture by monkey-patching one cached lookup through a tiny wrapper.
-        original = resolve_fixture
+        original = None
         try:
+            fixture_row = resolve_fixture(api, fid)
+            if not fixture_row:
+                print(f"WARN: fixture not found, skipped {fid}")
+                continue
+            kickoff = fixture_kickoff(fixture_row, rec)
+            if not args.include_started and kickoff and kickoff <= now_utc():
+                skipped_started.append(fid)
+                continue
+            # Reuse the resolved fixture by monkey-patching one cached lookup through a tiny wrapper.
+            original = resolve_fixture
             globals()["resolve_fixture"] = lambda _api, _fid, row=fixture_row: row if str(_fid) == fid else original(_api, _fid)
             bundle = build_fixture_bundle(api, rec)
+            path = write_bundle(bundle)
+            written.append(path.relative_to(ROOT).as_posix())
+            print(f"WROTE {path.relative_to(ROOT)} availability={bundle['availability']}")
+        except Exception as exc:
+            failed.append((fid, str(exc)))
+            print(f"WARN: fixture fetch failed after retries, skipped {fid}: {exc}")
         finally:
-            globals()["resolve_fixture"] = original
-        path = write_bundle(bundle)
-        written.append(path.relative_to(ROOT).as_posix())
-        print(f"WROTE {path.relative_to(ROOT)} availability={bundle['availability']}")
+            if original is not None:
+                globals()["resolve_fixture"] = original
     if skipped_started:
         print(f"Skipped already-started fixtures (pre-match guard): {', '.join(skipped_started)}")
-    print(f"scout api-football fetch complete: written={len(written)}")
+    if failed:
+        print(f"WARN: failed fixtures after retries: {failed[:8]}")
+    print(f"scout api-football fetch complete: written={len(written)}, failed={len(failed)}")
+    if failed and not written:
+        return 1
     return 0
 
 

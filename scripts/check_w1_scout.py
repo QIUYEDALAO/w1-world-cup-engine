@@ -139,6 +139,12 @@ def main() -> int:
     for token in ("/fixtures?team=&season=&status=FT", "/fixtures/statistics?fixture=", "dt < kickoff"):
         if token not in fetcher:
             fail(f"fetcher missing pre-match rolling-data guard token: {token}")
+    for token in ("--retries", "api-football retry", "failed fixtures after retries"):
+        if token not in fetcher:
+            fail(f"fetcher missing transient retry/continue guard token: {token}")
+    for token in ("FORBIDDEN_POSTMATCH_KEYS", "strip_forbidden_postmatch_fields", "build_api_pred"):
+        if token not in fetcher:
+            fail(f"fetcher missing api response post-match scrub token: {token}")
     if "write_json(RESULTS" in fetcher or "RESULTS_JSON" in fetcher:
         fail("fetcher must not write result ledger")
     if "w1_score_engine" in fetcher or "DEFAULT_RHO" in fetcher:
