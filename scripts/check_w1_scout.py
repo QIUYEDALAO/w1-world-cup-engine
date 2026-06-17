@@ -150,6 +150,7 @@ def main() -> int:
         "W1_SCOUT_LLM",
         "W1_SCOUT_BASE_URL",
         "https://api.deepseek.com/chat/completions",
+        "deepseek-v4-pro",
         "validate_call",
         "state/w1_scout_calls.json",
         "honesty_label",
@@ -163,6 +164,8 @@ def main() -> int:
             fail(f"analyst must not read/use redline or post-match token: {token}")
     if "https://api.anthropic.com" in analyst or "ANTHROPIC_API_KEY" in analyst:
         fail("analyst must follow the T5 OpenAI-compatible route, not Anthropic-only routes")
+    if "deepseek-chat" in analyst:
+        fail("analyst must use fixed DeepSeek-V4-Pro (API id: deepseek-v4-pro) for the DeepSeek route")
 
     # bundle leakage
     leaks = bundle_leak(bundles, forbidden_pm)

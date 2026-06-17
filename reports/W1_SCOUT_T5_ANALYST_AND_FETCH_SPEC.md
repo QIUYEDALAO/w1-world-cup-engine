@@ -103,10 +103,10 @@ python3 scripts/check_w1_scout.py                     # 必须 PASS;form/xg_roll
 挂一个**每日 Cowork 定时任务**,提示词=「读 `state/w1_scout_bundles.json` + 战绩 + 教训,对全部场按 SCOUT 规则产出 `state/w1_scout_calls.json`,再 `w1_scout_ledger.py lock`,完赛的 `audit`」。由我(Claude)当分析师,无需额外 API key。
 
 ### 路 B — Headless 脚本(可无人值守,生产化)
-新增 `scripts/w1_scout_analyst.py`,默认调 DeepSeek(OpenAI-compatible chat completions) 自动产 call;需要换供应商时用 `W1_SCOUT_LLM=openai` 或 `W1_SCOUT_LLM=custom`。
+新增 `scripts/w1_scout_analyst.py`,默认固定调 DeepSeek-V4-Pro(API model id: `deepseek-v4-pro`; OpenAI-compatible chat completions) 自动产 call;需要换供应商时用 `W1_SCOUT_LLM=openai` 或 `W1_SCOUT_LLM=custom`。
 
 ```bash
-# 默认 DeepSeek
+# 默认固定 DeepSeek-V4-Pro
 DEEPSEEK_API_KEY=... python3 scripts/w1_scout_analyst.py
 
 # OpenAI-compatible 切换

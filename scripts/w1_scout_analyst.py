@@ -33,7 +33,7 @@ CHECKER_P = ROOT / "scripts/check_w1_scout.py"
 PROVIDERS = {
     "deepseek": {
         "base_url": "https://api.deepseek.com/chat/completions",
-        "model": "deepseek-chat",
+        "model": "deepseek-v4-pro",
         "key_env": "DEEPSEEK_API_KEY",
     },
     "openai": {
@@ -145,7 +145,7 @@ def provider_config(provider_name: str) -> dict[str, str]:
         raise ValueError(f"unknown provider {provider_name}; use one of {sorted(PROVIDERS)}")
     cfg = dict(PROVIDERS[provider_name])
     base_url = os.environ.get("W1_SCOUT_BASE_URL") or cfg.get("base_url")
-    model = os.environ.get("W1_SCOUT_MODEL") or cfg.get("model")
+    model = cfg.get("model") if provider_name == "deepseek" else (os.environ.get("W1_SCOUT_MODEL") or cfg.get("model"))
     key_env = str(cfg["key_env"])
     api_key = os.environ.get(key_env)
     if provider_name == "custom":
@@ -264,7 +264,7 @@ def main() -> int:
 
     selected = selected_bundles(set(args.fixture or []) or None, args.limit)
     if args.dry_run:
-        model = os.environ.get("W1_SCOUT_MODEL") or PROVIDERS[args.provider].get("model") or "<custom>"
+        model = PROVIDERS[args.provider].get("model") if args.provider == "deepseek" else (os.environ.get("W1_SCOUT_MODEL") or PROVIDERS[args.provider].get("model") or "<custom>")
         print(f"scout analyst dry-run: provider={args.provider}, selected={len(selected)}, model={model}, output={CALLS_P.relative_to(ROOT)}")
         return 0
     if not selected:
