@@ -387,7 +387,7 @@ def assert_first_screen(text: str) -> None:
     cycle = _func_body(text, "function pScoutCycleStatus(")
     if not cycle:
         fail("pScoutCycleStatus function missing")
-    for need in ("运行 / 错误日志", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "刷新视图", "专家视图"):
+    for need in ("运行 / 错误日志", "上次抓取", "本轮结果", "累计成功抓取", "盘口异动", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "刷新视图", "专家视图"):
         if need not in cycle:
             fail(f"Scout cycle status card missing token: {need}")
     learning_func = _func_body(text, "function pScoutLearningStatus(")
@@ -452,7 +452,7 @@ def assert_html(data: dict) -> None:
             "/predict",
             "/progress",
             "后端未连接",
-            "正在抓取 + 预测",
+            "正在手动强刷",
             "已保留当前快照，未覆盖",
             "主比分",
             "备选比分",
@@ -548,7 +548,7 @@ def assert_html(data: dict) -> None:
         "teamB",
         "stageRow",
         "goBtn",
-        "开始预测",
+        "手动强刷",
         "result",
         "fix-card",
         "详细解读",
