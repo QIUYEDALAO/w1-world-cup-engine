@@ -185,6 +185,11 @@ def harden_call(call: dict[str, Any], fixture_id: str) -> dict[str, Any]:
     call["fixture_id"] = fixture_id
     call["honesty_label"] = "AI 观点·未验证·仅研究·可能错"
     call["independent_edge"] = False
+    if isinstance(call.get("conviction"), str):
+        call["conviction"] = call["conviction"].upper()
+    divergence = call.get("market_divergence")
+    if isinstance(divergence, dict) and isinstance(divergence.get("stance"), str):
+        divergence["stance"] = divergence["stance"].upper()
     return call
 
 
