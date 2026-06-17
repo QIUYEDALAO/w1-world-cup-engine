@@ -44,9 +44,13 @@ FORBIDDEN_NETWORK_IMPORTS = [
 
 REDLINE_PATHS = [
     "scripts/w1_score_engine.py",
-    "scripts/build_w1_dashboard_data.py",
     "config/w1_decision_policy.json",
     "config/w1_odds_movement_thresholds.json",
+    # NOTABLY_ABSENT: build_w1_dashboard_data.py and W1_VISUAL_DASHBOARD.html.
+    # Those are Stage B territory and are guarded by dashboard own checkers.
+    # NOTABLY_ABSENT: w1_odds_movement_thresholds.json is kept because it
+    # feeds the core liquidity/movement gate; changes indirectly affect
+    # market_view output.
 ]
 
 
