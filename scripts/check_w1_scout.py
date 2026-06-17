@@ -23,6 +23,8 @@ BUNDLES_P = ROOT / "state/w1_scout_bundles.json"
 CALLS_P = ROOT / "state/w1_scout_calls.json"
 TRACK_P = ROOT / "state/scout_track_record.json"
 LESSONS_P = ROOT / "state/scout_lessons.md"
+AUDIT_P = ROOT / "state/scout_audit.jsonl"
+LOCK_P = ROOT / "state/scout_lock.jsonl"
 SCOUT_DIR = ROOT / "data/scout"
 
 errors: list[str] = []
@@ -111,8 +113,25 @@ def validate_scout_file(path: Path, forbidden: list[str]) -> list[str]:
     return errs
 
 
+def count_jsonl_rows(path: Path) -> int:
+    rows = 0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            rows += 1
+    return rows
+
+
+def validate_memory_consistency(track: dict, audit_rows: int) -> list[str]:
+    overall = track.get("overall") or {}
+    if "n" not in overall:
+        return ["track_record overall.n missing"]
+    if overall.get("n") != audit_rows:
+        return [f"track_record overall.n={overall.get('n')} does not match scout_audit rows={audit_rows}"]
+    return []
+
+
 def main() -> int:
-    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, ANALYST, BUNDLES_P, TRACK_P, LESSONS_P):
+    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, ANALYST, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
         if not p.is_file():
             fail(f"missing artifact: {p.relative_to(ROOT)}")
     if errors:
@@ -196,12 +215,20 @@ def main() -> int:
     for k in ("overall", "by_conviction", "by_stance", "updated_at"):
         if k not in track:
             fail(f"track_record missing section {k}")
+    audit_rows = count_jsonl_rows(AUDIT_P)
+    for err in validate_memory_consistency(track, audit_rows):
+        fail(err)
     lessons_text = LESSONS_P.read_text(encoding="utf-8").strip()
     if not lessons_text:
         fail("scout_lessons.md must be non-empty")
     for t in policy["forbidden_terms"]:
         if t in lessons_text:
             fail(f"scout_lessons.md contains forbidden term: {t}")
+    for memory_path in (AUDIT_P, TRACK_P, LESSONS_P, LOCK_P):
+        text = memory_path.read_text(encoding="utf-8")
+        for secret_token in ("DEEPSEEK_API_KEY", "APIFOOTBALL_KEY", "OPENCLAW_APIFOOTBALL_KEY", "Bearer ", "sk-"):
+            if secret_token in text:
+                fail(f"Scout memory file contains secret-like token {secret_token}: {memory_path.relative_to(ROOT)}")
 
     # calls (validate if present)
     n_calls = 0
@@ -239,14 +266,16 @@ def main() -> int:
     bad_scout = {"fixture_id": "Z", "asof_pre_kickoff": False, "availability": {"form": "made_up"}}
     if not validate_scout_payload(bad_scout, "reverse_bad_scout", forbidden_pm):
         fail("reverse: bad scout file shape must be catchable")
+    if not validate_memory_consistency({"overall": {"n": audit_rows + 1}}, audit_rows):
+        fail("reverse: memory n/audit row mismatch must be caught")
 
     if errors:
         for e in errors:
             print(f"FAIL: {e}", file=sys.stderr)
         print(f"W1 scout check FAIL ({len(errors)})")
         return 1
-    print(f"W1 scout check PASS (bundles={len(bundles)}, calls={n_calls}, no leakage, "
-          "bold-but-honest call contract, FADE gated at HIGH conviction, no betting wording)")
+    print(f"W1 scout check PASS (bundles={len(bundles)}, calls={n_calls}, audit_rows={audit_rows}, no leakage, "
+          "bold-but-honest call contract, memory consistent, FADE gated at HIGH conviction, no betting wording)")
     return 0
 
 

@@ -4,6 +4,7 @@
 
 Enforces the corrected "治本" tracking policy:
   * UNTRACKED (regenerable runtime): reports/dashboard/assets/w1_dashboard_data.json, state/*
+    except the four W1_SCOUT learning-memory files explicitly persisted in git
   * TRACKED (source / template / facts — must NOT be untracked):
       match_cards/*.json, reports/dashboard/W1_VISUAL_DASHBOARD.html, data/results/round1_results.json
   * GITIGNORED (local/generated, never committed): data/local_odds/, data/processed/international/, the 2 untracked targets
@@ -23,7 +24,12 @@ ROOT = Path(__file__).resolve().parents[1]
 GITIGNORE = ROOT / ".gitignore"
 
 MUST_BE_UNTRACKED = ["reports/dashboard/assets/w1_dashboard_data.json"]
-MUST_BE_UNTRACKED_DIRS = ["state/"]
+TRACKED_SCOUT_MEMORY = {
+    "state/scout_audit.jsonl",
+    "state/scout_track_record.json",
+    "state/scout_lessons.md",
+    "state/scout_lock.jsonl",
+}
 MUST_BE_TRACKED = [
     "reports/dashboard/W1_VISUAL_DASHBOARD.html",
     "data/results/round1_results.json",
@@ -31,7 +37,11 @@ MUST_BE_TRACKED = [
 MUST_BE_TRACKED_GLOB = ["data/processed/match_cards/group_stage_round1"]  # >=1 tracked
 MUST_BE_GITIGNORED_PATTERNS = [
     "reports/dashboard/assets/w1_dashboard_data.json",
-    "state/",
+    "state/*",
+    "!state/scout_audit.jsonl",
+    "!state/scout_track_record.json",
+    "!state/scout_lessons.md",
+    "!state/scout_lock.jsonl",
     "data/local_odds/",
     "data/processed/international/",
 ]
@@ -64,10 +74,13 @@ def main() -> int:
     for rel in MUST_BE_UNTRACKED:
         if tracked(rel):
             fail(f"runtime artifact still tracked (should be git rm --cached): {rel}")
-    for d in MUST_BE_UNTRACKED_DIRS:
-        t = tracked_under(d)
-        if t:
-            fail(f"runtime dir still tracked ({len(t)} files, e.g. {t[:2]}): {d}")
+    tracked_state = set(tracked_under("state/"))
+    unexpected_state = sorted(tracked_state - TRACKED_SCOUT_MEMORY)
+    if unexpected_state:
+        fail(f"runtime state still tracked outside Scout memory allowlist: {unexpected_state[:4]}")
+    missing_memory = sorted(TRACKED_SCOUT_MEMORY - tracked_state)
+    if missing_memory:
+        fail(f"Scout learning memory file not tracked: {missing_memory}")
 
     # 2. source/template/facts must STAY tracked (guard against over-untracking)
     for rel in MUST_BE_TRACKED:
@@ -102,7 +115,7 @@ def main() -> int:
         print(f"rebuild runtime artifacts with: {REBUILD_CMD}")
         return 1
     print("W1 runtime artifact policy check PASS "
-          "(dashboard_data.json + state/ untracked; cards/HTML/results tracked; local/processed gitignored; QC evidence present)")
+          "(dashboard_data.json + raw state untracked; Scout memory allowlisted; cards/HTML/results tracked; local/processed gitignored; QC evidence present)")
     print(f"rebuild runtime artifacts with: {REBUILD_CMD}")
     return 0
 

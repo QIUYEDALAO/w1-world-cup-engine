@@ -24,6 +24,12 @@ BUNDLES_JSON="${STATE_DIR}/w1_scout_bundles.json"
 SHA_FILE="${STATE_DIR}/.scout_bundles.sha"
 STATUS_FILE="${STATE_DIR}/scout_cycle_status.json"
 ERROR_LOG="${STATE_DIR}/scout_cycle_errors.log"
+MEMORY_FILES=(
+  "state/scout_audit.jsonl"
+  "state/scout_track_record.json"
+  "state/scout_lessons.md"
+  "state/scout_lock.jsonl"
+)
 
 FETCH_CMD="${W1_SCOUT_FETCH_CMD:-$PYTHON_BIN scripts/w1_scout_fetch_api_football.py}"
 BUILD_CMD="${W1_SCOUT_BUILD_CMD:-$PYTHON_BIN scripts/w1_scout_bundle.py}"
@@ -32,9 +38,18 @@ CHECK_CMD="${W1_SCOUT_CHECK_CMD:-$PYTHON_BIN scripts/check_w1_scout.py}"
 EMBED_CMD="${W1_SCOUT_EMBED_CMD:-$PYTHON_BIN scripts/w1_scout_embed.py}"
 LOCK_CMD="${W1_SCOUT_LOCK_CMD:-$PYTHON_BIN scripts/w1_scout_ledger.py lock}"
 AUDIT_CMD="${W1_SCOUT_AUDIT_CMD:-$PYTHON_BIN scripts/w1_scout_ledger.py audit}"
+FETCH_OK=0
+FETCH_FAIL=0
 
 ts() { date -u +%FT%TZ; }
 log() { echo "[$(ts)] $*"; }
+persist_memory() {
+  [ "$DRY_RUN" = "1" ] && return 0
+  [ "${W1_SCOUT_DISABLE_MEMORY_COMMIT:-0}" = "1" ] && return 0
+  git add "${MEMORY_FILES[@]}" 2>/dev/null || return 0
+  git diff --cached --quiet -- "${MEMORY_FILES[@]}" || \
+    git commit -m "scout memory: cycle $(date -u +%FT%TZ)" >/dev/null 2>&1 || true
+}
 record_error() {
   [ "$DRY_RUN" = "1" ] && return 0
   mkdir -p "$STATE_DIR"
@@ -47,14 +62,58 @@ record_status() {
   W1_SCOUT_STATUS_RESULT="$2" \
   W1_SCOUT_STATUS_MESSAGE="$3" \
   W1_SCOUT_STATUS_DRY_RUN="$DRY_RUN" \
+  W1_SCOUT_STATUS_FETCH_OK="${FETCH_OK}" \
+  W1_SCOUT_STATUS_FETCH_FAIL="${FETCH_FAIL}" \
   W1_SCOUT_STATUS_FILE="$STATUS_FILE" \
+  W1_SCOUT_DASHBOARD_DATA="$DASHBOARD_DATA" \
   "$PYTHON_BIN" - <<'PY'
 import json, os
 from datetime import datetime, timezone
+from pathlib import Path
+
+def odds_move_summary(path: str) -> dict:
+    p = Path(path)
+    if not p.is_file():
+        return {"status": "UNKNOWN", "moved_fixtures": [], "message_cn": "暂无盘口异动遥测"}
+    try:
+        records = json.loads(p.read_text(encoding="utf-8")).get("match_records", [])
+    except Exception:
+        return {"status": "UNKNOWN", "moved_fixtures": [], "message_cn": "盘口异动遥测读取失败"}
+    moved = []
+    statuses = []
+    stable_like = {"", "STABLE", "UNKNOWN", "DATA_INSUFFICIENT", "SOFT_THIN", "数据不足"}
+    for rec in records:
+        om = rec.get("odds_movement") or {}
+        status = str(om.get("status") or om.get("movement_status") or "").strip()
+        if status:
+            statuses.append(status)
+        if status.upper() not in stable_like and status not in stable_like:
+            moved.append(str(rec.get("fixture_id") or rec.get("match") or "unknown"))
+    overall = "MOVING" if moved else ("STABLE" if statuses else "UNKNOWN")
+    msg = f"{len(moved)} 场出现非稳定盘口状态" if moved else "未发现明确盘口异动"
+    return {"status": overall, "moved_fixtures": moved[:8], "message_cn": msg}
+
 path = os.environ["W1_SCOUT_STATUS_FILE"]
+prior = {}
+try:
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            prior = json.load(f)
+except Exception:
+    prior = {}
+now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+fetch_ok = os.environ["W1_SCOUT_STATUS_FETCH_OK"] == "1"
+fetch_fail = os.environ["W1_SCOUT_STATUS_FETCH_FAIL"] == "1"
+cumulative_fetch_ok = int(prior.get("cumulative_fetch_ok") or 0) + (1 if fetch_ok else 0)
 payload = {
     "schema_version": "W1_SCOUT_CYCLE_STATUS_G2_V1",
-    "updated_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    "updated_at_utc": now,
+    "last_run_utc": now,
+    "last_fetch_utc": now if fetch_ok else prior.get("last_fetch_utc"),
+    "fetch_ok": fetch_ok,
+    "fetch_fail": fetch_fail,
+    "cumulative_fetch_ok": cumulative_fetch_ok,
+    "odds_move_summary": odds_move_summary(os.environ.get("W1_SCOUT_DASHBOARD_DATA", "")),
     "phase": os.environ["W1_SCOUT_STATUS_PHASE"],
     "result": os.environ["W1_SCOUT_STATUS_RESULT"],
     "message_cn": os.environ["W1_SCOUT_STATUS_MESSAGE"],
@@ -169,6 +228,7 @@ log "future fixtures selected=${FUTURE_COUNT}"
 
 if [ "$DRY_RUN" = "1" ]; then
   log "dry-run: no external fetch, no AI call, no state write, no embed, no lock"
+  log "dry_run=true ai_called_count=0 embedded_count=0 locked_count=0 no_old_call_advanced=true"
   exit 0
 fi
 
@@ -181,8 +241,11 @@ if [ "$FUTURE_COUNT" -gt 0 ]; then
   done
   # shellcheck disable=SC2086
   if ! ${FETCH_CMD} ${FETCH_ARGS}; then
+    FETCH_FAIL=1
     log "fetch failed/partial -> continue with existing local data only; no fake values"
     record_error "fetch failed/partial; continued with existing local data"
+  else
+    FETCH_OK=1
   fi
 else
   log "no future fixture -> skip factor fetch; audit only"
@@ -196,6 +259,7 @@ fi
 
 if [ "$FUTURE_COUNT" -eq 0 ]; then
   ${AUDIT_CMD}
+  persist_memory
   record_status "audit_only" "ok" "没有未来 fixture；本轮只执行赛后 audit。"
   log "W1_SCOUT cycle done (audit only)"
   exit 0
@@ -206,6 +270,7 @@ PREV="$(cat "$SHA_FILE" 2>/dev/null || echo "")"
 if [ "$NEW" = "$PREV" ]; then
   log "no effective delta -> skip DeepSeek, embed, lock; audit only"
   ${AUDIT_CMD}
+  persist_memory
   record_status "no_delta" "ok" "赛前有效因子无变化；未调用 AI、未上屏、未锁定，仅 audit。"
   log "W1_SCOUT cycle done (no delta)"
   exit 0
@@ -217,6 +282,7 @@ if ! ${ANALYST_CMD}; then
   record_status "analyst" "failed" "AI 分析师失败；未更新指纹、未上屏、未锁定。"
   record_error "analyst failed; sha/embed/lock blocked"
   ${AUDIT_CMD}
+  persist_memory
   exit 1
 fi
 
@@ -232,5 +298,6 @@ echo "$NEW" > "$SHA_FILE"
 ${EMBED_CMD}
 ${LOCK_CMD}
 ${AUDIT_CMD}
+persist_memory
 record_status "complete" "ok" "Scout 周期完成；AI call 已过闸门并完成可见性/锁定/audit。"
 log "W1_SCOUT G2 cycle done"

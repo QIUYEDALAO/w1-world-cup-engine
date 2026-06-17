@@ -21,4 +21,8 @@ data/processed/international/
 data/forward_ledger/
 data/scout/
 reports/dashboard/assets/w1_dashboard_data.json
-state/
+state/*
+!state/scout_audit.jsonl
+!state/scout_track_record.json
+!state/scout_lessons.md
+!state/scout_lock.jsonl

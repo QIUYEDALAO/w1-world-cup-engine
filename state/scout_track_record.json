@@ -1,0 +1,29 @@
+{
+  "stage": "W1_SCOUT",
+  "schema_version": "W1_SCOUT_TRACK_V1",
+  "note_cn": "冷启动:空。随赛后审计累积——这是诚实的成长,不能无中生有。",
+  "overall": {
+    "n": 8,
+    "hit": 0,
+    "hit_rate": 0.0
+  },
+  "by_conviction": {
+    "LOW": {
+      "n": 8,
+      "hit": 0
+    }
+  },
+  "by_stance": {
+    "AGREE": {
+      "n": 8,
+      "hit": 0,
+      "beat_market": 0
+    }
+  },
+  "by_situation": {},
+  "calibration": {
+    "note_cn": "实测 confidence vs 命中率;随审计填充",
+    "bins": {}
+  },
+  "updated_at": "2026-06-17T20:01:11Z"
+}

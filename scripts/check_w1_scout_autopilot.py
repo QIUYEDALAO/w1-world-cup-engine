@@ -7,7 +7,8 @@ Validates the production loop contract without calling api-football or DeepSeek:
 - --dry-run exits cleanly and does not mutate runtime status.
 - no effective delta does not call analyst/embed/lock.
 - analyst nonzero does not update sha/embed/lock and exits nonzero.
-- state/ and data/scout/ remain runtime-only.
+- raw state/ and data/scout/ remain runtime-only; the four Scout learning-memory
+  files are explicitly allowed to be tracked.
 """
 from __future__ import annotations
 
@@ -23,6 +24,12 @@ RUNNER = ROOT / "scripts/run_w1_scout_cycle.sh"
 POLICY = ROOT / "config/w1_scout_autopilot_policy.json"
 HTML_CHECK = ROOT / "scripts/check_w1_visual_dashboard.py"
 SCOUT_CHECK = ROOT / "scripts/check_w1_scout.py"
+SCOUT_MEMORY_ALLOWLIST = {
+    "state/scout_audit.jsonl",
+    "state/scout_track_record.json",
+    "state/scout_lessons.md",
+    "state/scout_lock.jsonl",
+}
 
 errors: list[str] = []
 
@@ -84,6 +91,9 @@ def assert_runner_static() -> None:
         "future fixtures selected",
         "scout_cycle_status.json",
         "scout_cycle_errors.log",
+        "persist_memory",
+        "scout memory: cycle",
+        "W1_SCOUT_DISABLE_MEMORY_COMMIT",
         "已开赛/完赛 fixture: 只 audit",
     ]
     for token in required:
@@ -99,7 +109,7 @@ def assert_dry_run() -> None:
     with tempfile.TemporaryDirectory(prefix="w1_scout_g2_dry_") as td:
         state = Path(td) / "state"
         state.mkdir()
-        env = {"W1_SCOUT_STATE_DIR": str(state), "W1_SCOUT_FORCE_HASH": "dry"}
+        env = {"W1_SCOUT_STATE_DIR": str(state), "W1_SCOUT_FORCE_HASH": "dry", "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1"}
         before = set(state.iterdir())
         proc = run(["bash", str(RUNNER), "--dry-run"], env=env)
         after = set(state.iterdir())
@@ -138,6 +148,7 @@ def assert_no_delta_blocks_ai_embed_lock() -> None:
             "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
             "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
             "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
         }
         proc = run(["bash", str(RUNNER)], env=env)
         if proc.returncode != 0:
@@ -178,6 +189,7 @@ def assert_analyst_fail_blocks_progress() -> None:
             "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
             "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
             "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
         }
         proc = run(["bash", str(RUNNER)], env=env)
         if proc.returncode == 0:
@@ -195,9 +207,13 @@ def assert_analyst_fail_blocks_progress() -> None:
 
 
 def assert_gitignored_runtime() -> None:
-    tracked = run("git ls-files state data/scout").stdout.strip()
-    if tracked:
-        fail(f"runtime state/data scout files must not be tracked: {tracked}")
+    tracked = set(x for x in run("git ls-files state data/scout").stdout.splitlines() if x.strip())
+    unexpected = sorted(tracked - SCOUT_MEMORY_ALLOWLIST)
+    missing_memory = sorted(SCOUT_MEMORY_ALLOWLIST - tracked)
+    if unexpected:
+        fail(f"runtime state/data scout files must not be tracked outside memory allowlist: {unexpected}")
+    if missing_memory:
+        fail(f"Scout learning-memory files must be tracked: {missing_memory}")
 
 
 def main() -> int:
@@ -215,7 +231,7 @@ def main() -> int:
             print(f"FAIL: {error}", file=sys.stderr)
         print(f"W1 scout autopilot check FAIL ({len(errors)})")
         return 1
-    print("W1 scout autopilot check PASS (dry-run/no-delta/analyst-fail gates, runtime gitignore, policy)")
+    print("W1 scout autopilot check PASS (dry-run/no-delta/analyst-fail gates, Scout memory allowlist, raw runtime gitignore, policy)")
     return 0
 
 
