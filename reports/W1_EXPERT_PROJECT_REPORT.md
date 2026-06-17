@@ -446,6 +446,7 @@ python3 scripts/check_w1_market_probability_panel.py
 - `scripts/check_w1_forward_prospective_run.py`（W1_FORWARD_LEDGER_PROSPECTIVE_RUN_V1：pre_match_view 不可变/write-once、lock_as_of≤kickoff（无 hindsight）、audit.locked_prediction==view（不可变）且引用存在的 view、result.source 本地、store gitignored、新脚本无外部抓取、engine/DEFAULT_RHO/configs 未改、无促性表达；skip-safe）
 - `scripts/check_w1_visual_dashboard.py` 强化 `assert_first_screen`（W1_OPPORTUNITY_SELECTOR_PHASE_A：Director View 必含中性 hero、四灯 `首发/数据可信度/盘口跟踪/阶段`、候选共识、比分峰值脚注与 `当前观察建议`；Header 右上 chip 只显示比赛生命周期，不再显示 PLAY_GUARD/W1 状态；BTTS 条件显示；旧标签 `盘口异动/现在该干嘛/本场参考摘要` 不得回到 Director View。纯展示重排,未改模型/build 计算/API。Analyst Debug View 保留完整矩阵、盘口面板和 candidates 表）
 - `scripts/check_w1_opportunity_phase_a.py`（W1_OPPORTUNITY_SELECTOR_PHASE_A：同源 candidates_snapshot 覆盖 1X2/OU/AH/BTTS/score_pool；强制 `basis=market_implied_score_matrix`、`independent_edge=false`、`calibrated=false`；离线 eval 限 128 FULL subset；dashboard 仅展示候选共识/专家表，无单一主结论；prospective future lock 支持 candidates_snapshot 且不重写既有 view；engine/DEFAULT_RHO/decision_policy/thresholds 未改，无外部抓取）
+- `scripts/check_w1_fivedim_lite.py`（W1_FIVEDIM_LITE_STAGE_A：只读 FiveDim Lite 数据卡 schema/policy/builder；market_view 复用 `w1_candidate_builder.py`，四维缺失如实 `missing/degraded`；`post_match_only` 黑名单、促性词、`independent_edge=true` 均有反向测试；无网络导入、不读 `round1_results`、不接 dashboard/predict/build/生产）
 
 ## 8. 当前 WARN_ONLY / 限制
 
