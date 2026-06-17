@@ -329,6 +329,18 @@ def assert_scout_embed(text: str) -> None:
             fail(f"Embedded Scout cycle status missing {key}")
     if "非推介" not in str(status_payload.get("redlines_cn", "")):
         fail("Embedded Scout cycle status must keep non-promotional disclaimer")
+    learning = re.search(r'<script id="w1-scout-learning-status" type="application/json">(.*?)</script>', text, re.S)
+    if not learning:
+        fail("HTML must embed Scout learning status summary")
+    try:
+        learning_payload = json.loads(learning.group(1))
+    except json.JSONDecodeError as exc:
+        fail(f"Embedded Scout learning status JSON is not parseable: {exc}")
+    for key in ("schema_version", "locked_count", "audited_count", "sample_status_cn", "lessons_status_cn", "fallback_cn"):
+        if key not in learning_payload:
+            fail(f"Embedded Scout learning status missing {key}")
+    if "等待赛后审计累积" not in str(learning_payload.get("fallback_cn", "")):
+        fail("Scout learning status must carry no-sample fallback wording")
 
 
 def _func_body(text: str, name: str) -> str:
@@ -342,9 +354,9 @@ def assert_first_screen(text: str) -> None:
     panel = _func_body(text, "function renderPanel(")
     if not panel:
         fail("renderPanel function missing")
-    first_expr = "pBanner()+pHeader(r)+pScoutAnalyst(r)+pScoutCycleStatus()+pPredict(r)"
+    first_expr = "pBanner()+pHeader(r)+pScoutAnalyst(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)"
     if first_expr not in panel:
-        fail("renderPanel must lead with AI analyst + cycle status + operation controls")
+        fail("renderPanel must lead with AI analyst + cycle status + learning status + operation controls")
     expert_idx = panel.find('`<div id="expert"')
     if expert_idx < 0:
         fail("expert section missing")
@@ -358,9 +370,18 @@ def assert_first_screen(text: str) -> None:
     scout = _func_body(text, "function pScoutAnalyst(")
     if not scout:
         fail("pScoutAnalyst function missing")
-    for need in ("AI 分析师 · DeepSeek", "DeepSeek Pro", "已读", "AI 观点", "independent_edge=false", "研究用途 · 非推介 · 非独立优势"):
+    for need in ("AI 分析师 · DeepSeek", "DeepSeek Pro", "已读", "AI 观点", "非独立优势", "研究用途 · 非推介 · 非独立优势", "比分锚点", "可信度："):
         if need not in scout:
             fail(f"AI-first scout card missing token: {need}")
+    for raw in ("home win", "away win", "draw", "MEDIUM", "HIGH", "LOW", "independent_edge=false", "outcome_lean", "scoreline_lean", "conviction", "market_divergence"):
+        if raw in scout:
+            fail(f"AI-first scout card must not display raw internal token: {raw}")
+    if "zhOutcome(" not in scout or "zhConfidence(" not in scout or "zhStance(" not in scout:
+        fail("AI-first scout card must use Chinese display mappers")
+    if "stripAiDisplayText(" not in scout:
+        fail("AI-first scout card must sanitize probability-like text from AI display")
+    if "fmtP(" in scout or "probability" in scout or "概率" in scout:
+        fail("AI-first scout card must not render probability numbers as its main read")
     if re.search(r"(?<![A-Za-z])V4(?![A-Za-z])", scout, re.I):
         fail("AI-first scout card must not expose old V4 token")
     cycle = _func_body(text, "function pScoutCycleStatus(")
@@ -369,13 +390,22 @@ def assert_first_screen(text: str) -> None:
     for need in ("运行 / 错误日志", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "刷新视图", "专家视图"):
         if need not in cycle:
             fail(f"Scout cycle status card missing token: {need}")
+    learning_func = _func_body(text, "function pScoutLearningStatus(")
+    if not learning_func:
+        fail("pScoutLearningStatus function missing")
+    for need in ("学习状态", "已锁定", "已审计", "等待赛后审计累积", "lessons 未自动蒸馏", "赛后审计", "置信校准"):
+        if need not in learning_func:
+            fail(f"Scout learning status display missing token: {need}")
+    for bad in ("AI 已自动训练", "AI 已完成进化", "稳定战胜市场", "保证提高命中率", "稳赚"):
+        if bad in learning_func:
+            fail(f"Scout learning status must not use overclaim wording: {bad}")
 
     pcore = _func_body(text, "function pCore(")
     if not pcore:
         fail("pCore function missing")
     for need in ("Director View", "一句话 + 四灯 + 共识", "首发", "数据可信度", "盘口跟踪", "阶段", "当前观察建议", "五维就绪度", "研究结论"):
         if need not in pcore:
-            fail(f"main card (pCore) first screen missing block: {need}")
+            fail(f"expert folded W1 card (pCore) missing block: {need}")
     if "repeat(4,1fr)" in pcore or "market-mini" in pcore:
         fail("Director View status lights must use compact inline chips, not four wide cards")
     for need in ("chip=", "snapTxt", "class=\"chips\""):
@@ -388,7 +418,7 @@ def assert_first_screen(text: str) -> None:
         if strong in pcore:
             fail(f"Director View hero/function body contains strong prediction wording: {strong}")
     if "分布峰值" not in pcore or "别当真" not in pcore:
-        fail("main card exact-score line must stay a weakened reference labelled 分布峰值·别当真")
+        fail("expert folded W1 card exact-score line must stay a weakened reference labelled 分布峰值·别当真")
     header = _func_body(text, "function pHeader(")
     if not header:
         fail("pHeader function missing")
@@ -465,8 +495,8 @@ def assert_html(data: dict) -> None:
         if panel_idx < 0:
             fail("renderPanel function missing")
         panel_body = text[panel_idx:text.find("function toggleExpert", panel_idx)]
-        if "pScoutAnalyst(r)+pScoutCycleStatus()+pPredict(r)" not in panel_body:
-            fail("AI analyst + cycle status must render before operation controls")
+        if "pScoutAnalyst(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)" not in panel_body:
+            fail("AI analyst + cycle status + learning status must render before operation controls")
         expert_idx = panel_body.find('`<div id="expert"')
         if expert_idx < 0:
             fail("expert section missing in renderPanel")

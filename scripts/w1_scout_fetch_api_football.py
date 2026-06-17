@@ -415,7 +415,14 @@ def build_rest_days(home_recent: list[dict[str, Any]], away_recent: list[dict[st
 
 def build_api_pred(api: ApiFootball, fixture_id: str) -> dict[str, Any] | None:
     rows = response_rows(api.get("/predictions", fixture=fixture_id))
-    return strip_forbidden_postmatch_fields(rows[0]) if rows else None
+    if not rows:
+        return None
+    return {
+        "source": "external_api_prediction",
+        "basis": "third_party_model",
+        "not_independent_edge": True,
+        "payload": strip_forbidden_postmatch_fields(rows[0]),
+    }
 
 
 def availability_from_blocks(bundle: dict[str, Any]) -> dict[str, str]:

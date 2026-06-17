@@ -145,6 +145,9 @@ def main() -> int:
     for token in ("FORBIDDEN_POSTMATCH_KEYS", "strip_forbidden_postmatch_fields", "build_api_pred"):
         if token not in fetcher:
             fail(f"fetcher missing api response post-match scrub token: {token}")
+    for token in ("external_api_prediction", "third_party_model", "not_independent_edge"):
+        if token not in fetcher:
+            fail(f"api_pred must be labelled as third-party comparison only: {token}")
     if "write_json(RESULTS" in fetcher or "RESULTS_JSON" in fetcher:
         fail("fetcher must not write result ledger")
     if "w1_score_engine" in fetcher or "DEFAULT_RHO" in fetcher:

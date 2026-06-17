@@ -1,7 +1,7 @@
 # W1_SCOUT_G2_AUTOPILOT_AI_FIRST_RESULT
 
 **阶段**: G2 Scout 自动生产闭环 + AI-first Director View  
-**结论**: 本地实现已完成，完整 checker 验证 PASS；未 push，等待验收。
+**结论**: 已提交并 push，等待真机 dashboard 体验验收。
 
 ## 1. 固定格式验收表
 

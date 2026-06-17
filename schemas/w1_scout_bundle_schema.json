@@ -33,7 +33,7 @@
     "standings": {"type": "object", "properties": {"rank_home": {}, "rank_away": {}, "pts_gap": {}}},
     "h2h": {"type": "object", "properties": {"last_n": {}, "home_wins": {}, "draws": {}, "away_wins": {}}},
     "rest_days": {"type": "object", "properties": {"home": {}, "away": {}, "diff": {}}},
-    "api_pred": {"type": ["object", "null"], "description": "api-football 自带预测,仅对照,不直接采信"},
+    "api_pred": {"type": ["object", "null"], "description": "api-football 自带预测,仅对照,不直接采信; source=external_api_prediction, basis=third_party_model, not_independent_edge"},
 
     "availability": {
       "type": "object",
