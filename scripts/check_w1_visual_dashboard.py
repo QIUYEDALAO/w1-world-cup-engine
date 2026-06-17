@@ -298,25 +298,40 @@ def assert_scout_embed(text: str) -> None:
     for idx, call in enumerate(calls):
         if not isinstance(call, dict):
             fail(f"Embedded Scout call #{idx} must be an object")
-        for key in ("fixture_id", "call", "market_divergence", "honesty_label", "independent_edge"):
+        for key in ("fixture_id", "read", "data_readiness", "honesty_label", "independent_edge"):
             if key not in call:
                 fail(f"Embedded Scout call #{idx} missing {key}")
         if call.get("independent_edge") is not False:
             fail(f"Embedded Scout call {call.get('fixture_id')} independent_edge must be false")
-        if "AI 观点" not in str(call.get("honesty_label", "")):
+        if "AI 解读" not in str(call.get("honesty_label", "")):
             fail(f"Embedded Scout call {call.get('fixture_id')} honesty_label must be visible")
-        cbody = call.get("call")
-        if not isinstance(cbody, dict):
-            fail(f"Embedded Scout call {call.get('fixture_id')} call must be object")
-        for key in ("outcome_lean", "scoreline_lean", "confidence"):
-            if key not in cbody:
-                fail(f"Embedded Scout call {call.get('fixture_id')} call.{key} missing")
-        divergence = call.get("market_divergence")
-        if not isinstance(divergence, dict):
-            fail(f"Embedded Scout call {call.get('fixture_id')} market_divergence must be object")
-        for key in ("stance", "where_cn", "why_cn"):
-            if key not in divergence:
-                fail(f"Embedded Scout call {call.get('fixture_id')} market_divergence.{key} missing")
+        read = call.get("read")
+        if not isinstance(read, dict):
+            fail(f"Embedded Scout call {call.get('fixture_id')} read must be object")
+            read = {}
+        for key in ("tilt_cn", "score_band_cn", "watch_points_cn", "risks_cn", "vs_market_cn"):
+            if key not in read:
+                fail(f"Embedded Scout call {call.get('fixture_id')} read.{key} missing")
+        if not isinstance(read.get("watch_points_cn"), list) or not read.get("watch_points_cn"):
+            fail(f"Embedded Scout call {call.get('fixture_id')} must include watch_points_cn")
+        if not isinstance(read.get("risks_cn"), list) or not read.get("risks_cn"):
+            fail(f"Embedded Scout call {call.get('fixture_id')} must include risks_cn")
+        for old_key in ("market_divergence", "conviction"):
+            if old_key in call:
+                fail(f"Embedded Scout call {call.get('fixture_id')} must not expose old field {old_key}")
+    reviews = re.search(r'<script id="w1-scout-reviews" type="application/json">(.*?)</script>', text, re.S)
+    if not reviews:
+        fail("HTML must embed Scout reviews for post-match review display")
+    calibration = re.search(r'<script id="w1-scout-calibration" type="application/json">(.*?)</script>', text, re.S)
+    if not calibration:
+        fail("HTML must embed Scout calibration summary")
+    try:
+        calibration_payload = json.loads(calibration.group(1))
+    except json.JSONDecodeError as exc:
+        fail(f"Embedded Scout calibration JSON is not parseable: {exc}")
+        calibration_payload = {}
+    if "自我体检" not in str(calibration_payload.get("note_cn", "")):
+        fail("Scout calibration must state self-check, not market-beating evidence")
     status = re.search(r'<script id="w1-scout-cycle-status" type="application/json">(.*?)</script>', text, re.S)
     if not status:
         fail("HTML must embed a stable Scout cycle status baseline")
@@ -354,7 +369,7 @@ def assert_first_screen(text: str) -> None:
     panel = _func_body(text, "function renderPanel(")
     if not panel:
         fail("renderPanel function missing")
-    first_expr = "pBanner()+pHeader(r)+pScoutAnalyst(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)"
+    first_expr = "pBanner()+pHeader(r)+pScoutAnalyst(r)+pScoutReview(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)"
     if first_expr not in panel:
         fail("renderPanel must lead with AI analyst + cycle status + learning status + operation controls")
     expert_idx = panel.find('`<div id="expert"')
@@ -370,14 +385,12 @@ def assert_first_screen(text: str) -> None:
     scout = _func_body(text, "function pScoutAnalyst(")
     if not scout:
         fail("pScoutAnalyst function missing")
-    for need in ("AI 分析师 · DeepSeek", "DeepSeek Pro", "已读", "AI 观点", "非独立优势", "研究用途 · 非推介 · 非独立优势", "比分锚点", "可信度："):
+    for need in ("本场解读 · DeepSeek", "已读", "AI 解读", "非独立优势", "研究用途 · 非推介 · 非独立优势", "看点", "风险", "与市场差异(讨论点)", "数据就绪度"):
         if need not in scout:
             fail(f"AI-first scout card missing token: {need}")
-    for raw in ("home win", "away win", "draw", "MEDIUM", "HIGH", "LOW", "independent_edge=false", "outcome_lean", "scoreline_lean", "conviction", "market_divergence"):
+    for raw in ("home win", "away win", "draw", "MEDIUM", "HIGH", "LOW", "independent_edge=false", "outcome_lean", "scoreline_lean", "conviction", "market_divergence", "FADE_MARKET", "LEAN_DIFFERENT"):
         if raw in scout:
             fail(f"AI-first scout card must not display raw internal token: {raw}")
-    if "zhOutcome(" not in scout or "zhConfidence(" not in scout or "zhStance(" not in scout:
-        fail("AI-first scout card must use Chinese display mappers")
     if "stripAiDisplayText(" not in scout:
         fail("AI-first scout card must sanitize probability-like text from AI display")
     if "fmtP(" in scout or "probability" in scout or "概率" in scout:
@@ -393,7 +406,13 @@ def assert_first_screen(text: str) -> None:
     learning_func = _func_body(text, "function pScoutLearningStatus(")
     if not learning_func:
         fail("pScoutLearningStatus function missing")
-    for need in ("学习状态", "已锁定", "已审计", "等待赛后审计累积", "lessons 未自动蒸馏", "赛后审计", "置信校准"):
+    review = _func_body(text, "function pScoutReview(")
+    if not review:
+        fail("pScoutReview function missing")
+    for need in ("赛后复盘", "AI 复盘·赛后对照", "赛前原文未改"):
+        if need not in review:
+            fail(f"Scout review display missing token: {need}")
+    for need in ("学习状态", "解读", "审计", "复盘", "平均就绪度", "自我体检", "赛后审计", "自我校准"):
         if need not in learning_func:
             fail(f"Scout learning status display missing token: {need}")
     for bad in ("AI 已自动训练", "AI 已完成进化", "稳定战胜市场", "保证提高命中率", "稳赚"):
@@ -495,7 +514,7 @@ def assert_html(data: dict) -> None:
         if panel_idx < 0:
             fail("renderPanel function missing")
         panel_body = text[panel_idx:text.find("function toggleExpert", panel_idx)]
-        if "pScoutAnalyst(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)" not in panel_body:
+        if "pScoutAnalyst(r)+pScoutReview(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)" not in panel_body:
             fail("AI analyst + cycle status + learning status must render before operation controls")
         expert_idx = panel_body.find('`<div id="expert"')
         if expert_idx < 0:
@@ -507,7 +526,7 @@ def assert_html(data: dict) -> None:
         if "pBanner()+pHeader(r)+pPredict(r)+pCore(r)" in panel_body:
             fail("Predict controls must not render before recommendation card")
         assert_first_screen(text)
-        for token in ("function pCandidateConsensus", "function pCandidateExpert", "候选共识", "同源矩阵", "market_implied_score_matrix", "function pScoutAnalyst", "AI 分析师"):
+        for token in ("function pCandidateConsensus", "function pCandidateExpert", "候选共识", "同源矩阵", "market_implied_score_matrix", "function pScoutAnalyst", "本场解读"):
             if token not in text:
                 fail(f"HTML missing Phase A candidate token: {token}")
         assert_scout_embed(text)
