@@ -1,0 +1,66 @@
+{
+  "policy_version": "W1_FACTOR_SAMPLE_V1",
+  "stage": "W1_FIVEDIM_HISTORICAL_VALIDATION_C",
+  "purpose": "离线、只读地组装 leakage-safe 因子验证样本。不接 API、不动模型/λ、纯研究。",
+  "independent_edge_claimed": false,
+  "production_wired": false,
+
+  "windows": { "primary_n": 5, "secondary_n": 10, "min_history": 3 },
+
+  "layers": {
+    "league": {
+      "source_glob": "data/historical/raw/football-data/*.csv",
+      "divs": ["E0", "D1", "I1", "SP1", "F1"],
+      "market": "Avg 1X2 multiplicative devig",
+      "split_by": "season",
+      "train_seasons": ["2021", "2122", "2223", "2324"],
+      "test_seasons": ["2425", "2526"]
+    },
+    "wc_qualifier": {
+      "source": "data/processed/international/w1_international_dataset_extended.csv",
+      "filter": "competition == WorldCup2026Qualifiers",
+      "market": "odds_1x2 multiplicative devig",
+      "split_by": "date_70_30"
+    },
+    "wc_finals": {
+      "source": "data/processed/international/w1_international_dataset_extended.csv",
+      "filter": "phase == finals",
+      "market": "odds_1x2 multiplicative devig",
+      "split_by": "tournament_holdout",
+      "note": "n=192 小样本，仅方向性结论，不给点估计强结论"
+    }
+  },
+
+  "elo": { "init": 1500, "k": 20, "home_field_advantage_elo": 60, "neutral_hfa": 0,
+           "pool_rule": "每联赛(Div)独立池；国际赛单一池" },
+
+  "features_prematch": ["elo_diff", "ppg_diff_n", "gd_diff_n", "sotr_diff_n", "xg_diff_n", "rest_days_diff"],
+  "feature_notes": {
+    "elo_diff": "赛前 ELO(home-away)，由历史赛果离线迭代，不接 API",
+    "ppg_diff_n": "近 N 场场均积分差(仅该队该场之前)",
+    "gd_diff_n": "近 N 场场均净胜球差",
+    "sotr_diff_n": "近 N 场射正率差(联赛 HST/HS；国际 sot/shots)——滚动，非当场",
+    "xg_diff_n": "近 N 场滚动 xG 差(仅国际 xg 子集；联赛为空，不插补)",
+    "rest_days_diff": "两队距上一场天数差"
+  },
+
+  "forbidden_current_match_columns": [
+    "FTHG", "FTAG", "HS", "AS", "HST", "AST", "HC", "AC", "HF", "AF", "HY", "AY", "HR", "AR",
+    "home_xg", "away_xg", "home_shots", "away_shots", "home_sot", "away_sot",
+    "home_corners", "away_corners", "home_goals_90", "away_goals_90"
+  ],
+  "leakage_rule": "当场赛后列只能(a)更新滚动/ELO 状态供未来比赛、(b)作标签 y；绝不能作当场特征。emitted 特征列只允许 elo_/ppg_/gd_/sotr_/xg_/rest_ 前缀 + 市场概率。",
+
+  "market_devig": "对每个市场按 1/赔率 归一化(基础乘法去水)",
+  "output": "state/w1_factor_validation_sample.csv",
+  "output_summary": "state/w1_factor_validation_sample_summary.json",
+  "output_gitignored": true,
+
+  "redlines": [
+    "只读本地 CSV；不接 API/不爬取/不采购",
+    "不动 w1_score_engine / DEFAULT_RHO / build λ·矩阵 / 受保护 config / dashboard",
+    "不外推 league->international、不外推 finals->qualifier、不外推 128->1081",
+    "缺失 xg 不插补；窗口不足标 low_history",
+    "本阶段不把任何因子系数写入生产、不声明独立优势"
+  ]
+}
