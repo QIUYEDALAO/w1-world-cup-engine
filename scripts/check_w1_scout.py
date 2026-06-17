@@ -18,6 +18,7 @@ POLICY_P = ROOT / "config/w1_scout_policy.json"
 SCHEMA_P = ROOT / "schemas/w1_scout_bundle_schema.json"
 BUNDLE_MOD = ROOT / "scripts/w1_scout_bundle.py"
 FETCHER = ROOT / "scripts/w1_scout_fetch_api_football.py"
+ANALYST = ROOT / "scripts/w1_scout_analyst.py"
 BUNDLES_P = ROOT / "state/w1_scout_bundles.json"
 CALLS_P = ROOT / "state/w1_scout_calls.json"
 TRACK_P = ROOT / "state/scout_track_record.json"
@@ -111,7 +112,7 @@ def validate_scout_file(path: Path, forbidden: list[str]) -> list[str]:
 
 
 def main() -> int:
-    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, BUNDLES_P, TRACK_P, LESSONS_P):
+    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, ANALYST, BUNDLES_P, TRACK_P, LESSONS_P):
         if not p.is_file():
             fail(f"missing artifact: {p.relative_to(ROOT)}")
     if errors:
@@ -135,10 +136,31 @@ def main() -> int:
     for token in ("SCOUT_DIR", "data/scout", "load_api_key", "APIFOOTBALL_", "OPENCLAW_APIFOOTBALL_KEY"):
         if token not in fetcher:
             fail(f"fetcher missing token: {token}")
+    for token in ("/fixtures?team=&season=&status=FT", "/fixtures/statistics?fixture=", "dt < kickoff"):
+        if token not in fetcher:
+            fail(f"fetcher missing pre-match rolling-data guard token: {token}")
     if "write_json(RESULTS" in fetcher or "RESULTS_JSON" in fetcher:
         fail("fetcher must not write result ledger")
     if "w1_score_engine" in fetcher or "DEFAULT_RHO" in fetcher:
         fail("fetcher must not import/alter score engine")
+
+    analyst = ANALYST.read_text(encoding="utf-8")
+    for token in (
+        "ANTHROPIC_API_KEY",
+        "https://api.anthropic.com/v1/messages",
+        "validate_call",
+        "state/w1_scout_calls.json",
+        "honesty_label",
+        "independent_edge",
+        "--dry-run",
+    ):
+        if token not in analyst:
+            fail(f"analyst missing token: {token}")
+    for token in ("actual_score", "fulltime", "ft_score", "post_match_calibration", "w1_score_engine", "DEFAULT_RHO"):
+        if token in analyst:
+            fail(f"analyst must not read/use redline or post-match token: {token}")
+    if "OPENAI_API_KEY" in analyst or "DEEPSEEK_API_KEY" in analyst:
+        fail("analyst must follow the T5 Anthropic route, not OpenAI/DeepSeek routes")
 
     # bundle leakage
     leaks = bundle_leak(bundles, forbidden_pm)
