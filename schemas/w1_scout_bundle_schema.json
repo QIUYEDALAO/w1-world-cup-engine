@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "W1 Scout Bundle (per-match pre-match data pack)",
+  "description": "每场赛前数据包,喂给 AI 分析师。只含【赛前可得】数据;绝不含当场赛后统计。form/xg_roll 由对手历史滚动得来(赛前),非当场。",
+  "type": "object",
+  "required": ["fixture_id", "kickoff_utc", "home", "away", "asof_pre_kickoff", "market", "availability"],
+  "properties": {
+    "fixture_id": {"type": "string"},
+    "kickoff_utc": {"type": "string"},
+    "home": {"type": "string"},
+    "away": {"type": "string"},
+    "league": {"type": "string"},
+    "season": {"type": ["string", "integer"]},
+    "asof_pre_kickoff": {"const": true, "description": "断言:数据快照早于开赛"},
+    "fetched_at_utc": {"type": ["string", "null"]},
+
+    "market": {
+      "type": "object",
+      "description": "来自 W1 市场读数(底座,不改)",
+      "properties": {"p_home": {}, "p_draw": {}, "p_away": {}, "ah_line": {}, "ou_line": {}}
+    },
+
+    "form_home": {"$ref": "#/$defs/form"},
+    "form_away": {"$ref": "#/$defs/form"},
+    "xg_roll_home": {"$ref": "#/$defs/xg_roll"},
+    "xg_roll_away": {"$ref": "#/$defs/xg_roll"},
+    "lineup": {
+      "type": "object",
+      "properties": {"confirmed": {"type": "boolean"}, "formation_home": {}, "formation_away": {}, "key_absences": {"type": "array"}}
+    },
+    "injuries_home": {"type": "array", "items": {"$ref": "#/$defs/injury"}},
+    "injuries_away": {"type": "array", "items": {"$ref": "#/$defs/injury"}},
+    "standings": {"type": "object", "properties": {"rank_home": {}, "rank_away": {}, "pts_gap": {}}},
+    "h2h": {"type": "object", "properties": {"last_n": {}, "home_wins": {}, "draws": {}, "away_wins": {}}},
+    "rest_days": {"type": "object", "properties": {"home": {}, "away": {}, "diff": {}}},
+    "api_pred": {"type": ["object", "null"], "description": "api-football 自带预测,仅对照,不直接采信"},
+
+    "availability": {
+      "type": "object",
+      "description": "每个维度 available/partial/missing —— 没抓到就如实 missing,不造值",
+      "additionalProperties": {"enum": ["available", "partial", "missing"]}
+    },
+    "missing_fields": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "form": {
+      "type": "object",
+      "properties": {"last5_wdl": {}, "gf_avg": {}, "ga_avg": {}, "ppg": {}, "home_away_split": {}, "availability": {"enum": ["available", "partial", "missing"]}}
+    },
+    "xg_roll": {
+      "type": "object",
+      "description": "滚动 xG(赛前,取该队过往场),非当场赛后",
+      "properties": {"xg_for": {}, "xg_against": {}, "shots": {}, "sot": {}, "window_n": {}, "availability": {"enum": ["available", "partial", "missing"]}}
+    },
+    "injury": {"type": "object", "properties": {"player": {}, "importance": {}}}
+  }
+}
