@@ -4,8 +4,9 @@
   "note_cn": "冷启动:空。随赛后审计累积——这是诚实的成长,不能无中生有。",
   "overall": {
     "n": 8,
-    "hit": 0,
-    "hit_rate": 0.0
+    "aligned": 0,
+    "aligned_known": 0,
+    "alignment_rate": null
   },
   "by_conviction": {
     "LOW": {
@@ -25,5 +26,19 @@
     "note_cn": "实测 confidence vs 命中率;随审计填充",
     "bins": {}
   },
-  "updated_at": "2026-06-17T20:01:11Z"
+  "updated_at": "2026-06-17T22:01:15Z",
+  "by_readiness": {
+    "unknown": {
+      "n": 8,
+      "aligned": 0,
+      "aligned_known": 0
+    }
+  },
+  "by_tilt_bucket": {
+    "未分档": {
+      "n": 8,
+      "aligned": 0,
+      "aligned_known": 0
+    }
+  }
 }
