@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 """Checker for W1_SCOUT (AI analyst loop).
 
-Guards: bundle is pre-match-only (no post-match leakage); every AI call is bold but
-honest (states a stance, gives real reasoning — not bare translation; FADE_MARKET only
-at HIGH conviction; carries an 'AI 观点' honesty label; independent_edge=false; no
-betting/guarantee wording). Only ADDS assertions; each safety rule has a reverse test.
+Guards: bundle is pre-match-only (no post-match leakage); every AI output is a
+structured match read, not a prediction selector (has tilt/watch points/risks,
+uses honest score-band language, carries an 'AI 解读' honesty label,
+independent_edge=false, and avoids betting/guarantee/edge wording). Only ADDS
+assertions; each safety rule has a reverse test.
 """
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 from pathlib import Path
 
@@ -19,12 +21,15 @@ SCHEMA_P = ROOT / "schemas/w1_scout_bundle_schema.json"
 BUNDLE_MOD = ROOT / "scripts/w1_scout_bundle.py"
 FETCHER = ROOT / "scripts/w1_scout_fetch_api_football.py"
 ANALYST = ROOT / "scripts/w1_scout_analyst.py"
+REVIEW_MOD = ROOT / "scripts/w1_scout_review.py"
+CALIBRATION_MOD = ROOT / "scripts/w1_scout_calibration.py"
 BUNDLES_P = ROOT / "state/w1_scout_bundles.json"
 CALLS_P = ROOT / "state/w1_scout_calls.json"
 TRACK_P = ROOT / "state/scout_track_record.json"
 LESSONS_P = ROOT / "state/scout_lessons.md"
 AUDIT_P = ROOT / "state/scout_audit.jsonl"
 LOCK_P = ROOT / "state/scout_lock.jsonl"
+REVIEWS_P = ROOT / "state/scout_reviews.jsonl"
 SCOUT_DIR = ROOT / "data/scout"
 
 errors: list[str] = []
@@ -36,35 +41,35 @@ def fail(m):
 
 def validate_call(c: dict, policy: dict) -> list[str]:
     errs: list[str] = []
-    for f in policy["call_required_fields"]:
+    for f in policy["read_required_fields"]:
         if f not in c:
             errs.append(f"missing field {f}")
-    call = c.get("call") or {}
-    for f in policy["call_subfields"]["call"]:
-        if f not in call:
-            errs.append(f"call.{f} missing")
-    md = c.get("market_divergence") or {}
-    for f in policy["call_subfields"]["market_divergence"]:
-        if f not in md:
-            errs.append(f"market_divergence.{f} missing")
-    stance = md.get("stance")
-    if stance not in policy["stances"]:
-        errs.append(f"invalid stance {stance}")
-    # not-just-translation: must give real reasoning + factors
-    if not (md.get("why_cn") and (c.get("key_factors_cn") or [])):
-        errs.append("bare translation rejected: need why_cn + key_factors_cn")
-    conv = c.get("conviction")
-    if conv not in policy["conviction_levels"]:
-        errs.append(f"invalid conviction {conv}")
-    # boldness gates (MEDIUM dial)
-    if stance == "FADE_MARKET" and conv != "HIGH":
-        errs.append("FADE_MARKET requires conviction=HIGH")
-    if stance == "LEAN_DIFFERENT" and conv not in ("MEDIUM", "HIGH"):
-        errs.append("LEAN_DIFFERENT requires conviction>=MEDIUM")
+    read = c.get("read") or {}
+    if not isinstance(read, dict):
+        errs.append("read must be object")
+        read = {}
+    for f in policy["read_subfields"]["read"]:
+        if f not in read:
+            errs.append(f"read.{f} missing")
+    watch = read.get("watch_points_cn")
+    risks = read.get("risks_cn")
+    if not isinstance(watch, list) or len([x for x in watch if str(x).strip()]) < 2:
+        errs.append("bare translation rejected: need at least 2 watch_points_cn")
+    if not isinstance(risks, list) or len([x for x in risks if str(x).strip()]) < 1:
+        errs.append("bare translation rejected: need at least 1 risks_cn")
+    score_band = str(read.get("score_band_cn") or "")
+    if not any(token in score_band for token in ("区间", "分布", "别当真", "偏")):
+        errs.append("score_band_cn must use band/distribution language")
+    readiness = c.get("data_readiness")
+    if readiness not in policy["readiness_levels"] and not isinstance(readiness, (int, float)):
+        errs.append(f"invalid data_readiness {readiness}")
     if policy["honesty"]["honesty_label_required_substr"] not in str(c.get("honesty_label", "")):
-        errs.append("honesty_label must contain 'AI 观点'")
+        errs.append("honesty_label must contain 'AI 解读'")
     if c.get("independent_edge") is not False:
         errs.append("independent_edge must be false")
+    for old in ("call", "market_divergence", "key_factors_cn", "conviction", "track_record_context_cn"):
+        if old in c:
+            errs.append(f"old prediction field forbidden: {old}")
     text = json.dumps(c, ensure_ascii=False)
     for t in policy["forbidden_terms"]:
         if t in text:
@@ -121,6 +126,51 @@ def count_jsonl_rows(path: Path) -> int:
     return rows
 
 
+def jsonl_rows(path: Path) -> list[dict]:
+    if not path.is_file():
+        return []
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def digest_read(call: dict) -> str:
+    blob = json.dumps(call, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+
+
+def result_fixture_ids() -> set[str]:
+    path = ROOT / "data/results/round1_results.json"
+    if not path.is_file():
+        return set()
+    out: set[str] = set()
+    for fid, row in json.loads(path.read_text(encoding="utf-8")).get("results", {}).items():
+        out.add(str(fid))
+        for alias in row.get("alias_fixture_ids", []):
+            out.add(str(alias))
+    return out
+
+
+def validate_review_rows(reviews: list[dict], locks: dict[str, dict], finished: set[str], policy: dict) -> list[str]:
+    errs: list[str] = []
+    for row in reviews:
+        fid = str(row.get("fixture_id"))
+        if fid not in finished:
+            errs.append(f"review {fid} has no local finished result")
+        lock = locks.get(fid)
+        if not lock:
+            errs.append(f"review {fid} missing immutable lock")
+            continue
+        expected = lock.get("prematch_read_digest") or digest_read(lock.get("call") or {})
+        if row.get("prematch_read_digest") != expected:
+            errs.append(f"review {fid} prematch_read_digest mismatch")
+        if row.get("honesty_label") != policy["honesty"]["review_label_exact"]:
+            errs.append(f"review {fid} honesty label mismatch")
+        text = json.dumps(row, ensure_ascii=False)
+        for token in policy["forbidden_terms"]:
+            if token in text:
+                errs.append(f"review {fid} forbidden term: {token}")
+    return errs
+
+
 def validate_memory_consistency(track: dict, audit_rows: int) -> list[str]:
     overall = track.get("overall") or {}
     if "n" not in overall:
@@ -131,7 +181,7 @@ def validate_memory_consistency(track: dict, audit_rows: int) -> list[str]:
 
 
 def main() -> int:
-    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, ANALYST, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
+    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, ANALYST, REVIEW_MOD, CALIBRATION_MOD, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
         if not p.is_file():
             fail(f"missing artifact: {p.relative_to(ROOT)}")
     if errors:
@@ -187,6 +237,9 @@ def main() -> int:
     ):
         if token not in analyst:
             fail(f"analyst missing token: {token}")
+    for token in ("read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn}", "AI 解读·非预测·非推介·可能错"):
+        if token not in analyst:
+            fail(f"analyst missing read-schema token: {token}")
     for token in ("actual_score", "fulltime", "ft_score", "post_match_calibration", "w1_score_engine", "DEFAULT_RHO"):
         if token in analyst:
             fail(f"analyst must not read/use redline or post-match token: {token}")
@@ -194,6 +247,14 @@ def main() -> int:
         fail("analyst must follow the T5 OpenAI-compatible route, not Anthropic-only routes")
     if "deepseek-chat" in analyst:
         fail("analyst must use fixed DeepSeek-V4-Pro (API id: deepseek-v4-pro) for the DeepSeek route")
+    review_src = REVIEW_MOD.read_text(encoding="utf-8")
+    for token in ("prematch_read_digest", "AI 复盘·赛后对照", "state/scout_reviews.jsonl", "不许嘴硬"):
+        if token not in review_src:
+            fail(f"review script missing token: {token}")
+    calibration_src = CALIBRATION_MOD.read_text(encoding="utf-8")
+    for token in ("state/scout_calibration.json", "direction_calibration", "avg_readiness_dims", "不是战胜市场的证据"):
+        if token not in calibration_src:
+            fail(f"calibration script missing token: {token}")
 
     # bundle leakage
     leaks = bundle_leak(bundles, forbidden_pm)
@@ -212,7 +273,7 @@ def main() -> int:
 
     # growth files structure
     track = json.loads(TRACK_P.read_text(encoding="utf-8"))
-    for k in ("overall", "by_conviction", "by_stance", "updated_at"):
+    for k in ("overall", "updated_at"):
         if k not in track:
             fail(f"track_record missing section {k}")
     audit_rows = count_jsonl_rows(AUDIT_P)
@@ -229,6 +290,10 @@ def main() -> int:
         for secret_token in ("DEEPSEEK_API_KEY", "APIFOOTBALL_KEY", "OPENCLAW_APIFOOTBALL_KEY", "Bearer ", "sk-"):
             if secret_token in text:
                 fail(f"Scout memory file contains secret-like token {secret_token}: {memory_path.relative_to(ROOT)}")
+    locks = {str(row.get("fixture_id")): row for row in jsonl_rows(LOCK_P)}
+    finished = result_fixture_ids()
+    for err in validate_review_rows(jsonl_rows(REVIEWS_P), locks, finished, policy):
+        fail(err)
 
     # calls (validate if present)
     n_calls = 0
@@ -245,22 +310,23 @@ def main() -> int:
                 fail(f"call {fid}: {e}")
 
     # --- reverse tests ---
-    base = {"fixture_id": "X", "call": {"outcome_lean": "主", "scoreline_lean": "1-0", "confidence": 0.5},
-            "market_divergence": {"stance": "AGREE", "where_cn": "-", "why_cn": "市场与近况一致"},
-            "key_factors_cn": ["近况"], "conviction": "LOW",
-            "track_record_context_cn": "暂无", "honesty_label": "AI 观点·未验证·仅研究·可能错",
+    base = {"fixture_id": "X",
+            "read": {"tilt_cn": "主队小优", "score_band_cn": "偏 1-0/2-0,但单场看区间、别当真",
+                     "watch_points_cn": ["主队边路推进", "客队转换防守"], "risks_cn": ["早球会改变节奏"],
+                     "vs_market_cn": "与市场差异不大,仅作讨论点"},
+            "data_readiness": "中", "honesty_label": "AI 解读·非预测·非推介·可能错",
             "independent_edge": False}
     if validate_call(base, policy):
-        fail("reverse: a clean AGREE call should pass")
-    bad_fade = dict(base, market_divergence={"stance": "FADE_MARKET", "where_cn": "x", "why_cn": "y"}, conviction="LOW")
-    if not validate_call(bad_fade, policy):
-        fail("reverse: FADE_MARKET at LOW conviction must be rejected")
-    bare = dict(base, market_divergence={"stance": "AGREE", "where_cn": "-", "why_cn": ""}, key_factors_cn=[])
+        fail("reverse: a clean match read should pass")
+    legacy = dict(base, call={"outcome_lean": "主", "scoreline_lean": "1-0", "confidence": "LOW"})
+    if not validate_call(legacy, policy):
+        fail("reverse: old prediction call field must be rejected")
+    bare = dict(base, read={"tilt_cn": "主队小优", "score_band_cn": "1-0", "watch_points_cn": [], "risks_cn": [], "vs_market_cn": ""})
     if not validate_call(bare, policy):
-        fail("reverse: bare translation (no why/factors) must be rejected")
-    betting = dict(base, key_factors_cn=["稳赢"])
+        fail("reverse: bare translation (no watch/risks/band wording) must be rejected")
+    betting = dict(base, read={**base["read"], "watch_points_cn": ["稳赢", "主队边路推进"]})
     if not validate_call(betting, policy):
-        fail("reverse: forbidden betting term must be caught")
+        fail("reverse: forbidden promise term must be caught")
     if not bundle_leak([{"fixture_id": "Z", "asof_pre_kickoff": True, "actual_score": "2-1"}], forbidden_pm):
         fail("reverse: a bundle with actual_score must be caught")
     bad_scout = {"fixture_id": "Z", "asof_pre_kickoff": False, "availability": {"form": "made_up"}}
@@ -268,14 +334,17 @@ def main() -> int:
         fail("reverse: bad scout file shape must be catchable")
     if not validate_memory_consistency({"overall": {"n": audit_rows + 1}}, audit_rows):
         fail("reverse: memory n/audit row mismatch must be caught")
+    fake_review = [{"fixture_id": "NO_RESULT", "prematch_read_digest": "bad", "honesty_label": "AI 复盘·赛后对照"}]
+    if not validate_review_rows(fake_review, locks, finished, policy):
+        fail("reverse: review without finished result / digest match must be caught")
 
     if errors:
         for e in errors:
             print(f"FAIL: {e}", file=sys.stderr)
         print(f"W1 scout check FAIL ({len(errors)})")
         return 1
-    print(f"W1 scout check PASS (bundles={len(bundles)}, calls={n_calls}, audit_rows={audit_rows}, no leakage, "
-          "bold-but-honest call contract, memory consistent, FADE gated at HIGH conviction, no betting wording)")
+    print(f"W1 scout check PASS (bundles={len(bundles)}, reads={n_calls}, audit_rows={audit_rows}, no leakage, "
+          "structured read contract, memory consistent, no betting/edge wording)")
     return 0
 
 

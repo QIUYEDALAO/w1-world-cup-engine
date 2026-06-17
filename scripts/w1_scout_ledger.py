@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""W1_SCOUT ledger — lock AI calls pre-match, audit vs result AND vs market, grow track record.
+"""W1_SCOUT ledger — lock AI reads pre-match, audit vs result, grow calibration memory.
 
-lock:  copy each call verbatim into an immutable pre-match lock IF kickoff is still ahead
+lock:  copy each read verbatim into an immutable pre-match lock IF kickoff is still ahead
        (refuse hindsight — never lock an already-started match).
-audit: for locked calls that now have a local result, score outcome hit + Brier, and when
-       the call diverged from the market (LEAN/FADE) record whether it BEAT the market.
-       Then update state/scout_track_record.json — this is the growth signal.
+audit: for locked reads that now have a local result, record outcome context,
+       direction bucket, data readiness, and whether the stated tilt broadly aligned
+       with the result. Then update state/scout_track_record.json — this is calibration
+       memory, not a claim of market edge.
 
 Offline, append-only, gitignored. Never modifies a lock. Never feeds result into a call.
 """
 from __future__ import annotations
 
 import json
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -27,6 +29,11 @@ DASH = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 
 def now():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def digest_read(call):
+    blob = json.dumps(call, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
 
 
 def dt(s):
@@ -77,6 +84,7 @@ def lock():
                 continue
             fh.write(json.dumps({"fixture_id": fid, "lock_as_of_utc": now(),
                                  "kickoff_utc": (ko.get(fid) or {}).get("kickoff"),
+                                 "prematch_read_digest": digest_read(c),
                                  "call": c, "market": (ko.get(fid) or {}).get("mkt")}, ensure_ascii=False) + "\n")
             added += 1
     print(f"scout lock: +{added} (refused hindsight={hindsight})")
@@ -84,6 +92,46 @@ def lock():
 
 def _outcome(h, a):
     return "主" if h > a else ("客" if a > h else "平")
+
+
+def _read_text(call):
+    read = call.get("read") if isinstance(call, dict) else None
+    if isinstance(read, dict):
+        return " ".join(str(read.get(k) or "") for k in ("tilt_cn", "score_band_cn", "vs_market_cn"))
+    legacy = call.get("call") if isinstance(call, dict) else None
+    if isinstance(legacy, dict):
+        return str(legacy.get("outcome_lean") or "")
+    return ""
+
+
+def _direction_bucket(call):
+    text = _read_text(call)
+    if any(token in text for token in ("明显", "大优", "强势", "压倒")):
+        return "明显占优"
+    if any(token in text for token in ("小优", "略优", "稍占优", "不败")):
+        return "小优"
+    if any(token in text for token in ("势均", "均衡", "五五", "胶着")):
+        return "势均"
+    return "未分档"
+
+
+def _tilt_side(call):
+    text = _read_text(call)
+    if any(token in text for token in ("主队", "主胜", "主场", "home", "主")):
+        return "主"
+    if any(token in text for token in ("客队", "客胜", "away", "客")):
+        return "客"
+    if any(token in text for token in ("平局", "势均", "均衡", "五五", "平")):
+        return "平"
+    return None
+
+
+def _broadly_aligned(tilt, actual):
+    if tilt is None:
+        return None
+    if tilt == "平":
+        return actual == "平"
+    return actual == tilt or actual == "平"
 
 
 def audit():
@@ -106,18 +154,17 @@ def audit():
                 continue
             actual = _outcome(sc["home"], sc["away"])
             call = L["call"]
-            lean = (call.get("call") or {}).get("outcome_lean")
-            hit = (lean == actual)
+            tilt = _tilt_side(call)
+            aligned = _broadly_aligned(tilt, actual)
             mkt = L.get("market") or {}
             mfav = "主" if (mkt.get("home_win") or 0) >= (mkt.get("away_win") or 0) else "客"
-            stance = (call.get("market_divergence") or {}).get("stance")
-            beat_market = None
-            if stance in ("LEAN_DIFFERENT", "FADE_MARKET"):
-                beat_market = bool(hit and lean != mfav)   # diverged AND was right
             fh.write(json.dumps({"fixture_id": fid, "actual": f"{sc['home']}-{sc['away']}",
-                                 "actual_outcome": actual, "call_outcome": lean, "hit": hit,
-                                 "stance": stance, "market_fav": mfav, "beat_market": beat_market,
-                                 "conviction": call.get("conviction"), "audited_at_utc": now()}, ensure_ascii=False) + "\n")
+                                 "actual_outcome": actual, "read_tilt_side": tilt,
+                                 "direction_bucket": _direction_bucket(call),
+                                 "data_readiness": call.get("data_readiness"),
+                                 "broadly_aligned": aligned, "market_fav": mfav,
+                                 "prematch_read_digest": L.get("prematch_read_digest") or digest_read(call),
+                                 "audited_at_utc": now()}, ensure_ascii=False) + "\n")
             added += 1
     _update_track()
     print(f"scout audit: +{added}; track record updated")
@@ -128,19 +175,24 @@ def _update_track():
         return
     rows = [json.loads(l) for l in AUDIT.open(encoding="utf-8") if l.strip()]
     t = json.loads(TRACK.read_text(encoding="utf-8")) if TRACK.is_file() else {}
-    t.setdefault("by_conviction", {}); t.setdefault("by_stance", {})
-    ov = {"n": 0, "hit": 0}
-    byc = {}; bys = {}
+    ov = {"n": 0, "aligned": 0, "aligned_known": 0}
+    byr = {}; byt = {}
     for r in rows:
-        ov["n"] += 1; ov["hit"] += int(bool(r["hit"]))
-        c = r.get("conviction") or "LOW"; byc.setdefault(c, {"n": 0, "hit": 0})
-        byc[c]["n"] += 1; byc[c]["hit"] += int(bool(r["hit"]))
-        s = r.get("stance") or "AGREE"; bys.setdefault(s, {"n": 0, "hit": 0, "beat_market": 0})
-        bys[s]["n"] += 1; bys[s]["hit"] += int(bool(r["hit"]))
-        if r.get("beat_market"):
-            bys[s]["beat_market"] += 1
-    t["overall"] = {"n": ov["n"], "hit": ov["hit"], "hit_rate": round(ov["hit"] / ov["n"], 3) if ov["n"] else None}
-    t["by_conviction"] = byc; t["by_stance"] = bys; t["updated_at"] = now()
+        ov["n"] += 1
+        if r.get("broadly_aligned") is not None:
+            ov["aligned_known"] += 1
+            ov["aligned"] += int(bool(r.get("broadly_aligned")))
+        rd = r.get("data_readiness") or "unknown"; byr.setdefault(rd, {"n": 0, "aligned": 0, "aligned_known": 0})
+        byr[rd]["n"] += 1
+        if r.get("broadly_aligned") is not None:
+            byr[rd]["aligned_known"] += 1; byr[rd]["aligned"] += int(bool(r.get("broadly_aligned")))
+        b = r.get("direction_bucket") or "未分档"; byt.setdefault(b, {"n": 0, "aligned": 0, "aligned_known": 0})
+        byt[b]["n"] += 1
+        if r.get("broadly_aligned") is not None:
+            byt[b]["aligned_known"] += 1; byt[b]["aligned"] += int(bool(r.get("broadly_aligned")))
+    t["overall"] = {"n": ov["n"], "aligned": ov["aligned"], "aligned_known": ov["aligned_known"],
+                    "alignment_rate": round(ov["aligned"] / ov["aligned_known"], 3) if ov["aligned_known"] else None}
+    t["by_readiness"] = byr; t["by_tilt_bucket"] = byt; t["updated_at"] = now()
     TRACK.write_text(json.dumps(t, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 

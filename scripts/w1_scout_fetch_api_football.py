@@ -143,12 +143,17 @@ def load_dashboard_records() -> list[dict[str, Any]]:
     return json.loads(DASHBOARD_DATA.read_text(encoding="utf-8")).get("match_records", [])
 
 
-def select_records(records: list[dict[str, Any]], wanted: set[str] | None, include_started: bool, limit: int | None) -> list[dict[str, Any]]:
+def select_records(records: list[dict[str, Any]], wanted: set[str] | None, include_started: bool, limit: int | None,
+                   league: int | None = None, season: int | None = None) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     now = now_utc()
     for rec in records:
         fid = str(rec.get("fixture_id") or "")
         if wanted and fid not in wanted:
+            continue
+        if league is not None and str(rec.get("league_id") or rec.get("league") or "") not in {str(league), ""}:
+            continue
+        if season is not None and str(rec.get("season") or "") not in {str(season), ""}:
             continue
         kickoff = parse_dt(rec.get("kickoff_utc") or rec.get("kickoff"))
         if not include_started and kickoff and kickoff <= now:
@@ -516,6 +521,8 @@ def write_bundle(bundle: dict[str, Any]) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Fetch api-football factors into gitignored data/scout/<fixture_id>.json")
     parser.add_argument("--fixture", action="append", dest="fixtures", help="Fixture id to fetch; may be repeated. Defaults to upcoming dashboard fixtures.")
+    parser.add_argument("--league", type=int, default=None, help="Optional league id filter for multi-league Scout runs.")
+    parser.add_argument("--season", type=int, default=None, help="Optional season filter for multi-league Scout runs.")
     parser.add_argument("--limit", type=int, default=None, help="Maximum fixtures to fetch.")
     parser.add_argument("--include-started", action="store_true", help="Allow already-started fixtures. Use only for manual backfill; pre-match flag still requires kickoff in future.")
     parser.add_argument("--sleep", type=float, default=0.25, help="Sleep seconds between API calls.")
@@ -527,7 +534,7 @@ def main() -> int:
         print("FAIL: APIFOOTBALL_KEY / OPENCLAW_APIFOOTBALL_KEY not configured; no data/scout files written.")
         return 2
 
-    records = select_records(load_dashboard_records(), set(args.fixtures) if args.fixtures else None, args.include_started, args.limit)
+    records = select_records(load_dashboard_records(), set(args.fixtures) if args.fixtures else None, args.include_started, args.limit, args.league, args.season)
     if not records:
         print("No eligible pre-match fixtures selected; no data/scout files written.")
         return 0

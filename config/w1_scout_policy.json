@@ -1,49 +1,60 @@
 {
-  "policy_version": "W1_SCOUT_V1",
+  "policy_version": "W1_SCOUT_READ_REVIEW_V1",
   "stage": "W1_SCOUT",
-  "purpose": "AI 分析师闭环策略:数据→敢说敢干判断→锁定审计→战绩回灌成长。",
+  "purpose": "AI 分析师闭环策略:赛前五维解读→不可变锁定→赛后复盘→赛季自我校准。定位是理解/复盘工具,不是预测器或投注 selector。",
 
-  "boldness": "MEDIUM",
-  "boldness_rules": {
-    "default_stance": "AGREE",
-    "LEAN_DIFFERENT_requires": {"conviction_min": "MEDIUM", "factor_divergence": "present", "min_real_factors": 1},
-    "FADE_MARKET_requires": {"conviction_min": "HIGH", "factor_divergence": "clear", "min_real_factors": 2},
-    "note_cn": "中间档:默认跟市场;只有真因子(form/xG/伤停/首发)明显背离市场、且 conviction 够高,才偏离或逆。证据不足时禁止逆市场。"
-  },
-
-  "conviction_levels": ["LOW", "MEDIUM", "HIGH"],
-  "stances": ["AGREE", "LEAN_DIFFERENT", "FADE_MARKET"],
-
-  "call_required_fields": [
-    "fixture_id", "call", "market_divergence", "key_factors_cn",
-    "conviction", "track_record_context_cn", "honesty_label", "independent_edge"
+  "leagues": [
+    {"league": 1, "season": 2026, "name": "FIFA World Cup"}
   ],
-  "call_subfields": {
-    "call": ["outcome_lean", "scoreline_lean", "confidence"],
-    "market_divergence": ["stance", "where_cn", "why_cn"]
+
+  "read_required_fields": [
+    "fixture_id", "read", "data_readiness", "honesty_label", "independent_edge"
+  ],
+  "read_subfields": {
+    "read": ["tilt_cn", "score_band_cn", "watch_points_cn", "risks_cn", "vs_market_cn"]
   },
+  "readiness_levels": ["高", "中", "低"],
 
   "honesty": {
-    "honesty_label_required_substr": "AI 观点",
+    "honesty_label_required_substr": "AI 解读",
+    "honesty_label_exact": "AI 解读·非预测·非推介·可能错",
+    "review_label_exact": "AI 复盘·赛后对照",
     "independent_edge_must_be": false,
-    "pure_agree_without_why_rejected": true,
-    "confidence_must_be_calibrated": true
+    "pure_market_translation_rejected": true,
+    "scoreline_must_be_band_language": true
   },
 
-  "forbidden_terms": ["稳赢", "稳赚", "必中", "必胜", "保证命中", "保证", "资金", "下注", "投注", "梭哈", "盈利承诺", "无风险"],
+  "review": {
+    "path": "state/scout_reviews.jsonl",
+    "prematch_digest_required": true,
+    "only_finished_fixtures": true,
+    "prompt_rule_cn": "赛前解读原样对照实际结果和赛后统计,诚实说明读对/读漏;不许嘴硬,不许把赛后事实包装成赛前判断。"
+  },
+
+  "calibration": {
+    "path": "state/scout_calibration.json",
+    "direction_buckets": ["明显占优", "小优", "势均"],
+    "note_cn": "赛季级自我体检与校准,不是战胜市场的证据。"
+  },
+
+  "forbidden_terms": [
+    "稳赢", "稳赚", "必中", "必胜", "保证命中", "保证", "资金", "下注", "投注", "梭哈",
+    "盈利承诺", "无风险", "打败市场", "战胜市场", "独立优势", "预测器", "敢说敢干",
+    "FADE_MARKET", "LEAN_DIFFERENT", "conviction"
+  ],
 
   "leakage": {
     "bundle_prematch_only": true,
     "forbidden_postmatch_fields": ["actual_score", "fulltime", "result_goals", "home_goals_actual", "away_goals_actual", "post_match", "ft_score"],
-    "rule_cn": "scout_bundle 与 call 只用赛前可得;当场赛后统计绝不进入;赛果只在审计阶段对照。"
+    "rule_cn": "scout_bundle 与赛前解读只用赛前可得;当场赛后统计绝不进入赛前解读;赛果只在审计和复盘阶段对照。"
   },
 
   "growth": {
     "track_record_path": "state/scout_track_record.json",
     "lessons_path": "state/scout_lessons.md",
-    "feed_back_into_call": true,
-    "recalibrate_confidence": true,
-    "note_cn": "每次开口前先读 track_record + lessons + 校准 → 写进判断依据。成长=经验累积+置信校准,非重训权重。"
+    "feed_back_into_read": true,
+    "calibrate_tone": true,
+    "note_cn": "每次解读前先读 track_record + lessons + calibration,用于控制语气与数据充分度,不是重训权重。"
   },
 
   "lock_audit": {
@@ -51,15 +62,15 @@
     "audit_path": "state/scout_audit.jsonl",
     "immutable_lock": true,
     "refuse_hindsight": true,
-    "score_vs_market": true,
-    "note_cn": "每个 fixture 只锁第一次合法赛前 call;锁定晚于开赛拒审;赛后既评绝对准度,也评『逆市场时谁对』。多版本锁定留待后续阶段。"
+    "score_vs_market": false,
+    "note_cn": "每个 fixture 只锁第一次合法赛前解读;锁定晚于开赛拒绝。赛后审计衡量读法是否校准,不是证明 edge。"
   },
 
   "redlines": [
-    "允许联网抓取(由你 pipeline 完成);SCOUT 不改 w1_score_engine/DEFAULT_RHO/build λ·矩阵 的市场底座",
-    "不造假;赛前判断只用赛前数据;赛后只作审计",
-    "不输出投注/资金/命中承诺;每条 call 带 honesty_label + independent_edge=false",
-    "不承诺赢市场;敢说敢干=敢表态、敢有据地逆,不等于保证对",
-    "输出落 gitignored state/;不碰已跟踪生产文件的底座逻辑"
+    "允许联网抓取(由 pipeline 完成);SCOUT 不改 w1_score_engine/DEFAULT_RHO/build λ·矩阵 的市场底座",
+    "不造假;赛前解读只用赛前数据;赛后只作审计和复盘",
+    "不输出投注/资金/命中承诺;每条 read 带 honesty_label + independent_edge=false",
+    "不承诺赢市场;与市场差异只作为讨论点,不作为机会或推荐",
+    "raw bundle/call/review/calibration 输出落 gitignored state/ 或 data/scout/;学习记忆只持久化 allowlist 文件"
   ]
 }

@@ -21,6 +21,16 @@ DASH = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 CARDS = ROOT / "data/processed/match_cards/group_stage_round1"
 SCOUT_DIR = ROOT / "data/scout"   # user pipeline may drop richer bundles here
 OUT = ROOT / "state/w1_scout_bundles.json"
+POLICY = ROOT / "config/w1_scout_policy.json"
+
+
+def _default_league() -> tuple[str, int | None]:
+    if POLICY.is_file():
+        leagues = json.loads(POLICY.read_text(encoding="utf-8")).get("leagues") or []
+        if leagues:
+            row = leagues[0]
+            return str(row.get("name") or "FIFA World Cup"), row.get("season")
+    return "FIFA World Cup", 2026
 
 
 def _card_context(fid: str) -> dict:
@@ -56,6 +66,7 @@ def build_bundle(rec: dict) -> dict:
     oxt = (rec.get("market_probability_panel") or {}).get("one_x_two") or {}
     inj_status = (ctx.get("injuries") or {}).get("status")
     has_formation = bool(rec.get("home_formation") or rec.get("away_formation"))
+    default_league, default_season = _default_league()
 
     bundle = {
         "schema_version": "W1_SCOUT_BUNDLE_V1",
@@ -63,7 +74,8 @@ def build_bundle(rec: dict) -> dict:
         "kickoff_utc": rec.get("kickoff"),
         "home": rec.get("home_team_cn") or rec.get("match", "").split(" vs ")[0],
         "away": rec.get("away_team_cn") or "",
-        "league": "FIFA World Cup", "season": 2026,
+        "league": rec.get("league") or rec.get("competition") or default_league,
+        "season": rec.get("season") or default_season,
         "asof_pre_kickoff": True, "fetched_at_utc": None,
         "market": {"p_home": oxt.get("home_win"), "p_draw": oxt.get("draw"),
                    "p_away": oxt.get("away_win"), "ah_line": None, "ou_line": None},

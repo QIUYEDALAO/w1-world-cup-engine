@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""W1_SCOUT T5 analyst runner.
+"""W1_SCOUT analyst runner.
 
-Turns pre-match scout bundles into research calls with a pluggable
+Turns pre-match scout bundles into structured match reads with a pluggable
 OpenAI-compatible chat API. DeepSeek is the default provider. The model is never
-trusted directly: each call must pass check_w1_scout.validate_call before it is
+trusted directly: each read must pass check_w1_scout.validate_call before it is
 written to the gitignored state/w1_scout_calls.json store.
 
 No provider key means no output is written. That keeps the cold-start path honest
@@ -48,24 +48,22 @@ PROVIDERS = {
     },
 }
 
-SYSTEM_PROMPT = """你是足球研究分析师。读“赛前因子包 + 你自己的历史战绩 + 教训”，对这场给出有据判断。
+SYSTEM_PROMPT = """你是足球研究分析师。任务是【把这场球读透】——不是预测谁赢,更不是投注建议。
 
 硬规则：
-- 默认 AGREE 跟市场；只有真因子(form/xG/伤停/首发/排名/休息天数)明显背离市场、且有把握，才 LEAN_DIFFERENT。
-- 只有背离很强且 conviction=HIGH，才 FADE_MARKET。
-- 必须 stance 表态，必须给 why_cn 和 key_factors_cn；禁止只复述赔率。
-- 缺数据就写缺数据，首发未确认要降低信心。
-- 禁止投注、资金、保证、稳赢、必胜等表达。
+- 按五维(实力/战术/阵型/市场/环境)给结构化解读。
+- 写清强弱倾向(谁占优、占多大)、看点(决定比赛走向的点)、风险(可能翻车的路径)、与市场的差异(若有,作为讨论点,不是叫人跟或逆)。
+- 比分只给分布口径:"偏 1-0/2-0,但单场看区间、别当真",绝不假装精确预测比分。
+- 缺数据(availability=missing)就说缺,别编;首发未确认要降低 data_readiness。
+- 禁止 投注/资金/命中/稳赢/打败市场/独立优势/推荐/机会 等表达。
 - 只输出一个 JSON 对象，字段必须是：
   fixture_id,
-  call{outcome_lean,scoreline_lean,confidence},
-  market_divergence{stance,where_cn,why_cn},
-  key_factors_cn[],
-  conviction,
-  track_record_context_cn,
+  read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn},
+  data_readiness,
   honesty_label,
   independent_edge。
-- honesty_label 必须包含“AI 观点”，independent_edge 必须为 false。
+- data_readiness 只能是 "高" / "中" / "低"。
+- honesty_label 必须等于“AI 解读·非预测·非推介·可能错”，independent_edge 必须为 false。
 """
 
 
@@ -122,8 +120,7 @@ def user_prompt(bundle: dict[str, Any], track: dict[str, Any], lessons: str, val
             "\n[上次输出未过闸门] "
             + json.dumps(validator_errors, ensure_ascii=False)
             + "\n必须修正：只输出一个顶层 call JSON 对象；不要输出 analysis/summary/wrapper；"
-            "必须包含 fixture_id, call, market_divergence, key_factors_cn, conviction, "
-            "track_record_context_cn, honesty_label, independent_edge。"
+            "必须包含 fixture_id, read, data_readiness, honesty_label, independent_edge。"
         )
     return (
         f"[比赛] {bundle.get('home')} vs {bundle.get('away')} (fixture_id={bundle.get('fixture_id')})\n"
@@ -132,7 +129,7 @@ def user_prompt(bundle: dict[str, Any], track: dict[str, Any], lessons: str, val
         f"[你的历史战绩] {json.dumps(track, ensure_ascii=False)[:1200]}\n"
         f"[教训] {lessons[:1000]}\n"
         f"{retry_note}\n"
-        "按系统规则只输出该场 call 的 JSON。"
+        "按系统规则只输出该场解读 JSON。"
     )
 
 
@@ -198,13 +195,14 @@ def chat_completion(cfg: dict[str, str], prompt: str, max_tokens: int, json_mode
 
 def harden_call(call: dict[str, Any], fixture_id: str) -> dict[str, Any]:
     call["fixture_id"] = fixture_id
-    call["honesty_label"] = "AI 观点·未验证·仅研究·可能错"
+    call["honesty_label"] = "AI 解读·非预测·非推介·可能错"
     call["independent_edge"] = False
-    if isinstance(call.get("conviction"), str):
-        call["conviction"] = call["conviction"].upper()
-    divergence = call.get("market_divergence")
-    if isinstance(divergence, dict) and isinstance(divergence.get("stance"), str):
-        divergence["stance"] = divergence["stance"].upper()
+    if isinstance(call.get("read"), dict):
+        read = call["read"]
+        read.setdefault("vs_market_cn", "")
+        for key in ("watch_points_cn", "risks_cn"):
+            if isinstance(read.get(key), str):
+                read[key] = [read[key]]
     return call
 
 
@@ -266,7 +264,7 @@ def write_calls(calls: list[dict[str, Any]], cfg: dict[str, str]) -> None:
         json.dumps(
             {
                 "stage": "W1_SCOUT",
-                "schema_version": "W1_SCOUT_CALL_V1",
+                "schema_version": "W1_SCOUT_READ_V1",
                 "generated_by": f"{cfg['provider']}:{cfg['model']}",
                 "calls": calls,
             },
@@ -279,9 +277,9 @@ def write_calls(calls: list[dict[str, Any]], cfg: dict[str, str]) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate W1_SCOUT analyst calls through an OpenAI-compatible API, gated by check_w1_scout.")
-    parser.add_argument("--fixture", action="append", help="Fixture id to judge; may be repeated. Defaults to all bundles.")
-    parser.add_argument("--limit", type=int, default=None, help="Maximum bundles to judge.")
+    parser = argparse.ArgumentParser(description="Generate W1_SCOUT match reads through an OpenAI-compatible API, gated by check_w1_scout.")
+    parser.add_argument("--fixture", action="append", help="Fixture id to read; may be repeated. Defaults to all bundles.")
+    parser.add_argument("--limit", type=int, default=None, help="Maximum bundles to read.")
     parser.add_argument("--provider", default=os.environ.get("W1_SCOUT_LLM", "deepseek"), choices=sorted(PROVIDERS))
     parser.add_argument("--max-tokens", type=int, default=1600)
     parser.add_argument("--retries", type=int, default=3, help="Validation retry count per fixture.")
@@ -291,10 +289,10 @@ def main() -> int:
     selected = selected_bundles(set(args.fixture or []) or None, args.limit)
     if args.dry_run:
         model = PROVIDERS[args.provider].get("model") if args.provider == "deepseek" else (os.environ.get("W1_SCOUT_MODEL") or PROVIDERS[args.provider].get("model") or "<custom>")
-        print(f"scout analyst dry-run: provider={args.provider}, selected={len(selected)}, model={model}, output={CALLS_P.relative_to(ROOT)}")
+        print(f"scout analyst dry-run: provider={args.provider}, selected={len(selected)}, model={model}, read_output={CALLS_P.relative_to(ROOT)}")
         return 0
     if not selected:
-        print("No scout bundles selected; no scout calls written.")
+        print("No scout bundles selected; no scout reads written.")
         return 0
 
     calls, failed, cfg = build_calls(args)
@@ -304,7 +302,7 @@ def main() -> int:
         print(f"scout analyst wrote nothing because {len(failed)} fixture(s) failed validation.", file=sys.stderr)
         return 1
     write_calls(calls, cfg)
-    print(f"scout analyst PASS: provider={cfg['provider']} model={cfg['model']} wrote {len(calls)} calls -> {CALLS_P.relative_to(ROOT)}")
+    print(f"scout analyst PASS: provider={cfg['provider']} model={cfg['model']} wrote {len(calls)} reads -> {CALLS_P.relative_to(ROOT)}")
     return 0
 
 
