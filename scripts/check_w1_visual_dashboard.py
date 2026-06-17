@@ -293,7 +293,7 @@ def assert_first_screen(text: str) -> None:
     pcore = _func_body(text, "function pCore(")
     if not pcore:
         fail("pCore function missing")
-    for need in ("Director View", "一句话 + 四灯 + 共识", "首发", "数据可信度", "盘口跟踪", "阶段", "当前观察建议"):
+    for need in ("Director View", "一句话 + 四灯 + 共识", "首发", "数据可信度", "盘口跟踪", "阶段", "当前观察建议", "五维就绪度"):
         if need not in pcore:
             fail(f"main card (pCore) first screen missing block: {need}")
     if "repeat(4,1fr)" in pcore or "market-mini" in pcore:

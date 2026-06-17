@@ -21622,21 +21622,21 @@ button{font:inherit;cursor:pointer}
       "away_starting_count": 0,
       "home_bench_count": 0,
       "away_bench_count": 0,
-      "status": "not_started",
+      "status": "finished",
       "actual_score": {
-        "home": null,
-        "away": null
+        "home": 3,
+        "away": 1
       },
-      "actual_score_display_cn": null,
-      "result_source": null,
-      "result_note": null,
+      "actual_score_display_cn": "法国 3-1 塞内加尔",
+      "result_source": "api_football_fixture_result",
+      "result_note": "API-Football fixtures endpoint result sync",
       "w1_state": "赛前未放行/未形成正式 W1_PLAY",
       "prediction_stage": "EARLY_REFERENCE",
       "prediction_stage_cn": "早盘参考",
       "prediction_version": "W1_EARLY_PREDICTION_MODE_V1",
       "reference_direction": "法国不败",
       "reference_score": "1-0 / 1-1",
-      "risk_level_cn": "中高",
+      "risk_level_cn": "高",
       "next_update_reason_cn": "下一阶段看 T-12h/T-6h/T-2h 赔率变化、伤停、裁判和首发状态",
       "is_final_decision": false,
       "non_final_disclaimer_cn": "参考倾向和参考比分不是最终结论，不绕过正式风控规则。",
@@ -22090,18 +22090,28 @@ button{font:inherit;cursor:pointer}
         },
         "score_summary_cn": "比分分布来自市场派生的 Dixon-Coles 矩阵; 六条路径是矩阵区域, 权重为会求和的真实概率, 而非模板比分。",
         "post_match_calibration": {
-          "actual_score": null,
-          "outcome": null,
-          "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。",
-          "prediction_hit_type": "待复盘",
+          "actual_score": "3-1",
+          "outcome": "H",
+          "actual_score_probability": 0.0573,
+          "actual_score_rank": 7,
+          "rps_model": 0.1335,
+          "rps_uniform_baseline": 0.5556,
+          "beat_uniform": true,
+          "log_score_exact": 2.8595,
+          "log_score_outcome": 0.4232,
+          "note_cn": "实际比分 3-1 概率 5.7%, 在矩阵中排第 7; 单场不调权重, 累计入 RPS 评估。",
+          "prediction_hit_type": "比分池命中",
           "evaluation_method": "rps_log_score",
-          "actual_score_probability": null,
-          "rps_1x2": null,
-          "exact_score_log_loss": null,
+          "rps_1x2": 0.1335,
+          "exact_score_log_loss": 2.8595,
           "deprecated_hit_type_warning": "main_hit/pool_hit/miss 仅保留展示，不作为核心评估",
-          "miss_reason_tags": [],
-          "lesson_cn": "等待赛后校准；RPS/log score 将在实际比分写入后计算。",
-          "prediction_hit_type_cn": "待复盘"
+          "miss_reason_tags": [
+            "GAME_OPEN_TRIGGER",
+            "OU_NOT_SCORE_CAP",
+            "FAVORITE_WIN_NOT_COVER_SEPARATION"
+          ],
+          "lesson_cn": "赛后校准：比分池命中，说明多路径比分分布比单一比分更稳。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+          "prediction_hit_type_cn": "比分池命中"
         }
       },
       "score_matrix_summary": {
@@ -22152,9 +22162,9 @@ button{font:inherit;cursor:pointer}
         "open_game_mass": 0.249,
         "collapse_mass": 0.1996,
         "market_fit_error": 0.0019,
-        "actual_score_probability": null,
-        "rps_1x2": null,
-        "exact_score_log_loss": null,
+        "actual_score_probability": 0.0573,
+        "rps_1x2": 0.1335,
+        "exact_score_log_loss": 2.8595,
         "notes_cn": [
           "比分矩阵由 1X2 去水概率和 OU 盘口派生。",
           "打开局概率来自比分矩阵区域概率，不是单独规则加权。",
@@ -22763,18 +22773,28 @@ button{font:inherit;cursor:pointer}
         ]
       },
       "post_match_calibration": {
-        "actual_score": null,
-        "outcome": null,
-        "note_cn": "未完赛; 赛后写入 actual_score 后由 RPS/log 评估。",
-        "prediction_hit_type": "待复盘",
+        "actual_score": "3-1",
+        "outcome": "H",
+        "actual_score_probability": 0.0573,
+        "actual_score_rank": 7,
+        "rps_model": 0.1335,
+        "rps_uniform_baseline": 0.5556,
+        "beat_uniform": true,
+        "log_score_exact": 2.8595,
+        "log_score_outcome": 0.4232,
+        "note_cn": "实际比分 3-1 概率 5.7%, 在矩阵中排第 7; 单场不调权重, 累计入 RPS 评估。",
+        "prediction_hit_type": "比分池命中",
         "evaluation_method": "rps_log_score",
-        "actual_score_probability": null,
-        "rps_1x2": null,
-        "exact_score_log_loss": null,
+        "rps_1x2": 0.1335,
+        "exact_score_log_loss": 2.8595,
         "deprecated_hit_type_warning": "main_hit/pool_hit/miss 仅保留展示，不作为核心评估",
-        "miss_reason_tags": [],
-        "lesson_cn": "等待赛后校准；RPS/log score 将在实际比分写入后计算。",
-        "prediction_hit_type_cn": "待复盘"
+        "miss_reason_tags": [
+          "GAME_OPEN_TRIGGER",
+          "OU_NOT_SCORE_CAP",
+          "FAVORITE_WIN_NOT_COVER_SEPARATION"
+        ],
+        "lesson_cn": "赛后校准：比分池命中，说明多路径比分分布比单一比分更稳。 深让不等于大胜；平手盘也可能打开；大小球不直接决定比分。",
+        "prediction_hit_type_cn": "比分池命中"
       },
       "supporting_factors": [
         "市场初始信号偏主队，1X2 Home=1.43；AH=Home -1=1.73",
@@ -22794,8 +22814,8 @@ button{font:inherit;cursor:pointer}
           "message": "裁判未公布; 非阻断缺口."
         }
       ],
-      "current_action_cn": "早盘参考可看方向和比分，但等待赛前观察刷新",
-      "boss_summary_cn": "法国 vs 塞内加尔：早盘参考，参考倾向 法国不败，参考比分 2-0 / 2-1；非最终结论",
+      "current_action_cn": "需要写入 ledger 做赛后验证",
+      "boss_summary_cn": "已完赛：法国 3-1 塞内加尔；W1 状态：赛前未放行/未形成正式 W1_PLAY；复盘动作：需要写入 ledger 做赛后验证",
       "reference_score_external": "1-0 / 1-1",
       "hit_status_cn": null
     },
@@ -31518,6 +31538,7 @@ function pCore(r){
   <div style="font-size:18px;font-weight:500;line-height:1.25">${hero}</div>
   <div style="font-size:12px;opacity:.8;margin:2px 0 8px">${subline}</div>
   <div class="chips" style="gap:6px;margin:0 0 8px">${chip('首发',lu,'')}${chip('数据可信度',trust,'')}${chip('盘口跟踪',move,snapTxt)}${chip('阶段',[gate.delta_hours!=null&&gate.delta_hours<1?'var(--amber)':'var(--mut)',gate.label_cn],'')}</div>
+  ${(()=>{const m=s=>s==='y'?'✓':s==='p'?'◐':'—';const ec=r.environment_context||{};const ws=String(ec.weather_status||'').toLowerCase();const env=ec.venue_name?((ws&&ws!=='missing'&&ws.indexOf('暂缺')<0)?'y':'p'):'p';const mkt=((((r.candidates_snapshot||{}).items)||[]).length)?'y':'—';const chem=r.confirmed_lineup_available?'y':'p';return `<div style="font-size:10.5px;opacity:.6;margin:0 0 8px" title="FiveDim Lite 阶段A 数据就绪度(只读)：市场维已接入(市场隐含再表达)；环境/阵型部分；实力·战术本地无数据未接入。✓就绪 ◐部分 —未接入。非独立优势·未校准·非推介。">五维就绪度 · 市场 ${m(mkt)} 环境 ${m(env)} 阵型 ${m(chem)} 实力 未接入 战术 未接入</div>`;})()}
   <div style="font-size:12px;opacity:.9;margin-bottom:3px">当前观察建议：<b>${esc(gate.label_cn)}</b> · ${esc(r.current_action_cn||(r.play_guard_pass?'可进入正式赛前分析':'关键数据未齐，只作赛前参考'))}　｜　比分峰值 <b>${esc(rv.primary_score||'–')}</b>${rv.secondary_score?` / <b>${esc(rv.secondary_score)}</b>`:''} <span style="opacity:.65">（分布峰值·参考·别当真·单格概率天然低）</span></div>
   <div style="font-size:11.5px;opacity:.75;margin-bottom:3px"><b>风险路径摘要</b><span style="opacity:.6">（开放/冷门）</span>：${esc(rv.risk_path_summary||r.current_action_cn||'—')}</div>
   <div style="font-size:10.5px;opacity:.6">本页多为同一市场赔率反解（市场复述）的切片；独立信息＝首发 / 数据可信度 / 盘口跟踪 / 进球与净胜区间。完整盘口与比分矩阵在专家视图，非最终结论。</div>`;
