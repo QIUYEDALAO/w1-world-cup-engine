@@ -317,6 +317,18 @@ def assert_scout_embed(text: str) -> None:
         for key in ("stance", "where_cn", "why_cn"):
             if key not in divergence:
                 fail(f"Embedded Scout call {call.get('fixture_id')} market_divergence.{key} missing")
+    status = re.search(r'<script id="w1-scout-cycle-status" type="application/json">(.*?)</script>', text, re.S)
+    if not status:
+        fail("HTML must embed a stable Scout cycle status baseline")
+    try:
+        status_payload = json.loads(status.group(1))
+    except json.JSONDecodeError as exc:
+        fail(f"Embedded Scout cycle status JSON is not parseable: {exc}")
+    for key in ("schema_version", "phase", "result", "message_cn", "dry_run", "redlines_cn"):
+        if key not in status_payload:
+            fail(f"Embedded Scout cycle status missing {key}")
+    if "非推介" not in str(status_payload.get("redlines_cn", "")):
+        fail("Embedded Scout cycle status must keep non-promotional disclaimer")
 
 
 def _func_body(text: str, name: str) -> str:
@@ -325,9 +337,39 @@ def _func_body(text: str, name: str) -> str:
 
 
 def assert_first_screen(text: str) -> None:
-    """W1_OPPORTUNITY_SELECTOR_PHASE_A: Director View leads with a neutral hero,
-    four independent lights, candidate consensus, weakened score peak footnote,
-    and 当前观察建议. It must not fall back to old pCore labels."""
+    """G2: first screen is AI-first. W1/FiveDim/Primary Read/candidate consensus
+    and score matrix remain available but must be folded into the expert view."""
+    panel = _func_body(text, "function renderPanel(")
+    if not panel:
+        fail("renderPanel function missing")
+    first_expr = "pBanner()+pHeader(r)+pScoutAnalyst(r)+pScoutCycleStatus()+pPredict(r)"
+    if first_expr not in panel:
+        fail("renderPanel must lead with AI analyst + cycle status + operation controls")
+    expert_idx = panel.find('`<div id="expert"')
+    if expert_idx < 0:
+        fail("expert section missing")
+    before_expert = panel[:expert_idx]
+    for folded in ("pCore(r)", "pCandidateConsensus(r)", "pMatrix(r)", "pTopScores(r)", "pMarketProbabilityPanel(r)"):
+        if folded in before_expert:
+            fail(f"{folded} must be folded into expert view, not first screen")
+    for folded in ("pCore(r)+pCandidateConsensus(r)", "pMatrix(r)", "pCandidateExpert(r)", "pMarketProbabilityPanel(r)"):
+        if folded not in panel[expert_idx:]:
+            fail(f"expert view missing folded W1 surface: {folded}")
+    scout = _func_body(text, "function pScoutAnalyst(")
+    if not scout:
+        fail("pScoutAnalyst function missing")
+    for need in ("AI 分析师 · DeepSeek", "DeepSeek Pro", "已读", "AI 观点", "independent_edge=false", "研究用途 · 非推介 · 非独立优势"):
+        if need not in scout:
+            fail(f"AI-first scout card missing token: {need}")
+    if re.search(r"(?<![A-Za-z])V4(?![A-Za-z])", scout, re.I):
+        fail("AI-first scout card must not expose old V4 token")
+    cycle = _func_body(text, "function pScoutCycleStatus(")
+    if not cycle:
+        fail("pScoutCycleStatus function missing")
+    for need in ("运行 / 错误日志", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "刷新视图", "专家视图"):
+        if need not in cycle:
+            fail(f"Scout cycle status card missing token: {need}")
+
     pcore = _func_body(text, "function pCore(")
     if not pcore:
         fail("pCore function missing")
@@ -423,8 +465,13 @@ def assert_html(data: dict) -> None:
         if panel_idx < 0:
             fail("renderPanel function missing")
         panel_body = text[panel_idx:text.find("function toggleExpert", panel_idx)]
-        if "pCore(r)+pCandidateConsensus(r)+pScoutAnalyst(r)+pPredict(r)" not in panel_body:
-            fail("Recommendation card + scout analyst must render before predict controls")
+        if "pScoutAnalyst(r)+pScoutCycleStatus()+pPredict(r)" not in panel_body:
+            fail("AI analyst + cycle status must render before operation controls")
+        expert_idx = panel_body.find('`<div id="expert"')
+        if expert_idx < 0:
+            fail("expert section missing in renderPanel")
+        if panel_body.find("pCore(r)+pCandidateConsensus(r)") < expert_idx:
+            fail("W1 Director + candidate consensus must live inside expert section")
         if panel_body.find("pMarketProbabilityPanel(r)") < panel_body.find('`<div id="expert"'):
             fail("Full market probability panel must live inside expert section")
         if "pBanner()+pHeader(r)+pPredict(r)+pCore(r)" in panel_body:
