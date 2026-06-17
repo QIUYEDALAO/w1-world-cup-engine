@@ -104,6 +104,21 @@
       "result_source": "api_football_fixture_result",
       "result_note": "API-Football fixtures endpoint result sync",
       "result_synced_at_utc": "2026-06-15T09:06:27Z"
+    },
+    "1489383": {
+      "fixture_id": "1489383",
+      "api_fixture_id": "1489383",
+      "alias_fixture_ids": [],
+      "home_team": "France",
+      "away_team": "Senegal",
+      "actual_score": {
+        "home": 3,
+        "away": 1
+      },
+      "status": "finished",
+      "result_source": "api_football_fixture_result",
+      "result_note": "API-Football fixtures endpoint result sync",
+      "result_synced_at_utc": "2026-06-17T00:06:22Z"
     }
   }
 }
