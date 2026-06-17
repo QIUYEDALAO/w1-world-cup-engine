@@ -1,0 +1,58 @@
+{
+  "policy_version": "W1_SCOUT_AUTOPILOT_G2_V1",
+  "stage": "G2_SCOUT_AUTOPILOT_AI_FIRST",
+  "purpose": "把 Scout 从手动可跑收敛为可 dry-run、可自动生产、可审计的赛前闭环；dashboard 首屏以 AI 分析师运行状态为主，W1 市场读数折叠进专家视图。",
+  "schedule_windows": [
+    {"label": "T-48h", "from_hours_before_kickoff": 48, "to_hours_before_kickoff": 24, "suggested_interval_minutes": 120},
+    {"label": "T-24h", "from_hours_before_kickoff": 24, "to_hours_before_kickoff": 6, "suggested_interval_minutes": 120},
+    {"label": "T-6h", "from_hours_before_kickoff": 6, "to_hours_before_kickoff": 2, "suggested_interval_minutes": 60},
+    {"label": "T-2h", "from_hours_before_kickoff": 2, "to_hours_before_kickoff": 0, "suggested_interval_minutes": 30}
+  ],
+  "fixture_selection": {
+    "future_only_for_factor_fetch": true,
+    "started_or_finished_policy": "audit_only",
+    "no_post_match_fake_pre_match_factors": true,
+    "note_cn": "未来 fixture 才允许赛前抓因子；已开赛/完赛 fixture 只允许赛后 audit，禁止补写伪赛前因子。"
+  },
+  "delta_triggers": {
+    "hash_scope": "future_fixture_effective_scout_bundle",
+    "ignore_runtime_fields": ["fetched_at_utc", "generated_at_utc", "updated_at", "requested_at", "fetched_at"],
+    "meaningful_changes": [
+      "market/factor bundle effective content changed",
+      "lineup.confirmed changed",
+      "injuries list changed",
+      "form/xg/standings/h2h/rest_days availability changed"
+    ],
+    "no_delta_policy": "do_not_call_ai_do_not_embed_do_not_lock_audit_only"
+  },
+  "skip_conditions": [
+    "no future fixture selected",
+    "no effective delta",
+    "APIFOOTBALL_KEY missing: fetch may fail honestly; no fake data is written",
+    "DEEPSEEK_API_KEY missing: analyst fails and cycle must not advance"
+  ],
+  "failure_policy": {
+    "analyst_nonzero": "do_not_update_sha_do_not_embed_do_not_lock_audit_only_exit_nonzero",
+    "checker_fail": "do_not_update_sha_do_not_embed_do_not_lock_exit_nonzero",
+    "fetch_fail": "continue_to_bundle_existing_local_scout_data_without_fake_values",
+    "status_path": "state/scout_cycle_status.json",
+    "error_log_path": "state/scout_cycle_errors.log"
+  },
+  "dry_run_policy": {
+    "no_external_fetch": true,
+    "no_ai_call": true,
+    "no_state_write": true,
+    "no_embed": true,
+    "no_lock": true,
+    "prints_selected_future_fixture_count": true
+  },
+  "redlines": [
+    "不改 w1_score_engine / DEFAULT_RHO / λ / 概率 / Primary Read 决策逻辑",
+    "不迁移 state/scout_*",
+    "不新增 distiller",
+    "不把 state/ 或 data/scout/ 纳入 git",
+    "不提交 raw prompt、raw call、API dump、secret/env",
+    "不使用投注化语言",
+    "不对已开赛/完赛比赛补写伪赛前因子"
+  ]
+}
