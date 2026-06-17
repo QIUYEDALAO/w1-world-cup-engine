@@ -31511,14 +31511,13 @@ function pCore(r){
   const gate=stageGate(r);
   const hero=`${esc(RR.x2||r.reference_direction||'市场读数暂缺')} · ${esc(goalsCn==='偏少'?'偏小球':goalsCn==='偏多'?'偏开放':'进球均衡')}`;
   const subline=`最可能净胜 ${esc(gd.most_likely_margin_cn||'–')} · 进球区间 ${esc(tg.most_likely_band||'–')} · 数据可信度${esc(trust[1])}`;
-  const dot=(c)=>`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:5px"></span>`;
-  const pill=(lab,a,sub)=>`<div class="market-mini" style="margin:0;padding:8px 10px"><div style="font-size:11px;opacity:.6">${lab}</div><div style="font-size:13px;font-weight:500;margin-top:2px">${dot(a[0])}${a[1]}</div>${sub?`<div style="font-size:11px;opacity:.6;margin-top:1px">${sub}</div>`:''}</div>`;
   const snapTxt=snap?`盘口 ${fmtSnapCST(snap)}${stale!=null?' · '+fmtStale(stale):''}${books!=null?' · '+books+'家':''}`:(books!=null?books+' 家':'');
+  const dot=(c)=>`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${c};margin-right:5px;vertical-align:1px"></span>`;
+  const chip=(lab,a,sub)=>`<span class="kc" style="padding:5px 8px;display:inline-flex;gap:5px;align-items:baseline;white-space:nowrap"><span style="opacity:.58">${lab}</span><b style="font-weight:500">${dot(a[0])}${a[1]}</b>${sub?`<small style="opacity:.55">${sub}</small>`:''}</span>`;
   return `<div style="font-size:10px;color:var(--mut);letter-spacing:.5px;margin-bottom:4px">Director View · 一句话 + 四灯 + 共识</div>
   <div style="font-size:18px;font-weight:500;line-height:1.25">${hero}</div>
   <div style="font-size:12px;opacity:.8;margin:2px 0 8px">${subline}</div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;align-items:start;margin-bottom:4px">${pill('首发',lu,'')}${pill('数据可信度',trust,'')}${pill('盘口跟踪',move,'')}${pill('阶段',[gate.delta_hours!=null&&gate.delta_hours<1?'var(--amber)':'var(--mut)',gate.label_cn],'')}</div>
-  ${snapTxt?`<div style="font-size:10.5px;opacity:.55;margin-bottom:8px">${snapTxt}</div>`:''}
+  <div class="chips" style="gap:6px;margin:0 0 8px">${chip('首发',lu,'')}${chip('数据可信度',trust,'')}${chip('盘口跟踪',move,snapTxt)}${chip('阶段',[gate.delta_hours!=null&&gate.delta_hours<1?'var(--amber)':'var(--mut)',gate.label_cn],'')}</div>
   <div style="font-size:12px;opacity:.9;margin-bottom:3px">当前观察建议：<b>${esc(gate.label_cn)}</b> · ${esc(r.current_action_cn||(r.play_guard_pass?'可进入正式赛前分析':'关键数据未齐，只作赛前参考'))}　｜　比分峰值 <b>${esc(rv.primary_score||'–')}</b>${rv.secondary_score?` / <b>${esc(rv.secondary_score)}</b>`:''} <span style="opacity:.65">（分布峰值·参考·别当真·单格概率天然低）</span></div>
   <div style="font-size:11.5px;opacity:.75;margin-bottom:3px"><b>风险路径摘要</b><span style="opacity:.6">（开放/冷门）</span>：${esc(rv.risk_path_summary||r.current_action_cn||'—')}</div>
   <div style="font-size:10.5px;opacity:.6">本页多为同一市场赔率反解（市场复述）的切片；独立信息＝首发 / 数据可信度 / 盘口跟踪 / 进球与净胜区间。完整盘口与比分矩阵在专家视图，非最终结论。</div>`;

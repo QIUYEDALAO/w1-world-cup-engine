@@ -296,6 +296,11 @@ def assert_first_screen(text: str) -> None:
     for need in ("Director View", "一句话 + 四灯 + 共识", "首发", "数据可信度", "盘口跟踪", "阶段", "当前观察建议"):
         if need not in pcore:
             fail(f"main card (pCore) first screen missing block: {need}")
+    if "repeat(4,1fr)" in pcore or "market-mini" in pcore:
+        fail("Director View status lights must use compact inline chips, not four wide cards")
+    for need in ("chip=", "snapTxt", "class=\"chips\""):
+        if need not in pcore:
+            fail(f"Director View compact status strip missing token: {need}")
     for old in ("盘口异动", "现在该干嘛"):
         if old in pcore:
             fail(f"Director View must not use old label: {old}")
