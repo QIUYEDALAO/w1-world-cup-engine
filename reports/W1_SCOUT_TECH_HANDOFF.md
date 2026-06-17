@@ -1,7 +1,7 @@
 # W1_SCOUT 技术员交接清单
 
 **日期**: 2026-06-17
-**一句话**: 大脑(分析师闭环)已建好并跑通,**现在只缺真因子数据**。技术员的核心任务=**扩抓 api-football 真因子,写到 `data/scout/<fixture_id>.json`**;其余我已就绪。
+**一句话**: 大脑(分析师闭环)已建好并跑通,**现在只缺未来 fixture 的赛前真因子数据**。技术员的核心任务=**扩抓 api-football 真因子,写到 `data/scout/<fixture_id>.json`**;其余我已就绪。
 
 ---
 
@@ -32,7 +32,7 @@
 ## B. 技术员待办(开展工作)
 
 ### T1 ★核心★ 扩抓真因子 → `data/scout/<fixture_id>.json`
-对每场(先世界杯)用 api-football 拉以下,**只写 `data/scout/<fixture_id>.json`**(已 gitignored):
+对每场仍未开赛的 fixture(先世界杯)用 api-football 拉以下,**只写 `data/scout/<fixture_id>.json`**(已 gitignored):
 
 | endpoint | 取字段 → 映射到 bundle |
 |---|---|
@@ -44,7 +44,7 @@
 | `/standings?league=1&season=2026` | 排名/积分差 → `standings` |
 | (按赛程算) | 距上场天数 → `rest_days` |
 
-**文件格式**:键名对齐 `schemas/w1_scout_bundle_schema.json`;每维带 `availability: available/partial/missing`。**抓不到的标 `missing`,绝不造值。**
+**文件格式**:键名对齐 `schemas/w1_scout_bundle_schema.json`;每维带 `availability: available/partial/missing`。**抓不到的标 `missing`,绝不造值。已开赛/完赛 fixture 不做赛后伪赛前补因子,只进入 audit。**
 **边界**:只用 `APIFOOTBALL_KEY`;只写 `data/scout/`;**不改** `w1_score_engine`/`DEFAULT_RHO`/`build_w1_dashboard_data.py` 的 λ·矩阵底座。
 
 已落地脚本:

@@ -281,6 +281,44 @@ def walk_live_refresh_timestamps(value: object, path: str = "live_refresh") -> l
     return found
 
 
+def assert_scout_embed(text: str) -> None:
+    embedded = re.search(r'<script id="w1-scout-calls" type="application/json">(.*?)</script>', text, re.S)
+    if not embedded:
+        fail("HTML must embed Scout calls for AI analyst file-open display")
+    raw = embedded.group(1)
+    if re.search(r"(?<![A-Za-z])V4(?![A-Za-z])", raw, re.I):
+        fail("Scout embedded display copy must not contain old V4 token")
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        fail(f"Embedded Scout JSON is not parseable: {exc}")
+    calls = payload.get("calls")
+    if not isinstance(calls, list) or not calls:
+        fail("Embedded Scout JSON calls must be a non-empty array")
+    for idx, call in enumerate(calls):
+        if not isinstance(call, dict):
+            fail(f"Embedded Scout call #{idx} must be an object")
+        for key in ("fixture_id", "call", "market_divergence", "honesty_label", "independent_edge"):
+            if key not in call:
+                fail(f"Embedded Scout call #{idx} missing {key}")
+        if call.get("independent_edge") is not False:
+            fail(f"Embedded Scout call {call.get('fixture_id')} independent_edge must be false")
+        if "AI 观点" not in str(call.get("honesty_label", "")):
+            fail(f"Embedded Scout call {call.get('fixture_id')} honesty_label must be visible")
+        cbody = call.get("call")
+        if not isinstance(cbody, dict):
+            fail(f"Embedded Scout call {call.get('fixture_id')} call must be object")
+        for key in ("outcome_lean", "scoreline_lean", "confidence"):
+            if key not in cbody:
+                fail(f"Embedded Scout call {call.get('fixture_id')} call.{key} missing")
+        divergence = call.get("market_divergence")
+        if not isinstance(divergence, dict):
+            fail(f"Embedded Scout call {call.get('fixture_id')} market_divergence must be object")
+        for key in ("stance", "where_cn", "why_cn"):
+            if key not in divergence:
+                fail(f"Embedded Scout call {call.get('fixture_id')} market_divergence.{key} missing")
+
+
 def _func_body(text: str, name: str) -> str:
     idx = text.find(name)
     return text[idx:text.find("\nfunction ", idx + 1)] if idx >= 0 else ""
@@ -395,6 +433,7 @@ def assert_html(data: dict) -> None:
         for token in ("function pCandidateConsensus", "function pCandidateExpert", "候选共识", "同源矩阵", "market_implied_score_matrix", "function pScoutAnalyst", "AI 分析师"):
             if token not in text:
                 fail(f"HTML missing Phase A candidate token: {token}")
+        assert_scout_embed(text)
         if "fetch('/api/predict" in text or 'fetch("/api/predict' in text or "worldcup.youliaoyun.com/api" in text:
             fail("HTML must not call the original site prediction API")
         embedded = re.search(r'<script id="w1-data" type="application/json">(.*?)</script>', text, re.S)

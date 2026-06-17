@@ -1,7 +1,7 @@
 # W1_SCOUT 技术员交接清单
 
 **日期**: 2026-06-17
-**一句话**: AI 分析师的"大脑"我已建好并验证通过;**技术员负责把真实因子数据喂进来**(数据层),喂上之后 AI 才能从"多数跟市场"变成"有据地敢分歧"。
+**一句话**: AI 分析师的"大脑"我已建好并验证通过;**技术员负责把未来 fixture 的赛前真实因子数据喂进来**(数据层),喂上之后 AI 才能从"多数跟市场"变成"有据地敢分歧"。
 **底座红线不变**:不改 `scripts/w1_score_engine.py` / `DEFAULT_RHO` / build λ·矩阵 / 受保护 config / dashboard 的市场底座。SCOUT 全叠在上层。
 
 ---
@@ -20,7 +20,7 @@
 | `state/scout_track_record.json` · `scout_lessons.md` | ✅ | 成长引擎(冷启动空,随审计长大) |
 | `reports/W1_SCOUT_EXECUTION_SPEC.md` | ✅ | 完整规格(字段细节看这份 §2) |
 
-**已跑通**:24 场 bundle(目前只有市场维)、9 个 AI call(7 AGREE + 2 LEAN,0 FADE——数据薄,正确)、9 场已赛前锁定。
+**已跑通**:24 场 bundle、DeepSeek call、赛前锁定与赛后审计。当前合法赛前真因子只覆盖部分仍未开赛/已提前抓取 fixture;已开赛/完赛场不做伪赛前回填。
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### T1 — 扩抓真因子,写入 `data/scout/<fixture_id>.json`(核心)
 
-复用现有 api-football 桥(`w1_local_predict_server.py` / `w1_watcher.sh` 的 `x-apisports-key` 模式),对**每场即将开赛的 fixture**新增抓取:
+复用现有 api-football 桥(`w1_local_predict_server.py` / `w1_watcher.sh` 的 `x-apisports-key` 模式),对**每场仍未开赛的 fixture**新增抓取:
 
 | api-football endpoint | 抽取 → bundle 字段 |
 |---|---|
@@ -45,6 +45,7 @@
 
 > 🔴 **最重要的红线(防数据泄漏)**:bundle 只能放**赛前可得**数据。
 > `xg_roll` = 该队**本场之前**历史场次的滚动值,**绝不是本场的赛后 xG**;**绝不放** actual_score / 本场 fulltime 统计。`check_w1_scout.py` 会扫泄漏并 FAIL。
+> 已开赛/完赛 fixture 只允许进入赛后 audit,不允许为了覆盖率补写伪赛前因子。
 
 **验收**:
 1. `data/scout/<fid>.json` 为即将开赛场次生成;

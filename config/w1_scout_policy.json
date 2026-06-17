@@ -52,7 +52,7 @@
     "immutable_lock": true,
     "refuse_hindsight": true,
     "score_vs_market": true,
-    "note_cn": "赛前锁定不可变;锁定晚于开赛拒审;赛后既评绝对准度,也评『逆市场时谁对』。"
+    "note_cn": "每个 fixture 只锁第一次合法赛前 call;锁定晚于开赛拒审;赛后既评绝对准度,也评『逆市场时谁对』。多版本锁定留待后续阶段。"
   },
 
   "redlines": [

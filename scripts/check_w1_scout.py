@@ -190,9 +190,15 @@ def main() -> int:
 
     # growth files structure
     track = json.loads(TRACK_P.read_text(encoding="utf-8"))
-    for k in ("overall", "by_conviction", "by_stance"):
+    for k in ("overall", "by_conviction", "by_stance", "updated_at"):
         if k not in track:
             fail(f"track_record missing section {k}")
+    lessons_text = LESSONS_P.read_text(encoding="utf-8").strip()
+    if not lessons_text:
+        fail("scout_lessons.md must be non-empty")
+    for t in policy["forbidden_terms"]:
+        if t in lessons_text:
+            fail(f"scout_lessons.md contains forbidden term: {t}")
 
     # calls (validate if present)
     n_calls = 0

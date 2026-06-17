@@ -21,7 +21,11 @@ NEW=$(python3 -c "import hashlib;print(hashlib.sha1(open('state/w1_scout_bundles
 PREV=$(cat state/.scout_bundles.sha 2>/dev/null || echo "")
 if [ "$NEW" != "$PREV" ]; then
   echo "bundle changed -> DeepSeek 全量重判"
-  python3 scripts/w1_scout_analyst.py || { echo "analyst failed (key/quota?), 跳过本轮重判"; }
+  if ! python3 scripts/w1_scout_analyst.py; then
+    echo "analyst failed (key/quota/validation?) -> 不更新指纹/不 embed/不 lock"
+    python3 scripts/w1_scout_ledger.py audit
+    exit 1
+  fi
   # 4) 闸门:不过就不锁(set -e 风格手动判)
   if python3 scripts/check_w1_scout.py; then
     echo "$NEW" > state/.scout_bundles.sha
