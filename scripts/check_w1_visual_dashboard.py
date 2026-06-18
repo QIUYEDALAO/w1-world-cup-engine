@@ -317,6 +317,19 @@ def assert_scout_embed(text: str) -> None:
             fail(f"Embedded Scout call {call.get('fixture_id')} must include watch_points_cn")
         if not isinstance(read.get("risks_cn"), list) or not read.get("risks_cn"):
             fail(f"Embedded Scout call {call.get('fixture_id')} must include risks_cn")
+        if "evidence_chain_cn" in read and (
+            not isinstance(read.get("evidence_chain_cn"), list) or len(read.get("evidence_chain_cn") or []) < 2
+        ):
+            fail(f"Embedded Scout call {call.get('fixture_id')} evidence_chain_cn must be a 2+ item array when present")
+        if "reverse_risks_cn" in read and (
+            not isinstance(read.get("reverse_risks_cn"), list) or not read.get("reverse_risks_cn")
+        ):
+            fail(f"Embedded Scout call {call.get('fixture_id')} reverse_risks_cn must be a non-empty array when present")
+        if "market_expert_script_cn" in read and not any(
+            token in str(read.get("market_expert_script_cn") or "")
+            for token in ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")
+        ):
+            fail(f"Embedded Scout call {call.get('fixture_id')} market_expert_script_cn must use market-language terms")
         for old_key in ("market_divergence", "conviction"):
             if old_key in call:
                 fail(f"Embedded Scout call {call.get('fixture_id')} must not expose old field {old_key}")
@@ -386,7 +399,27 @@ def assert_first_screen(text: str) -> None:
     scout = _func_body(text, "function pScoutAnalyst(")
     if not scout:
         fail("pScoutAnalyst function missing")
-    for need in ("本场解读 · DeepSeek", "已读", "AI 解读", "非独立优势", "研究用途 · 非推介 · 非独立优势", "看点", "风险", "与市场差异(讨论点)", "数据就绪度"):
+    for need in (
+        "本场解读 · DeepSeek",
+        "已读",
+        "AI 解读",
+        "非独立优势",
+        "研究用途 · 非推介 · 非独立优势",
+        "数据证据链",
+        "常规剧本",
+        "尾部高方差剧本",
+        "看点",
+        "风险",
+        "反向风险",
+        "专家盘口剧本",
+        "与市场差异(讨论点)",
+        "数据就绪度",
+        "evidence_chain_cn",
+        "regular_script_cn",
+        "high_variance_tail_script_cn",
+        "reverse_risks_cn",
+        "market_expert_script_cn",
+    ):
         if need not in scout:
             fail(f"AI-first scout card missing token: {need}")
     for raw in ("home win", "away win", "draw", "MEDIUM", "HIGH", "LOW", "independent_edge=false", "outcome_lean", "scoreline_lean", "conviction", "market_divergence", "FADE_MARKET", "LEAN_DIFFERENT"):

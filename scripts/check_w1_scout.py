@@ -60,6 +60,21 @@ def validate_call(c: dict, policy: dict) -> list[str]:
         errs.append("bare translation rejected: need at least 2 watch_points_cn")
     if not isinstance(risks, list) or len([x for x in risks if str(x).strip()]) < 1:
         errs.append("bare translation rejected: need at least 1 risks_cn")
+    evidence = read.get("evidence_chain_cn")
+    if not isinstance(evidence, list) or len([x for x in evidence if str(x).strip()]) < 2:
+        errs.append("evidence_chain_cn must include at least 2 data evidence bullets")
+    reverse_risks = read.get("reverse_risks_cn")
+    if not isinstance(reverse_risks, list) or len([x for x in reverse_risks if str(x).strip()]) < 1:
+        errs.append("reverse_risks_cn must include at least 1 reverse path")
+    regular_script = str(read.get("regular_script_cn") or "")
+    if len(regular_script.strip()) < 8:
+        errs.append("regular_script_cn must describe the normal match script")
+    tail_script = str(read.get("high_variance_tail_script_cn") or "")
+    if not any(token in tail_script for token in ("高方差", "早球", "红牌", "转换", "定位球", "门将", "尾部")):
+        errs.append("high_variance_tail_script_cn must describe a tail/high-variance script")
+    market_script = str(read.get("market_expert_script_cn") or "")
+    if not any(token in market_script for token in ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")):
+        errs.append("market_expert_script_cn must use expert market-language without action wording")
     score_band = str(read.get("score_band_cn") or "")
     if not any(token in score_band for token in ("区间", "分布", "别当真", "偏")):
         errs.append("score_band_cn must use band/distribution language")
@@ -232,7 +247,15 @@ def main() -> int:
     ):
         if token not in analyst:
             fail(f"analyst missing token: {token}")
-    for token in ("read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn}", "AI 解读·非预测·非推介·可能错"):
+    for token in (
+        "read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn",
+        "evidence_chain_cn",
+        "regular_script_cn",
+        "high_variance_tail_script_cn",
+        "reverse_risks_cn",
+        "market_expert_script_cn",
+        "AI 解读·非预测·非推介·可能错",
+    ):
         if token not in analyst:
             fail(f"analyst missing read-schema token: {token}")
     for token in ("actual_score", "fulltime", "ft_score", "post_match_calibration", "w1_score_engine", "DEFAULT_RHO"):
@@ -314,7 +337,12 @@ def main() -> int:
     base = {"fixture_id": "X",
             "read": {"tilt_cn": "主队小优", "score_band_cn": "偏 1-0/2-0,但单场看区间、别当真",
                      "watch_points_cn": ["主队边路推进", "客队转换防守"], "risks_cn": ["早球会改变节奏"],
-                     "vs_market_cn": "与市场差异不大,仅作讨论点"},
+                     "vs_market_cn": "与市场差异不大,仅作讨论点",
+                     "evidence_chain_cn": ["市场读数主队略低水", "阵容信息部分缺失,只作降权证据"],
+                     "regular_script_cn": "常规剧本是主队压住节奏,通过边路和二点球慢慢建立优势。",
+                     "high_variance_tail_script_cn": "尾部高方差剧本来自早球、红牌或转换混乱,会让比赛脱离常规节奏。",
+                     "reverse_risks_cn": ["客队低位防守拖慢节奏后,主队优势可能只停留在场面"],
+                     "market_expert_script_cn": "盘口样本显示早盘让球倾向主队,但水位与样本厚度只作为读盘语境。"},
             "data_readiness": "中", "honesty_label": "AI 解读·非预测·非推介·可能错",
             "independent_edge": False}
     if validate_call(base, policy):
@@ -325,6 +353,12 @@ def main() -> int:
     bare = dict(base, read={"tilt_cn": "主队小优", "score_band_cn": "1-0", "watch_points_cn": [], "risks_cn": [], "vs_market_cn": ""})
     if not validate_call(bare, policy):
         fail("reverse: bare translation (no watch/risks/band wording) must be rejected")
+    no_evidence = dict(base, read={**base["read"], "evidence_chain_cn": []})
+    if not validate_call(no_evidence, policy):
+        fail("reverse: missing evidence chain must be rejected")
+    no_market_script = dict(base, read={**base["read"], "market_expert_script_cn": "普通自然语言描述"})
+    if not validate_call(no_market_script, policy):
+        fail("reverse: market expert script without market-language terms must be rejected")
     betting = dict(base, read={**base["read"], "watch_points_cn": ["稳赢", "主队边路推进"]})
     if not validate_call(betting, policy):
         fail("reverse: forbidden promise term must be caught")

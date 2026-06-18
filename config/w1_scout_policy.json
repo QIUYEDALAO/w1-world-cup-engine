@@ -11,7 +11,18 @@
     "fixture_id", "read", "data_readiness", "honesty_label", "independent_edge"
   ],
   "read_subfields": {
-    "read": ["tilt_cn", "score_band_cn", "watch_points_cn", "risks_cn", "vs_market_cn"]
+    "read": [
+      "tilt_cn",
+      "score_band_cn",
+      "watch_points_cn",
+      "risks_cn",
+      "vs_market_cn",
+      "evidence_chain_cn",
+      "regular_script_cn",
+      "high_variance_tail_script_cn",
+      "reverse_risks_cn",
+      "market_expert_script_cn"
+    ]
   },
   "readiness_levels": ["高", "中", "低"],
 
