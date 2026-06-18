@@ -72,6 +72,7 @@ SCOUT_RECOMMENDATION_CARD_KEYS = (
     "confidence_cn",
 )
 SCOUT_FUNDS_FORBIDDEN_TOKENS = ("下注", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中")
+SCOUT_RECOMMENDATION_SOURCE_TOKENS = ("来源：市场", "来源：市场赔率", "来源：W1模型", "来源：score matrix", "来源：缺失", "来源：盘口")
 
 
 class CheckError(Exception):
@@ -400,11 +401,17 @@ def assert_scout_embed(text: str) -> None:
         card = read.get("recommendation_card")
         if isinstance(card, dict):
             for key in SCOUT_RECOMMENDATION_CARD_KEYS:
-                if not str(card.get(key) or "").strip():
+                value = str(card.get(key) or "").strip()
+                if not value:
                     fail(f"Embedded Scout call {call.get('fixture_id')} recommendation_card.{key} missing")
-                visible_chunks.append(str(card.get(key) or ""))
+                if len(value) > 80:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} recommendation_card.{key} too long")
+                visible_chunks.append(value)
             if str(card.get("confidence_cn") or "") not in {"高", "中", "低"}:
                 fail(f"Embedded Scout call {call.get('fixture_id')} recommendation_card.confidence_cn must be 高/中/低")
+            card_text = "\n".join(str(card.get(key) or "") for key in SCOUT_RECOMMENDATION_CARD_KEYS)
+            if not any(token in card_text for token in SCOUT_RECOMMENDATION_SOURCE_TOKENS):
+                fail(f"Embedded Scout call {call.get('fixture_id')} recommendation_card lacks source label")
         visible_text = "\n".join(visible_chunks)
         for token in SCOUT_VISIBLE_FORBIDDEN_TOKENS:
             if token in visible_text:

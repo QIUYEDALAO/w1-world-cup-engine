@@ -196,6 +196,7 @@ def _odds_snapshot_market(fid: str) -> dict:
 
 def _market_availability(market: dict) -> dict:
     has_1x2 = all(isinstance(market.get(key), (int, float)) for key in ("p_home", "p_draw", "p_away"))
+    has_model_1x2 = all(isinstance(market.get(key), (int, float)) for key in ("model_p_home", "model_p_draw", "model_p_away"))
     has_ah = market.get("ah_line") not in (None, "") and all(
         isinstance(market.get(key), (int, float)) for key in ("ah_home_price", "ah_away_price")
     )
@@ -211,9 +212,51 @@ def _market_availability(market: dict) -> dict:
     return {
         "market": overall,
         "market_1x2": "available" if has_1x2 else "missing",
+        "model_1x2": "available" if has_model_1x2 else "missing",
         "market_ah": "available" if has_ah else "missing",
         "market_ou": "available" if has_ou else "missing",
     }
+
+
+def _prob_triplet_from_rec(rec: dict) -> dict:
+    panel = rec.get("market_probability_panel") or {}
+    comparison = panel.get("market_comparison") or {}
+    market_oxt = comparison.get("one_x_two_market") or {}
+    model_oxt = panel.get("one_x_two") or {}
+    summary = rec.get("score_matrix_summary") or {}
+    distribution = rec.get("score_distribution") or {}
+    model = distribution.get("matrix_model") or {}
+    model_hda = model.get("model_hda") or []
+
+    out = {
+        "p_home": market_oxt.get("home_win"),
+        "p_draw": market_oxt.get("draw"),
+        "p_away": market_oxt.get("away_win"),
+        "model_p_home": model_oxt.get("home_win"),
+        "model_p_draw": model_oxt.get("draw"),
+        "model_p_away": model_oxt.get("away_win"),
+        "model_1x2_source": None,
+    }
+    if not all(isinstance(out.get(key), (int, float)) for key in ("model_p_home", "model_p_draw", "model_p_away")):
+        out["model_p_home"] = summary.get("home_win_prob")
+        out["model_p_draw"] = summary.get("draw_prob")
+        out["model_p_away"] = summary.get("away_win_prob")
+    if not all(isinstance(out.get(key), (int, float)) for key in ("model_p_home", "model_p_draw", "model_p_away")) and len(model_hda) >= 3:
+        out["model_p_home"], out["model_p_draw"], out["model_p_away"] = model_hda[:3]
+    if all(isinstance(out.get(key), (int, float)) for key in ("model_p_home", "model_p_draw", "model_p_away")):
+        out["model_1x2_source"] = "W1模型"
+    return out
+
+
+def _score_picks_from_rec(rec: dict) -> list[dict]:
+    rows = (rec.get("score_matrix_summary") or {}).get("top_scores") or (rec.get("score_distribution") or {}).get("top_scores") or []
+    out = []
+    for row in rows[:3]:
+        score = row.get("score")
+        probability = row.get("probability")
+        if score:
+            out.append({"score": score, "probability": probability, "source": "score matrix"})
+    return out
 
 
 def _form_block(_ctx) -> dict:
@@ -230,12 +273,12 @@ def _xg_block() -> dict:
 def build_bundle(rec: dict) -> dict:
     fid = str(rec.get("fixture_id"))
     ctx = _card_context(fid)
-    oxt = (rec.get("market_probability_panel") or {}).get("one_x_two") or {}
     inj_status = (ctx.get("injuries") or {}).get("status")
     has_formation = bool(rec.get("home_formation") or rec.get("away_formation"))
     default_league, default_season = _default_league()
-    market = {"p_home": oxt.get("home_win"), "p_draw": oxt.get("draw"),
-              "p_away": oxt.get("away_win"), "ah_line": None, "ah_home_price": None,
+    market = {**_prob_triplet_from_rec(rec),
+              "score_picks": _score_picks_from_rec(rec),
+              "ah_line": None, "ah_home_price": None,
               "ah_away_price": None, "ou_line": None, "over_price": None,
               "under_price": None, "bookmaker_count": None, "market_source": None,
               "odds_updated_at": None}

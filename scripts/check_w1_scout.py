@@ -53,6 +53,7 @@ RECOMMENDATION_CARD_KEYS = (
 )
 RECOMMENDATION_CARD_OPTIONAL_KEYS = ("data_status_cn",)
 FUNDS_FORBIDDEN_TOKENS = ("下注", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中")
+RECOMMENDATION_SOURCE_TOKENS = ("来源：市场", "来源：市场赔率", "来源：W1模型", "来源：score matrix", "来源：缺失", "来源：盘口")
 VISIBLE_FORBIDDEN_TOKENS = (
     "p_home",
     "p_draw",
@@ -243,8 +244,11 @@ def validate_recommendation_card(read: dict, readiness: str) -> list[str]:
     if not isinstance(card, dict):
         return ["read.recommendation_card must be an object"]
     for key in RECOMMENDATION_CARD_KEYS:
-        if not str(card.get(key) or "").strip():
+        value = str(card.get(key) or "").strip()
+        if not value:
             errs.append(f"read.recommendation_card.{key} missing")
+        if len(value) > 80:
+            errs.append(f"read.recommendation_card.{key} too long (>80 chars)")
     confidence = str(card.get("confidence_cn") or "")
     if confidence not in {"高", "中", "低"}:
         errs.append("read.recommendation_card.confidence_cn must be 高/中/低")
@@ -257,6 +261,9 @@ def validate_recommendation_card(read: dict, readiness: str) -> list[str]:
             if token in joined:
                 errs.append(f"low data_readiness recommendation_card overstates: {token}")
     one_x_two = str(card.get("one_x_two_cn") or "")
+    card_text = "\n".join(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
+    if not any(token in card_text for token in RECOMMENDATION_SOURCE_TOKENS):
+        errs.append("recommendation_card must include an explicit 来源 label")
     if not any(token in one_x_two for token in ("主胜", "平", "客胜", "1X2", "胜平负")):
         errs.append("recommendation_card.one_x_two_cn must use 1X2 / 主胜平客胜 wording")
     if "比分" not in str(card.get("score_picks_cn") or "") and not any(token in str(card.get("score_picks_cn") or "") for token in ("首选", "次选", "风险", "观察")):
@@ -284,6 +291,14 @@ def market_has_lines(bundle: dict) -> bool:
     return bool(has_ah or has_ou)
 
 
+def model_has_1x2(bundle: dict) -> bool:
+    market = bundle.get("market") if isinstance(bundle.get("market"), dict) else {}
+    availability = bundle.get("availability") if isinstance(bundle.get("availability"), dict) else {}
+    return availability.get("model_1x2") == "available" or all(
+        isinstance(market.get(key), (int, float)) for key in ("model_p_home", "model_p_draw", "model_p_away")
+    )
+
+
 def market_all_missing(bundle: dict) -> bool:
     availability = bundle.get("availability") if isinstance(bundle.get("availability"), dict) else {}
     return all(availability.get(key) != "available" for key in ("market_1x2", "market_ah", "market_ou"))
@@ -302,6 +317,12 @@ def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
             errs.append("market AH/OU available but recommendation_card still says odds are missing")
         if not ("让球" in market_script and "大小球" in market_script and any(token in market_script for token in REVERSE_FAILURE_TOKENS + TAIL_TRIGGER_TOKENS)):
             errs.append("market AH/OU available but market_expert_script_cn lacks handicap/totals/condition language")
+    if model_has_1x2(bundle):
+        one_x_two = str(card.get("one_x_two_cn") or "")
+        if "缺失" in one_x_two or "暂不展开胜平负推荐" in one_x_two:
+            errs.append("W1 model 1X2 available but recommendation_card.one_x_two_cn still says missing")
+        if "来源：W1模型" not in one_x_two and "来源：市场" not in one_x_two:
+            errs.append("1X2 recommendation must label source as W1模型 or market when model 1X2 exists")
     elif market_all_missing(bundle):
         has_market_terms = any(token in market_script for token in MARKET_TERMS)
         has_missing = any(token in market_script for token in MARKET_MISSING_TERMS)
@@ -601,11 +622,11 @@ def main() -> int:
         if (b.get("availability") or {}).get("market") not in {"available", "partial", "missing"}:
             fail(f"bundle {b.get('fixture_id')} availability.market missing or invalid")
         availability = b.get("availability") or {}
-        for key in ("market_1x2", "market_ah", "market_ou"):
+        for key in ("market_1x2", "model_1x2", "market_ah", "market_ou"):
             if availability.get(key) not in {"available", "missing"}:
                 fail(f"bundle {b.get('fixture_id')} availability.{key} missing or invalid")
         market = b.get("market") or {}
-        for key in ("p_home", "p_draw", "p_away", "ah_line", "ah_home_price", "ah_away_price", "ou_line", "over_price", "under_price", "bookmaker_count", "market_source", "odds_updated_at"):
+        for key in ("p_home", "p_draw", "p_away", "model_p_home", "model_p_draw", "model_p_away", "model_1x2_source", "score_picks", "ah_line", "ah_home_price", "ah_away_price", "ou_line", "over_price", "under_price", "bookmaker_count", "market_source", "odds_updated_at"):
             if key not in market:
                 fail(f"bundle {b.get('fixture_id')} market missing key {key}")
 
@@ -666,10 +687,10 @@ def main() -> int:
                          {"claim": "阵容信息部分缺失", "source": "lineups", "fields": ["lineup"], "availability": "partial", "weight": "low"},
                      ],
                      "recommendation_card": {
-                         "one_x_two_cn": "主胜 45%｜平 29%｜客胜 26%",
-                         "score_picks_cn": "首选 1-0｜次选 1-1｜风险 2-1",
-                         "ou_pick_cn": "小2.5 倾向｜信心：中｜失效：早球打开节奏",
-                         "ah_pick_cn": "主队 -0.25 倾向｜信心：中｜理由：主队小优但覆盖深盘不稳",
+                         "one_x_two_cn": "主胜 45%｜平 29%｜客胜 26%｜来源：市场赔率",
+                         "score_picks_cn": "首选 1-0｜次选 1-1｜风险 2-1｜来源：score matrix",
+                         "ou_pick_cn": "小2.5｜信心：中｜失效：早球｜来源：盘口",
+                         "ah_pick_cn": "主队 -0.25｜信心：中｜覆盖深盘不稳｜来源：盘口",
                          "main_recommendation_cn": "主线看主队不败与低比分；让球只作覆盖条件讨论。",
                          "risk_cn": "若客队先球或主队久攻不下，主线降权。",
                          "confidence_cn": "中",
@@ -751,6 +772,13 @@ def main() -> int:
     market_bundle = {"availability": {"market_ah": "available", "market_ou": "available"}, "market": {"ah_line": "-1", "ah_home_price": 1.9, "ah_away_price": 1.9, "ou_line": "2.5", "over_price": 1.9, "under_price": 1.9}}
     if not validate_call_against_bundle(approved_missing_market_script, market_bundle):
         fail("reverse: AH/OU available but missing-market script must be rejected")
+    model_bundle = {
+        "availability": {"model_1x2": "available", "market_ah": "missing", "market_ou": "missing"},
+        "market": {"model_p_home": 0.47, "model_p_draw": 0.28, "model_p_away": 0.25},
+    }
+    missing_model_1x2 = dict(base, read={**base["read"], "recommendation_card": {**base["read"]["recommendation_card"], "one_x_two_cn": "1X2 数据缺失，降级观察｜来源：缺失"}})
+    if not validate_call_against_bundle(missing_model_1x2, model_bundle):
+        fail("reverse: W1 model 1X2 available but missing 1X2 card must be rejected")
     missing_bundle = {"availability": {"market_1x2": "missing", "market_ah": "missing", "market_ou": "missing"}, "market": {}}
     invented_market = dict(base, read={**base["read"], "market_expert_script_cn": "若临场让球盘口保持主队低水，大小球触发看早球。"})
     if not validate_call_against_bundle(invented_market, missing_bundle):
