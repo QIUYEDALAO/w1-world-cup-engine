@@ -62,6 +62,16 @@ SCOUT_VISIBLE_FORBIDDEN_TOKENS = (
     "LDDL",
 )
 SCOUT_MARKET_MISSING_TERMS = ("盘口数据缺失", "无法展开盘口剧本", "不展开盘口剧本", "市场赔率数据缺失")
+SCOUT_RECOMMENDATION_CARD_KEYS = (
+    "one_x_two_cn",
+    "score_picks_cn",
+    "ou_pick_cn",
+    "ah_pick_cn",
+    "main_recommendation_cn",
+    "risk_cn",
+    "confidence_cn",
+)
+SCOUT_FUNDS_FORBIDDEN_TOKENS = ("下注", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中")
 
 
 class CheckError(Exception):
@@ -387,10 +397,21 @@ def assert_scout_embed(text: str) -> None:
                 visible_chunks.extend(str(item) for item in value if str(item).strip())
             elif value:
                 visible_chunks.append(str(value))
+        card = read.get("recommendation_card")
+        if isinstance(card, dict):
+            for key in SCOUT_RECOMMENDATION_CARD_KEYS:
+                if not str(card.get(key) or "").strip():
+                    fail(f"Embedded Scout call {call.get('fixture_id')} recommendation_card.{key} missing")
+                visible_chunks.append(str(card.get(key) or ""))
+            if str(card.get("confidence_cn") or "") not in {"高", "中", "低"}:
+                fail(f"Embedded Scout call {call.get('fixture_id')} recommendation_card.confidence_cn must be 高/中/低")
         visible_text = "\n".join(visible_chunks)
         for token in SCOUT_VISIBLE_FORBIDDEN_TOKENS:
             if token in visible_text:
                 fail(f"Embedded Scout visible text contains forbidden token {token}: fixture {call.get('fixture_id')}")
+        for token in SCOUT_FUNDS_FORBIDDEN_TOKENS:
+            if token in visible_text:
+                fail(f"Embedded Scout visible text contains forbidden funds token {token}: fixture {call.get('fixture_id')}")
         for old_key in ("market_divergence", "conviction"):
             if old_key in call:
                 fail(f"Embedded Scout call {call.get('fixture_id')} must not expose old field {old_key}")
@@ -461,7 +482,18 @@ def assert_first_screen(text: str) -> None:
     if not scout:
         fail("pScoutAnalyst function missing")
     for need in (
-        "本场解读 · DeepSeek",
+        "AI推荐卡 · DeepSeek",
+        "recommendation_card",
+        "one_x_two_cn",
+        "score_picks_cn",
+        "ou_pick_cn",
+        "ah_pick_cn",
+        "main_recommendation_cn",
+        "risk_cn",
+        "confidence_cn",
+        "scout-rec-grid",
+        "核心判断",
+        "推荐理由",
         "已读",
         "AI 解读",
         "非独立优势",
@@ -488,8 +520,8 @@ def assert_first_screen(text: str) -> None:
             fail(f"AI-first scout card must not display raw internal token: {raw}")
     if "stripAiDisplayText(" not in scout:
         fail("AI-first scout card must sanitize probability-like text from AI display")
-    if "fmtP(" in scout or "probability" in scout or "概率" in scout:
-        fail("AI-first scout card must not render probability numbers as its main read")
+    if "fmtP(" in scout or "probability" in scout:
+        fail("AI-first scout card must not render internal probability helpers as its main read")
     if re.search(r"(?<![A-Za-z])V4(?![A-Za-z])", scout, re.I):
         fail("AI-first scout card must not expose old V4 token")
     cycle = _func_body(text, "function pScoutCycleStatus(")

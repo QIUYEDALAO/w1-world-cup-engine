@@ -18,6 +18,7 @@
       "risks_cn",
       "vs_market_cn",
       "evidence",
+      "recommendation_card",
       "evidence_chain_cn",
       "regular_script_cn",
       "high_variance_tail_script_cn",
@@ -58,6 +59,7 @@
 
   "forbidden_terms": [
     "稳赢", "稳赚", "必中", "必胜", "保证命中", "保证", "资金", "下注", "投注", "梭哈",
+    "重仓", "倍投", "加仓", "必红", "包中",
     "盈利承诺", "无风险", "打败市场", "战胜市场", "独立优势", "预测器", "敢说敢干",
     "FADE_MARKET", "LEAN_DIFFERENT", "conviction"
   ],

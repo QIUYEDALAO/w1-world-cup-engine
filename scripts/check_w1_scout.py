@@ -42,6 +42,17 @@ TAIL_TRIGGER_TOKENS = ("如果", "若", "一旦", "前 30 分钟", "前30分钟"
 REVERSE_FAILURE_TOKENS = ("如果上半场仍是 0-0", "如果上半场仍是0-0", "如果久攻不下", "如果低位防守成功", "如果首发进攻点缺席", "如果射门质量无法转化", "该剧本降权", "大比分剧本失效", "失效")
 MARKET_TERMS = ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")
 MARKET_MISSING_TERMS = ("盘口数据缺失", "无法展开盘口剧本", "不展开盘口剧本")
+RECOMMENDATION_CARD_KEYS = (
+    "one_x_two_cn",
+    "score_picks_cn",
+    "ou_pick_cn",
+    "ah_pick_cn",
+    "main_recommendation_cn",
+    "risk_cn",
+    "confidence_cn",
+)
+RECOMMENDATION_CARD_OPTIONAL_KEYS = ("data_status_cn",)
+FUNDS_FORBIDDEN_TOKENS = ("下注", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中")
 VISIBLE_FORBIDDEN_TOKENS = (
     "p_home",
     "p_draw",
@@ -117,6 +128,9 @@ def visible_text_chunks(read: dict) -> list[str]:
     evidence_rows = read.get("evidence")
     if isinstance(evidence_rows, list):
         chunks.extend(str(row.get("claim") or "") for row in evidence_rows if isinstance(row, dict))
+    card = read.get("recommendation_card")
+    if isinstance(card, dict):
+        chunks.extend(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
     return chunks
 
 
@@ -204,6 +218,9 @@ def validate_visible_text(read: dict, readiness: str) -> list[str]:
     for token in VISIBLE_FORBIDDEN_TOKENS:
         if token in visible:
             errs.append(f"visible Scout text contains forbidden token: {token}")
+    for token in FUNDS_FORBIDDEN_TOKENS:
+        if token in visible:
+            errs.append(f"recommendation card / visible Scout text contains forbidden funds token: {token}")
     score_band = str(read.get("score_band_cn") or "")
     if "历史样本" in score_band or "若干" in score_band:
         errs.append("score_band_cn must not contain machine fallback tokens")
@@ -217,6 +234,37 @@ def validate_visible_text(read: dict, readiness: str) -> list[str]:
             if token in visible:
                 errs.append(f"weak evidence context overclaims: {token}")
     errs.extend(validate_data_wording(read, readiness))
+    return errs
+
+
+def validate_recommendation_card(read: dict, readiness: str) -> list[str]:
+    errs: list[str] = []
+    card = read.get("recommendation_card")
+    if not isinstance(card, dict):
+        return ["read.recommendation_card must be an object"]
+    for key in RECOMMENDATION_CARD_KEYS:
+        if not str(card.get(key) or "").strip():
+            errs.append(f"read.recommendation_card.{key} missing")
+    confidence = str(card.get("confidence_cn") or "")
+    if confidence not in {"高", "中", "低"}:
+        errs.append("read.recommendation_card.confidence_cn must be 高/中/低")
+    if readiness == "低":
+        joined = "\n".join(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
+        if "观察" not in joined and "降级" not in joined:
+            errs.append("low data_readiness recommendation_card must explicitly show 观察 or 降级")
+        strong_tokens = ("强推", "确定", "重心", "首选直接", "单关")
+        for token in strong_tokens:
+            if token in joined:
+                errs.append(f"low data_readiness recommendation_card overstates: {token}")
+    one_x_two = str(card.get("one_x_two_cn") or "")
+    if not any(token in one_x_two for token in ("主胜", "平", "客胜", "1X2", "胜平负")):
+        errs.append("recommendation_card.one_x_two_cn must use 1X2 / 主胜平客胜 wording")
+    if "比分" not in str(card.get("score_picks_cn") or "") and not any(token in str(card.get("score_picks_cn") or "") for token in ("首选", "次选", "风险", "观察")):
+        errs.append("recommendation_card.score_picks_cn must use score pick / observation wording")
+    if "大小球" not in str(card.get("ou_pick_cn") or "") and not any(token in str(card.get("ou_pick_cn") or "") for token in ("大", "小", "2.5")):
+        errs.append("recommendation_card.ou_pick_cn must mention totals / 大小球")
+    if "让球" not in str(card.get("ah_pick_cn") or "") and not any(token in str(card.get("ah_pick_cn") or "") for token in ("受让", "+", "-")):
+        errs.append("recommendation_card.ah_pick_cn must mention handicap / 让球")
     return errs
 
 
@@ -245,9 +293,13 @@ def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
     errs: list[str] = []
     read = call.get("read") if isinstance(call.get("read"), dict) else {}
     market_script = str(read.get("market_expert_script_cn") or "")
+    card = read.get("recommendation_card") if isinstance(read.get("recommendation_card"), dict) else {}
+    card_text = "\n".join(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
     if market_has_lines(bundle):
         if "盘口数据缺失" in market_script or "无法展开盘口剧本" in market_script or "不展开盘口剧本" in market_script:
             errs.append("market AH/OU available but call still says market data is missing")
+        if any(token in card_text for token in ("盘口缺失", "盘口数据缺失", "暂不输出大小球推荐", "暂不输出让球推荐")):
+            errs.append("market AH/OU available but recommendation_card still says odds are missing")
         if not ("让球" in market_script and "大小球" in market_script and any(token in market_script for token in REVERSE_FAILURE_TOKENS + TAIL_TRIGGER_TOKENS)):
             errs.append("market AH/OU available but market_expert_script_cn lacks handicap/totals/condition language")
     elif market_all_missing(bundle):
@@ -270,6 +322,7 @@ def validate_call(c: dict, policy: dict) -> list[str]:
     for f in policy["read_subfields"]["read"]:
         if f not in read:
             errs.append(f"read.{f} missing")
+    errs.extend(validate_recommendation_card(read, str(c.get("data_readiness") or "")))
     watch = read.get("watch_points_cn")
     risks = read.get("risks_cn")
     if not isinstance(watch, list) or len([x for x in watch if str(x).strip()]) < 2:
@@ -506,6 +559,7 @@ def main() -> int:
     for token in (
         "read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn",
         "evidence[{claim,source,fields[],availability,weight}]",
+        "recommendation_card{one_x_two_cn,score_picks_cn,ou_pick_cn,ah_pick_cn,main_recommendation_cn,risk_cn,confidence_cn,data_status_cn}",
         "evidence_chain_cn",
         "regular_script_cn",
         "high_variance_tail_script_cn",
@@ -611,6 +665,16 @@ def main() -> int:
                          {"claim": "市场读数主队略低水", "source": "market", "fields": ["market"], "availability": "partial", "weight": "medium"},
                          {"claim": "阵容信息部分缺失", "source": "lineups", "fields": ["lineup"], "availability": "partial", "weight": "low"},
                      ],
+                     "recommendation_card": {
+                         "one_x_two_cn": "主胜 45%｜平 29%｜客胜 26%",
+                         "score_picks_cn": "首选 1-0｜次选 1-1｜风险 2-1",
+                         "ou_pick_cn": "小2.5 倾向｜信心：中｜失效：早球打开节奏",
+                         "ah_pick_cn": "主队 -0.25 倾向｜信心：中｜理由：主队小优但覆盖深盘不稳",
+                         "main_recommendation_cn": "主线看主队不败与低比分；让球只作覆盖条件讨论。",
+                         "risk_cn": "若客队先球或主队久攻不下，主线降权。",
+                         "confidence_cn": "中",
+                         "data_status_cn": "市场赔率可用 / 数据部分缺失"
+                     },
                      "evidence_chain_cn": ["市场读数主队略低水", "阵容信息部分缺失,只作降权证据"],
                      "regular_script_cn": "常规剧本是市场读数主队略低水支撑主队压住节奏,通过边路和二点球慢慢建立优势。",
                      "high_variance_tail_script_cn": "如果市场读数主队略低水被早球或红牌打穿,尾部高方差剧本会让比赛脱离常规节奏。",
@@ -620,6 +684,10 @@ def main() -> int:
             "independent_edge": False}
     if validate_call(base, policy):
         fail("reverse: a clean match read should pass")
+    no_card = dict(base, read={**base["read"]})
+    no_card["read"].pop("recommendation_card", None)
+    if not validate_call(no_card, policy):
+        fail("reverse: missing recommendation_card must be rejected")
     legacy = dict(base, call={"outcome_lean": "主", "scoreline_lean": "1-0", "confidence": "LOW"})
     if not validate_call(legacy, policy):
         fail("reverse: old prediction call field must be rejected")
@@ -690,6 +758,12 @@ def main() -> int:
     betting = dict(base, read={**base["read"], "watch_points_cn": ["稳赢", "主队边路推进"]})
     if not validate_call(betting, policy):
         fail("reverse: forbidden promise term must be caught")
+    funds_card = dict(base, read={**base["read"], "recommendation_card": {**base["read"]["recommendation_card"], "main_recommendation_cn": "重仓主线"}})
+    if not validate_call(funds_card, policy):
+        fail("reverse: recommendation_card funds wording must be caught")
+    low_no_observe = dict(base, data_readiness="低", read={**base["read"], "recommendation_card": {**base["read"]["recommendation_card"], "main_recommendation_cn": "主线看主队不败与低比分。", "risk_cn": "若客队先球则主线变化。", "data_status_cn": "数据部分缺失"}})
+    if not validate_call(low_no_observe, policy):
+        fail("reverse: low data recommendation_card without observation/downgrade must be rejected")
     if not bundle_leak([{"fixture_id": "Z", "asof_pre_kickoff": True, "actual_score": "2-1"}], forbidden_pm):
         fail("reverse: a bundle with actual_score must be caught")
     bad_scout = {"fixture_id": "Z", "asof_pre_kickoff": False, "availability": {"form": "made_up"}}

@@ -149,6 +149,14 @@ button{font:inherit;cursor:pointer}
 .scout-hero .why{font-size:12.5px;line-height:1.55;color:var(--ink);opacity:.9;margin-bottom:7px}
 .scout-hero .src{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
 .scout-hero .src span{font-family:var(--mono);font-size:10px;border:1px solid var(--line2);border-radius:6px;padding:2px 7px;color:var(--mut)}
+.scout-rec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0}
+.scout-rec-item{border:1px solid var(--line2);border-radius:7px;padding:8px 9px;background:rgba(255,255,255,.025)}
+.scout-rec-item b{display:block;font-size:11px;color:var(--mut);margin-bottom:3px}
+.scout-rec-item div{font-size:14px;font-weight:750;line-height:1.35}
+.scout-rec-main{font-size:17px;font-weight:850;line-height:1.32;margin:8px 0 6px}
+.scout-hero details.why{border-top:1px solid var(--line2);padding-top:7px}
+.scout-hero summary{cursor:pointer;font-weight:800;color:var(--ink)}
+@media(max-width:760px){.scout-rec-grid{grid-template-columns:1fr}}
 .cycle-log{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
 .cycle-log .msg{font-size:12px;line-height:1.55;color:var(--ink)}
 .cycle-log .mini{font-family:var(--mono);font-size:10px;color:var(--mut2)}
@@ -54882,8 +54890,17 @@ function pScoutAnalyst(r){
     <div class="why">当前 fixture 暂无已嵌入赛前解读；系统只在赛前有效因子变化后调用分析师，失败不会推进旧内容。</div>
     <div style="font-size:10px;opacity:.6;margin-top:5px">研究用途 · 非推介 · 非独立优势</div></div>`;
   const read=c.read||{};
-  const watch=(read.watch_points_cn||[]).slice(0,4).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
-  const risks=(read.risks_cn||[]).slice(0,3).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
+  const card=read.recommendation_card||{};
+  const cardRows=[
+    ['1X2',card.one_x_two_cn],
+    ['比分',card.score_picks_cn],
+    ['大小球',card.ou_pick_cn],
+    ['让球',card.ah_pick_cn],
+    ['信心',card.confidence_cn],
+    ['数据',card.data_status_cn],
+  ].filter(row=>row[1]).map(row=>`<div class="scout-rec-item"><b>${esc(row[0])}</b><div>${esc(stripAiDisplayText(row[1]))}</div></div>`).join('');
+  const watch=(read.watch_points_cn||[]).slice(0,3).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
+  const risks=(read.risks_cn||[]).slice(0,2).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
   const evidence=(read.evidence_chain_cn||[]).slice(0,5).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
   const reverse=(read.reverse_risks_cn||[]).slice(0,3).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
   const factorN=scoutAvailableFactorCount(c);
@@ -54891,18 +54908,23 @@ function pScoutAnalyst(r){
   const normal=stripAiDisplayText(read.regular_script_cn||'');
   const tail=stripAiDisplayText(read.high_variance_tail_script_cn||'');
   const marketScript=stripAiDisplayText(read.market_expert_script_cn||'');
-  return `<div class="card scout-hero"><h3>本场解读 · DeepSeek<span class="r">数据就绪度：${esc(String(c.data_readiness||'低'))}</span></h3>
-    <div class="call">${esc(stripAiDisplayText(read.tilt_cn||'强弱倾向待观察'))} · ${esc(stripAiDisplayText(read.score_band_cn||'比分看区间·别当真'))}</div>
-    ${evidence?`<div class="why"><b>数据证据链</b><ul>${evidence}</ul></div>`:''}
-    ${normal?`<div class="why"><b>常规剧本</b> ${esc(normal)}</div>`:''}
-    ${tail?`<div class="why"><b>尾部高方差剧本</b> ${esc(tail)}</div>`:''}
-    ${watch?`<div class="why"><b>看点</b><ul>${watch}</ul></div>`:''}
+  return `<div class="card scout-hero"><h3>AI推荐卡 · DeepSeek<span class="r">数据就绪度：${esc(String(c.data_readiness||'低'))}</span></h3>
+    <div class="scout-rec-main">${esc(stripAiDisplayText(card.main_recommendation_cn||read.tilt_cn||'主线待观察'))}</div>
+    ${cardRows?`<div class="scout-rec-grid">${cardRows}</div>`:''}
+    <div class="why"><b>核心判断</b> ${esc(stripAiDisplayText(read.tilt_cn||'强弱倾向待观察'))} · ${esc(stripAiDisplayText(read.score_band_cn||'比分看区间·别当真'))}</div>
+    ${watch?`<div class="why"><b>推荐理由 / 看点</b><ul>${watch}</ul></div>`:''}
     ${risks?`<div class="why"><b>风险</b><ul>${risks}</ul></div>`:''}
-    ${reverse?`<div class="why"><b>反向风险</b><ul>${reverse}</ul></div>`:''}
-    ${marketScript?`<div class="why"><b>专家盘口剧本</b> ${esc(marketScript)}</div>`:''}
+    ${card.risk_cn?`<div class="why"><b>风险触发</b> ${esc(stripAiDisplayText(card.risk_cn))}</div>`:''}
+    ${evidence?`<details class="why"><summary>数据证据链</summary><ul>${evidence}</ul></details>`:''}
+    ${(normal||tail||marketScript||reverse)?`<details class="why"><summary>专家展开 · 常规 / 尾部 / 盘口剧本</summary>
+      ${normal?`<div><b>常规剧本</b> ${esc(normal)}</div>`:''}
+      ${tail?`<div><b>尾部高方差剧本</b> ${esc(tail)}</div>`:''}
+      ${marketScript?`<div><b>专家盘口剧本</b> ${esc(marketScript)}</div>`:''}
+      ${reverse?`<div><b>反向风险</b><ul>${reverse}</ul></div>`:''}
+    </details>`:''}
     ${vs?`<div class="why"><b>与市场差异(讨论点)</b> ${esc(vs)}</div>`:''}
     <div class="src"><span>已读 ${factorN}/7 因子</span><span>非独立优势</span><span>${esc(String(c.honesty_label||'AI 解读·非预测'))}</span><span>研究用途</span></div>
-    <div style="font-size:10px;opacity:.6;margin-top:7px">研究用途 · 非推介 · 非独立优势；比分只看区间，别当真；不改 W1 市场底座或模型输出。</div></div>`;
+    <div style="font-size:10px;opacity:.6;margin-top:7px">研究用途 · 非推介 · 非独立优势；不输出操作建议，不承诺结果；比分只看区间，别当真；不改 W1 市场底座或模型输出。</div></div>`;
 }
 function pScoutCycleStatus(){
   const s=scoutCycleStatus()||{};
