@@ -133,6 +133,32 @@ def assert_runner_static() -> None:
             fail(f"local predict server missing Scout embed verification token: {token}")
 
 
+def assert_local_env_contract() -> None:
+    server = (ROOT / "scripts/w1_local_predict_server.py").read_text(encoding="utf-8")
+    for token in (
+        "LOCAL_ENV_FILES",
+        "load_local_env_files",
+        "env_status_line",
+        "DEEPSEEK_API_KEY: {deepseek}",
+        "APIFOOTBALL_KEY: {api}",
+        "W1_MANUAL_REFRESH_TRIGGER_SCOUT: {scout}",
+        '"OK" if',
+        "MISSING",
+        "enabled",
+        "disabled",
+        "当前 W1 server 进程未读取到 DEEPSEEK_API_KEY",
+        "写入 .env.local 后重启 server",
+    ):
+        if token not in server:
+            fail(f"local env contract missing token: {token}")
+    if "print(os.environ" in server or "print(env[" in server or "print(env.get" in server:
+        fail("server must not print raw environment or secrets")
+    for path in (".env", ".env.local", "config/.env", "config/.env.local"):
+        proc = run(["git", "check-ignore", path])
+        if proc.returncode != 0:
+            fail(f"{path} must be gitignored")
+
+
 def assert_dry_run() -> None:
     with tempfile.TemporaryDirectory(prefix="w1_scout_g2_dry_") as td:
         state = Path(td) / "state"
@@ -401,6 +427,7 @@ def assert_gitignored_runtime() -> None:
 def main() -> int:
     assert_policy()
     assert_runner_static()
+    assert_local_env_contract()
     assert_dry_run()
     assert_no_delta_blocks_ai_lock_allows_review_calibration_embed()
     assert_prematch_only_repairs_missing_dashboard_embed()

@@ -57,6 +57,12 @@ API_ENV_BRIDGE_FILES = [
     Path.home() / ".openclaw/secrets/v4_daily_scan.env",
     Path.home() / ".openclaw/workspace/v4-football/api_keys.sh",
 ]
+LOCAL_ENV_FILES = [
+    ROOT / ".env",
+    ROOT / ".env.local",
+    ROOT / "config/.env",
+    ROOT / "config/.env.local",
+]
 
 STEPS = [
     "初始化比赛",
@@ -231,6 +237,40 @@ def ensure_dashboard_data_ready() -> bool:
     if dashboard_data_payload() is not None:
         return True
     return build_dashboard_data_once()
+
+
+def load_local_env_files() -> None:
+    """Load repo-local KEY=value env files without printing secret values."""
+    for path in LOCAL_ENV_FILES:
+        if not path.is_file():
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        for raw in lines:
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if not key or key.startswith("export "):
+                key = key.replace("export ", "", 1).strip()
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
+def env_status_line() -> str:
+    deepseek = "OK" if (os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("W1_SCOUT_API_KEY")) else "MISSING"
+    api = "OK" if (os.environ.get(ENV_KEY_NAME) or os.environ.get("OPENCLAW_APIFOOTBALL_KEY")) else "MISSING"
+    scout = "enabled" if manual_scout_enabled() else "disabled"
+    return (
+        "W1 server env: "
+        f"DEEPSEEK_API_KEY: {deepseek} | "
+        f"APIFOOTBALL_KEY: {api} | "
+        f"W1_MANUAL_REFRESH_TRIGGER_SCOUT: {scout}"
+    )
 
 
 def competition_scope() -> dict[str, Any]:
@@ -1095,7 +1135,7 @@ def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
     if not is_future_match(match):
         return "AI 解读未生成：该 fixture 已开赛或不在未来赛程内；只允许赛后 audit/review/calibration。"
     if not deepseek_key_available(env):
-        return "基础数据已刷新；AI 解读未生成：缺少 DEEPSEEK_API_KEY。"
+        return "基础数据已刷新；AI 解读未生成：当前 W1 server 进程未读取到 DEEPSEEK_API_KEY。请在启动 server 前 export DEEPSEEK_API_KEY，或写入 .env.local 后重启 server。"
     api_available = api_football_key_available(env)
     scout_env = {
         **env,
@@ -1128,8 +1168,8 @@ def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
 
 
 def final_refresh_message(live_status: str, scout_message: str) -> str:
-    if "缺少 DEEPSEEK_API_KEY" in scout_message:
-        return "完成 ✓ 已刷新基础数据；AI 解读未生成：缺少 DEEPSEEK_API_KEY。"
+    if "DEEPSEEK_API_KEY" in scout_message and "未读取到" in scout_message:
+        return "完成 ✓ 已刷新基础数据；AI 解读未生成：当前 W1 server 进程未读取到 DEEPSEEK_API_KEY。请在启动 server 前 export DEEPSEEK_API_KEY，或写入 .env.local 后重启 server。"
     if "W1_MANUAL_REFRESH_TRIGGER_SCOUT=0" in scout_message:
         return "完成 ✓ 已刷新基础数据；Scout 自动解读已被 W1_MANUAL_REFRESH_TRIGGER_SCOUT=0 关闭。"
     if "补写 dashboard 上屏" in scout_message:
@@ -1145,6 +1185,7 @@ def final_refresh_message(live_status: str, scout_message: str) -> str:
 
 def run_prediction(job_id: str, match: dict[str, Any]) -> None:
     global _active_job, _active_job_started_at
+    load_local_env_files()
     load_api_key_env_bridge()
     env = os.environ.copy()
     fixture_id = str(match.get("fixture_id") or "")
@@ -1373,6 +1414,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 def main() -> int:
+    load_local_env_files()
     load_api_key_env_bridge()
     ensure_dashboard_data_ready()
     PROGRESS.parent.mkdir(parents=True, exist_ok=True)
@@ -1380,6 +1422,7 @@ def main() -> int:
         write_progress(progress_payload(job_id="none", status="idle", step_index=1, message="等待开始预测。", match={}))
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     print(f"W1 dashboard server: http://{HOST}:{PORT}/reports/dashboard/W1_VISUAL_DASHBOARD.html")
+    print(env_status_line())
     server.serve_forever()
     return 0
 

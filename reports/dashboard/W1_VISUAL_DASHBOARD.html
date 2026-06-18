@@ -54487,7 +54487,7 @@ function renderRail(){
 // ---- 子面板 ----
 function pBanner(){
   if(backendConnected)
-    return `<div class="banner ok"><span class="bi2">●</span> W1 后端已连接：点击「手动强刷 + AI解读」会刷新基础数据；若 DEEPSEEK_API_KEY 可用，将追加生成本场 Scout 解读。实时 API 缺失时使用本地缓存，不伪造缺失数据。</div>`;
+    return `<div class="banner ok"><span class="bi2">●</span> W1 后端已连接：点击「手动强刷 + AI解读」会刷新基础数据；若 DEEPSEEK_API_KEY 可用，将追加生成本场 Scout 解读。DeepSeek key 状态以当前 server 进程为准；修改 .env 后需重启 server。实时 API 缺失时使用本地缓存，不伪造缺失数据。</div>`;
   return `<div class="banner"><span class="bi2">◌</span> 当前为<b>静态快照</b>，W1 后端未连接。<code>/predict</code> 需要 W1 后端在线；连上后端后，下方按钮才会真实触发基础数据强刷。</div>`;
 }
 function stageGate(r){
