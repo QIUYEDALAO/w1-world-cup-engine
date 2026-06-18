@@ -37,9 +37,37 @@ SCOUT_DIR = ROOT / "data/scout"
 
 errors: list[str] = []
 
+TAIL_TRIGGER_TOKENS = ("如果", "若", "一旦", "前 30 分钟", "前30分钟", "早球", "红牌", "被迫前压", "转换", "定位球", "门将失误")
+REVERSE_FAILURE_TOKENS = ("如果上半场仍是 0-0", "如果上半场仍是0-0", "如果久攻不下", "如果低位防守成功", "如果首发进攻点缺席", "如果射门质量无法转化", "该剧本降权", "大比分剧本失效", "失效")
+MARKET_TERMS = ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")
+MARKET_MISSING_TERMS = ("盘口数据缺失", "无法展开盘口剧本", "不展开盘口剧本")
+
 
 def fail(m):
     errors.append(m)
+
+
+def script_binds_evidence(script: str, evidence_rows: list[dict]) -> bool:
+    if not evidence_rows:
+        return False
+    compact_script = script.replace(" ", "")
+    for row in evidence_rows:
+        claim = str(row.get("claim") or "").strip()
+        source = str(row.get("source") or "").strip()
+        if claim and claim in script:
+            return True
+        if source and source in script:
+            return True
+        for field in row.get("fields") or []:
+            if str(field) and str(field) in script:
+                return True
+        compact_claim = claim.replace(" ", "")
+        for size in (8, 6, 4):
+            for idx in range(0, max(0, len(compact_claim) - size + 1)):
+                piece = compact_claim[idx:idx + size]
+                if piece and piece in compact_script:
+                    return True
+    return False
 
 
 def validate_call(c: dict, policy: dict) -> list[str]:
@@ -60,6 +88,33 @@ def validate_call(c: dict, policy: dict) -> list[str]:
         errs.append("bare translation rejected: need at least 2 watch_points_cn")
     if not isinstance(risks, list) or len([x for x in risks if str(x).strip()]) < 1:
         errs.append("bare translation rejected: need at least 1 risks_cn")
+    evidence_contract = policy.get("evidence_contract") or {}
+    evidence_rows = read.get("evidence")
+    if not isinstance(evidence_rows, list) or len(evidence_rows) < int(evidence_contract.get("min_items", 2)):
+        errs.append("read.evidence must include at least 2 structured evidence rows")
+        evidence_rows = []
+    allowed_sources = set(evidence_contract.get("sources") or [])
+    allowed_availability = set(evidence_contract.get("availability") or [])
+    allowed_weight = set(evidence_contract.get("weight") or [])
+    required_evidence_fields = set(evidence_contract.get("required_fields") or [])
+    for idx, row in enumerate(evidence_rows):
+        if not isinstance(row, dict):
+            errs.append(f"read.evidence[{idx}] must be object")
+            continue
+        missing = required_evidence_fields - set(row)
+        if missing:
+            errs.append(f"read.evidence[{idx}] missing fields: {sorted(missing)}")
+        if str(row.get("source") or "") not in allowed_sources:
+            errs.append(f"read.evidence[{idx}] invalid source {row.get('source')}")
+        if str(row.get("availability") or "") not in allowed_availability:
+            errs.append(f"read.evidence[{idx}] invalid availability {row.get('availability')}")
+        if str(row.get("weight") or "") not in allowed_weight:
+            errs.append(f"read.evidence[{idx}] invalid weight {row.get('weight')}")
+        fields = row.get("fields")
+        if not isinstance(fields, list) or not fields or not all(isinstance(x, str) and x.strip() for x in fields):
+            errs.append(f"read.evidence[{idx}] fields must be a non-empty string array")
+        if not str(row.get("claim") or "").strip():
+            errs.append(f"read.evidence[{idx}] claim must be non-empty")
     evidence = read.get("evidence_chain_cn")
     if not isinstance(evidence, list) or len([x for x in evidence if str(x).strip()]) < 2:
         errs.append("evidence_chain_cn must include at least 2 data evidence bullets")
@@ -69,12 +124,24 @@ def validate_call(c: dict, policy: dict) -> list[str]:
     regular_script = str(read.get("regular_script_cn") or "")
     if len(regular_script.strip()) < 8:
         errs.append("regular_script_cn must describe the normal match script")
+    if evidence_rows and not script_binds_evidence(regular_script, evidence_rows):
+        errs.append("regular_script_cn must bind at least 1 structured evidence row")
     tail_script = str(read.get("high_variance_tail_script_cn") or "")
     if not any(token in tail_script for token in ("高方差", "早球", "红牌", "转换", "定位球", "门将", "尾部")):
         errs.append("high_variance_tail_script_cn must describe a tail/high-variance script")
+    if not any(token in tail_script for token in TAIL_TRIGGER_TOKENS):
+        errs.append("high_variance_tail_script_cn must include a concrete trigger condition")
+    if evidence_rows and not script_binds_evidence(tail_script, evidence_rows):
+        errs.append("high_variance_tail_script_cn must bind at least 1 structured evidence claim verbatim")
+    reverse_text = "\n".join(str(x) for x in reverse_risks) if isinstance(reverse_risks, list) else ""
+    if not any(token in reverse_text for token in REVERSE_FAILURE_TOKENS):
+        errs.append("reverse_risks_cn must include at least 1 failure/invalidating condition")
     market_script = str(read.get("market_expert_script_cn") or "")
-    if not any(token in market_script for token in ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")):
-        errs.append("market_expert_script_cn must use expert market-language without action wording")
+    market_has_terms = any(token in market_script for token in MARKET_TERMS)
+    market_missing = any(token in market_script for token in MARKET_MISSING_TERMS)
+    market_has_condition = any(token in market_script for token in TAIL_TRIGGER_TOKENS + REVERSE_FAILURE_TOKENS)
+    if not ((market_has_terms and market_has_condition) or market_missing):
+        errs.append("market_expert_script_cn must either use market-language with a condition or explicitly say market data is missing")
     score_band = str(read.get("score_band_cn") or "")
     if not any(token in score_band for token in ("区间", "分布", "别当真", "偏")):
         errs.append("score_band_cn must use band/distribution language")
@@ -249,6 +316,7 @@ def main() -> int:
             fail(f"analyst missing token: {token}")
     for token in (
         "read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn",
+        "evidence[{claim,source,fields[],availability,weight}]",
         "evidence_chain_cn",
         "regular_script_cn",
         "high_variance_tail_script_cn",
@@ -338,11 +406,15 @@ def main() -> int:
             "read": {"tilt_cn": "主队小优", "score_band_cn": "偏 1-0/2-0,但单场看区间、别当真",
                      "watch_points_cn": ["主队边路推进", "客队转换防守"], "risks_cn": ["早球会改变节奏"],
                      "vs_market_cn": "与市场差异不大,仅作讨论点",
+                     "evidence": [
+                         {"claim": "市场读数主队略低水", "source": "market", "fields": ["market"], "availability": "partial", "weight": "medium"},
+                         {"claim": "阵容信息部分缺失", "source": "lineups", "fields": ["lineup"], "availability": "partial", "weight": "low"},
+                     ],
                      "evidence_chain_cn": ["市场读数主队略低水", "阵容信息部分缺失,只作降权证据"],
-                     "regular_script_cn": "常规剧本是主队压住节奏,通过边路和二点球慢慢建立优势。",
-                     "high_variance_tail_script_cn": "尾部高方差剧本来自早球、红牌或转换混乱,会让比赛脱离常规节奏。",
-                     "reverse_risks_cn": ["客队低位防守拖慢节奏后,主队优势可能只停留在场面"],
-                     "market_expert_script_cn": "盘口样本显示早盘让球倾向主队,但水位与样本厚度只作为读盘语境。"},
+                     "regular_script_cn": "常规剧本是市场读数主队略低水支撑主队压住节奏,通过边路和二点球慢慢建立优势。",
+                     "high_variance_tail_script_cn": "如果市场读数主队略低水被早球或红牌打穿,尾部高方差剧本会让比赛脱离常规节奏。",
+                     "reverse_risks_cn": ["如果低位防守成功,客队拖慢节奏后主队优势可能只停留在场面,大比分剧本失效。"],
+                     "market_expert_script_cn": "若临场盘口样本仍显示早盘让球倾向主队,水位与样本厚度只作为读盘语境。"},
             "data_readiness": "中", "honesty_label": "AI 解读·非预测·非推介·可能错",
             "independent_edge": False}
     if validate_call(base, policy):
@@ -356,9 +428,21 @@ def main() -> int:
     no_evidence = dict(base, read={**base["read"], "evidence_chain_cn": []})
     if not validate_call(no_evidence, policy):
         fail("reverse: missing evidence chain must be rejected")
+    bad_structured_evidence = dict(base, read={**base["read"], "evidence": [{"claim": "x", "source": "made_up", "fields": [], "availability": "ok", "weight": "strong"}]})
+    if not validate_call(bad_structured_evidence, policy):
+        fail("reverse: invalid structured evidence must be rejected")
+    no_tail_trigger = dict(base, read={**base["read"], "high_variance_tail_script_cn": "尾部高方差剧本来自节奏变化。"})
+    if not validate_call(no_tail_trigger, policy):
+        fail("reverse: high variance script without trigger must be rejected")
+    no_reverse_failure = dict(base, read={**base["read"], "reverse_risks_cn": ["客队也可能拖慢节奏"]})
+    if not validate_call(no_reverse_failure, policy):
+        fail("reverse: reverse risks without failure condition must be rejected")
     no_market_script = dict(base, read={**base["read"], "market_expert_script_cn": "普通自然语言描述"})
     if not validate_call(no_market_script, policy):
         fail("reverse: market expert script without market-language terms must be rejected")
+    missing_market_script = dict(base, read={**base["read"], "market_expert_script_cn": "盘口数据缺失,不展开盘口剧本。"})
+    if validate_call(missing_market_script, policy):
+        fail("reverse: explicit market-data-missing script should pass")
     betting = dict(base, read={**base["read"], "watch_points_cn": ["稳赢", "主队边路推进"]})
     if not validate_call(betting, policy):
         fail("reverse: forbidden promise term must be caught")

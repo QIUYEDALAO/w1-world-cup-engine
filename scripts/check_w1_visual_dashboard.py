@@ -317,6 +317,29 @@ def assert_scout_embed(text: str) -> None:
             fail(f"Embedded Scout call {call.get('fixture_id')} must include watch_points_cn")
         if not isinstance(read.get("risks_cn"), list) or not read.get("risks_cn"):
             fail(f"Embedded Scout call {call.get('fixture_id')} must include risks_cn")
+        if "evidence" in read:
+            allowed_sources = {"form", "xg_roll", "lineups", "injuries", "market", "score_matrix", "rest_days", "standings", "h2h", "environment", "availability"}
+            allowed_availability = {"full", "partial", "weak_sample", "missing"}
+            allowed_weight = {"high", "medium", "low"}
+            rows = read.get("evidence")
+            if not isinstance(rows, list) or len(rows) < 2:
+                fail(f"Embedded Scout call {call.get('fixture_id')} evidence must be a 2+ item array when present")
+                rows = []
+            for eidx, row in enumerate(rows):
+                if not isinstance(row, dict):
+                    fail(f"Embedded Scout call {call.get('fixture_id')} evidence[{eidx}] must be object")
+                    continue
+                for ekey in ("claim", "source", "fields", "availability", "weight"):
+                    if ekey not in row:
+                        fail(f"Embedded Scout call {call.get('fixture_id')} evidence[{eidx}].{ekey} missing")
+                if row.get("source") not in allowed_sources:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} evidence[{eidx}] invalid source")
+                if row.get("availability") not in allowed_availability:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} evidence[{eidx}] invalid availability")
+                if row.get("weight") not in allowed_weight:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} evidence[{eidx}] invalid weight")
+                if not isinstance(row.get("fields"), list) or not row.get("fields"):
+                    fail(f"Embedded Scout call {call.get('fixture_id')} evidence[{eidx}].fields must be non-empty list")
         if "evidence_chain_cn" in read and (
             not isinstance(read.get("evidence_chain_cn"), list) or len(read.get("evidence_chain_cn") or []) < 2
         ):
