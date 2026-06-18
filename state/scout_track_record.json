@@ -3,7 +3,7 @@
   "schema_version": "W1_SCOUT_TRACK_V1",
   "note_cn": "冷启动:空。随赛后审计累积——这是诚实的成长,不能无中生有。",
   "overall": {
-    "n": 24,
+    "n": 25,
     "aligned": 13,
     "aligned_known": 16,
     "alignment_rate": 0.812
@@ -26,12 +26,17 @@
     "note_cn": "实测 confidence vs 命中率;随审计填充",
     "bins": {}
   },
-  "updated_at": "2026-06-18T16:40:48Z",
+  "updated_at": "2026-06-18T18:31:05Z",
   "by_readiness": {
     "unknown": {
       "n": 24,
       "aligned": 13,
       "aligned_known": 16
+    },
+    "中": {
+      "n": 1,
+      "aligned": 0,
+      "aligned_known": 0
     }
   },
   "by_tilt_bucket": {
@@ -39,6 +44,11 @@
       "n": 24,
       "aligned": 13,
       "aligned_known": 16
+    },
+    "明显占优": {
+      "n": 1,
+      "aligned": 0,
+      "aligned_known": 0
     }
   }
 }
