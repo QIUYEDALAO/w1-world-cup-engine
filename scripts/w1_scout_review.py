@@ -18,10 +18,11 @@ from pathlib import Path
 from typing import Any
 from urllib import request
 
+from w1_results_overlay import load_results_map
+
 ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "state/scout_lock.jsonl"
 REVIEWS = ROOT / "state/scout_reviews.jsonl"
-RESULTS = ROOT / "data/results/round1_results.json"
 
 FORBIDDEN = ("投注", "下注", "资金", "稳赢", "稳赚", "必中", "必胜", "保证命中", "打败市场", "战胜市场")
 
@@ -48,12 +49,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def results_map() -> dict[str, dict[str, Any]]:
-    out: dict[str, dict[str, Any]] = {}
-    for fid, row in read_json(RESULTS, {"results": {}}).get("results", {}).items():
-        out[str(fid)] = row
-        for alias in row.get("alias_fixture_ids", []):
-            out[str(alias)] = row
-    return out
+    return load_results_map()
 
 
 def outcome(score: dict[str, Any]) -> str:

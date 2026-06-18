@@ -18,12 +18,13 @@ import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 
+from w1_results_overlay import load_results_map
+
 ROOT = Path(__file__).resolve().parents[1]
 CALLS = ROOT / "state/w1_scout_calls.json"
 LOCK = ROOT / "state/scout_lock.jsonl"
 AUDIT = ROOT / "state/scout_audit.jsonl"
 TRACK = ROOT / "state/scout_track_record.json"
-RESULTS = ROOT / "data/results/round1_results.json"
 DASH = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 
 
@@ -53,13 +54,7 @@ def _kickoffs():
 
 
 def _results():
-    out = {}
-    if RESULTS.is_file():
-        for fid, row in json.loads(RESULTS.read_text(encoding="utf-8")).get("results", {}).items():
-            out[str(fid)] = row
-            for a in row.get("alias_fixture_ids", []):
-                out[str(a)] = row
-    return out
+    return load_results_map()
 
 
 def lock():

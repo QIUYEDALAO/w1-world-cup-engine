@@ -13,8 +13,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SYNC = ROOT / "scripts/w1_result_sync.py"
+RESULT_HELPER = ROOT / "scripts/w1_results_overlay.py"
 BUILDER = ROOT / "scripts/build_w1_dashboard_data.py"
 SERVER = ROOT / "scripts/w1_local_predict_server.py"
+SCOUT_LEDGER = ROOT / "scripts/w1_scout_ledger.py"
+SCOUT_REVIEW = ROOT / "scripts/w1_scout_review.py"
 SCOPE = ROOT / "config/w1_competition_scope.json"
 SCORE_ENGINE = ROOT / "scripts/w1_score_engine.py"
 ODDS_THRESHOLDS = ROOT / "config/w1_odds_movement_thresholds.json"
@@ -67,9 +70,30 @@ def check_scope_and_sources() -> None:
     if 'RESULTS_JSON = ROOT / "data/results/round1_results.json"' in builder:
         fail("builder still hardcodes round1_results as only overlay")
 
+    helper = RESULT_HELPER.read_text(encoding="utf-8")
+    for token in (
+        'SCOPE_JSON = ROOT / "config/w1_competition_scope.json"',
+        "def configured_result_paths",
+        "def load_results_map",
+        'scope.get("legacy_results"',
+        'scope.get("results_overlay")',
+        "alias_fixture_ids",
+    ):
+        if token not in helper:
+            fail(f"result helper missing token: {token}")
+
     server = SERVER.read_text(encoding="utf-8")
     if "results_overlay_path()" not in server or "iter_match_card_paths()" not in server:
         fail("local predict server must use competition scope for cards/results")
+
+    for path in (SCOUT_LEDGER, SCOUT_REVIEW):
+        source = path.read_text(encoding="utf-8")
+        if 'RESULTS = ROOT / "data/results/round1_results.json"' in source:
+            fail(f"{path.relative_to(ROOT)} still hardcodes round1_results.json")
+        if "load_results_map" not in source:
+            fail(f"{path.relative_to(ROOT)} must use shared load_results_map")
+        if "data/results/round1_results.json" in source and "legacy" not in source:
+            fail(f"{path.relative_to(ROOT)} must not directly read round1_results.json")
 
 
 def check_dry_run_no_write() -> None:
