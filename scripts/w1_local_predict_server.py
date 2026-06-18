@@ -119,6 +119,8 @@ def progress_payload(
     match: dict[str, Any],
     error: str | None = None,
 ) -> dict[str, Any]:
+    fixture_id = str(match.get("fixture_id") or match.get("requested_fixture_id") or "").strip()
+    match_name = str(match.get("match") or "").strip()
     steps = []
     for index, label in enumerate(STEPS, start=1):
         if index < step_index:
@@ -137,6 +139,9 @@ def progress_payload(
         "schema_version": "w1_predict_progress.v1",
         "job_id": job_id,
         "status": status,
+        "fixture_id": fixture_id,
+        "target_fixture_id": fixture_id,
+        "match_name": match_name,
         "total_steps": len(STEPS),
         "step_index": step_index,
         "step_label": STEPS[max(0, min(step_index - 1, len(STEPS) - 1))],
@@ -1330,12 +1335,20 @@ class Handler(SimpleHTTPRequestHandler):
             candidates = api_fixture_id_candidates(match)
             if candidates:
                 match["api_fixture_id"] = candidates[0]
+        print(
+            "POST /predict received "
+            f"fixture_id={requested_fixture_id or match.get('fixture_id') or ''} "
+            f"home={match.get('home_team_cn') or match.get('home_team') or ''} "
+            f"away={match.get('away_team_cn') or match.get('away_team') or ''} "
+            f"path={self.path}"
+        )
 
         with _job_lock:
             cleanup_note = cleanup_finished_or_stale_active_job_locked()
             if cleanup_note:
                 print(f"WARN: {cleanup_note}")
             if _active_job:
+                print(f"POST /predict ACTIVE_JOB active_job={_active_job} requested_fixture_id={requested_fixture_id or match.get('fixture_id') or ''}")
                 self.send_json(
                     {
                         "ok": False,
@@ -1350,6 +1363,7 @@ class Handler(SimpleHTTPRequestHandler):
             job_id = uuid.uuid4().hex[:12]
             _active_job = job_id
             _active_job_started_at = time.time()
+            print(f"POST /predict start job_id={job_id} active_job={_active_job} fixture_id={requested_fixture_id or match.get('fixture_id') or ''}")
 
         init_message = f"初始化比赛中：fixture_id={match.get('fixture_id', '未提供')}，{match.get('match') or ''}"
         write_progress(progress_payload(job_id=job_id, status="running", step_index=1, message=init_message, match=match))
