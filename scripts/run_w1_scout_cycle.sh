@@ -279,17 +279,21 @@ fi
 record_status "start" "running" "Scout 自动周期启动。"
 
 if [ "$FUTURE_COUNT" -gt 0 ]; then
-  FETCH_ARGS=""
-  for fid in $FUTURES; do
-    FETCH_ARGS="${FETCH_ARGS} --fixture ${fid}"
-  done
-  # shellcheck disable=SC2086
-  if ! ${FETCH_CMD} ${FETCH_ARGS}; then
-    FETCH_FAIL=1
-    log "fetch failed/partial -> continue with existing local data only; no fake values"
-    record_error "fetch failed/partial; continued with existing local data"
+  if [ "${W1_SCOUT_SKIP_FETCH:-0}" = "1" ]; then
+    log "Scout factor fetch skipped by W1_SCOUT_SKIP_FETCH=1; use existing local data only"
   else
-    FETCH_OK=1
+    FETCH_ARGS=""
+    for fid in $FUTURES; do
+      FETCH_ARGS="${FETCH_ARGS} --fixture ${fid}"
+    done
+    # shellcheck disable=SC2086
+    if ! ${FETCH_CMD} ${FETCH_ARGS}; then
+      FETCH_FAIL=1
+      log "fetch failed/partial -> continue with existing local data only; no fake values"
+      record_error "fetch failed/partial; continued with existing local data"
+    else
+      FETCH_OK=1
+    fi
   fi
 else
   log "no future fixture -> skip factor fetch; audit only"
@@ -370,6 +374,11 @@ if [ -n "$MISSING_READS" ]; then
   record_status "missing_read" "running" "存在未生成赛前解读的 fixture，本轮强制生成首版解读。"
 fi
 if [ "$NEW" = "$PREV" ] && [ -z "$MISSING_READS" ]; then
+  if [ "${W1_SCOUT_PREMATCH_ONLY:-0}" = "1" ]; then
+    log "no effective delta -> existing pre-match Scout read/lock is current; skip audit/review/calibration for manual refresh"
+    record_status "no_delta" "ok" "已有有效赛前解读；手动强刷不重复调用 AI、不重新锁定。"
+    exit 0
+  fi
   log "no effective delta -> skip DeepSeek and lock; audit/review/calibration visibility only"
   run_audit_review_calibration 1
   persist_memory
@@ -406,6 +415,11 @@ mkdir -p "$STATE_DIR"
 echo "$NEW" > "$SHA_FILE"
 ${EMBED_CMD}
 ${LOCK_CMD}
+if [ "${W1_SCOUT_PREMATCH_ONLY:-0}" = "1" ]; then
+  record_status "complete" "ok" "Scout 单场赛前解读已完成；手动强刷不运行赛后 audit/review/calibration。"
+  log "W1_SCOUT G2 cycle done (prematch only)"
+  exit 0
+fi
 run_audit_review_calibration 1
 persist_memory
 record_status "complete" "ok" "Scout 周期完成；AI call 已过闸门并完成可见性/锁定/audit。"

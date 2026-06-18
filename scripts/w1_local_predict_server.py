@@ -992,9 +992,16 @@ def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
     scout_env = {
         **env,
         "W1_SCOUT_FORCE_FIXTURE": fixture_id,
+        "W1_SCOUT_PREMATCH_ONLY": "1",
+        "W1_SCOUT_SKIP_FETCH": "1",
         "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
     }
-    proc = run_command(["bash", str(SCOUT_CYCLE)], scout_env)
+    try:
+        proc = run_command(["bash", str(SCOUT_CYCLE)], scout_env)
+    except subprocess.TimeoutExpired:
+        return "AI 解读未生成：Scout 单场周期超时；未推进旧内容。"
+    except Exception as exc:  # noqa: BLE001 - keep manual refresh usable when Scout fails
+        return f"AI 解读未生成：Scout 单场周期异常；未推进旧内容。{exc}"
     if proc.returncode != 0:
         tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-1:] or ["Scout cycle failed"]
         return "AI 解读未生成：Scout 单场周期失败；未推进旧内容。" + (" " + tail[0] if tail else "")
