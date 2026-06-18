@@ -42,6 +42,26 @@ FORBIDDEN_DASHBOARD_DISPLAY_TERMS = [
     "non-WAIT final_decision",
     "lineup=WAIT",
 ]
+SCOUT_VISIBLE_FORBIDDEN_TOKENS = (
+    "p_home",
+    "p_draw",
+    "p_away",
+    "None",
+    "null",
+    "NaN",
+    "undefined",
+    "claim",
+    "fields",
+    "source",
+    "availability",
+    "weight",
+    "历史样本-0",
+    "1-历史样本-0",
+    "xG若干",
+    "若干",
+    "LDDL",
+)
+SCOUT_MARKET_MISSING_TERMS = ("盘口数据缺失", "无法展开盘口剧本", "不展开盘口剧本", "市场赔率数据缺失")
 
 
 class CheckError(Exception):
@@ -348,11 +368,29 @@ def assert_scout_embed(text: str) -> None:
             not isinstance(read.get("reverse_risks_cn"), list) or not read.get("reverse_risks_cn")
         ):
             fail(f"Embedded Scout call {call.get('fixture_id')} reverse_risks_cn must be a non-empty array when present")
-        if "market_expert_script_cn" in read and not any(
-            token in str(read.get("market_expert_script_cn") or "")
-            for token in ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")
-        ):
-            fail(f"Embedded Scout call {call.get('fixture_id')} market_expert_script_cn must use market-language terms")
+        if "market_expert_script_cn" in read:
+            market_script = str(read.get("market_expert_script_cn") or "")
+            market_has_terms = any(
+                token in market_script
+                for token in ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")
+            )
+            market_missing = any(token in market_script for token in SCOUT_MARKET_MISSING_TERMS)
+            if not (market_has_terms or market_missing):
+                fail(f"Embedded Scout call {call.get('fixture_id')} market_expert_script_cn must use market-language terms or explicit missing-data downgrade")
+        visible_chunks = []
+        for key in ("tilt_cn", "score_band_cn", "vs_market_cn", "regular_script_cn", "high_variance_tail_script_cn", "market_expert_script_cn"):
+            if read.get(key):
+                visible_chunks.append(str(read.get(key)))
+        for key in ("watch_points_cn", "risks_cn", "evidence_chain_cn", "reverse_risks_cn"):
+            value = read.get(key)
+            if isinstance(value, list):
+                visible_chunks.extend(str(item) for item in value if str(item).strip())
+            elif value:
+                visible_chunks.append(str(value))
+        visible_text = "\n".join(visible_chunks)
+        for token in SCOUT_VISIBLE_FORBIDDEN_TOKENS:
+            if token in visible_text:
+                fail(f"Embedded Scout visible text contains forbidden token {token}: fixture {call.get('fixture_id')}")
         for old_key in ("market_divergence", "conviction"):
             if old_key in call:
                 fail(f"Embedded Scout call {call.get('fixture_id')} must not expose old field {old_key}")

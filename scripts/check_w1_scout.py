@@ -41,6 +41,29 @@ TAIL_TRIGGER_TOKENS = ("如果", "若", "一旦", "前 30 分钟", "前30分钟"
 REVERSE_FAILURE_TOKENS = ("如果上半场仍是 0-0", "如果上半场仍是0-0", "如果久攻不下", "如果低位防守成功", "如果首发进攻点缺席", "如果射门质量无法转化", "该剧本降权", "大比分剧本失效", "失效")
 MARKET_TERMS = ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")
 MARKET_MISSING_TERMS = ("盘口数据缺失", "无法展开盘口剧本", "不展开盘口剧本")
+VISIBLE_FORBIDDEN_TOKENS = (
+    "p_home",
+    "p_draw",
+    "p_away",
+    "None",
+    "null",
+    "NaN",
+    "undefined",
+    "claim",
+    "fields",
+    "source",
+    "availability",
+    "weight",
+    "历史样本-0",
+    "1-历史样本-0",
+    "xG若干",
+    "若干",
+    "LDDL",
+)
+WEAK_OVERCLAIM_TOKENS = ("概率较高", "确定", "明显", "强烈", "零封概率较高", "大胜概率较高", "明显打穿", "穿盘路径明确")
+MARKET_MISSING_TEXT = "市场赔率数据缺失，暂时无法对比市场倾向。"
+MARKET_SCRIPT_MISSING_TEXT = "盘口数据缺失，无法展开让球覆盖或大小球触发判断；本场只保留比赛剧本推演。"
+XG_WEAK_TEXT = "xG 样本不足，只作为弱参考。"
 
 
 def fail(m):
@@ -53,14 +76,8 @@ def script_binds_evidence(script: str, evidence_rows: list[dict]) -> bool:
     compact_script = script.replace(" ", "")
     for row in evidence_rows:
         claim = str(row.get("claim") or "").strip()
-        source = str(row.get("source") or "").strip()
         if claim and claim in script:
             return True
-        if source and source in script:
-            return True
-        for field in row.get("fields") or []:
-            if str(field) and str(field) in script:
-                return True
         compact_claim = claim.replace(" ", "")
         for size in (8, 6, 4):
             for idx in range(0, max(0, len(compact_claim) - size + 1)):
@@ -68,6 +85,71 @@ def script_binds_evidence(script: str, evidence_rows: list[dict]) -> bool:
                 if piece and piece in compact_script:
                     return True
     return False
+
+
+def visible_text_chunks(read: dict) -> list[str]:
+    chunks: list[str] = []
+    if not isinstance(read, dict):
+        return chunks
+    for key in ("tilt_cn", "score_band_cn", "vs_market_cn", "regular_script_cn", "high_variance_tail_script_cn", "market_expert_script_cn"):
+        if read.get(key):
+            chunks.append(str(read.get(key)))
+    for key in ("watch_points_cn", "risks_cn", "evidence_chain_cn", "reverse_risks_cn"):
+        value = read.get(key)
+        if isinstance(value, list):
+            chunks.extend(str(item) for item in value if str(item).strip())
+        elif value:
+            chunks.append(str(value))
+    evidence_rows = read.get("evidence")
+    if isinstance(evidence_rows, list):
+        chunks.extend(str(row.get("claim") or "") for row in evidence_rows if isinstance(row, dict))
+    return chunks
+
+
+def weak_low_evidence(read: dict, readiness: str) -> bool:
+    if readiness not in {"中", "低"}:
+        return False
+    evidence_rows = read.get("evidence") if isinstance(read, dict) else []
+    market_missing = False
+    xg_weak = False
+    if isinstance(evidence_rows, list):
+        for row in evidence_rows:
+            if not isinstance(row, dict):
+                continue
+            source = str(row.get("source") or "")
+            availability = str(row.get("availability") or "")
+            if source == "market" and availability == "missing":
+                market_missing = True
+            if source == "xg_roll" and availability in {"weak_sample", "partial", "missing"}:
+                xg_weak = True
+    visible = "\n".join(visible_text_chunks(read))
+    if MARKET_MISSING_TEXT in visible or "盘口数据缺失" in visible:
+        market_missing = True
+    if XG_WEAK_TEXT in visible or "xG样本不足" in visible:
+        xg_weak = True
+    return market_missing and xg_weak
+
+
+def validate_visible_text(read: dict, readiness: str) -> list[str]:
+    errs: list[str] = []
+    chunks = visible_text_chunks(read)
+    visible = "\n".join(chunks)
+    for token in VISIBLE_FORBIDDEN_TOKENS:
+        if token in visible:
+            errs.append(f"visible Scout text contains forbidden token: {token}")
+    score_band = str(read.get("score_band_cn") or "")
+    if "历史样本" in score_band or "若干" in score_band:
+        errs.append("score_band_cn must not contain machine fallback tokens")
+    market_script = str(read.get("market_expert_script_cn") or "")
+    if any(token in market_script for token in ("p_home", "p_draw", "p_away", "None", "null", "NaN", "undefined")):
+        errs.append("market_expert_script_cn must not expose market variables or missing sentinels")
+    if "盘口数据缺失" in market_script and MARKET_SCRIPT_MISSING_TEXT not in market_script:
+        errs.append("market_expert_script_cn must use the approved market-missing sentence")
+    if weak_low_evidence(read, readiness):
+        for token in WEAK_OVERCLAIM_TOKENS:
+            if token in visible:
+                errs.append(f"weak evidence context overclaims: {token}")
+    return errs
 
 
 def validate_call(c: dict, policy: dict) -> list[str]:
@@ -148,6 +230,7 @@ def validate_call(c: dict, policy: dict) -> list[str]:
     readiness = c.get("data_readiness")
     if readiness not in policy["readiness_levels"]:
         errs.append(f"invalid data_readiness {readiness}")
+    errs.extend(validate_visible_text(read, str(readiness or "")))
     if policy["honesty"]["honesty_label_required_substr"] not in str(c.get("honesty_label", "")):
         errs.append("honesty_label must contain 'AI 解读'")
     if c.get("independent_edge") is not False:
@@ -441,8 +524,32 @@ def main() -> int:
     if not validate_call(no_market_script, policy):
         fail("reverse: market expert script without market-language terms must be rejected")
     missing_market_script = dict(base, read={**base["read"], "market_expert_script_cn": "盘口数据缺失,不展开盘口剧本。"})
-    if validate_call(missing_market_script, policy):
-        fail("reverse: explicit market-data-missing script should pass")
+    if not validate_call(missing_market_script, policy):
+        fail("reverse: short market-data-missing script must be rejected in favor of the approved sentence")
+    approved_missing_market_script = dict(base, read={**base["read"], "market_expert_script_cn": MARKET_SCRIPT_MISSING_TEXT})
+    if validate_call(approved_missing_market_script, policy):
+        fail("reverse: approved market-data-missing script should pass")
+    bad_visible_text = dict(base, read={
+        **base["read"],
+        "score_band_cn": "偏 1-历史样本-0",
+        "evidence_chain_cn": ["市场读数 p_home=None", "数据claim 暴露了结构词"],
+        "regular_script_cn": "常规剧本来自 claim 字段拼接。",
+    })
+    if not validate_call(bad_visible_text, policy):
+        fail("reverse: visible machine/debug tokens must be rejected")
+    weak_overclaim = dict(base, data_readiness="低", read={
+        **base["read"],
+        "evidence": [
+            {"claim": "市场赔率数据缺失，暂时无法对比市场倾向。", "source": "market", "fields": ["market"], "availability": "missing", "weight": "low"},
+            {"claim": "xG 样本不足，只作为弱参考。", "source": "xg_roll", "fields": ["xg_for"], "availability": "weak_sample", "weight": "low"},
+        ],
+        "evidence_chain_cn": ["市场赔率数据缺失，暂时无法对比市场倾向。", "xG 样本不足，只作为弱参考。"],
+        "regular_script_cn": "常规剧本是市场赔率数据缺失，暂时无法对比市场倾向，但主队零封概率较高。",
+        "high_variance_tail_script_cn": "如果 xG 样本不足，只作为弱参考，同时出现早球，尾部剧本打开。",
+        "market_expert_script_cn": MARKET_SCRIPT_MISSING_TEXT,
+    })
+    if not validate_call(weak_overclaim, policy):
+        fail("reverse: weak evidence overclaim must be rejected")
     betting = dict(base, read={**base["read"], "watch_points_cn": ["稳赢", "主队边路推进"]})
     if not validate_call(betting, policy):
         fail("reverse: forbidden promise term must be caught")

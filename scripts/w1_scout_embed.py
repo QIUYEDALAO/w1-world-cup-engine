@@ -9,6 +9,7 @@ Display-only: does not touch the W1 market base, λ, score matrix, or build pipe
 from __future__ import annotations
 
 import json
+import copy
 import re
 from pathlib import Path
 
@@ -20,6 +21,42 @@ CALIBRATION = ROOT / "state/scout_calibration.json"
 TAG_RE = re.compile(r'<script id="w1-scout-calls" type="application/json">.*?</script>', re.S)
 REVIEWS_TAG_RE = re.compile(r'<script id="w1-scout-reviews" type="application/json">.*?</script>', re.S)
 CALIBRATION_TAG_RE = re.compile(r'<script id="w1-scout-calibration" type="application/json">.*?</script>', re.S)
+SCORE_BAND_FALLBACK = "常规比分带暂不展开；偏低比分小胜或平局分支，需结合临场数据。"
+MARKET_MISSING_TEXT = "市场赔率数据缺失，暂时无法对比市场倾向。"
+MARKET_SCRIPT_MISSING_TEXT = "盘口数据缺失，无法展开让球覆盖或大小球触发判断；本场只保留比赛剧本推演。"
+XG_WEAK_TEXT = "xG 样本不足，只作为弱参考。"
+VISIBLE_TEXT_KEYS = ("tilt_cn", "score_band_cn", "vs_market_cn", "regular_script_cn", "high_variance_tail_script_cn", "market_expert_script_cn")
+VISIBLE_LIST_KEYS = ("watch_points_cn", "risks_cn", "evidence_chain_cn", "reverse_risks_cn")
+REPLACEMENTS = (
+    ("p_home", "市场主胜读数"),
+    ("p_draw", "市场平局读数"),
+    ("p_away", "市场客胜读数"),
+    ("None", "数据缺失"),
+    ("null", "数据缺失"),
+    ("NaN", "数据缺失"),
+    ("undefined", "数据缺失"),
+    ("数据claim", "证据"),
+    ("claim", "证据"),
+    ("fields", "数据项"),
+    ("source", "来源"),
+    ("availability", "可用度"),
+    ("weight", "证据力度"),
+    ("xG若干", XG_WEAK_TEXT),
+    ("xG 若干", XG_WEAK_TEXT),
+    ("若干", "样本不足"),
+    ("1-历史样本-0", SCORE_BAND_FALLBACK),
+    ("历史样本-0", SCORE_BAND_FALLBACK),
+)
+STRONG_REPLACEMENTS = (
+    ("零封概率较高", "存在零封分支，但证据不足，需临场确认"),
+    ("大胜概率较高", "大胜只作为尾部路径"),
+    ("明显打穿", "盘口覆盖不展开"),
+    ("穿盘路径明确", "盘口覆盖不展开"),
+    ("概率较高", "倾向存在"),
+    ("确定", "倾向"),
+    ("强烈", "偏向"),
+    ("明显", "相对"),
+)
 
 
 def read_reviews() -> list[dict]:
@@ -39,13 +76,52 @@ def upsert_tag(html: str, tag_id: str, payload: dict, regex: re.Pattern[str]) ->
                         new_tag + "\n" + '<script id="w1-data" type="application/json">', 1)
 
 
+def clean_visible_text(value: object, *, score_band: bool = False, market_script: bool = False) -> str:
+    text = str(value or "").strip()
+    if re.search(r"(?:p_home|p_draw|p_away).*?(?:None|null|NaN|undefined)", text, flags=re.I):
+        text = MARKET_SCRIPT_MISSING_TEXT if market_script else MARKET_MISSING_TEXT
+    for old, new in REPLACEMENTS:
+        text = text.replace(old, new)
+    text = re.sub(r"\b[WDL]{3,}\b", "近期战绩序列", text)
+    text = re.sub(r"\d+-样本不足-\d+", SCORE_BAND_FALLBACK, text)
+    if score_band and ("历史样本" in text or "样本不足-0" in text):
+        return SCORE_BAND_FALLBACK
+    if market_script and MARKET_MISSING_TEXT in text:
+        return MARKET_SCRIPT_MISSING_TEXT
+    for old, new in STRONG_REPLACEMENTS:
+        text = text.replace(old, new)
+    return text
+
+
+def display_call(call: dict) -> dict:
+    """Dashboard embeds only display text; structured evidence stays in state."""
+    out = copy.deepcopy(call)
+    read = out.get("read")
+    if isinstance(read, dict):
+        read.pop("evidence", None)
+        for key in VISIBLE_TEXT_KEYS:
+            if key in read:
+                read[key] = clean_visible_text(
+                    read.get(key),
+                    score_band=(key == "score_band_cn"),
+                    market_script=(key == "market_expert_script_cn"),
+                )
+        for key in VISIBLE_LIST_KEYS:
+            value = read.get(key)
+            if isinstance(value, list):
+                read[key] = [clean_visible_text(item) for item in value if str(item or "").strip()]
+            elif isinstance(value, str):
+                read[key] = [clean_visible_text(value)]
+    return out
+
+
 def main() -> int:
     calls = json.loads(CALLS.read_text(encoding="utf-8")) if CALLS.is_file() else {"calls": []}
     generated_by = calls.get("generated_by")
     if generated_by == "deepseek:deepseek-v4-pro":
         generated_by = "deepseek:deepseek-pro"
     html = HTML.read_text(encoding="utf-8")
-    html = upsert_tag(html, "w1-scout-calls", {"generated_by": generated_by, "calls": calls.get("calls", [])}, TAG_RE)
+    html = upsert_tag(html, "w1-scout-calls", {"generated_by": generated_by, "calls": [display_call(c) for c in calls.get("calls", [])]}, TAG_RE)
     html = upsert_tag(html, "w1-scout-reviews", {"reviews": read_reviews()}, REVIEWS_TAG_RE)
     calibration = json.loads(CALIBRATION.read_text(encoding="utf-8")) if CALIBRATION.is_file() else {"schema_version": "W1_SCOUT_CALIBRATION_V1", "note_cn": "这是 Scout 解读的自我体检与校准,不是战胜市场的证据。"}
     html = upsert_tag(html, "w1-scout-calibration", calibration, CALIBRATION_TAG_RE)
