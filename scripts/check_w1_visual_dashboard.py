@@ -540,6 +540,9 @@ def assert_html(data: dict) -> None:
             "Czechia':'捷克",
             "赛果待同步",
             "未开赛",
+            "dashboardEmptyMessage",
+            "dashboard 数据为空，请先生成 w1_dashboard_data.json",
+            "dashboard 数据为空",
             "主比分",
             "备选比分",
             "风险路径",
@@ -565,6 +568,8 @@ def assert_html(data: dict) -> None:
             fail("HTML must use default Scout trigger wording, not old opt-in manual refresh copy")
         if "主 -" in text:
             fail("HTML must not show ambiguous pre-match placeholder '主 -'")
+        if "NaN/NaN" in text or "undefined · 0 场" in text:
+            fail("HTML must guard empty dashboard data instead of rendering NaN/undefined")
         if '<select id="teamA"' in text or '<select id="teamB"' in text:
             fail("HTML must not render fake team select controls")
         for token in ("pMarketStateBar", "市场复述", "自洽核对", "未对该盘独立校准"):

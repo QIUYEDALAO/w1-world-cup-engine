@@ -115,7 +115,15 @@ def assert_runner_static() -> None:
     if "scripts/w1_score_engine.py" in text or "DEFAULT_RHO" in text:
         fail("runner must not touch score engine/RHO")
     server = (ROOT / "scripts/w1_local_predict_server.py").read_text(encoding="utf-8")
-    for token in ("scout_embedded_in_dashboard", "AI 解读已生成但未上屏", "已有合法赛前解读，本轮已补写 dashboard 上屏"):
+    for token in (
+        "scout_embedded_in_dashboard",
+        "AI 解读已生成但未上屏",
+        "已有合法赛前解读，本轮已补写 dashboard 上屏",
+        "ensure_dashboard_data_ready",
+        "DASHBOARD_EMPTY_ERROR",
+        "dashboard 数据为空：match_records=0",
+        "build_dashboard_data_once",
+    ):
         if token not in server:
             fail(f"local predict server missing Scout embed verification token: {token}")
 

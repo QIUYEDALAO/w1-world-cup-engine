@@ -50,6 +50,7 @@ WATCHER = ROOT / "scripts/w1_watcher.sh"
 ENV_KEY_NAME = "APIFOOTBALL_" + "KEY"
 API_FOOTBALL_BASE = "https://v" + "3.football.api-sports.io"
 WEATHER_STEP_DETAIL = "实时请求天气 API/Open-Meteo"
+DASHBOARD_EMPTY_ERROR = "dashboard 数据为空：match_records=0，请检查 match_cards / competition_scope。"
 API_ENV_BRIDGE_FILES = [
     Path.home() / ".openclaw/.env",
     Path.home() / ".openclaw/service-env/ai.openclaw.gateway.env",
@@ -156,6 +157,34 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     tmp.replace(path)
+
+
+def dashboard_data_payload() -> dict[str, Any] | None:
+    if not DASHBOARD_DATA.is_file():
+        return None
+    try:
+        payload = load_json(DASHBOARD_DATA)
+    except Exception:
+        return None
+    records = payload.get("match_records")
+    if not isinstance(records, list) or not records:
+        return None
+    return payload
+
+
+def build_dashboard_data_once(env: dict[str, str] | None = None) -> bool:
+    run_env = env or os.environ.copy()
+    try:
+        proc = run_command(["python3", str(BUILD_SCRIPT)], run_env)
+    except Exception:
+        return False
+    return proc.returncode == 0 and dashboard_data_payload() is not None
+
+
+def ensure_dashboard_data_ready() -> bool:
+    if dashboard_data_payload() is not None:
+        return True
+    return build_dashboard_data_once()
 
 
 def competition_scope() -> dict[str, Any]:
@@ -366,9 +395,9 @@ def write_live_refresh_state(fixture_id: str, live_refresh: dict[str, Any]) -> N
 
 
 def match_records() -> list[dict[str, Any]]:
-    if not DASHBOARD_DATA.is_file():
+    data = dashboard_data_payload()
+    if not data:
         return []
-    data = load_json(DASHBOARD_DATA)
     return data.get("match_records", [])
 
 
@@ -1214,10 +1243,14 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_json(progress_payload(job_id="none", status="idle", step_index=1, message="等待开始预测。", match={}))
             return
         if path == "/dashboard-data":
-            if DASHBOARD_DATA.is_file():
-                self.send_json(load_json(DASHBOARD_DATA))
+            data = dashboard_data_payload()
+            if data is None:
+                ensure_dashboard_data_ready()
+                data = dashboard_data_payload()
+            if data is not None:
+                self.send_json(data)
             else:
-                self.send_json({"ok": False, "error_cn": "dashboard 数据不存在。"}, HTTPStatus.NOT_FOUND)
+                self.send_json({"ok": False, "error_cn": DASHBOARD_EMPTY_ERROR}, HTTPStatus.SERVICE_UNAVAILABLE)
             return
         super().do_GET()
 
@@ -1271,6 +1304,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 def main() -> int:
     load_api_key_env_bridge()
+    ensure_dashboard_data_ready()
     PROGRESS.parent.mkdir(parents=True, exist_ok=True)
     if not PROGRESS.is_file():
         write_progress(progress_payload(job_id="none", status="idle", step_index=1, message="等待开始预测。", match={}))

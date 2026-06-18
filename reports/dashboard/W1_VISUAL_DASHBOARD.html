@@ -54371,6 +54371,10 @@ async function loadData(){
   backendConnected=false;markSource(false);return JSON.parse($('#w1-data').textContent);
 }
 function markSource(live){const p=$('#srcPill');p.classList.toggle('off',!live);$('#srcTxt').textContent=live?'实时 · 后端在线':'静态快照';}
+function dashboardEmptyMessage(){
+  const msg=(D&&D.error_cn)||'dashboard 数据为空，请先生成 w1_dashboard_data.json';
+  return `<div class="empty" style="margin:18px 0">${esc(msg)}</div>`;
+}
 
 const WD=['周日','周一','周二','周三','周四','周五','周六'];
 // 解析开球时间: 优先 kickoff_utc; 否则把 kickoff 字符串按 CST(UTC+8) 解析
@@ -54385,8 +54389,8 @@ function fmtCST(d){const c=new Date(d.getTime()+8*3600*1000),y=c.getUTCFullYear(
     hm:`${String(c.getUTCHours()).padStart(2,'0')}:${String(c.getUTCMinutes()).padStart(2,'0')}`,wd:WD[c.getUTCDay()]};}
 function todayKeyCST(){const c=new Date(Date.now()+8*3600*1000);
   return `${c.getUTCFullYear()}-${String(c.getUTCMonth()+1).padStart(2,'0')}-${String(c.getUTCDate()).padStart(2,'0')}`;}
-function keyParts(k){const d=new Date(k+'T00:00:00Z');return {label:`${d.getUTCMonth()+1}/${d.getUTCDate()}`,wd:WD[d.getUTCDay()]};}
-function prepRecs(){RECS=(D.match_records||[]).slice();
+function keyParts(k){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(k||'')))return {label:'未定',wd:''};const d=new Date(k+'T00:00:00Z');return {label:`${d.getUTCMonth()+1}/${d.getUTCDate()}`,wd:WD[d.getUTCDay()]};}
+function prepRecs(){RECS=(Array.isArray(D&&D.match_records)?D.match_records:[]).slice();
   RECS.forEach(r=>{r._ko=parseKO(r);const p=r._ko?fmtCST(r._ko):null;r._day=p?p.key:'未定';r._hm=p?p.hm:'';r._wd=p?p.wd:'';});
   RECS.sort((a,b)=>((a._ko?a._ko.getTime():Infinity)-(b._ko?b._ko.getTime():Infinity)));
   DAYS=[...new Set(RECS.map(r=>r._day))];}
@@ -54411,6 +54415,14 @@ async function boot(){
   D=await loadData();prepRecs();
   $('#brandT').textContent=D.title_cn||'W1 世界杯赛前预测控制台';
   $('#ledN').textContent=(D.dashboard_binding&&D.dashboard_binding.records_count)||RECS.length;
+  if(!RECS.length){
+    renderStatusCards();renderBoss();renderReportLinks();
+    $('#dayStrip').innerHTML='<span class="dlab">赛程</span><button class="day on"><b>暂无</b><small>0场</small></button>';
+    $('#railTitle').textContent='dashboard 数据为空';
+    $('#mcount').textContent='0';
+    $('#panel').innerHTML=dashboardEmptyMessage();
+    return;
+  }
   selDay=pickDefaultDay();setActiveToDayDefault();
   renderStatusCards();renderBoss();renderReportLinks();renderDays();renderRail();renderPanel();
 }
