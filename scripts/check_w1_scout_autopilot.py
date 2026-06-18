@@ -123,6 +123,11 @@ def assert_runner_static() -> None:
         "DASHBOARD_EMPTY_ERROR",
         "dashboard 数据为空：match_records=0",
         "build_dashboard_data_once",
+        "ACTIVE_JOB",
+        "retryable",
+        "_active_job_started_at",
+        "cleanup_finished_or_stale_active_job_locked",
+        "已有手动强刷任务正在进行，请等待当前任务完成。",
     ):
         if token not in server:
             fail(f"local predict server missing Scout embed verification token: {token}")

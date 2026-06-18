@@ -54377,6 +54377,7 @@ function dashboardEmptyMessage(){
 }
 
 const WD=['周日','周一','周二','周三','周四','周五','周六'];
+const SELECTED_FIXTURE_KEY='w1_selected_fixture_id';
 // 解析开球时间: 优先 kickoff_utc; 否则把 kickoff 字符串按 CST(UTC+8) 解析
 function parseKO(r){
   if(r.kickoff_utc){const d=new Date(r.kickoff_utc);if(!isNaN(d))return d;}
@@ -54396,9 +54397,22 @@ function prepRecs(){RECS=(Array.isArray(D&&D.match_records)?D.match_records:[]).
   DAYS=[...new Set(RECS.map(r=>r._day))];}
 function nextKickoffDay(){const now=Date.now();const r=RECS.find(x=>x._ko&&x._ko.getTime()>now);return r?r._day:null;}
 function pickDefaultDay(){return nextKickoffDay()||DAYS[DAYS.length-1]||'未定';}
+function hashFixtureId(){const m=String(location.hash||'').match(/fixture=([^&]+)/);return m?decodeURIComponent(m[1]):'';}
+function storedFixtureId(){try{return hashFixtureId()||localStorage.getItem(SELECTED_FIXTURE_KEY)||'';}catch(e){return hashFixtureId();}}
+function persistFixture(fid){
+  if(!fid)return;
+  try{localStorage.setItem(SELECTED_FIXTURE_KEY,String(fid));}catch(e){}
+  try{history.replaceState(null,'','#fixture='+encodeURIComponent(String(fid)));}catch(e){}
+}
+function setActiveByFixture(fid){
+  const i=RECS.findIndex(x=>String(x.fixture_id)===String(fid));
+  if(i<0)return false;
+  active=i;selDay=RECS[i]._day||selDay||pickDefaultDay();return true;
+}
+function restoreSelectedFixture(){return setActiveByFixture(storedFixtureId());}
 function setActiveToDayDefault(){const inDay=RECS.filter(r=>r._day===selDay);
   const up=inDay.find(r=>r.status!=='finished');active=RECS.indexOf(up||inDay[0]||RECS[0]);if(active<0)active=0;}
-function selectDay(k){selDay=k;setActiveToDayDefault();selStage=null;renderDays();renderRail();renderPanel();$('#panel').scrollTop=0;}
+function selectDay(k){selDay=k;setActiveToDayDefault();if(RECS[active])persistFixture(RECS[active].fixture_id);selStage=null;renderDays();renderRail();renderPanel();$('#panel').scrollTop=0;}
 function renderDays(){const tk=todayKeyCST(),nd=nextKickoffDay();
   $('#dayStrip').innerHTML='<span class="dlab">赛程</span>'+DAYS.map(k=>{const recs=RECS.filter(r=>r._day===k),fin=recs.filter(r=>r.status==='finished').length;
     const p=keyParts(k),on=k===selDay,isT=k===tk;
@@ -54423,7 +54437,7 @@ async function boot(){
     $('#panel').innerHTML=dashboardEmptyMessage();
     return;
   }
-  selDay=pickDefaultDay();setActiveToDayDefault();
+  selDay=pickDefaultDay();if(!restoreSelectedFixture())setActiveToDayDefault();if(RECS[active])persistFixture(RECS[active].fixture_id);
   renderStatusCards();renderBoss();renderReportLinks();renderDays();renderRail();renderPanel();
 }
 
@@ -54446,7 +54460,7 @@ function renderRail(){
     if(r._day!==selDay)return;
     const st=STATUS(r),b=document.createElement('button');
     b.className='mrow'+(idx===active?' on':'');
-    b.onclick=()=>{active=idx;selStage=null;renderRail();renderPanel();$('#panel').scrollTop=0;};
+    b.onclick=()=>{active=idx;persistFixture(r.fixture_id);selStage=null;renderRail();renderPanel();$('#panel').scrollTop=0;};
     const rec=(r.recommendation_view&&r.recommendation_view.primary_score)||'–';
     const band=((r.safe_view||{}).total_goals_range||{}).most_likely_band;
     const hasResult=r.status==='finished'&&r.actual_score&&r.actual_score.home!=null;
@@ -54491,6 +54505,12 @@ function stageGate(r){
   }
   return {label_cn,delta_hours,kickoff_utc:r.kickoff_utc||null};
 }
+function isFutureFixture(r){
+  const gate=stageGate(r);
+  if(gate.delta_hours!=null)return gate.delta_hours>0;
+  const status=String((r&&r.status)||'').toLowerCase();
+  return !(status==='finished'||status==='live'||status==='started'||String((r&&r.prediction_stage_cn)||'').includes('赛中'));
+}
 function stageActionText(gate){
   return `当前处于${gate.label_cn}阶段；若首发、盘口、天气等关键数据未齐，仍不进入最终结论。`;
 }
@@ -54507,8 +54527,13 @@ function pPredict(r){
   const opts=RECS.map(x=>`${x.home_flag||''} ${esc(teamName(x,'home'))}`);
   const stHtml=flow.map(s=>{const on=s.label_cn===selStage;const isCur=s.label_cn===cur;
     return `<button class="stg ${on?'sel':''}" onclick="selStage='${esc(s.label_cn)}';renderPanel()" title="${esc(s.window_cn||'')} · ${esc(s.description_cn||'')}">${esc(s.label_cn)}<small>${esc(s.window_cn||'')}</small>${isCur?'<span class="cur">当前</span>':''}</button>`;}).join('');
+  const futureFixture=isFutureFixture(r);
+  const btnLabel=busy?'正在手动强刷…':(futureFixture?'手动强刷 + AI解读':'已开赛，仅刷新基础数据 / 等待赛后复盘');
+  const btnTitle=futureFixture
+    ? '手动强制刷新本场基础数据；若 DeepSeek key 可用，将追加生成本场 Scout 单场赛前解读'
+    : '已开赛或完赛：只刷新基础数据 / 赛果，不生成赛前 Scout 解读，不写 lock，等待赛后复盘';
   const btn = backendConnected
-    ? `<button class="go" id="goBtn" ${busy?'disabled':''} onclick="runPredict()" title="手动强制刷新本场基础数据；若 DeepSeek key 可用，将追加生成本场 Scout 单场赛前解读">${busy?'正在手动强刷…':'手动强刷 + AI解读'}</button>`
+    ? `<button class="go" id="goBtn" ${busy?'disabled':''} onclick="runPredict()" title="${esc(btnTitle)}">${esc(btnLabel)}</button>`
     : `<button class="go off" id="goBtn" disabled title="后端未连接，暂不触发 /predict">连接后可强刷基础数据</button>`;
   return `<div class="predict">
     <div class="prow">
@@ -54923,16 +54948,29 @@ function toggleExpert(){expertOpen=!expertOpen;const e=$('#expert');if(e)e.class
 
 // ---- 预测流程: 仅后端连接时真实触发 /predict + 轮询 /progress ----
 async function runPredict(){
-  if(busy||!backendConnected)return;const r=RECS[active];busy=true;renderPanel();
+  if(busy||!backendConnected)return;const r=RECS[active];const requestedFixture=String(r.fixture_id||'');persistFixture(requestedFixture);busy=true;renderPanel();
   const prog=$('#prog'),msg=$('#progMsg');if(prog)prog.classList.add('on');if(msg)msg.textContent='正在手动强刷…';
   const payload={fixture_id:r.fixture_id,match:r.match,home_team_cn:teamName(r,'home'),away_team_cn:teamName(r,'away'),stage_cn:selStage};
   try{
     const res=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(!res.ok)throw new Error('predict '+res.status);
+    let body={};try{body=await res.clone().json();}catch(e){}
+    if(res.status===409&&body&&body.code==='ACTIVE_JOB'){
+      const p=$('#prog'),m=$('#progMsg');if(p)p.classList.add('on');
+      if(m)m.innerHTML='<span class="pm">已有强刷任务进行中，请等待当前任务完成</span>';
+      const finalProgress=await pollProgress();
+      try{
+        const fresh=await fetchBackendDashboardData();backendConnected=true;D=fresh;prepRecs();
+        if(!setActiveByFixture(requestedFixture)&&!DAYS.includes(selDay)){selDay=pickDefaultDay();setActiveToDayDefault();}
+      }catch(e){setActiveByFixture(requestedFixture);}
+      busy=false;renderStatusCards();renderDays();renderRail();renderPanel();
+      const pp=$('#prog'),mm=$('#progMsg');if(pp)pp.classList.add('on');
+      if(mm)mm.innerHTML='<span class="pm">'+esc((finalProgress&&finalProgress.message_cn)||'已有强刷任务进行中，请等待当前任务完成')+'</span>';
+      return;
+    }
+    if(!res.ok)throw new Error((body&&body.error_cn)||('predict '+res.status));
     const finalProgress=await pollProgress();
     const fresh=await fetchBackendDashboardData();backendConnected=true;D=fresh;prepRecs();          // 仅成功时替换快照
-    if(!DAYS.includes(selDay))selDay=pickDefaultDay();
-    active=Math.max(0,RECS.findIndex(x=>x.fixture_id===r.fixture_id));
+    if(!setActiveByFixture(requestedFixture)&&!DAYS.includes(selDay)){selDay=pickDefaultDay();setActiveToDayDefault();}
     busy=false;renderStatusCards();renderDays();renderRail();renderPanel();
     const p=$('#prog'),m=$('#progMsg');if(p)p.classList.add('on');
     if(m)m.innerHTML='<span class="pm">'+esc((finalProgress&&finalProgress.message_cn)||'完成 ✓ 已刷新基础数据。')+'</span>';
@@ -54962,9 +55000,12 @@ async function probeBackend(){
     const r=await fetch('/dashboard-data',{cache:'no-store'});
     if(!r.ok)return;
     const j=await r.json();backendConnected=true;markSource(true);
-    const cur=RECS[active];D=j;prepRecs();
-    if(!DAYS.includes(selDay))selDay=pickDefaultDay();
-    if(cur){const i=RECS.findIndex(x=>x.fixture_id===cur.fixture_id);if(i>=0)active=i;}
+    const cur=RECS[active];const fid=(cur&&cur.fixture_id)||storedFixtureId();D=j;prepRecs();
+    if(!setActiveByFixture(fid)){
+      if(!DAYS.includes(selDay))selDay=pickDefaultDay();
+      if(cur){const i=RECS.findIndex(x=>x.fixture_id===cur.fixture_id);if(i>=0)active=i;}
+    }
+    if(RECS[active])persistFixture(RECS[active].fixture_id);
     renderStatusCards();renderDays();renderRail();renderPanel();
   }catch(e){}
 }

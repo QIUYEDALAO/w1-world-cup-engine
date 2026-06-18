@@ -74,6 +74,8 @@ STEPS = [
 
 _job_lock = threading.Lock()
 _active_job: str | None = None
+_active_job_started_at: float | None = None
+ACTIVE_JOB_STALE_SECONDS = 10 * 60
 
 
 def now_ts() -> str:
@@ -157,6 +159,45 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     tmp.replace(path)
+
+
+def progress_status() -> str:
+    if not PROGRESS.is_file():
+        return ""
+    try:
+        return str(load_json(PROGRESS).get("status") or "")
+    except Exception:
+        return ""
+
+
+def progress_updated_age_seconds() -> float | None:
+    if not PROGRESS.is_file():
+        return None
+    try:
+        return max(0.0, time.time() - PROGRESS.stat().st_mtime)
+    except OSError:
+        return None
+
+
+def cleanup_finished_or_stale_active_job_locked() -> str | None:
+    """Called with _job_lock held. Clears only clearly finished/stale jobs."""
+    global _active_job, _active_job_started_at
+    if not _active_job:
+        return None
+    status = progress_status()
+    if status in {"done", "failed", "error"}:
+        old = _active_job
+        _active_job = None
+        _active_job_started_at = None
+        return f"cleared finished active job {old} status={status}"
+    started_age = time.time() - _active_job_started_at if _active_job_started_at else 0
+    progress_age = progress_updated_age_seconds()
+    if started_age > ACTIVE_JOB_STALE_SECONDS and (progress_age is None or progress_age > ACTIVE_JOB_STALE_SECONDS):
+        old = _active_job
+        _active_job = None
+        _active_job_started_at = None
+        return f"cleared stale active job {old} started_age={started_age:.0f}s progress_age={progress_age}"
+    return None
 
 
 def dashboard_data_payload() -> dict[str, Any] | None:
@@ -1098,7 +1139,7 @@ def final_refresh_message(live_status: str, scout_message: str) -> str:
 
 
 def run_prediction(job_id: str, match: dict[str, Any]) -> None:
-    global _active_job
+    global _active_job, _active_job_started_at
     load_api_key_env_bridge()
     env = os.environ.copy()
     fixture_id = str(match.get("fixture_id") or "")
@@ -1203,7 +1244,9 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
         )
     finally:
         with _job_lock:
-            _active_job = None
+            if _active_job == job_id:
+                _active_job = None
+                _active_job_started_at = None
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -1255,7 +1298,7 @@ class Handler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self) -> None:  # noqa: N802 - stdlib handler name
-        global _active_job
+        global _active_job, _active_job_started_at
         path = urlparse(self.path).path
         if path != "/predict":
             self.send_json({"ok": False, "error_cn": "接口不存在。"}, HTTPStatus.NOT_FOUND)
@@ -1289,11 +1332,24 @@ class Handler(SimpleHTTPRequestHandler):
                 match["api_fixture_id"] = candidates[0]
 
         with _job_lock:
+            cleanup_note = cleanup_finished_or_stale_active_job_locked()
+            if cleanup_note:
+                print(f"WARN: {cleanup_note}")
             if _active_job:
-                self.send_json({"ok": False, "error_cn": "已有查询正在进行，请稍后。", "job_id": _active_job}, HTTPStatus.CONFLICT)
+                self.send_json(
+                    {
+                        "ok": False,
+                        "code": "ACTIVE_JOB",
+                        "error_cn": "已有手动强刷任务正在进行，请等待当前任务完成。",
+                        "job_id": _active_job,
+                        "retryable": True,
+                    },
+                    HTTPStatus.CONFLICT,
+                )
                 return
             job_id = uuid.uuid4().hex[:12]
             _active_job = job_id
+            _active_job_started_at = time.time()
 
         init_message = f"初始化比赛中：fixture_id={match.get('fixture_id', '未提供')}，{match.get('match') or ''}"
         write_progress(progress_payload(job_id=job_id, status="running", step_index=1, message=init_message, match=match))
