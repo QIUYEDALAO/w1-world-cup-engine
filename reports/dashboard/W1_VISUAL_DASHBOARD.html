@@ -54311,6 +54311,11 @@ const tau=(i,j,lh,la,r)=>i===0&&j===0?1-lh*la*r:i===0&&j===1?1+lh*r:i===1&&j===0
 function matrix(lh,la,r,mg=10){const M=[];let s=0;for(let i=0;i<=mg;i++){M[i]=[];for(let j=0;j<=mg;j++){const v=pois(i,lh)*pois(j,la)*tau(i,j,lh,la,r);M[i][j]=v;s+=v;}}for(let i=0;i<=mg;i++)for(let j=0;j<=mg;j++)M[i][j]/=s;return M;}
 const parse=s=>s&&/-/.test(s)?s.split('-').map(Number):null;
 const STATUS=r=>r.status==='finished'?'fin':(r.play_guard_pass?'up':'wait');
+const TEAM_CN_ALIAS={'Czechia':'捷克','Türkiye':'土耳其','Turkey':'土耳其'};
+function teamName(r,side){
+  const raw=r[`${side}_team_cn`]||r[`${side}_cn`]||r[`${side}_team`]||r[side]||'未知球队';
+  return TEAM_CN_ALIAS[raw]||raw;
+}
 
 // ---- 盘口读数 / 市场状态 (仅 UI 展示, 不改任何模型量) ----
 function readsOf(p){
@@ -54442,11 +54447,11 @@ function renderRail(){
         oc=exact?'<span class="oc hit">完全命中</span>':dir?'<span class="oc dir">方向命中</span>':'<span class="oc miss">方向未中</span>';}
       res=`<span class="tag main sm">主 ${esc(rec)}</span><span class="tag ft">终 ${ah}-${aa}</span>${oc}`;
     }else if(r._ko&&r._ko.getTime()<now){
-      res=`<span class="tag main sm">主 ${esc(rec)}</span><span class="tag pend">结果待录入</span>`;
+      res=`<span class="tag pend">赛果待同步</span>`;
     }else{
-      res=`<span class="tag main">主 ${esc(rec)}</span>${band?`<span class="tag">总进球 ${esc(band)}</span>`:''}`;
+      res=`<span class="tag main">未开赛</span>${band?`<span class="tag">总进球 ${esc(band)}</span>`:''}`;
     }
-    b.innerHTML=`<div class="mt">${r.home_flag||''} ${esc(r.home_team_cn)} <span class="vs">vs</span> ${r.away_flag||''} ${esc(r.away_team_cn)}</div>
+    b.innerHTML=`<div class="mt">${r.home_flag||''} ${esc(teamName(r,'home'))} <span class="vs">vs</span> ${r.away_flag||''} ${esc(teamName(r,'away'))}</div>
       <div class="mm"><span class="dot ${st}"></span>${r._hm||''} CST</div>
       <div class="mres">${res}</div>`;
     rail.appendChild(b);
@@ -54456,7 +54461,7 @@ function renderRail(){
 // ---- 子面板 ----
 function pBanner(){
   if(backendConnected)
-    return `<div class="banner ok"><span class="bi2">●</span> W1 后端已连接：可点击「手动强刷基础数据」触发真实刷新；若服务端启用 W1_MANUAL_REFRESH_TRIGGER_SCOUT=1 且 key 齐备，会追加生成本场 Scout 解读。</div>`;
+    return `<div class="banner ok"><span class="bi2">●</span> W1 后端已连接：点击「手动强刷 + AI解读」会刷新基础数据；若 DEEPSEEK_API_KEY 可用，将追加生成本场 Scout 解读。实时 API 缺失时使用本地缓存，不伪造缺失数据。</div>`;
   return `<div class="banner"><span class="bi2">◌</span> 当前为<b>静态快照</b>，W1 后端未连接。<code>/predict</code> 需要 W1 后端在线；连上后端后，下方按钮才会真实触发基础数据强刷。</div>`;
 }
 function stageGate(r){
@@ -54479,7 +54484,7 @@ function stageActionText(gate){
 }
 function pHeader(r){
   return `<div class="ph">
-    <div class="teams">${r.home_flag||''} ${esc(r.home_team_cn)}<span class="vs">vs</span>${r.away_flag||''} ${esc(r.away_team_cn)}</div>
+    <div class="teams">${r.home_flag||''} ${esc(teamName(r,'home'))}<span class="vs">vs</span>${r.away_flag||''} ${esc(teamName(r,'away'))}</div>
     <span class="ko">${esc(r.kickoff||'')}</span>
   </div>`;
 }
@@ -54487,17 +54492,17 @@ function pPredict(r){
   const gate=stageGate(r),cur=gate.label_cn;if(selStage==null)selStage=cur;
   let flow=[...(D.prediction_stage_flow_cn||[])];
   if(!flow.some(s=>s.label_cn===cur))flow.push({label_cn:cur,window_cn:'动态倒计时',description_cn:stageActionText(gate)});
-  const opts=RECS.map(x=>`${x.home_flag||''} ${esc(x.home_team_cn)}`);
+  const opts=RECS.map(x=>`${x.home_flag||''} ${esc(teamName(x,'home'))}`);
   const stHtml=flow.map(s=>{const on=s.label_cn===selStage;const isCur=s.label_cn===cur;
     return `<button class="stg ${on?'sel':''}" onclick="selStage='${esc(s.label_cn)}';renderPanel()" title="${esc(s.window_cn||'')} · ${esc(s.description_cn||'')}">${esc(s.label_cn)}<small>${esc(s.window_cn||'')}</small>${isCur?'<span class="cur">当前</span>':''}</button>`;}).join('');
   const btn = backendConnected
-    ? `<button class="go" id="goBtn" ${busy?'disabled':''} onclick="runPredict()" title="手动强制刷新本场基础数据；启用 W1_MANUAL_REFRESH_TRIGGER_SCOUT=1 后才追加生成解读">${busy?'正在手动强刷…':'手动强刷基础数据'}</button>`
+    ? `<button class="go" id="goBtn" ${busy?'disabled':''} onclick="runPredict()" title="手动强制刷新本场基础数据；若 DeepSeek key 可用，将追加生成本场 Scout 单场赛前解读">${busy?'正在手动强刷…':'手动强刷 + AI解读'}</button>`
     : `<button class="go off" id="goBtn" disabled title="后端未连接，暂不触发 /predict">连接后可强刷基础数据</button>`;
   return `<div class="predict">
     <div class="prow">
-      <div class="sel static"><span>${r.home_flag||''}</span><b class="tname">${esc(r.home_team_cn)}</b></div>
+      <div class="sel static"><span>${r.home_flag||''}</span><b class="tname">${esc(teamName(r,'home'))}</b></div>
       <span class="vsdot">VS</span>
-      <div class="sel static"><span>${r.away_flag||''}</span><b class="tname">${esc(r.away_team_cn)}</b></div>
+      <div class="sel static"><span>${r.away_flag||''}</span><b class="tname">${esc(teamName(r,'away'))}</b></div>
       <span class="selhint">切换对阵请用左侧赛程列表</span>
       <div class="stages">${stHtml}</div>
       ${btn}
@@ -54594,7 +54599,7 @@ function pMatrix(r){
   return `<div class="card"><h3>比分概率矩阵 · DIXON-COLES<span class="r">审计 / 模型调试</span></h3>
     <div class="note" style="margin:-2px 0 9px">该矩阵展示模型对各比分格子的概率分布，主要用于<b>审计与调试</b>，不是推荐列表。</div>
     <div class="mxwrap"><div class="mxaxis-y"><span>主</span><span>队</span><span>进</span><span>球</span></div>
-    <div class="mx">${head}${grid}<div class="axlab"><span>← 客队进球</span><span>${esc(r.away_team_cn)} →</span></div></div></div>
+    <div class="mx">${head}${grid}<div class="axlab"><span>← 客队进球</span><span>${esc(teamName(r,'away'))} →</span></div></div></div>
     <div class="mxleg"><span class="mklab"><span class="sw" style="outline:2px solid var(--amber);outline-offset:-2px"></span>主比分</span>
     <span class="mklab"><span class="sw" style="outline:1.5px dashed var(--amber)"></span>备选</span>
     ${act?'<span class="mklab"><span class="sw" style="border:2px solid var(--red)"></span>实际</span>':''}
@@ -54894,17 +54899,17 @@ function toggleExpert(){expertOpen=!expertOpen;const e=$('#expert');if(e)e.class
 async function runPredict(){
   if(busy||!backendConnected)return;const r=RECS[active];busy=true;renderPanel();
   const prog=$('#prog'),msg=$('#progMsg');if(prog)prog.classList.add('on');if(msg)msg.textContent='正在手动强刷…';
-  const payload={fixture_id:r.fixture_id,match:r.match,home_team_cn:r.home_team_cn,away_team_cn:r.away_team_cn,stage_cn:selStage};
+  const payload={fixture_id:r.fixture_id,match:r.match,home_team_cn:teamName(r,'home'),away_team_cn:teamName(r,'away'),stage_cn:selStage};
   try{
     const res=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!res.ok)throw new Error('predict '+res.status);
-    await pollProgress();
+    const finalProgress=await pollProgress();
     const fresh=await fetchBackendDashboardData();backendConnected=true;D=fresh;prepRecs();          // 仅成功时替换快照
     if(!DAYS.includes(selDay))selDay=pickDefaultDay();
     active=Math.max(0,RECS.findIndex(x=>x.fixture_id===r.fixture_id));
     busy=false;renderStatusCards();renderDays();renderRail();renderPanel();
     const p=$('#prog'),m=$('#progMsg');if(p)p.classList.add('on');
-    if(m)m.innerHTML='<span class="pm">完成 ✓ 已刷新 ledger / match card / 比分矩阵 / 推荐</span>';
+    if(m)m.innerHTML='<span class="pm">'+esc((finalProgress&&finalProgress.message_cn)||'完成 ✓ 已刷新基础数据。')+'</span>';
   }catch(e){
     busy=false;renderPanel();                                  // 失败: 保留旧快照, 不覆盖
     const p=$('#prog'),m=$('#progMsg');if(p)p.classList.add('on');
@@ -54918,9 +54923,10 @@ async function pollProgress(){
     if(p){msg.textContent=p.message_cn||p.message||'抓取中…';
       if(p.steps)list.innerHTML=(p.steps||[]).map(s=>`<span>${esc(s.label||s.name||'步骤')}:${esc(s.status||'')}</span>`).join('');
       else if(p.modules)list.innerHTML=Object.entries(p.modules).map(([k,v])=>`<span>${k}:${(v&&v.status)||v}</span>`).join('');
-      if(p.status==='done'||p.done||p.overall_status==='success'||p.overall_status==='failed')return;}
+      if(p.status==='done'||p.done||p.overall_status==='success'||p.overall_status==='failed')return p;}
     await new Promise(r=>setTimeout(r,1000));
   }
+  return null;
 }
 
 // ---- 后端探测: 静态启动后, 后端上线则自动平滑切到实时数据 + 启用预测 ----

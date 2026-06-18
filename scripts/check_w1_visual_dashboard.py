@@ -529,11 +529,17 @@ def assert_html(data: dict) -> None:
             "/progress",
             "后端未连接",
             "正在手动强刷",
-            "手动强刷基础数据",
-            "W1_MANUAL_REFRESH_TRIGGER_SCOUT=1",
+            "手动强刷 + AI解读",
+            "若 DEEPSEEK_API_KEY 可用",
+            "实时 API 缺失时使用本地缓存，不伪造缺失数据",
+            "Scout 单场赛前解读",
             "缺 key / no-delta / not due / analyst failed",
             "缺少赛前解读/lock 时会强制生成首版解读",
             "已保留当前快照，未覆盖",
+            "teamName",
+            "Czechia':'捷克",
+            "赛果待同步",
+            "未开赛",
             "主比分",
             "备选比分",
             "风险路径",
@@ -555,6 +561,10 @@ def assert_html(data: dict) -> None:
         for token in required_new:
             if token not in text:
                 fail(f"HTML missing backend dashboard token: {token}")
+        if "手动强刷基础数据" in text or "W1_MANUAL_REFRESH_TRIGGER_SCOUT=1" in text:
+            fail("HTML must use default Scout trigger wording, not old opt-in manual refresh copy")
+        if "主 -" in text:
+            fail("HTML must not show ambiguous pre-match placeholder '主 -'")
         if '<select id="teamA"' in text or '<select id="teamB"' in text:
             fail("HTML must not render fake team select controls")
         for token in ("pMarketStateBar", "市场复述", "自洽核对", "未对该盘独立校准"):

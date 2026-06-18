@@ -976,7 +976,8 @@ def api_football_key_available(env: dict[str, str]) -> bool:
 
 
 def manual_scout_enabled() -> bool:
-    return os.environ.get("W1_MANUAL_REFRESH_TRIGGER_SCOUT", "0") == "1"
+    value = os.environ.get("W1_MANUAL_REFRESH_TRIGGER_SCOUT", "1").strip().lower()
+    return value not in {"0", "false", "no", "off"}
 
 
 def scout_call_exists(fixture_id: str) -> bool:
@@ -1013,22 +1014,22 @@ def scout_embedded_in_dashboard(fixture_id: str) -> bool:
 def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
     fixture_id = str(match.get("fixture_id") or "")
     if not manual_scout_enabled():
-        return "Scout 未触发：当前按钮为手动强刷基础数据；如需同时生成解读，设置 W1_MANUAL_REFRESH_TRIGGER_SCOUT=1。"
+        return "Scout 自动解读已被 W1_MANUAL_REFRESH_TRIGGER_SCOUT=0 关闭。"
     if not fixture_id:
         return "AI 解读未生成：缺少 fixture_id。"
     if not is_future_match(match):
         return "AI 解读未生成：该 fixture 已开赛或不在未来赛程内；只允许赛后 audit/review/calibration。"
     if not deepseek_key_available(env):
         return "基础数据已刷新；AI 解读未生成：缺少 DEEPSEEK_API_KEY。"
-    if not api_football_key_available(env):
-        return "实时 API 未配置，基础数据使用缓存；AI 解读不伪造。"
+    api_available = api_football_key_available(env)
     scout_env = {
         **env,
         "W1_SCOUT_FORCE_FIXTURE": fixture_id,
         "W1_SCOUT_PREMATCH_ONLY": "1",
-        "W1_SCOUT_SKIP_FETCH": "1",
         "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
     }
+    if not api_available:
+        scout_env["W1_SCOUT_SKIP_FETCH"] = "1"
     try:
         proc = run_command(["bash", str(SCOUT_CYCLE)], scout_env)
     except subprocess.TimeoutExpired:
@@ -1041,13 +1042,30 @@ def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
     has_call = scout_call_exists(fixture_id)
     has_embed = scout_embedded_in_dashboard(fixture_id)
     if has_call and has_embed:
+        api_note = "实时 API 可用，本轮先刷新基础数据，再生成 Scout 解读。" if api_available else "实时 API 未配置，本轮使用本地缓存 / match card / 已有 bundle 生成 Scout 解读；不伪造缺失数据。"
         stdout = proc.stdout or ""
         if "embed_existing" in stdout or "补写 dashboard 上屏" in stdout or "dashboard embed missing" in stdout:
-            return "已有合法赛前解读，本轮已补写 dashboard 上屏；未重复调用 AI。"
-        return "Scout 单场赛前解读已生成并上屏，已按首次合法赛前 call 锁定。"
+            return f"{api_note} 已有合法赛前解读，本轮已补写 dashboard 上屏；未重复调用 AI。"
+        return f"{api_note} Scout 单场赛前解读已生成并上屏，已按首次合法赛前 call 锁定。"
     if has_call and not has_embed:
         return "AI 解读已生成但未上屏：dashboard embed 校验失败，请检查 w1_scout_embed.py。"
     return "AI 解读未生成：Scout 单场周期未产出合法 read；未推进旧内容。"
+
+
+def final_refresh_message(live_status: str, scout_message: str) -> str:
+    if "缺少 DEEPSEEK_API_KEY" in scout_message:
+        return "完成 ✓ 已刷新基础数据；AI 解读未生成：缺少 DEEPSEEK_API_KEY。"
+    if "W1_MANUAL_REFRESH_TRIGGER_SCOUT=0" in scout_message:
+        return "完成 ✓ 已刷新基础数据；Scout 自动解读已被 W1_MANUAL_REFRESH_TRIGGER_SCOUT=0 关闭。"
+    if "补写 dashboard 上屏" in scout_message:
+        return "完成 ✓ 已刷新基础数据；已有合法赛前解读，本轮已补写 dashboard 上屏；未重复调用 AI。"
+    if "使用本地缓存" in scout_message and (
+        "已生成并上屏" in scout_message
+    ):
+        return "完成 ✓ 已刷新基础数据；实时 API 缺失，本轮使用本地缓存生成 Scout 解读，上屏成功。"
+    if "已生成并上屏" in scout_message or "补写 dashboard 上屏" in scout_message:
+        return "完成 ✓ 已刷新基础数据，并生成本场 Scout 解读，上屏成功。"
+    return f"完成 ✓ 已刷新基础数据；{scout_message or f'实时刷新 {live_status}。'}"
 
 
 def run_prediction(job_id: str, match: dict[str, Any]) -> None:
@@ -1139,7 +1157,7 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                 job_id=job_id,
                 status="done",
                 step_index=len(STEPS),
-                message=f"查询完成：实时刷新 {live_refresh.get('overall_status')}，已更新 dashboard。{scout_message}",
+                message=final_refresh_message(str(live_refresh.get("overall_status") or ""), scout_message),
                 match=progress_match(selected, match.get("stage_cn", "")) if selected else match,
             )
         )

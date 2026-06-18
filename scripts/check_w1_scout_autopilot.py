@@ -217,7 +217,7 @@ def assert_prematch_only_repairs_missing_dashboard_embed() -> None:
             "W1_SCOUT_FORCE_FIXTURE": "F1",
             "W1_SCOUT_PREMATCH_ONLY": "1",
             "W1_SCOUT_SKIP_FETCH": "1",
-            "W1_SCOUT_FORCE_HASH": "same",
+            "W1_SCOUT_FORCE_HASH": "changed",
             "W1_SCOUT_FETCH_CMD": str(root / "fetch.sh"),
             "W1_SCOUT_BUILD_CMD": str(root / "build.sh"),
             "W1_SCOUT_ANALYST_CMD": str(root / "analyst.sh"),

@@ -404,14 +404,14 @@ if [ -n "$MISSING_READS" ]; then
   log "存在未生成赛前解读的 fixture，本轮强制生成首版解读: ${MISSING_READS}"
   record_status "missing_read" "running" "存在未生成赛前解读的 fixture，本轮强制生成首版解读。"
 fi
+if [ "${W1_SCOUT_PREMATCH_ONLY:-0}" = "1" ] && [ -z "$MISSING_READS" ] && [ -n "$DASHBOARD_MISSING_EMBEDS" ]; then
+  log "existing Scout read found but dashboard embed missing: ${DASHBOARD_MISSING_EMBEDS}; embedding without AI/lock"
+  ${EMBED_CMD}
+  record_status "embed_existing" "ok" "已有合法赛前解读；本轮补写 dashboard 上屏，不重复调用 AI、不重新锁定。"
+  exit 0
+fi
 if [ "$NEW" = "$PREV" ] && [ -z "$MISSING_READS" ]; then
   if [ "${W1_SCOUT_PREMATCH_ONLY:-0}" = "1" ]; then
-    if [ -n "$DASHBOARD_MISSING_EMBEDS" ]; then
-      log "no effective delta -> existing Scout read found but dashboard embed missing: ${DASHBOARD_MISSING_EMBEDS}; embedding without AI/lock"
-      ${EMBED_CMD}
-      record_status "embed_existing" "ok" "已有合法赛前解读；本轮补写 dashboard 上屏，不重复调用 AI、不重新锁定。"
-      exit 0
-    fi
     log "no effective delta -> existing pre-match Scout read/lock is current; skip audit/review/calibration for manual refresh"
     record_status "no_delta" "ok" "已有有效赛前解读；手动强刷不重复调用 AI、不重新锁定。"
     exit 0
