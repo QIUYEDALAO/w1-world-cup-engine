@@ -15,6 +15,9 @@ import hashlib
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+from w1_results_overlay import load_results_map  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_P = ROOT / "config/w1_scout_policy.json"
 SCHEMA_P = ROOT / "schemas/w1_scout_bundle_schema.json"
@@ -138,15 +141,7 @@ def digest_read(call: dict) -> str:
 
 
 def result_fixture_ids() -> set[str]:
-    path = ROOT / "data/results/round1_results.json"
-    if not path.is_file():
-        return set()
-    out: set[str] = set()
-    for fid, row in json.loads(path.read_text(encoding="utf-8")).get("results", {}).items():
-        out.add(str(fid))
-        for alias in row.get("alias_fixture_ids", []):
-            out.add(str(alias))
-    return out
+    return set(load_results_map())
 
 
 def validate_review_rows(reviews: list[dict], locks: dict[str, dict], finished: set[str], policy: dict) -> list[str]:

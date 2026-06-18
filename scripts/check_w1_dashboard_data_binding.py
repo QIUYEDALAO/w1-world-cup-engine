@@ -155,8 +155,8 @@ def main() -> int:
             fail("First match status must be finished via overlay when ledger has no result")
         if first["actual_score"] != {"home": 2, "away": 0}:
             fail("First match actual_score must be 2-0")
-        if first["result_source"] != "manual_verified_overlay":
-            fail("First match result_source must be manual_verified_overlay")
+        if first["result_source"] not in ALLOWED_RESULT_SOURCES:
+            fail(f"First match result_source invalid: {first['result_source']}")
 
         required_fields = [
             "match",

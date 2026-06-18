@@ -54456,8 +54456,8 @@ function renderRail(){
 // ---- 子面板 ----
 function pBanner(){
   if(backendConnected)
-    return `<div class="banner ok"><span class="bi2">●</span> W1 后端已连接：可点击「手动强刷」触发真实抓取 + 预测，成功后会刷新 ledger / match card / 比分矩阵 / 推荐。</div>`;
-  return `<div class="banner"><span class="bi2">◌</span> 当前为<b>静态快照</b>，W1 后端未连接。<code>/predict</code> 需要 W1 后端在线；连上后端后，下方按钮才会真实触发抓取 + 预测。</div>`;
+    return `<div class="banner ok"><span class="bi2">●</span> W1 后端已连接：可点击「手动强刷基础数据」触发真实刷新；若服务端启用 W1_MANUAL_REFRESH_TRIGGER_SCOUT=1 且 key 齐备，会追加生成本场 Scout 解读。</div>`;
+  return `<div class="banner"><span class="bi2">◌</span> 当前为<b>静态快照</b>，W1 后端未连接。<code>/predict</code> 需要 W1 后端在线；连上后端后，下方按钮才会真实触发基础数据强刷。</div>`;
 }
 function stageGate(r){
   const ko=parseKO(r);let delta_hours=null;
@@ -54491,8 +54491,8 @@ function pPredict(r){
   const stHtml=flow.map(s=>{const on=s.label_cn===selStage;const isCur=s.label_cn===cur;
     return `<button class="stg ${on?'sel':''}" onclick="selStage='${esc(s.label_cn)}';renderPanel()" title="${esc(s.window_cn||'')} · ${esc(s.description_cn||'')}">${esc(s.label_cn)}<small>${esc(s.window_cn||'')}</small>${isCur?'<span class="cur">当前</span>':''}</button>`;}).join('');
   const btn = backendConnected
-    ? `<button class="go" id="goBtn" ${busy?'disabled':''} onclick="runPredict()" title="手动强制刷新本场，不替代自动周期">${busy?'正在手动强刷…':'手动强刷'}</button>`
-    : `<button class="go off" id="goBtn" disabled title="后端未连接，暂不触发 /predict">连接后可手动强刷</button>`;
+    ? `<button class="go" id="goBtn" ${busy?'disabled':''} onclick="runPredict()" title="手动强制刷新本场基础数据；启用 W1_MANUAL_REFRESH_TRIGGER_SCOUT=1 后才追加生成解读">${busy?'正在手动强刷…':'手动强刷基础数据'}</button>`
+    : `<button class="go off" id="goBtn" disabled title="后端未连接，暂不触发 /predict">连接后可强刷基础数据</button>`;
   return `<div class="predict">
     <div class="prow">
       <div class="sel static"><span>${r.home_flag||''}</span><b class="tname">${esc(r.home_team_cn)}</b></div>
@@ -54841,7 +54841,7 @@ function pScoutAnalyst(r){
 function pScoutCycleStatus(){
   const s=scoutCycleStatus()||{};
   const phase=s.phase||'static_snapshot',res=s.result||'embedded';
-  const msg=s.message_cn||'当前页面展示最近一次通过闸门的 AI 分析师可见性快照；自动周期只在赛前有效因子变化后推进。';
+  const msg=s.message_cn||'当前页面展示最近一次通过闸门的 AI 分析师可见性快照；缺 key / no-delta / not due / analyst failed 都会在这里显示明确原因。';
   const om=s.odds_move_summary||{};
   const resultLabel=s.dry_run?'dry-run':(res==='ok'?'成功':(res==='failed'?'失败':(phase==='no_delta'?'no-delta 跳过':res)));
   const lastFetch=fmtCst(s.last_fetch_utc||s.last_run_utc||s.updated_at_utc);
@@ -54851,7 +54851,7 @@ function pScoutCycleStatus(){
   return `<div class="card"><h3>运行 / 错误日志<span class="r">${esc(phase)} · ${esc(res)}</span></h3>
     <div class="cycle-log"><div><div class="msg">${esc(msg)}</div>
       <div class="mini">上次抓取: ${esc(lastFetch)} · 本轮结果: ${esc(resultLabel)} · 累计成功抓取: ${esc(fetchN)} 次 · 盘口异动: ${esc(moveStatus)} / ${esc(moveMsg)}</div>
-      <div class="mini">状态文件: state/scout_cycle_status.json · 错误日志: state/scout_cycle_errors.log · no-delta 不调用 AI</div></div>
+      <div class="mini">状态文件: state/scout_cycle_status.json · 错误日志: state/scout_cycle_errors.log · no-delta 不调用 AI；缺少赛前解读/lock 时会强制生成首版解读</div></div>
       <div class="ops"><button onclick="renderPanel()" title="仅刷新当前静态视图">刷新视图</button><button onclick="toggleExpert()" title="展开 W1 市场读数、FiveDim、Primary Read、候选共识和 score matrix">专家视图</button></div></div></div>`;
 }
 function pScoutLearningStatus(){
@@ -54898,7 +54898,7 @@ async function runPredict(){
   }catch(e){
     busy=false;renderPanel();                                  // 失败: 保留旧快照, 不覆盖
     const p=$('#prog'),m=$('#progMsg');if(p)p.classList.add('on');
-    if(m)m.innerHTML='<span class="pe">预测失败：'+esc(e.message||'/predict 不可用')+'。已保留当前快照，未覆盖。</span>';
+    if(m)m.innerHTML='<span class="pe">强刷失败：'+esc(e.message||'/predict 不可用')+'。已保留当前快照，未覆盖。</span>';
   }
 }
 async function pollProgress(){

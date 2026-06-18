@@ -18,10 +18,34 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
-CARDS = ROOT / "data/processed/match_cards/group_stage_round1"
+SCOPE_JSON = ROOT / "config/w1_competition_scope.json"
+LEGACY_CARDS = ROOT / "data/processed/match_cards/group_stage_round1"
 SCOUT_DIR = ROOT / "data/scout"   # user pipeline may drop richer bundles here
 OUT = ROOT / "state/w1_scout_bundles.json"
 POLICY = ROOT / "config/w1_scout_policy.json"
+
+
+def _root_path(path: str | Path) -> Path:
+    p = Path(path)
+    return p if p.is_absolute() else ROOT / p
+
+
+def _card_dirs() -> list[Path]:
+    dirs: list[Path] = []
+    if SCOPE_JSON.is_file():
+        scope = json.loads(SCOPE_JSON.read_text(encoding="utf-8"))
+        dirs.extend(_root_path(path) for path in scope.get("card_dirs", []) or [])
+    if LEGACY_CARDS not in dirs:
+        dirs.append(LEGACY_CARDS)
+    return dirs
+
+
+def _card_paths() -> list[Path]:
+    out: list[Path] = []
+    for directory in _card_dirs():
+        if directory.is_dir():
+            out.extend(sorted(directory.glob("*.json")))
+    return out
 
 
 def _default_league() -> tuple[str, int | None]:
@@ -34,7 +58,7 @@ def _default_league() -> tuple[str, int | None]:
 
 
 def _card_context(fid: str) -> dict:
-    for p in CARDS.glob("*.json"):
+    for p in _card_paths():
         try:
             c = json.loads(p.read_text(encoding="utf-8"))
         except Exception:

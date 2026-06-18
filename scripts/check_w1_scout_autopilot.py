@@ -85,6 +85,9 @@ def assert_runner_static() -> None:
     text = RUNNER.read_text(encoding="utf-8")
     required = [
         "--dry-run",
+        "W1_SCOUT_FORCE_FIXTURE",
+        "missing_scout_reads",
+        "存在未生成赛前解读的 fixture，本轮强制生成首版解读",
         "W1_SCOUT_FORCE_HASH",
         "no effective delta -> skip DeepSeek and lock; audit/review/calibration visibility only",
         "run_audit_review_calibration",
@@ -132,7 +135,9 @@ def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
         state = root / "state"
         state.mkdir()
         (state / ".scout_bundles.sha").write_text("same\n", encoding="utf-8")
-        (state / "w1_scout_bundles.json").write_text('{"bundles":[]}\n', encoding="utf-8")
+        (state / "w1_scout_bundles.json").write_text('{"bundles":[{"fixture_id":"F1"}]}\n', encoding="utf-8")
+        (state / "w1_scout_calls.json").write_text('{"calls":[{"fixture_id":"F1","read":{},"independent_edge":false}]}\n', encoding="utf-8")
+        (state / "scout_lock.jsonl").write_text('{"fixture_id":"F1"}\n', encoding="utf-8")
         dash = root / "dash.json"
         dash.write_text('{"match_records":[{"fixture_id":"F1","kickoff_utc":"2099-01-01T00:00:00Z"}]}\n', encoding="utf-8")
         marker = root / "marker"
@@ -177,6 +182,84 @@ def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
                 fail(f"no-delta should allow {name} for post-match review/calibration visibility")
         if (state / ".scout_bundles.sha").read_text(encoding="utf-8").strip() != "same":
             fail("no-delta must not rewrite sha")
+
+
+def assert_missing_read_forces_ai() -> None:
+    with tempfile.TemporaryDirectory(prefix="w1_scout_g2_missing_") as td:
+        root = Path(td)
+        state = root / "state"
+        state.mkdir()
+        (state / ".scout_bundles.sha").write_text("same\n", encoding="utf-8")
+        (state / "w1_scout_bundles.json").write_text('{"bundles":[{"fixture_id":"F2"}]}\n', encoding="utf-8")
+        dash = root / "dash.json"
+        dash.write_text('{"match_records":[{"fixture_id":"F2","kickoff_utc":"2099-01-01T00:00:00Z"}]}\n', encoding="utf-8")
+        marker = root / "marker"
+        marker.mkdir()
+        for name in ("fetch", "build", "analyst", "check", "embed", "lock", "audit", "result_sync", "calibration"):
+            write_cmd(root / f"{name}.sh", "touch \"" + str(marker) + f"/{name}\"")
+        env = {
+            "W1_SCOUT_STATE_DIR": str(state),
+            "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_FORCE_HASH": "same",
+            "W1_SCOUT_FETCH_CMD": str(root / "fetch.sh"),
+            "W1_SCOUT_BUILD_CMD": str(root / "build.sh"),
+            "W1_SCOUT_ANALYST_CMD": str(root / "analyst.sh"),
+            "W1_SCOUT_CHECK_CMD": str(root / "check.sh"),
+            "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
+            "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
+            "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_RESULT_SYNC_CMD": str(root / "result_sync.sh"),
+            "W1_SCOUT_CALIBRATION_CMD": str(root / "calibration.sh"),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
+        }
+        proc = run(["bash", str(RUNNER)], env=env)
+        if proc.returncode != 0:
+            fail(f"missing-read runner failed: stdout={proc.stdout} stderr={proc.stderr}")
+        for name in ("analyst", "check", "embed", "lock"):
+            if not (marker / name).exists():
+                fail(f"missing read/lock must force {name}")
+        if "存在未生成赛前解读" not in proc.stdout:
+            fail("missing-read run must explain forced first read generation")
+
+
+def assert_force_fixture_mode() -> None:
+    with tempfile.TemporaryDirectory(prefix="w1_scout_g2_force_") as td:
+        root = Path(td)
+        state = root / "state"
+        state.mkdir()
+        (state / "w1_scout_bundles.json").write_text('{"bundles":[{"fixture_id":"F9"},{"fixture_id":"OTHER"}]}\n', encoding="utf-8")
+        dash = root / "dash.json"
+        dash.write_text('{"match_records":[{"fixture_id":"F9","kickoff_utc":"2099-01-01T00:00:00Z"},{"fixture_id":"OTHER","kickoff_utc":"2099-01-01T00:00:00Z"}]}\n', encoding="utf-8")
+        marker = root / "marker"
+        marker.mkdir()
+        write_cmd(root / "fetch.sh", "printf '%s\\n' \"$@\" > \"" + str(marker) + "/fetch_args\"")
+        write_cmd(root / "build.sh", "touch \"" + str(marker) + "/build\"")
+        write_cmd(root / "analyst.sh", "printf '%s\\n' \"$@\" > \"" + str(marker) + "/analyst_args\"")
+        for name in ("check", "embed", "lock", "audit", "result_sync", "calibration"):
+            write_cmd(root / f"{name}.sh", "touch \"" + str(marker) + f"/{name}\"")
+        env = {
+            "W1_SCOUT_STATE_DIR": str(state),
+            "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_FORCE_FIXTURE": "F9",
+            "W1_SCOUT_FORCE_HASH": "force-hash",
+            "W1_SCOUT_FETCH_CMD": str(root / "fetch.sh"),
+            "W1_SCOUT_BUILD_CMD": str(root / "build.sh"),
+            "W1_SCOUT_ANALYST_CMD": str(root / "analyst.sh"),
+            "W1_SCOUT_CHECK_CMD": str(root / "check.sh"),
+            "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
+            "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
+            "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_RESULT_SYNC_CMD": str(root / "result_sync.sh"),
+            "W1_SCOUT_CALIBRATION_CMD": str(root / "calibration.sh"),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
+        }
+        proc = run(["bash", str(RUNNER)], env=env)
+        if proc.returncode != 0:
+            fail(f"force fixture runner failed: stdout={proc.stdout} stderr={proc.stderr}")
+        if "--fixture\nF9" not in (marker / "analyst_args").read_text(encoding="utf-8"):
+            fail("force fixture mode must pass --fixture F9 to analyst")
+        if "--fixture\nF9" not in (marker / "fetch_args").read_text(encoding="utf-8"):
+            fail("force fixture mode must pass --fixture F9 to fetcher")
 
 
 def assert_analyst_fail_blocks_progress() -> None:
@@ -246,6 +329,8 @@ def main() -> int:
     assert_runner_static()
     assert_dry_run()
     assert_no_delta_blocks_ai_lock_allows_review_calibration_embed()
+    assert_missing_read_forces_ai()
+    assert_force_fixture_mode()
     assert_analyst_fail_blocks_progress()
     assert_gitignored_runtime()
     for required in (HTML_CHECK, SCOUT_CHECK):

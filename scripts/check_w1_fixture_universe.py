@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCOPE = ROOT / "config/w1_competition_scope.json"
 BUILDER = ROOT / "scripts/build_w1_dashboard_data.py"
+BUNDLE = ROOT / "scripts/w1_scout_bundle.py"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 SCORE_ENGINE = ROOT / "scripts/w1_score_engine.py"
 
@@ -70,6 +71,12 @@ def check_builder_source() -> None:
     for token in required:
         if token not in source:
             fail(f"builder missing competition scope token: {token}")
+    bundle = BUNDLE.read_text(encoding="utf-8")
+    if re.search(r"^CARDS\s*=\s*ROOT\s*/\s*['\"]data/processed/match_cards/group_stage_round1['\"]", bundle, re.M):
+        fail("w1_scout_bundle.py still reads only group_stage_round1")
+    for token in ("config/w1_competition_scope.json", "card_dirs", "_card_dirs", "_card_paths"):
+        if token not in bundle:
+            fail(f"w1_scout_bundle.py missing competition scope token: {token}")
 
 
 def check_cards_and_dashboard(scope: dict) -> None:

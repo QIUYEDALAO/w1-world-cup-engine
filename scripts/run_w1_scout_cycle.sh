@@ -222,12 +222,15 @@ def scrub(value):
 
 dash = Path(os.environ["W1_SCOUT_DASHBOARD_DATA"])
 future = set()
+force = os.environ.get("W1_SCOUT_FORCE_FIXTURE", "").strip()
 if dash.is_file():
     now = datetime.now(timezone.utc)
     for rec in json.loads(dash.read_text(encoding="utf-8")).get("match_records", []):
         ko = parse_dt(rec.get("kickoff_utc") or rec.get("kickoff"))
         if ko and ko > now:
             future.add(str(rec.get("fixture_id")))
+if force:
+    future = {force} if force in future else set()
 
 bundles_path = Path(os.environ["W1_SCOUT_BUNDLES_JSON"])
 if not bundles_path.is_file():
@@ -248,11 +251,28 @@ if [ -n "$FUTURES" ]; then
   set -- $FUTURES
   FUTURE_COUNT=$#
 fi
+FORCE_FIXTURE="${W1_SCOUT_FORCE_FIXTURE:-}"
+if [ -n "$FORCE_FIXTURE" ]; then
+  case " $FUTURES " in
+    *" $FORCE_FIXTURE "*) FUTURES="$FORCE_FIXTURE"; FUTURE_COUNT=1 ;;
+    *)
+      log "force fixture ${FORCE_FIXTURE} is not future -> refuse pre-match Scout read; audit/review/calibration only"
+      if [ "$DRY_RUN" = "1" ]; then
+        log "dry-run: force_fixture=${FORCE_FIXTURE} refused_pre_match=true ai_called_count=0 embedded_count=0 locked_count=0"
+        exit 0
+      fi
+      record_status "force_fixture" "refused" "指定 fixture 已开赛或不在未来赛程内；拒绝生成伪赛前解读，仅允许 audit/review/calibration。"
+      run_audit_review_calibration 1
+      persist_memory
+      exit 0
+      ;;
+  esac
+fi
 log "future fixtures selected=${FUTURE_COUNT}"
 
 if [ "$DRY_RUN" = "1" ]; then
   log "dry-run: no external fetch, no AI call, no state write, no embed, no lock"
-  log "dry_run=true ai_called_count=0 embedded_count=0 locked_count=0 no_old_call_advanced=true"
+  log "dry_run=true force_fixture=${FORCE_FIXTURE:-none} ai_called_count=0 embedded_count=0 locked_count=0 no_old_call_advanced=true"
   exit 0
 fi
 
@@ -281,6 +301,59 @@ if ! ${BUILD_CMD}; then
   exit 1
 fi
 
+missing_scout_reads() {
+  W1_SCOUT_FUTURES="$FUTURES" \
+  W1_SCOUT_CALLS_JSON="${STATE_DIR}/w1_scout_calls.json" \
+  W1_SCOUT_LOCK_JSONL="${STATE_DIR}/scout_lock.jsonl" \
+  W1_SCOUT_DASHBOARD_HTML="reports/dashboard/W1_VISUAL_DASHBOARD.html" \
+  "$PYTHON_BIN" - <<'PY'
+import json, os, re
+from pathlib import Path
+
+futures = [fid for fid in os.environ.get("W1_SCOUT_FUTURES", "").split() if fid]
+if not futures:
+    print("")
+    raise SystemExit(0)
+missing = set(futures)
+
+calls_path = Path(os.environ["W1_SCOUT_CALLS_JSON"])
+if calls_path.is_file():
+    try:
+        for call in json.loads(calls_path.read_text(encoding="utf-8")).get("calls", []):
+            fid = str(call.get("fixture_id") or "")
+            if fid in missing and isinstance(call.get("read"), dict) and call.get("independent_edge") is False:
+                missing.discard(fid)
+    except Exception:
+        pass
+
+html_path = Path(os.environ["W1_SCOUT_DASHBOARD_HTML"])
+if html_path.is_file():
+    try:
+        m = re.search(r'<script id="w1-scout-calls" type="application/json">(.*?)</script>', html_path.read_text(encoding="utf-8"), re.S)
+        if m:
+            for call in json.loads(m.group(1)).get("calls", []):
+                fid = str(call.get("fixture_id") or "")
+                if fid in missing and isinstance(call.get("read"), dict) and call.get("independent_edge") is False:
+                    missing.discard(fid)
+    except Exception:
+        pass
+
+locked = set()
+lock_path = Path(os.environ["W1_SCOUT_LOCK_JSONL"])
+if lock_path.is_file():
+    try:
+        for line in lock_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            locked.add(str(json.loads(line).get("fixture_id") or ""))
+    except Exception:
+        pass
+
+missing.update(fid for fid in futures if fid not in locked)
+print(" ".join(fid for fid in futures if fid in missing))
+PY
+}
+
 if [ "$FUTURE_COUNT" -eq 0 ]; then
   run_audit_review_calibration 1
   persist_memory
@@ -291,7 +364,12 @@ fi
 
 NEW="$(effective_hash)"
 PREV="$(cat "$SHA_FILE" 2>/dev/null || echo "")"
-if [ "$NEW" = "$PREV" ]; then
+MISSING_READS="$(missing_scout_reads)"
+if [ -n "$MISSING_READS" ]; then
+  log "存在未生成赛前解读的 fixture，本轮强制生成首版解读: ${MISSING_READS}"
+  record_status "missing_read" "running" "存在未生成赛前解读的 fixture，本轮强制生成首版解读。"
+fi
+if [ "$NEW" = "$PREV" ] && [ -z "$MISSING_READS" ]; then
   log "no effective delta -> skip DeepSeek and lock; audit/review/calibration visibility only"
   run_audit_review_calibration 1
   persist_memory
@@ -301,7 +379,12 @@ if [ "$NEW" = "$PREV" ]; then
 fi
 
 log "effective delta -> DeepSeek analyst"
-if ! ${ANALYST_CMD}; then
+ANALYST_ARGS=""
+if [ -n "$FORCE_FIXTURE" ]; then
+  ANALYST_ARGS="--fixture ${FORCE_FIXTURE}"
+fi
+# shellcheck disable=SC2086
+if ! ${ANALYST_CMD} ${ANALYST_ARGS}; then
   log "analyst failed -> do not update sha, do not embed, do not lock; audit only"
   record_status "analyst" "failed" "AI 分析师失败；未更新指纹、未上屏、未锁定。"
   record_error "analyst failed; sha/embed/lock blocked"

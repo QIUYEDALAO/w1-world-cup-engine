@@ -40,6 +40,7 @@ MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
+SCOUT_CYCLE = ROOT / "scripts/run_w1_scout_cycle.sh"
 WEATHER_CLIENT = ROOT / "scripts/w1_weather_client.py"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
 SCOPE_JSON = ROOT / "config/w1_competition_scope.json"
@@ -64,6 +65,7 @@ STEPS = [
     "写入 match card runtime",
     "重算首发/战术/风控",
     "重建 dashboard 数据",
+    "Scout 单场赛前解读",
     "返回 progress",
 ]
 
@@ -958,6 +960,47 @@ def run_command(cmd: list[str], env: dict[str, str]) -> subprocess.CompletedProc
     return subprocess.run(cmd, cwd=ROOT, env=env, text=True, capture_output=True, timeout=180)
 
 
+def is_future_match(match: dict[str, Any]) -> bool:
+    kickoff = parse_utc_datetime(match.get("kickoff_utc"))
+    return bool(kickoff and datetime.now(timezone.utc) < kickoff)
+
+
+def deepseek_key_available(env: dict[str, str]) -> bool:
+    return bool(env.get("DEEPSEEK_API_KEY") or env.get("W1_SCOUT_API_KEY"))
+
+
+def api_football_key_available(env: dict[str, str]) -> bool:
+    return bool(env.get(ENV_KEY_NAME) or env.get("OPENCLAW_APIFOOTBALL_KEY"))
+
+
+def manual_scout_enabled() -> bool:
+    return os.environ.get("W1_MANUAL_REFRESH_TRIGGER_SCOUT", "0") == "1"
+
+
+def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
+    fixture_id = str(match.get("fixture_id") or "")
+    if not manual_scout_enabled():
+        return "Scout 未触发：当前按钮为手动强刷基础数据；如需同时生成解读，设置 W1_MANUAL_REFRESH_TRIGGER_SCOUT=1。"
+    if not fixture_id:
+        return "AI 解读未生成：缺少 fixture_id。"
+    if not is_future_match(match):
+        return "AI 解读未生成：该 fixture 已开赛或不在未来赛程内；只允许赛后 audit/review/calibration。"
+    if not deepseek_key_available(env):
+        return "基础数据已刷新；AI 解读未生成：缺少 DEEPSEEK_API_KEY。"
+    if not api_football_key_available(env):
+        return "实时 API 未配置，基础数据使用缓存；AI 解读不伪造。"
+    scout_env = {
+        **env,
+        "W1_SCOUT_FORCE_FIXTURE": fixture_id,
+        "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
+    }
+    proc = run_command(["bash", str(SCOUT_CYCLE)], scout_env)
+    if proc.returncode != 0:
+        tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-1:] or ["Scout cycle failed"]
+        return "AI 解读未生成：Scout 单场周期失败；未推进旧内容。" + (" " + tail[0] if tail else "")
+    return "Scout 单场赛前解读已生成并上屏，已按首次合法赛前 call 锁定。"
+
+
 def run_prediction(job_id: str, match: dict[str, Any]) -> None:
     global _active_job
     load_api_key_env_bridge()
@@ -1028,6 +1071,17 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
         if build.returncode != 0:
             raise RuntimeError("dashboard 数据更新失败，数据暂缺，保留上一版。")
 
+        scout_message = run_manual_scout_cycle(match, env)
+        write_progress(
+            progress_payload(
+                job_id=job_id,
+                status="running",
+                step_index=len(STEPS) - 1,
+                message=scout_message,
+                match=match,
+            )
+        )
+
         selected = find_match_by_fixture_id(match.get("fixture_id"))
         if not selected and not match.get("fixture_id"):
             selected = find_match_by_name(match.get("home_team_cn", ""), match.get("away_team_cn", ""))
@@ -1036,7 +1090,7 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                 job_id=job_id,
                 status="done",
                 step_index=len(STEPS),
-                message=f"查询完成：实时刷新 {live_refresh.get('overall_status')}，已更新 dashboard。",
+                message=f"查询完成：实时刷新 {live_refresh.get('overall_status')}，已更新 dashboard。{scout_message}",
                 match=progress_match(selected, match.get("stage_cn", "")) if selected else match,
             )
         )
