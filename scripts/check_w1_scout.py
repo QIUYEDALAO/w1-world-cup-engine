@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
 import sys
 from pathlib import Path
 
@@ -59,6 +60,19 @@ VISIBLE_FORBIDDEN_TOKENS = (
     "xG若干",
     "若干",
     "LDDL",
+    "赢盘",
+    "输盘",
+    "全赢",
+    "走水",
+    "不输不赢",
+    "无输赢",
+    "返还本金",
+    "本金",
+    "打出",
+    "打穿盘口",
+    "打穿概率",
+    "打穿大球",
+    "深穿",
 )
 WEAK_OVERCLAIM_TOKENS = ("概率较高", "确定", "明显", "强烈", "零封概率较高", "大胜概率较高", "明显打穿", "穿盘路径明确")
 MARKET_MISSING_TEXT = "市场赔率数据缺失，暂时无法对比市场倾向。"
@@ -130,6 +144,59 @@ def weak_low_evidence(read: dict, readiness: str) -> bool:
     return market_missing and xg_weak
 
 
+def validate_data_wording(read: dict, readiness: str) -> list[str]:
+    errs: list[str] = []
+    visible = "\n".join(visible_text_chunks(read))
+    for match in re.finditer(r"近\s*(\d+)\s*场\s*(\d+)\s*胜\s*(\d+)\s*平\s*(\d+)\s*负", visible):
+        n, w, d, l = (int(item) for item in match.groups())
+        if w + d + l != n:
+            errs.append(f"recent form W-D-L sum mismatch: {match.group(0)}")
+    for match in re.finditer(r"近\s*(\d+)\s*场[^。；;\n]{0,28}", visible):
+        snippet = match.group(0)
+        n = int(match.group(1))
+        counts = []
+        for label in ("胜", "平", "负"):
+            token_match = re.search(r"([0-9一二三四五六七八九十两]+)\s*" + label, snippet)
+            if token_match:
+                counts.append(_small_cn_int(token_match.group(1)))
+        if counts and all(item is not None for item in counts) and sum(int(item) for item in counts) != n:
+            errs.append(f"recent form W-D-L sum mismatch: {snippet}")
+    for match in re.finditer(r"xG\s*(?:为|约|=|:|：)?\s*\d+(?:\.\d+)?\s*[（(][^）)]*\d+\s*场[^）)]*[）)]", visible, flags=re.I):
+        start = max(0, match.start() - 24)
+        end = min(len(visible), match.end() + 24)
+        window = visible[start:end]
+        if not any(token in window for token in ("总量", "累计", "场均", "平均", "每场", "avg", "total")):
+            errs.append(f"xG wording missing total/avg basis: {match.group(0)}")
+    for match in re.finditer(r"[0-9一二三四五六七八九十两]+\s*场[^。；;\n]{0,12}xG\s*(?:为|约|=|:|：)?\s*\d+(?:\.\d+)?", visible, flags=re.I):
+        start = max(0, match.start() - 16)
+        end = min(len(visible), match.end() + 16)
+        window = visible[start:end]
+        if not any(token in window for token in ("总量", "累计", "场均", "平均", "每场", "avg", "total")):
+            errs.append(f"xG wording missing total/avg basis: {match.group(0)}")
+    tail = str(read.get("high_variance_tail_script_cn") or "")
+    if weak_low_evidence(read, readiness) and re.search(r"(?:^|[^0-9])(?:[3-9]-0|0-[3-9])(?:[^0-9]|$)", tail):
+        errs.append("weak evidence context must not state a strong 3-0/0-3 tail score without sufficient support")
+    return errs
+
+
+def _small_cn_int(text: str) -> int | None:
+    text = text.strip()
+    if text.isdigit():
+        return int(text)
+    mapping = {"零": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+    if text in mapping:
+        return mapping[text]
+    if text == "十":
+        return 10
+    if text.startswith("十") and len(text) == 2 and text[1] in mapping:
+        return 10 + mapping[text[1]]
+    if "十" in text:
+        left, right = text.split("十", 1)
+        if left in mapping:
+            return mapping[left] * 10 + (mapping.get(right, 0) if right else 0)
+    return None
+
+
 def validate_visible_text(read: dict, readiness: str) -> list[str]:
     errs: list[str] = []
     chunks = visible_text_chunks(read)
@@ -149,6 +216,45 @@ def validate_visible_text(read: dict, readiness: str) -> list[str]:
         for token in WEAK_OVERCLAIM_TOKENS:
             if token in visible:
                 errs.append(f"weak evidence context overclaims: {token}")
+    errs.extend(validate_data_wording(read, readiness))
+    return errs
+
+
+def market_has_lines(bundle: dict) -> bool:
+    market = bundle.get("market") if isinstance(bundle.get("market"), dict) else {}
+    availability = bundle.get("availability") if isinstance(bundle.get("availability"), dict) else {}
+    has_ah = availability.get("market_ah") == "available" or (
+        market.get("ah_line") not in (None, "")
+        and isinstance(market.get("ah_home_price"), (int, float))
+        and isinstance(market.get("ah_away_price"), (int, float))
+    )
+    has_ou = availability.get("market_ou") == "available" or (
+        market.get("ou_line") not in (None, "")
+        and isinstance(market.get("over_price"), (int, float))
+        and isinstance(market.get("under_price"), (int, float))
+    )
+    return bool(has_ah or has_ou)
+
+
+def market_all_missing(bundle: dict) -> bool:
+    availability = bundle.get("availability") if isinstance(bundle.get("availability"), dict) else {}
+    return all(availability.get(key) != "available" for key in ("market_1x2", "market_ah", "market_ou"))
+
+
+def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
+    errs: list[str] = []
+    read = call.get("read") if isinstance(call.get("read"), dict) else {}
+    market_script = str(read.get("market_expert_script_cn") or "")
+    if market_has_lines(bundle):
+        if "盘口数据缺失" in market_script or "无法展开盘口剧本" in market_script or "不展开盘口剧本" in market_script:
+            errs.append("market AH/OU available but call still says market data is missing")
+        if not ("让球" in market_script and "大小球" in market_script and any(token in market_script for token in REVERSE_FAILURE_TOKENS + TAIL_TRIGGER_TOKENS)):
+            errs.append("market AH/OU available but market_expert_script_cn lacks handicap/totals/condition language")
+    elif market_all_missing(bundle):
+        has_market_terms = any(token in market_script for token in MARKET_TERMS)
+        has_missing = any(token in market_script for token in MARKET_MISSING_TERMS)
+        if has_market_terms and not has_missing:
+            errs.append("market all missing but call invents market expert script")
     return errs
 
 
@@ -440,6 +546,14 @@ def main() -> int:
     for b in bundles:
         if (b.get("availability") or {}).get("market") not in {"available", "partial", "missing"}:
             fail(f"bundle {b.get('fixture_id')} availability.market missing or invalid")
+        availability = b.get("availability") or {}
+        for key in ("market_1x2", "market_ah", "market_ou"):
+            if availability.get(key) not in {"available", "missing"}:
+                fail(f"bundle {b.get('fixture_id')} availability.{key} missing or invalid")
+        market = b.get("market") or {}
+        for key in ("p_home", "p_draw", "p_away", "ah_line", "ah_home_price", "ah_away_price", "ou_line", "over_price", "under_price", "bookmaker_count", "market_source", "odds_updated_at"):
+            if key not in market:
+                fail(f"bundle {b.get('fixture_id')} market missing key {key}")
 
     if SCOUT_DIR.is_dir():
         for path in sorted(SCOUT_DIR.glob("*.json")):
@@ -475,6 +589,7 @@ def main() -> int:
     if CALLS_P.is_file():
         calls = json.loads(CALLS_P.read_text(encoding="utf-8")).get("calls", [])
         n_calls = len(calls)
+        bundle_by_fixture = {str(bundle.get("fixture_id")): bundle for bundle in bundles}
         seen = set()
         for c in calls:
             fid = c.get("fixture_id")
@@ -483,6 +598,9 @@ def main() -> int:
             seen.add(fid)
             for e in validate_call(c, policy):
                 fail(f"call {fid}: {e}")
+            if str(fid) in bundle_by_fixture:
+                for e in validate_call_against_bundle(c, bundle_by_fixture[str(fid)]):
+                    fail(f"call {fid}: {e}")
 
     # --- reverse tests ---
     base = {"fixture_id": "X",
@@ -550,6 +668,25 @@ def main() -> int:
     })
     if not validate_call(weak_overclaim, policy):
         fail("reverse: weak evidence overclaim must be rejected")
+    bad_wdl = dict(base, read={**base["read"], "evidence_chain_cn": ["近期状态：近5场2胜3平2负。", "阵容信息部分缺失,只作降权证据"]})
+    if not validate_call(bad_wdl, policy):
+        fail("reverse: impossible recent form W-D-L count must be rejected")
+    bad_cn_wdl = dict(base, read={**base["read"], "evidence_chain_cn": ["近期状态：近 5 场两平一负一胜。", "阵容信息部分缺失,只作降权证据"]})
+    if not validate_call(bad_cn_wdl, policy):
+        fail("reverse: impossible Chinese W-D-L count must be rejected")
+    bad_xg_basis = dict(base, read={**base["read"], "evidence_chain_cn": ["xG 3.2（5场）", "阵容信息部分缺失,只作降权证据"]})
+    if not validate_call(bad_xg_basis, policy):
+        fail("reverse: xG number without total/avg basis must be rejected")
+    bad_tail_score = dict(weak_overclaim, read={**weak_overclaim["read"], "regular_script_cn": "常规剧本是市场赔率数据缺失，暂时无法对比市场倾向，主队只有倾向。", "high_variance_tail_script_cn": "如果 xG 样本不足，只作为弱参考，同时出现早球，比分可能直接走到 3-0。"})
+    if not validate_call(bad_tail_score, policy):
+        fail("reverse: weak evidence strong tail score must be rejected")
+    market_bundle = {"availability": {"market_ah": "available", "market_ou": "available"}, "market": {"ah_line": "-1", "ah_home_price": 1.9, "ah_away_price": 1.9, "ou_line": "2.5", "over_price": 1.9, "under_price": 1.9}}
+    if not validate_call_against_bundle(approved_missing_market_script, market_bundle):
+        fail("reverse: AH/OU available but missing-market script must be rejected")
+    missing_bundle = {"availability": {"market_1x2": "missing", "market_ah": "missing", "market_ou": "missing"}, "market": {}}
+    invented_market = dict(base, read={**base["read"], "market_expert_script_cn": "若临场让球盘口保持主队低水，大小球触发看早球。"})
+    if not validate_call_against_bundle(invented_market, missing_bundle):
+        fail("reverse: all-missing market bundle must reject invented market script")
     betting = dict(base, read={**base["read"], "watch_points_cn": ["稳赢", "主队边路推进"]})
     if not validate_call(betting, policy):
         fail("reverse: forbidden promise term must be caught")
