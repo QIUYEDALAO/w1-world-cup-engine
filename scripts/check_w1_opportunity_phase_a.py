@@ -144,6 +144,14 @@ def main() -> int:
         if len(records) < 24:
             fail("dashboard records must include at least 24 matches")
         for row in records:
+            score_dist = row.get("score_distribution", {})
+            if row.get("odds_status") == "WAIT" and score_dist.get("status") == "skipped":
+                payload = row.get("candidates_snapshot")
+                if not isinstance(payload, dict):
+                    fail(f"fixture {row.get('fixture_id')}: skipped odds fixture still needs candidates_snapshot object")
+                if payload.get("status") != "skipped":
+                    fail(f"fixture {row.get('fixture_id')}: missing-odds fixture candidates_snapshot must be skipped")
+                continue
             assert_candidates(row)
 
     if OFFLINE_JSON.is_file():

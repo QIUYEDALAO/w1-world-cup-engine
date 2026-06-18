@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""Check W1 post-match API result sync wiring."""
+"""Check W1 post-match batch result sync contract."""
 
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SYNC = ROOT / "scripts/w1_result_sync.py"
+BUILDER = ROOT / "scripts/build_w1_dashboard_data.py"
 SERVER = ROOT / "scripts/w1_local_predict_server.py"
-DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
-RESULTS_JSON = ROOT / "data/results/round1_results.json"
-GERMANY_CARD = ROOT / "data/processed/match_cards/group_stage_round1/fixture_1489374_germany_vs_cura-ao.json"
+SCOPE = ROOT / "config/w1_competition_scope.json"
 SCORE_ENGINE = ROOT / "scripts/w1_score_engine.py"
 ODDS_THRESHOLDS = ROOT / "config/w1_odds_movement_thresholds.json"
 
@@ -29,75 +31,68 @@ def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def assert_score_record(row: dict, source_name: str) -> None:
-    score = row.get("actual_score")
-    if not isinstance(score, dict):
-        fail(f"{source_name} actual_score is not an object")
-    if score.get("home") != 7 or score.get("away") != 1:
-        fail(f"{source_name} Germany vs Curacao score is not 7-1: {score}")
-    if row.get("result_source") != "api_football_fixture_result":
-        fail(f"{source_name} result_source is not api_football_fixture_result")
+def check_scope_and_sources() -> None:
+    scope = read_json(SCOPE)
+    if scope.get("results_overlay") != "data/results/world_cup_2026_results.json":
+        fail("competition scope must point to world_cup_2026_results.json")
+    if "data/results/round1_results.json" not in scope.get("legacy_results", []):
+        fail("round1 legacy results compatibility missing")
 
-
-def check_server_wiring() -> None:
-    source = SERVER.read_text(encoding="utf-8")
-    required = [
-        "api_football_get_fixture_by_id",
-        "/fixtures?id={fixture_id}",
-        "FINISHED_STATUS_SHORT",
-        "is_finished_fixture_status",
-        "parse_finished_score",
-        "skipped_not_finished",
-        "skipped_not_due",
-        "refresh_result_sync_module",
-        '"result_sync"',
+    sync_source = SYNC.read_text(encoding="utf-8")
+    required_sync = [
+        'SCOPE_JSON = ROOT / "config/w1_competition_scope.json"',
+        'api.get("/fixtures", id=fid)',
+        "FINISHED_STATUS_SHORT = {\"FT\", \"AET\", \"PEN\"}",
+        "dry_run",
+        "api_called_count=0",
+        "write_json(overlay_path, overlay)",
+        "used_in_audit_review_calibration_only",
     ]
-    for needle in required:
-        if needle not in source:
-            fail(f"server missing result sync wiring: {needle}")
-    if "fixtures?id=66457070" in source or 'if fixture_id == "66457070"' in source:
-        fail("server contains Germany local alias hardcode for API result sync")
-    if "kickoff_utc" not in source or "timedelta(hours=2)" not in source:
-        fail("result sync must skip future/not-due fixtures before calling final-score API")
-    result_fn = source[source.find("def api_fixture_id_candidates_for_result") : source.find("def write_result_overlay")]
-    if result_fn.find('match.get("fixture_id")') > result_fn.find('match.get("api_fixture_id")'):
-        fail("result sync must prefer match fixture_id before api_fixture_id/request alias")
-
-
-def check_dashboard_data() -> None:
-    data = read_json(DASHBOARD_DATA)
-    rows = data.get("match_records") or []
-    germany = next((row for row in rows if str(row.get("fixture_id")) == "1489374"), None)
-    if not germany:
-        fail("dashboard_data missing fixture_id=1489374")
-    if germany.get("status") != "finished":
-        fail(f"dashboard_data Germany status is not finished: {germany.get('status')}")
-    assert_score_record(germany, "dashboard_data")
-    if germany.get("actual_score_display_cn") != "德国 7-1 库拉索":
-        fail(f"dashboard_data display is wrong: {germany.get('actual_score_display_cn')}")
-
-
-def check_card_and_results() -> None:
-    # W1_PREDICT_OVERLAY_SPLIT_V1: results live in the overlay (round1_results.json),
-    # not in the tracked source card. The source card must NOT carry runtime result
-    # fields (predict writes only the overlay; build reads results from the overlay).
-    card = read_json(GERMANY_CARD)
-    leaked = [
-        key
-        for key in ("status", "actual_score", "actual_score_display_cn", "result_source", "result_note", "result_synced_at_utc")
-        if key in card
+    for token in required_sync:
+        if token not in sync_source:
+            fail(f"result sync missing contract token: {token}")
+    forbidden_sync = [
+        "state/w1_scout_bundles.json",
+        "state/w1_scout_calls.json",
+        "state/scout_lock.jsonl",
+        "w1_score_engine.py",
     ]
-    if leaked:
-        fail(f"Germany source card must not carry runtime result fields (now in overlay): {leaked}")
+    for token in forbidden_sync:
+        if token in sync_source:
+            fail(f"result sync must not write/read pre-match runtime/engine target: {token}")
 
-    results = read_json(RESULTS_JSON).get("results", {})
-    row = results.get("1489374")
-    if not row:
-        fail("results overlay missing 1489374")
-    assert_score_record(row, "results overlay")
-    aliases = [str(value) for value in row.get("alias_fixture_ids", [])]
-    if "66457070" not in aliases:
-        fail("results overlay missing alias 66457070 for Germany vs Curacao")
+    builder = BUILDER.read_text(encoding="utf-8")
+    if "configured_result_paths" not in builder or "world_cup_2026_results.json" not in json.dumps(scope):
+        fail("builder must read configured result overlay")
+    if 'RESULTS_JSON = ROOT / "data/results/round1_results.json"' in builder:
+        fail("builder still hardcodes round1_results as only overlay")
+
+    server = SERVER.read_text(encoding="utf-8")
+    if "results_overlay_path()" not in server or "iter_match_card_paths()" not in server:
+        fail("local predict server must use competition scope for cards/results")
+
+
+def check_dry_run_no_write() -> None:
+    overlay = ROOT / "data/results/world_cup_2026_results.json"
+    before = overlay.read_text(encoding="utf-8") if overlay.is_file() else None
+    env = os.environ.copy()
+    env["W1_DISABLE_API_ENV_BRIDGE"] = "1"
+    proc = subprocess.run(
+        [sys.executable, str(SYNC), "--dry-run"],
+        cwd=ROOT,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        fail(f"w1_result_sync.py --dry-run failed: {proc.stderr or proc.stdout}")
+    out = proc.stdout + proc.stderr
+    if "api_called_count=0" not in out or "written_results=0" not in out:
+        fail("result sync dry-run must report no API calls and no writes")
+    after = overlay.read_text(encoding="utf-8") if overlay.is_file() else None
+    if before != after:
+        fail("result sync dry-run modified results overlay")
 
 
 def check_guards_unchanged() -> None:
@@ -110,9 +105,8 @@ def check_guards_unchanged() -> None:
 
 
 def main() -> int:
-    check_server_wiring()
-    check_dashboard_data()
-    check_card_and_results()
+    check_scope_and_sources()
+    check_dry_run_no_write()
     check_guards_unchanged()
     print("PASS check_w1_post_match_result_sync")
     return 0

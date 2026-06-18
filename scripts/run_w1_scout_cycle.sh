@@ -37,6 +37,7 @@ ANALYST_CMD="${W1_SCOUT_ANALYST_CMD:-$PYTHON_BIN scripts/w1_scout_analyst.py}"
 CHECK_CMD="${W1_SCOUT_CHECK_CMD:-$PYTHON_BIN scripts/check_w1_scout.py}"
 EMBED_CMD="${W1_SCOUT_EMBED_CMD:-$PYTHON_BIN scripts/w1_scout_embed.py}"
 LOCK_CMD="${W1_SCOUT_LOCK_CMD:-$PYTHON_BIN scripts/w1_scout_ledger.py lock}"
+RESULT_SYNC_CMD="${W1_RESULT_SYNC_CMD:-$PYTHON_BIN scripts/w1_result_sync.py}"
 AUDIT_CMD="${W1_SCOUT_AUDIT_CMD:-$PYTHON_BIN scripts/w1_scout_ledger.py audit}"
 REVIEW_CMD="${W1_SCOUT_REVIEW_CMD:-$PYTHON_BIN scripts/w1_scout_review.py}"
 CALIBRATION_CMD="${W1_SCOUT_CALIBRATION_CMD:-$PYTHON_BIN scripts/w1_scout_calibration.py}"
@@ -131,6 +132,9 @@ PY
 
 run_audit_review_calibration() {
   local allow_embed="${1:-0}"
+  if ! ${RESULT_SYNC_CMD}; then
+    record_error "result sync failed WARN_ONLY; audit/review/calibration continue with local results overlay"
+  fi
   ${AUDIT_CMD}
   if [ "${W1_SCOUT_ENABLE_REVIEW:-0}" = "1" ]; then
     if ! ${REVIEW_CMD}; then

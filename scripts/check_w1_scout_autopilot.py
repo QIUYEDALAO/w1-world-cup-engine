@@ -88,6 +88,7 @@ def assert_runner_static() -> None:
         "W1_SCOUT_FORCE_HASH",
         "no effective delta -> skip DeepSeek and lock; audit/review/calibration visibility only",
         "run_audit_review_calibration",
+        "W1_RESULT_SYNC_CMD",
         "W1_SCOUT_ENABLE_REVIEW",
         "W1_SCOUT_CALIBRATION_CMD",
         "W1_SCOUT_REVIEW_CMD",
@@ -141,6 +142,7 @@ def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
         write_cmd(root / "embed.sh", "touch \"" + str(marker) + "/embed\"")
         write_cmd(root / "lock.sh", "touch \"" + str(marker) + "/lock\"")
         write_cmd(root / "audit.sh", "mkdir -p \"" + str(marker) + "\"; touch \"" + str(marker) + "/audit\"")
+        write_cmd(root / "result_sync.sh", "touch \"" + str(marker) + "/result_sync\"")
         write_cmd(root / "review.sh", "touch \"" + str(marker) + "/review\"")
         write_cmd(root / "calibration.sh", "touch \"" + str(marker) + "/calibration\"")
         marker.mkdir()
@@ -154,6 +156,7 @@ def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
             "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
             "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
             "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_RESULT_SYNC_CMD": str(root / "result_sync.sh"),
             "W1_SCOUT_REVIEW_CMD": str(root / "review.sh"),
             "W1_SCOUT_CALIBRATION_CMD": str(root / "calibration.sh"),
             "W1_SCOUT_ENABLE_REVIEW": "1",
@@ -167,6 +170,8 @@ def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
                 fail(f"no-delta must not call {name}")
         if not (marker / "audit").exists():
             fail("no-delta must still allow audit")
+        if not (marker / "result_sync").exists():
+            fail("no-delta should run result sync before audit")
         for name in ("review", "calibration", "embed"):
             if not (marker / name).exists():
                 fail(f"no-delta should allow {name} for post-match review/calibration visibility")
@@ -190,6 +195,7 @@ def assert_analyst_fail_blocks_progress() -> None:
         write_cmd(root / "embed.sh", "touch \"" + str(marker) + "/embed\"")
         write_cmd(root / "lock.sh", "touch \"" + str(marker) + "/lock\"")
         write_cmd(root / "audit.sh", "touch \"" + str(marker) + "/audit\"")
+        write_cmd(root / "result_sync.sh", "touch \"" + str(marker) + "/result_sync\"")
         write_cmd(root / "calibration.sh", "touch \"" + str(marker) + "/calibration\"")
         env = {
             "W1_SCOUT_STATE_DIR": str(state),
@@ -202,6 +208,7 @@ def assert_analyst_fail_blocks_progress() -> None:
             "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
             "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
             "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_RESULT_SYNC_CMD": str(root / "result_sync.sh"),
             "W1_SCOUT_CALIBRATION_CMD": str(root / "calibration.sh"),
             "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
         }
@@ -215,6 +222,8 @@ def assert_analyst_fail_blocks_progress() -> None:
                 fail(f"analyst failure must not call {name}")
         if not (marker / "audit").exists():
             fail("analyst failure may only continue to audit")
+        if not (marker / "result_sync").exists():
+            fail("analyst failure should still run result sync before audit")
         if not (marker / "calibration").exists():
             fail("analyst failure should still run calibration after audit")
         status = json.loads((state / "scout_cycle_status.json").read_text(encoding="utf-8"))

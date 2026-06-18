@@ -307,6 +307,12 @@ def main() -> int:
                 fail(f"{row.get('fixture_id')}: score_distribution must be derived from score matrix")
             if score_distribution.get("legacy_rule_weight") is not False:
                 fail(f"{row.get('fixture_id')}: legacy_rule_weight must be false")
+            if score_distribution.get("status") == "skipped":
+                if row.get("odds_status") != "WAIT":
+                    fail(f"{row.get('fixture_id')}: skipped score_distribution is only allowed when odds_status=WAIT")
+                if not score_distribution.get("skip_reason"):
+                    fail(f"{row.get('fixture_id')}: skipped score_distribution must explain skip_reason")
+                continue
             if len(score_distribution.get("score_pool", [])) < 6:
                 fail(f"{row.get('fixture_id')}: score_distribution.score_pool must contain at least 6 paths")
             for item in score_distribution.get("score_pool", []):

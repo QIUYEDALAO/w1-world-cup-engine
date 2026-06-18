@@ -1,0 +1,23 @@
+{
+  "schema_version": "W1_COMPETITION_SCOPE_V1",
+  "tournament": "world_cup_2026",
+  "stage": "group_stage",
+  "rounds": [1, 2, 3],
+  "card_dirs": [
+    "data/processed/match_cards/group_stage_round1",
+    "data/processed/match_cards/group_stage_round2",
+    "data/processed/match_cards/group_stage_round3"
+  ],
+  "results_overlay": "data/results/world_cup_2026_results.json",
+  "legacy_results": [
+    "data/results/round1_results.json"
+  ],
+  "snapshot_dirs": [
+    "data/snapshots/group_stage_round1",
+    "data/snapshots/group_stage_round2",
+    "data/snapshots/group_stage_round3"
+  ],
+  "ledger_candidates": [
+    "data/processed/ledger/w1_ledger_group_stage_round1.csv"
+  ]
+}

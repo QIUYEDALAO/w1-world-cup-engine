@@ -91,6 +91,13 @@ def assert_data() -> None:
         view = row.get("recommendation_view")
         if not isinstance(view, dict):
             fail(f"{fid}: recommendation_view missing")
+        score_dist = row.get("score_distribution", {})
+        if row.get("odds_status") == "WAIT" and score_dist.get("status") == "skipped":
+            if view.get("primary_score") or view.get("secondary_score"):
+                fail(f"{fid}: missing-odds fixture must not emit primary/secondary score")
+            if not score_dist.get("skip_reason"):
+                fail(f"{fid}: missing-odds fixture must explain score_distribution skip_reason")
+            continue
         primary = view.get("primary_score")
         secondary = view.get("secondary_score")
         if isinstance(primary, list):
@@ -99,7 +106,6 @@ def assert_data() -> None:
             fail(f"{fid}: secondary_score must be a single value or null")
         if primary and secondary and primary == secondary:
             fail(f"{fid}: secondary_score must not duplicate primary_score")
-        score_dist = row.get("score_distribution", {})
         top_scores = score_dist.get("top_scores") or row.get("score_matrix_summary", {}).get("top_scores") or []
         model_hda = (score_dist.get("matrix_model", {}) or {}).get("model_hda") or [
             row.get("score_matrix_summary", {}).get("home_win_prob") or 0,

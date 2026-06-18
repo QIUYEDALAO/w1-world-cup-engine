@@ -187,8 +187,9 @@ def assert_dashboard_data(data: dict) -> None:
         fail("W1 backend list must keep W1_PLAY_GUARD_V1")
 
     boss = data.get("boss_view", {})
+    records_count = int(data.get("dashboard_binding", {}).get("records_count") or len(data.get("match_records", [])))
     expected_boss = {
-        "current_status": "24 场 W1 数据已绑定",
+        "current_status": f"{records_count} 场 W1 数据已绑定",
         "first_match_cn": "墨西哥 vs 南非",
         "reference_lean": "墨西哥不败",
         "reference_score": "1-0 / 0-0",
@@ -603,7 +604,8 @@ def assert_html(data: dict) -> None:
         "环境风险：",
         "天气数据暂缺",
         "当前你只需要看这里",
-        "24 场 W1 数据已绑定",
+        f"{records_count} 场 W1 数据已绑定",
+        "赛果待同步",
         "墨西哥 vs 南非",
         "参考倾向",
         "墨西哥不败",

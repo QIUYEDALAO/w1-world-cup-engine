@@ -18,7 +18,7 @@ import w1_candidate_builder as W1CANDIDATES
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CARDS_DIR = ROOT / "data/processed/match_cards/group_stage_round1"
+SCOPE_JSON = ROOT / "config/w1_competition_scope.json"
 DASHBOARD_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 DASHBOARD_HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 STATE_JSON = ROOT / "state/w1_refresh_state.json"
@@ -29,11 +29,6 @@ MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
 ODDS_MOVEMENT_THRESHOLDS = ROOT / "config/w1_odds_movement_thresholds.json"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
-RESULTS_JSON = ROOT / "data/results/round1_results.json"
-SNAPSHOT_DIR = ROOT / "data/snapshots/group_stage_round1"
-LEDGER_CANDIDATES = [
-    ROOT / "data/processed/ledger/w1_ledger_group_stage_round1.csv",
-]
 PREDICTION_VERSION = "W1_EARLY_PREDICTION_MODE_V1"
 W1_RHO = float(os.environ.get("W1_RHO", W1ENGINE.DEFAULT_RHO))
 W1_SCORE_ENGINE_ON = os.environ.get("W1_SCORE_ENGINE", "on").lower() != "off"
@@ -191,6 +186,44 @@ def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def competition_scope() -> dict[str, Any]:
+    if SCOPE_JSON.is_file():
+        return read_json(SCOPE_JSON)
+    raise FileNotFoundError(f"missing competition scope: {SCOPE_JSON.relative_to(ROOT)}")
+
+
+def root_path(path: str | Path) -> Path:
+    p = Path(path)
+    return p if p.is_absolute() else ROOT / p
+
+
+def configured_card_dirs(scope: dict[str, Any] | None = None) -> list[Path]:
+    scope = scope or competition_scope()
+    return [root_path(path) for path in scope.get("card_dirs", [])]
+
+
+def configured_result_paths(scope: dict[str, Any] | None = None) -> list[Path]:
+    scope = scope or competition_scope()
+    paths: list[Path] = []
+    for key in ("legacy_results",):
+        for path in scope.get(key, []) or []:
+            paths.append(root_path(path))
+    overlay = scope.get("results_overlay")
+    if overlay:
+        paths.append(root_path(overlay))
+    return paths
+
+
+def configured_snapshot_dirs(scope: dict[str, Any] | None = None) -> list[Path]:
+    scope = scope or competition_scope()
+    return [root_path(path) for path in scope.get("snapshot_dirs", [])]
+
+
+def configured_ledger_candidates(scope: dict[str, Any] | None = None) -> list[Path]:
+    scope = scope or competition_scope()
+    return [root_path(path) for path in scope.get("ledger_candidates", [])]
+
+
 def write_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -237,15 +270,17 @@ def fixture_id_candidates(fixture_id: Any) -> list[str]:
 
 
 def result_overlay() -> dict[str, dict[str, Any]]:
-    if not RESULTS_JSON.is_file():
-        return {}
-    data = read_json(RESULTS_JSON)
     results: dict[str, dict[str, Any]] = {}
-    for fid, row in data.get("results", {}).items():
-        row = dict(row)
-        results[str(fid)] = row
-        for alias in row.get("alias_fixture_ids", []):
-            results[str(alias)] = row
+    for path in configured_result_paths():
+        if not path.is_file():
+            continue
+        data = read_json(path)
+        for fid, row in data.get("results", {}).items():
+            row = dict(row)
+            row.setdefault("result_overlay_path", str(path.relative_to(ROOT)))
+            results[str(fid)] = row
+            for alias in row.get("alias_fixture_ids", []):
+                results[str(alias)] = row
     return results
 
 
@@ -300,7 +335,11 @@ def fixture_id_from_card(card: dict[str, Any]) -> str:
 
 
 def latest_snapshots() -> list[Path]:
-    return sorted(SNAPSHOT_DIR.glob("w1_round1_fixture_details_*.json"))
+    paths: list[Path] = []
+    for directory in configured_snapshot_dirs():
+        if directory.is_dir():
+            paths.extend(directory.glob("w1_*fixture_details_*.json"))
+    return sorted(paths)
 
 
 def snapshot_matches(path: Path | None) -> dict[str, dict[str, Any]]:
@@ -321,7 +360,7 @@ def snapshot_time_cst(path: Path | None) -> datetime | None:
 
 
 def read_ledger() -> dict[str, dict[str, str]]:
-    for path in LEDGER_CANDIDATES:
+    for path in configured_ledger_candidates():
         if path.is_file():
             with path.open("r", encoding="utf-8", newline="") as handle:
                 return {row["fixture_id"]: row for row in csv.DictReader(handle)}
@@ -1012,12 +1051,30 @@ def actual_score_for_fixture(fid: str, results: dict[str, dict[str, Any]]) -> di
     return {"home": None, "away": None}
 
 
+def result_sync_due(card: dict[str, Any], now: datetime | None = None) -> bool:
+    kickoff = parse_utc_datetime(card.get("match", {}).get("kickoff_utc"))
+    if not kickoff:
+        return False
+    now = now or datetime.now(timezone.utc)
+    return now >= kickoff.astimezone(timezone.utc) + timedelta(hours=2)
+
+
 def cst_label(kickoff: str | None) -> str:
     if not kickoff:
         return ""
     if "CST" in kickoff:
         return kickoff
     return f"{kickoff} CST"
+
+
+def kickoff_cst_for_card(card: dict[str, Any], latest: dict[str, Any], ledger: dict[str, Any] | None) -> str:
+    direct = latest.get("kickoff_cst") or (ledger or {}).get("kickoff_cst")
+    if direct:
+        return cst_label(direct)
+    kickoff = parse_utc_datetime(card.get("match", {}).get("kickoff_utc") or latest.get("kickoff_utc"))
+    if not kickoff:
+        return ""
+    return kickoff.astimezone(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M CST")
 
 
 def parse_kickoff_cst(kickoff: str | None) -> datetime | None:
@@ -2138,6 +2195,13 @@ def build_record(
     status = status_for_fixture(fid, results)
     score = actual_score_for_fixture(fid, results)
     overlay = results.get(fid, {})
+    if status == "not_started" and result_sync_due(card):
+        status = "result_sync_due"
+        overlay = {
+            **overlay,
+            "result_note": "赛果待同步",
+            "result_source": "api_football_result_sync_due",
+        }
 
     supporting = [
         market_signal["summary_cn"],
@@ -2149,7 +2213,8 @@ def build_record(
         counter = ["等待 W1 风控信号补齐"]
 
     score_display = format_score(home_cn, away_cn, score)
-    stage_info = prediction_stage(cst_label(latest.get("kickoff_cst") or (ledger or {}).get("kickoff_cst")), snapshot_at, play_guard_pass)
+    kickoff_cst = kickoff_cst_for_card(card, latest, ledger)
+    stage_info = prediction_stage(kickoff_cst, snapshot_at, play_guard_pass)
     reference = reference_from_market(market_signal, home_cn, away_cn)
     risk_cn = risk_level_cn(play_guard_pass, gaps, risks)
     reference_score = reference["reference_score"]
@@ -2160,6 +2225,9 @@ def build_record(
     if status == "finished":
         current_action = "需要写入 ledger 做赛后验证"
         boss_summary = f"已完赛：{score_display}；W1 状态：{w1_state}；复盘动作：{current_action}"
+    elif status == "result_sync_due":
+        current_action = "赛果待同步；等待后台批量 result sync 写入统一结果覆盖。"
+        boss_summary = f"{home_cn} vs {away_cn}：赛果待同步；未用赛后结果改写赛前判断"
     elif not play_guard_pass:
         current_action = stage_info["stage_current_action_cn"]
         boss_summary = f"{home_cn} vs {away_cn}：{stage_info['prediction_stage_cn']}，参考倾向 {reference['reference_direction']}，参考比分 {reference_score}；非最终结论"
@@ -2216,7 +2284,7 @@ def build_record(
         "away_team_cn": away_cn,
         "home_flag": TEAM_FLAG.get(home_cn, ""),
         "away_flag": TEAM_FLAG.get(away_cn, ""),
-        "kickoff": cst_label(latest.get("kickoff_cst") or (ledger or {}).get("kickoff_cst")),
+        "kickoff": kickoff_cst,
         "kickoff_utc": card.get("match", {}).get("kickoff_utc") or latest.get("kickoff_utc"),
         "status": status,
         "actual_score": score,
@@ -2655,26 +2723,29 @@ def build_records(
     include_runtime_state: bool,
 ) -> list[dict[str, Any]]:
     records = []
-    for card_path in sorted(CARDS_DIR.glob("*.json")):
-        card = read_json(card_path)
-        fid = fixture_id_from_card(card)
-        records.append(
-            build_record(
-                card_path=card_path,
-                latest=latest.get(fid, {}),
-                previous=previous.get(fid),
-                ledger=ledger_rows.get(fid),
-                next_refresh=next_refresh,
-                snapshot_at=snapshot_at,
-                venues=venues,
-                weather_by_fixture=weather_by_fixture,
-                live_refresh_by_fixture=live_refresh_by_fixture,
-                lineup_overlay_by_fixture=lineup_overlay_by_fixture,
-                results=results,
-                thresholds_config=thresholds_config,
-                include_runtime_state=include_runtime_state,
+    for cards_dir in configured_card_dirs():
+        if not cards_dir.is_dir():
+            continue
+        for card_path in sorted(cards_dir.glob("*.json")):
+            card = read_json(card_path)
+            fid = fixture_id_from_card(card)
+            records.append(
+                build_record(
+                    card_path=card_path,
+                    latest=latest.get(fid, {}),
+                    previous=previous.get(fid),
+                    ledger=ledger_rows.get(fid),
+                    next_refresh=next_refresh,
+                    snapshot_at=snapshot_at,
+                    venues=venues,
+                    weather_by_fixture=weather_by_fixture,
+                    live_refresh_by_fixture=live_refresh_by_fixture,
+                    lineup_overlay_by_fixture=lineup_overlay_by_fixture,
+                    results=results,
+                    thresholds_config=thresholds_config,
+                    include_runtime_state=include_runtime_state,
+                )
             )
-        )
     records.sort(key=lambda row: (row.get("kickoff") or "", row["fixture_id"]))
     return records
 
@@ -2782,7 +2853,7 @@ def main() -> int:
 
     first = records[0] if records else {}
     data["schema_version"] = "W1_VISUAL_DASHBOARD_DATA_BOUND_V1"
-    data["generated_from"] = "本地 W1 赛前卡、ledger、状态文件、最新快照和人工核验赛果覆盖"
+    data["generated_from"] = "本地 W1 competition scope、赛前卡、ledger、状态文件、最新快照和统一赛果覆盖"
     data["generated_at_utc"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     data["page_footer_statement_cn"] = "本页面用于世界杯赛前数据分析、风险识别和赛后复盘，仅作研究参考，不构成收益承诺。"
     data["w1_backend_kept"] = [
@@ -2803,12 +2874,15 @@ def main() -> int:
     }
     data["dashboard_binding"] = {
         "version": "W1_DATA_BINDING_V1",
-        "cards_dir": str(CARDS_DIR.relative_to(ROOT)),
+        "competition_scope": str(SCOPE_JSON.relative_to(ROOT)),
+        "card_dirs": [str(path.relative_to(ROOT)) for path in configured_card_dirs()],
         "dashboard_json": str(DASHBOARD_JSON.relative_to(ROOT)),
         "state_json": str(STATE_JSON.relative_to(ROOT)),
         "latest_snapshot": str(latest_path.relative_to(ROOT)) if latest_path else None,
         "previous_snapshot": str(previous_path.relative_to(ROOT)) if previous_path else None,
-        "ledger": str(LEDGER_CANDIDATES[0].relative_to(ROOT)) if LEDGER_CANDIDATES[0].is_file() else None,
+        "results_overlay": str(root_path(competition_scope().get("results_overlay")).relative_to(ROOT)) if competition_scope().get("results_overlay") else None,
+        "legacy_results": [str(path.relative_to(ROOT)) for path in configured_result_paths()[:-1]],
+        "ledger": str(configured_ledger_candidates()[0].relative_to(ROOT)) if configured_ledger_candidates() and configured_ledger_candidates()[0].is_file() else None,
         "records_count": len(records),
     }
     data["odds_movement_monitor"] = {
@@ -2823,7 +2897,7 @@ def main() -> int:
     data.setdefault("hero", {})["intro"] = "第一场先看市场读数、比分峰值脚注、风险提示和当前观察建议。W1 风控没过，不下最终结论。"
     data["boss_view"] = {
         **data.get("boss_view", {}),
-        "current_status": "24 场 W1 数据已绑定",
+        "current_status": f"{len(records)} 场 W1 数据已绑定",
         "first_match_cn": first["match"],
         "reference_lean": first["reference_direction"],
         "reference_score": first["reference_score"],

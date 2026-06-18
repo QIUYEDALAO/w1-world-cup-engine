@@ -1,0 +1,176 @@
+{
+  "schema_version": "w1_match_card.v1",
+  "match": {
+    "match_id": "api-football:1489405",
+    "competition": "World Cup",
+    "season": 2026,
+    "round": "Group Stage - 3",
+    "kickoff_utc": "2026-06-24T22:00:00Z",
+    "generated_at_utc": "2026-06-18T05:31:25Z",
+    "venue": {
+      "name": "Mercedes-Benz Stadium",
+      "city": "Atlanta",
+      "country": null,
+      "latitude": null,
+      "longitude": null
+    },
+    "referee": {
+      "name": null,
+      "available": false
+    }
+  },
+  "teams": {
+    "home": {
+      "team_id": 31,
+      "name": "Morocco",
+      "fifa_rank": null,
+      "elo_rating": null
+    },
+    "away": {
+      "team_id": 2386,
+      "name": "Haiti",
+      "fifa_rank": null,
+      "elo_rating": null
+    }
+  },
+  "data_sources": {
+    "api_football": {
+      "status": "OK",
+      "as_of_utc": "2026-06-18T05:31:25Z",
+      "note": "Fixture schedule metadata normalized from api-football for competition universe expansion; no raw API dump stored."
+    },
+    "open_meteo": {
+      "status": "MISSING",
+      "as_of_utc": null,
+      "note": "Weather not fetched during R0 fixture universe expansion."
+    },
+    "fifa_rank": {
+      "status": "MISSING",
+      "as_of_utc": null,
+      "note": "Not required for schedule universe expansion."
+    },
+    "elo": {
+      "status": "MISSING",
+      "as_of_utc": null,
+      "note": "Not required for schedule universe expansion."
+    },
+    "local_snapshots": {
+      "status": "MISSING",
+      "as_of_utc": null,
+      "note": "No local round snapshot available yet for this fixture."
+    }
+  },
+  "markets": {
+    "odds_snapshot_time_utc": null,
+    "first_seen_odds_proxy": {
+      "available": false,
+      "captured_at_utc": null,
+      "source": null,
+      "note": "No local odds snapshot available for this fixture yet."
+    },
+    "odds_1X2": {
+      "available": false,
+      "bookmakers_count": 0,
+      "lines": []
+    },
+    "odds_AH": {
+      "available": false,
+      "bookmakers_count": 0,
+      "lines": []
+    },
+    "odds_OU": {
+      "available": false,
+      "bookmakers_count": 0,
+      "lines": []
+    }
+  },
+  "squad": {
+    "home": {
+      "available": false,
+      "players_count": 0,
+      "source": null,
+      "missing_fields": [
+        "squad"
+      ]
+    },
+    "away": {
+      "available": false,
+      "players_count": 0,
+      "source": null,
+      "missing_fields": [
+        "squad"
+      ]
+    }
+  },
+  "lineups": {
+    "confirmed_lineup_available": false,
+    "status": "MISSING",
+    "home_starting_xi": [],
+    "away_starting_xi": []
+  },
+  "context": {
+    "standings": {
+      "status": "MISSING",
+      "summary": "Not loaded during R0 fixture universe expansion."
+    },
+    "recent_form": {
+      "status": "MISSING",
+      "summary": "Not loaded during R0 fixture universe expansion."
+    },
+    "h2h": {
+      "status": "MISSING",
+      "summary": "Not loaded during R0 fixture universe expansion."
+    },
+    "injuries": {
+      "status": "MISSING",
+      "summary": "Not loaded during R0 fixture universe expansion."
+    },
+    "suspensions": {
+      "status": "MISSING",
+      "summary": "Not loaded during R0 fixture universe expansion."
+    },
+    "weather": {
+      "status": "MISSING",
+      "summary": "Not loaded during R0 fixture universe expansion."
+    },
+    "travel_distance": {
+      "status": "MISSING",
+      "summary": "Not loaded during R0 fixture universe expansion."
+    }
+  },
+  "risk_flags": [
+    {
+      "code": "ODDS_SNAPSHOT_MISSING",
+      "severity": "HIGH",
+      "message": "No local odds snapshot yet; W1 remains W1_WAIT."
+    },
+    {
+      "code": "CONFIRMED_LINEUP_MISSING",
+      "severity": "HIGH",
+      "message": "confirmed_lineup missing; W1 hard rule keeps final_decision at W1_WAIT."
+    }
+  ],
+  "data_gaps": [
+    {
+      "field": "markets.odds_1X2",
+      "severity": "HIGH",
+      "message": "No local odds snapshot yet; cannot build W1 market read.",
+      "blocks_play": true
+    },
+    {
+      "field": "lineups.confirmed_lineup",
+      "severity": "HIGH",
+      "message": "confirmed_lineup missing; this blocks any non-WAIT final_decision.",
+      "blocks_play": true
+    }
+  ],
+  "decision": {
+    "label": "W1_WAIT",
+    "ledger_required": true,
+    "reasons": [
+      "No local odds snapshot yet for this fixture.",
+      "confirmed_lineup missing for this fixture; W1 hard rule forces W1_WAIT."
+    ],
+    "no_betting_commitment": true
+  }
+}

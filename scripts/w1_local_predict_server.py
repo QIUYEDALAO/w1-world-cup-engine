@@ -42,8 +42,7 @@ DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
 WEATHER_CLIENT = ROOT / "scripts/w1_weather_client.py"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
-RESULTS_JSON = ROOT / "data/results/round1_results.json"
-CARDS_DIR = ROOT / "data/processed/match_cards/group_stage_round1"
+SCOPE_JSON = ROOT / "config/w1_competition_scope.json"
 WATCHER = ROOT / "scripts/w1_watcher.sh"
 ENV_KEY_NAME = "APIFOOTBALL_" + "KEY"
 API_FOOTBALL_BASE = "https://v" + "3.football.api-sports.io"
@@ -153,6 +152,33 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     tmp.replace(path)
+
+
+def competition_scope() -> dict[str, Any]:
+    if SCOPE_JSON.is_file():
+        return load_json(SCOPE_JSON)
+    return {"card_dirs": [], "results_overlay": "data/results/world_cup_2026_results.json"}
+
+
+def scoped_path(path: str | Path) -> Path:
+    p = Path(path)
+    return p if p.is_absolute() else ROOT / p
+
+
+def configured_card_dirs() -> list[Path]:
+    return [scoped_path(path) for path in competition_scope().get("card_dirs", [])]
+
+
+def results_overlay_path() -> Path:
+    return scoped_path(competition_scope().get("results_overlay", "data/results/world_cup_2026_results.json"))
+
+
+def iter_match_card_paths() -> list[Path]:
+    paths: list[Path] = []
+    for directory in configured_card_dirs():
+        if directory.is_dir():
+            paths.extend(sorted(directory.glob("*.json")))
+    return paths
 
 
 def parse_env_assignment(line: str) -> tuple[str, str] | None:
@@ -377,7 +403,7 @@ def card_path_for_fixture_id(fixture_id: Any) -> Path | None:
     candidates = fixture_id_candidates(fixture_id)
     if not candidates:
         return None
-    for path in CARDS_DIR.glob("*.json"):
+    for path in iter_match_card_paths():
         try:
             card = load_json(path)
         except json.JSONDecodeError:
@@ -390,7 +416,7 @@ def card_path_for_fixture_id(fixture_id: Any) -> Path | None:
 def card_path_for_manual_lineup(lineup: dict[str, Any]) -> Path | None:
     home = lineup.get("home_team")
     away = lineup.get("away_team")
-    for path in CARDS_DIR.glob("*.json"):
+    for path in iter_match_card_paths():
         try:
             card = load_json(path)
         except json.JSONDecodeError:
@@ -762,7 +788,8 @@ def api_fixture_id_candidates_for_result(match: dict[str, Any]) -> list[str]:
 
 
 def write_result_overlay(match: dict[str, Any], api_fixture_id: str, score: dict[str, int], synced_at: str) -> None:
-    payload = load_json(RESULTS_JSON) if RESULTS_JSON.is_file() else {"results": {}}
+    overlay_path = results_overlay_path()
+    payload = load_json(overlay_path) if overlay_path.is_file() else {"results": {}}
     payload.setdefault("results", {})
     local_fixture_id = str(match.get("fixture_id") or api_fixture_id)
     aliases = [candidate for candidate in fixture_id_candidates(local_fixture_id) if candidate != local_fixture_id]
@@ -780,7 +807,7 @@ def write_result_overlay(match: dict[str, Any], api_fixture_id: str, score: dict
         "result_note": "API-Football fixtures endpoint result sync",
         "result_synced_at_utc": synced_at,
     }
-    write_json(RESULTS_JSON, payload)
+    write_json(overlay_path, payload)
 
 
 def refresh_result_sync_module(match: dict[str, Any], env: dict[str, str]) -> dict[str, Any]:
