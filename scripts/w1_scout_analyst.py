@@ -218,11 +218,6 @@ def build_calls(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[tu
     track = read_json(TRACK_P, {})
     lessons = LESSONS_P.read_text(encoding="utf-8") if LESSONS_P.is_file() else ""
     fixtures = set(args.fixture or []) or None
-    previous_calls = {
-        str(call.get("fixture_id")): call
-        for call in read_json(CALLS_P, {"calls": []}).get("calls", [])
-        if isinstance(call, dict)
-    }
     calls: list[dict[str, Any]] = []
     failed: list[tuple[str, str]] = []
 
@@ -249,12 +244,7 @@ def build_calls(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[tu
         if accepted:
             calls.append(accepted)
         else:
-            previous = previous_calls.get(fixture_id)
-            if previous and not checker.validate_call(previous, policy):
-                calls.append(previous)
-                print(f"WARN: fixture {fixture_id}: reused previous valid scout call after model validation failure", file=sys.stderr)
-            else:
-                failed.append((fixture_id, "; ".join(validator_errors or ["unknown validation failure"])))
+            failed.append((fixture_id, "; ".join(validator_errors or ["unknown validation failure"])))
     return calls, failed, cfg
 
 

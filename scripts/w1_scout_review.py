@@ -32,7 +32,7 @@ def now() -> str:
 
 def digest_read(call: dict[str, Any]) -> str:
     blob = json.dumps(call, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 def read_json(path: Path, default: Any) -> Any:
@@ -161,29 +161,32 @@ def main() -> int:
         print(f"FAIL: {exc}")
         return 2
 
+    pending: list[dict[str, Any]] = []
+    for lock in eligible:
+        fid = str(lock.get("fixture_id"))
+        digest = lock.get("prematch_read_digest") or digest_read(lock.get("call") or {})
+        result = results[fid]
+        score = result.get("actual_score") or {}
+        candidate = call_model(cfg, build_prompt(lock, result, digest))
+        candidate["fixture_id"] = fid
+        candidate["reviewed_at_utc"] = now()
+        candidate["prematch_read_digest"] = digest
+        candidate["actual"] = {
+            "score": f"{score.get('home')}-{score.get('away')}",
+            "outcome": outcome(score),
+            "key_stats": result.get("key_stats") or {},
+        }
+        candidate["honesty_label"] = "AI 复盘·赛后对照"
+        errors = validate_review(candidate, digest)
+        if errors:
+            raise RuntimeError(f"review validation failed for {fid}: {errors}")
+        pending.append(candidate)
+
     REVIEWS.parent.mkdir(parents=True, exist_ok=True)
-    written = 0
     with REVIEWS.open("a", encoding="utf-8") as fh:
-        for lock in eligible:
-            fid = str(lock.get("fixture_id"))
-            digest = lock.get("prematch_read_digest") or digest_read(lock.get("call") or {})
-            result = results[fid]
-            score = result.get("actual_score") or {}
-            candidate = call_model(cfg, build_prompt(lock, result, digest))
-            candidate["fixture_id"] = fid
-            candidate["reviewed_at_utc"] = now()
-            candidate["prematch_read_digest"] = digest
-            candidate["actual"] = {
-                "score": f"{score.get('home')}-{score.get('away')}",
-                "outcome": outcome(score),
-                "key_stats": result.get("key_stats") or {},
-            }
-            candidate["honesty_label"] = "AI 复盘·赛后对照"
-            errors = validate_review(candidate, digest)
-            if errors:
-                raise RuntimeError(f"review validation failed for {fid}: {errors}")
+        for candidate in pending:
             fh.write(json.dumps(candidate, ensure_ascii=False) + "\n")
-            written += 1
+    written = len(pending)
     print(f"scout review PASS: wrote {written} review(s) -> {REVIEWS.relative_to(ROOT)}")
     return 0
 

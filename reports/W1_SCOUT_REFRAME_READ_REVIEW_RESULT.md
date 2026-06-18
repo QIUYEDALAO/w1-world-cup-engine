@@ -19,8 +19,9 @@ W1_SCOUT 已从"预测器/追 edge"口径收敛为"五维理解 + 赛后复盘 +
 2. G2 赛后复盘
    - 新增 `scripts/w1_scout_review.py`。
    - 复盘只读取 immutable lock + 本地赛果。
-   - 输出 `state/scout_reviews.jsonl`，保持 gitignored。
+   - 输出 `state/scout_reviews.jsonl`，保持 gitignored runtime；本阶段不是 tracked memory。
    - `prematch_read_digest` 与 lock 计算值一致才通过 checker。
+   - 新 lock digest 使用 canonical JSON 的 sha256；旧 lock 若无 digest 仅做 legacy 兼容，不回写原文。
 
 3. G3 多联赛参数化入口
    - `config/w1_scout_policy.json` 增加 `leagues`。
@@ -35,15 +36,16 @@ W1_SCOUT 已从"预测器/追 edge"口径收敛为"五维理解 + 赛后复盘 +
 
 5. G5 自我校准
    - 新增 `scripts/w1_scout_calibration.py`。
-   - 输出 `state/scout_calibration.json`，保持 gitignored。
+   - 输出 `state/scout_calibration.json`，保持 gitignored runtime；本阶段不是 tracked memory。
    - dashboard 学习状态显示解读数、审计数、复盘数、平均就绪度。
    - 明确: 这是自我体检与校准，不是战胜市场的证据。
 
 ## 当前本机状态
 
 - 当前已转换本机 `state/w1_scout_calls.json` 为新 read schema，但该文件仍是 gitignored runtime，不入库。
-- 当前 `state/scout_reviews.jsonl` 仍可为空；`scripts/w1_scout_review.py --dry-run` 显示已有已完赛锁定样本可复盘，真正生成需 DeepSeek key。
-- 当前 `state/scout_calibration.json` 已由本地脚本生成，仍 gitignored。
+- 当前 `state/scout_reviews.jsonl` 仍可为空；`scripts/w1_scout_review.py --dry-run` 显示已有已完赛锁定样本可复盘，真正生成需 DeepSeek key。该文件仍是 gitignored runtime，不属于 tracked memory allowlist。
+- 当前 `state/scout_calibration.json` 已由本地脚本生成，仍是 gitignored runtime，不属于 tracked memory allowlist。
+- 后续是否将 review/calibration 纳入 tracked memory，需要单独阶段决策；本阶段不扩大 allowlist。
 
 ## Checker
 

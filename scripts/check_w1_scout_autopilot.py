@@ -5,7 +5,7 @@
 Validates the production loop contract without calling api-football or DeepSeek:
 - policy exists and encodes dry-run/delta/failure/post-kickoff discipline.
 - --dry-run exits cleanly and does not mutate runtime status.
-- no effective delta does not call analyst/embed/lock.
+- no effective delta does not call analyst/lock; review/calibration may refresh embed.
 - analyst nonzero does not update sha/embed/lock and exits nonzero.
 - raw state/ and data/scout/ remain runtime-only; the four Scout learning-memory
   files are explicitly allowed to be tracked.
@@ -70,10 +70,10 @@ def assert_policy() -> None:
     if selection.get("no_post_match_fake_pre_match_factors") is not True:
         fail("policy must forbid fake pre-match factor backfill")
     delta = policy.get("delta_triggers") or {}
-    if delta.get("no_delta_policy") != "do_not_call_ai_do_not_embed_do_not_lock_audit_only":
-        fail("policy must make no-delta skip AI/embed/lock")
+    if delta.get("no_delta_policy") != "do_not_call_ai_do_not_lock_audit_review_calibration_embed_only":
+        fail("policy must make no-delta skip AI/lock while allowing review/calibration embed")
     failure = policy.get("failure_policy") or {}
-    if failure.get("analyst_nonzero") != "do_not_update_sha_do_not_embed_do_not_lock_audit_only_exit_nonzero":
+    if failure.get("analyst_nonzero") != "do_not_update_sha_do_not_embed_do_not_lock_audit_calibration_exit_nonzero":
         fail("policy must block sha/embed/lock when analyst fails")
     dry = policy.get("dry_run_policy") or {}
     for key in ("no_external_fetch", "no_ai_call", "no_state_write", "no_embed", "no_lock"):
@@ -86,7 +86,11 @@ def assert_runner_static() -> None:
     required = [
         "--dry-run",
         "W1_SCOUT_FORCE_HASH",
-        "no effective delta -> skip DeepSeek, embed, lock; audit only",
+        "no effective delta -> skip DeepSeek and lock; audit/review/calibration visibility only",
+        "run_audit_review_calibration",
+        "W1_SCOUT_ENABLE_REVIEW",
+        "W1_SCOUT_CALIBRATION_CMD",
+        "W1_SCOUT_REVIEW_CMD",
         "analyst failed -> do not update sha, do not embed, do not lock; audit only",
         "future fixtures selected",
         "scout_cycle_status.json",
@@ -121,7 +125,7 @@ def assert_dry_run() -> None:
             fail("dry-run output must state no AI/no state write")
 
 
-def assert_no_delta_blocks_ai_embed_lock() -> None:
+def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
     with tempfile.TemporaryDirectory(prefix="w1_scout_g2_nodelta_") as td:
         root = Path(td)
         state = root / "state"
@@ -137,6 +141,8 @@ def assert_no_delta_blocks_ai_embed_lock() -> None:
         write_cmd(root / "embed.sh", "touch \"" + str(marker) + "/embed\"")
         write_cmd(root / "lock.sh", "touch \"" + str(marker) + "/lock\"")
         write_cmd(root / "audit.sh", "mkdir -p \"" + str(marker) + "\"; touch \"" + str(marker) + "/audit\"")
+        write_cmd(root / "review.sh", "touch \"" + str(marker) + "/review\"")
+        write_cmd(root / "calibration.sh", "touch \"" + str(marker) + "/calibration\"")
         marker.mkdir()
         env = {
             "W1_SCOUT_STATE_DIR": str(state),
@@ -148,16 +154,22 @@ def assert_no_delta_blocks_ai_embed_lock() -> None:
             "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
             "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
             "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_SCOUT_REVIEW_CMD": str(root / "review.sh"),
+            "W1_SCOUT_CALIBRATION_CMD": str(root / "calibration.sh"),
+            "W1_SCOUT_ENABLE_REVIEW": "1",
             "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
         }
         proc = run(["bash", str(RUNNER)], env=env)
         if proc.returncode != 0:
             fail(f"no-delta runner failed: stdout={proc.stdout} stderr={proc.stderr}")
-        for name in ("analyst", "embed", "lock"):
+        for name in ("analyst", "lock"):
             if (marker / name).exists():
                 fail(f"no-delta must not call {name}")
         if not (marker / "audit").exists():
             fail("no-delta must still allow audit")
+        for name in ("review", "calibration", "embed"):
+            if not (marker / name).exists():
+                fail(f"no-delta should allow {name} for post-match review/calibration visibility")
         if (state / ".scout_bundles.sha").read_text(encoding="utf-8").strip() != "same":
             fail("no-delta must not rewrite sha")
 
@@ -178,6 +190,7 @@ def assert_analyst_fail_blocks_progress() -> None:
         write_cmd(root / "embed.sh", "touch \"" + str(marker) + "/embed\"")
         write_cmd(root / "lock.sh", "touch \"" + str(marker) + "/lock\"")
         write_cmd(root / "audit.sh", "touch \"" + str(marker) + "/audit\"")
+        write_cmd(root / "calibration.sh", "touch \"" + str(marker) + "/calibration\"")
         env = {
             "W1_SCOUT_STATE_DIR": str(state),
             "W1_SCOUT_DASHBOARD_DATA": str(dash),
@@ -189,6 +202,7 @@ def assert_analyst_fail_blocks_progress() -> None:
             "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
             "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
             "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_SCOUT_CALIBRATION_CMD": str(root / "calibration.sh"),
             "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
         }
         proc = run(["bash", str(RUNNER)], env=env)
@@ -201,6 +215,8 @@ def assert_analyst_fail_blocks_progress() -> None:
                 fail(f"analyst failure must not call {name}")
         if not (marker / "audit").exists():
             fail("analyst failure may only continue to audit")
+        if not (marker / "calibration").exists():
+            fail("analyst failure should still run calibration after audit")
         status = json.loads((state / "scout_cycle_status.json").read_text(encoding="utf-8"))
         if status.get("phase") != "analyst" or status.get("result") != "failed":
             fail("analyst failure must write failed cycle status")
@@ -220,7 +236,7 @@ def main() -> int:
     assert_policy()
     assert_runner_static()
     assert_dry_run()
-    assert_no_delta_blocks_ai_embed_lock()
+    assert_no_delta_blocks_ai_lock_allows_review_calibration_embed()
     assert_analyst_fail_blocks_progress()
     assert_gitignored_runtime()
     for required in (HTML_CHECK, SCOUT_CHECK):

@@ -61,7 +61,7 @@ def validate_call(c: dict, policy: dict) -> list[str]:
     if not any(token in score_band for token in ("区间", "分布", "别当真", "偏")):
         errs.append("score_band_cn must use band/distribution language")
     readiness = c.get("data_readiness")
-    if readiness not in policy["readiness_levels"] and not isinstance(readiness, (int, float)):
+    if readiness not in policy["readiness_levels"]:
         errs.append(f"invalid data_readiness {readiness}")
     if policy["honesty"]["honesty_label_required_substr"] not in str(c.get("honesty_label", "")):
         errs.append("honesty_label must contain 'AI 解读'")
@@ -134,7 +134,7 @@ def jsonl_rows(path: Path) -> list[dict]:
 
 def digest_read(call: dict) -> str:
     blob = json.dumps(call, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 def result_fixture_ids() -> set[str]:
@@ -247,10 +247,16 @@ def main() -> int:
         fail("analyst must follow the T5 OpenAI-compatible route, not Anthropic-only routes")
     if "deepseek-chat" in analyst:
         fail("analyst must use fixed DeepSeek-V4-Pro (API id: deepseek-v4-pro) for the DeepSeek route")
+    for token in ("previous_calls", "reused previous valid scout call"):
+        if token in analyst:
+            fail(f"analyst must not fallback to previous calls: {token}")
     review_src = REVIEW_MOD.read_text(encoding="utf-8")
-    for token in ("prematch_read_digest", "AI 复盘·赛后对照", "state/scout_reviews.jsonl", "不许嘴硬"):
+    for token in ("prematch_read_digest", "AI 复盘·赛后对照", "state/scout_reviews.jsonl", "不许嘴硬", "hashlib.sha256"):
         if token not in review_src:
             fail(f"review script missing token: {token}")
+    ledger_src = (ROOT / "scripts/w1_scout_ledger.py").read_text(encoding="utf-8")
+    if "hashlib.sha256" not in ledger_src:
+        fail("ledger digest must use sha256 canonical JSON")
     calibration_src = CALIBRATION_MOD.read_text(encoding="utf-8")
     for token in ("state/scout_calibration.json", "direction_calibration", "avg_readiness_dims", "不是战胜市场的证据"):
         if token not in calibration_src:

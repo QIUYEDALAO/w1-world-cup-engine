@@ -33,7 +33,7 @@ def now():
 
 def digest_read(call):
     blob = json.dumps(call, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 def dt(s):

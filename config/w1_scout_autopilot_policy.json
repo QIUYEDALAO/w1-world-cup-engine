@@ -23,7 +23,7 @@
       "injuries list changed",
       "form/xg/standings/h2h/rest_days availability changed"
     ],
-    "no_delta_policy": "do_not_call_ai_do_not_embed_do_not_lock_audit_only"
+    "no_delta_policy": "do_not_call_ai_do_not_lock_audit_review_calibration_embed_only"
   },
   "skip_conditions": [
     "no future fixture selected",
@@ -32,8 +32,8 @@
     "DEEPSEEK_API_KEY missing: analyst fails and cycle must not advance"
   ],
   "failure_policy": {
-    "analyst_nonzero": "do_not_update_sha_do_not_embed_do_not_lock_audit_only_exit_nonzero",
-    "checker_fail": "do_not_update_sha_do_not_embed_do_not_lock_exit_nonzero",
+    "analyst_nonzero": "do_not_update_sha_do_not_embed_do_not_lock_audit_calibration_exit_nonzero",
+    "checker_fail": "do_not_update_sha_do_not_embed_do_not_lock_audit_calibration_exit_nonzero",
     "fetch_fail": "continue_to_bundle_existing_local_scout_data_without_fake_values",
     "status_path": "state/scout_cycle_status.json",
     "error_log_path": "state/scout_cycle_errors.log"

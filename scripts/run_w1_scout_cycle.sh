@@ -38,6 +38,8 @@ CHECK_CMD="${W1_SCOUT_CHECK_CMD:-$PYTHON_BIN scripts/check_w1_scout.py}"
 EMBED_CMD="${W1_SCOUT_EMBED_CMD:-$PYTHON_BIN scripts/w1_scout_embed.py}"
 LOCK_CMD="${W1_SCOUT_LOCK_CMD:-$PYTHON_BIN scripts/w1_scout_ledger.py lock}"
 AUDIT_CMD="${W1_SCOUT_AUDIT_CMD:-$PYTHON_BIN scripts/w1_scout_ledger.py audit}"
+REVIEW_CMD="${W1_SCOUT_REVIEW_CMD:-$PYTHON_BIN scripts/w1_scout_review.py}"
+CALIBRATION_CMD="${W1_SCOUT_CALIBRATION_CMD:-$PYTHON_BIN scripts/w1_scout_calibration.py}"
 FETCH_OK=0
 FETCH_FAIL=0
 
@@ -120,10 +122,28 @@ payload = {
     "dry_run": os.environ["W1_SCOUT_STATUS_DRY_RUN"] == "1",
     "redlines_cn": "研究用途 · 非推介 · 非独立优势；失败不推进旧 call。",
 }
+
 with open(path, "w", encoding="utf-8") as f:
     json.dump(payload, f, ensure_ascii=False, indent=2)
     f.write("\n")
 PY
+}
+
+run_audit_review_calibration() {
+  local allow_embed="${1:-0}"
+  ${AUDIT_CMD}
+  if [ "${W1_SCOUT_ENABLE_REVIEW:-0}" = "1" ]; then
+    if ! ${REVIEW_CMD}; then
+      record_error "scout review failed; lock/read advancement remains blocked"
+    fi
+  fi
+  if ! ${CALIBRATION_CMD}; then
+    record_error "scout calibration failed"
+    return 1
+  fi
+  if [ "$allow_embed" = "1" ]; then
+    ${EMBED_CMD}
+  fi
 }
 
 future_fixtures() {
@@ -258,7 +278,7 @@ if ! ${BUILD_CMD}; then
 fi
 
 if [ "$FUTURE_COUNT" -eq 0 ]; then
-  ${AUDIT_CMD}
+  run_audit_review_calibration 1
   persist_memory
   record_status "audit_only" "ok" "没有未来 fixture；本轮只执行赛后 audit。"
   log "W1_SCOUT cycle done (audit only)"
@@ -268,10 +288,10 @@ fi
 NEW="$(effective_hash)"
 PREV="$(cat "$SHA_FILE" 2>/dev/null || echo "")"
 if [ "$NEW" = "$PREV" ]; then
-  log "no effective delta -> skip DeepSeek, embed, lock; audit only"
-  ${AUDIT_CMD}
+  log "no effective delta -> skip DeepSeek and lock; audit/review/calibration visibility only"
+  run_audit_review_calibration 1
   persist_memory
-  record_status "no_delta" "ok" "赛前有效因子无变化；未调用 AI、未上屏、未锁定，仅 audit。"
+  record_status "no_delta" "ok" "赛前有效因子无变化；未调用 AI、未锁定；仅更新 audit/review/calibration 可见性。"
   log "W1_SCOUT cycle done (no delta)"
   exit 0
 fi
@@ -281,7 +301,7 @@ if ! ${ANALYST_CMD}; then
   log "analyst failed -> do not update sha, do not embed, do not lock; audit only"
   record_status "analyst" "failed" "AI 分析师失败；未更新指纹、未上屏、未锁定。"
   record_error "analyst failed; sha/embed/lock blocked"
-  ${AUDIT_CMD}
+  run_audit_review_calibration 0
   persist_memory
   exit 1
 fi
@@ -290,6 +310,8 @@ if ! ${CHECK_CMD}; then
   log "check_w1_scout failed -> do not update sha, do not embed, do not lock"
   record_status "checker" "failed" "Scout 闸门失败；未更新指纹、未上屏、未锁定。"
   record_error "check_w1_scout failed; sha/embed/lock blocked"
+  run_audit_review_calibration 0
+  persist_memory
   exit 1
 fi
 
@@ -297,7 +319,7 @@ mkdir -p "$STATE_DIR"
 echo "$NEW" > "$SHA_FILE"
 ${EMBED_CMD}
 ${LOCK_CMD}
-${AUDIT_CMD}
+run_audit_review_calibration 1
 persist_memory
 record_status "complete" "ok" "Scout 周期完成；AI call 已过闸门并完成可见性/锁定/audit。"
 log "W1_SCOUT G2 cycle done"
