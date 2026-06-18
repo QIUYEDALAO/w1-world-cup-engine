@@ -107,12 +107,13 @@ class AutoScoutHandler(base.Handler):
                 self._send_html_text(patch_dashboard_html(base.DASHBOARD_HTML.read_text(encoding="utf-8")))
                 return
         if path == "/dashboard-data":
-            try:
-                data = patch_dashboard_payload(base.load_json(base.DASHBOARD_DATA))
-            except Exception as exc:  # noqa: BLE001 - preserve server API behavior
-                self.send_json({"ok": False, "error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
-                return
-            self.send_json({"ok": True, "data": data})
+            # IMPORTANT: the dashboard expects the raw dashboard data JSON, not an
+            # API wrapper such as {"ok": true, "data": ...}. Returning the wrapped
+            # shape makes the UI render NaN/undefined and an empty schedule.
+            if base.DASHBOARD_DATA.is_file():
+                self.send_json(patch_dashboard_payload(base.load_json(base.DASHBOARD_DATA)))
+            else:
+                self.send_json({"ok": False, "error_cn": "dashboard 数据不存在。"}, status=HTTPStatus.NOT_FOUND)
             return
         return super().do_GET()
 
