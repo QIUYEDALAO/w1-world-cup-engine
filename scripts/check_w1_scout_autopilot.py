@@ -102,6 +102,9 @@ def assert_runner_static() -> None:
         "persist_memory",
         "scout memory: cycle",
         "W1_SCOUT_DISABLE_MEMORY_COMMIT",
+        "dashboard_missing_embeds",
+        "embed_existing",
+        "补写 dashboard 上屏",
         "已开赛/完赛 fixture: 只 audit",
     ]
     for token in required:
@@ -111,6 +114,10 @@ def assert_runner_static() -> None:
         fail("runner must not fetch started fixtures")
     if "scripts/w1_score_engine.py" in text or "DEFAULT_RHO" in text:
         fail("runner must not touch score engine/RHO")
+    server = (ROOT / "scripts/w1_local_predict_server.py").read_text(encoding="utf-8")
+    for token in ("scout_embedded_in_dashboard", "AI 解读已生成但未上屏", "已有合法赛前解读，本轮已补写 dashboard 上屏"):
+        if token not in server:
+            fail(f"local predict server missing Scout embed verification token: {token}")
 
 
 def assert_dry_run() -> None:
@@ -182,6 +189,60 @@ def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
                 fail(f"no-delta should allow {name} for post-match review/calibration visibility")
         if (state / ".scout_bundles.sha").read_text(encoding="utf-8").strip() != "same":
             fail("no-delta must not rewrite sha")
+
+
+def assert_prematch_only_repairs_missing_dashboard_embed() -> None:
+    with tempfile.TemporaryDirectory(prefix="w1_scout_g2_embedgap_") as td:
+        root = Path(td)
+        state = root / "state"
+        state.mkdir()
+        (state / ".scout_bundles.sha").write_text("same\n", encoding="utf-8")
+        (state / "w1_scout_bundles.json").write_text('{"bundles":[{"fixture_id":"F1"}]}\n', encoding="utf-8")
+        (state / "w1_scout_calls.json").write_text(
+            '{"calls":[{"fixture_id":"F1","read":{"tilt_cn":"x"},"independent_edge":false}]}\n',
+            encoding="utf-8",
+        )
+        (state / "scout_lock.jsonl").write_text('{"fixture_id":"F1"}\n', encoding="utf-8")
+        dash = root / "dash.json"
+        dash.write_text('{"match_records":[{"fixture_id":"F1","kickoff_utc":"2099-01-01T00:00:00Z"}]}\n', encoding="utf-8")
+        html = root / "dash.html"
+        html.write_text('<script id="w1-scout-calls" type="application/json">{"calls":[]}</script>\n', encoding="utf-8")
+        marker = root / "marker"
+        marker.mkdir()
+        for name in ("fetch", "build", "analyst", "check", "embed", "lock", "audit", "result_sync", "calibration"):
+            write_cmd(root / f"{name}.sh", "touch \"" + str(marker) + f"/{name}\"")
+        env = {
+            "W1_SCOUT_STATE_DIR": str(state),
+            "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_FORCE_FIXTURE": "F1",
+            "W1_SCOUT_PREMATCH_ONLY": "1",
+            "W1_SCOUT_SKIP_FETCH": "1",
+            "W1_SCOUT_FORCE_HASH": "same",
+            "W1_SCOUT_FETCH_CMD": str(root / "fetch.sh"),
+            "W1_SCOUT_BUILD_CMD": str(root / "build.sh"),
+            "W1_SCOUT_ANALYST_CMD": str(root / "analyst.sh"),
+            "W1_SCOUT_CHECK_CMD": str(root / "check.sh"),
+            "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
+            "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
+            "W1_SCOUT_AUDIT_CMD": str(root / "audit.sh"),
+            "W1_RESULT_SYNC_CMD": str(root / "result_sync.sh"),
+            "W1_SCOUT_CALIBRATION_CMD": str(root / "calibration.sh"),
+            "W1_SCOUT_DASHBOARD_HTML": str(html),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
+        }
+        proc = run(["bash", str(RUNNER)], env=env)
+        if proc.returncode != 0:
+            fail(f"prematch-only embed repair failed: stdout={proc.stdout} stderr={proc.stderr}")
+        if not (marker / "embed").exists():
+            fail("prematch-only no-delta with missing dashboard embed must call embed")
+        for name in ("analyst", "lock", "audit", "result_sync", "calibration"):
+            if (marker / name).exists():
+                fail(f"prematch-only embed repair must not call {name}")
+        if "补写 dashboard 上屏" not in proc.stdout and "dashboard embed missing" not in proc.stdout:
+            fail("prematch-only embed repair must explain dashboard embed compensation")
+        status = json.loads((state / "scout_cycle_status.json").read_text(encoding="utf-8"))
+        if status.get("phase") != "embed_existing" or status.get("result") != "ok":
+            fail("prematch-only embed repair must write embed_existing ok status")
 
 
 def assert_missing_read_forces_ai() -> None:
@@ -329,6 +390,7 @@ def main() -> int:
     assert_runner_static()
     assert_dry_run()
     assert_no_delta_blocks_ai_lock_allows_review_calibration_embed()
+    assert_prematch_only_repairs_missing_dashboard_embed()
     assert_missing_read_forces_ai()
     assert_force_fixture_mode()
     assert_analyst_fail_blocks_progress()

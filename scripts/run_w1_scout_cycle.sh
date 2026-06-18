@@ -20,6 +20,7 @@ done
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 STATE_DIR="${W1_SCOUT_STATE_DIR:-state}"
 DASHBOARD_DATA="${W1_SCOUT_DASHBOARD_DATA:-reports/dashboard/assets/w1_dashboard_data.json}"
+DASHBOARD_HTML="${W1_SCOUT_DASHBOARD_HTML:-reports/dashboard/W1_VISUAL_DASHBOARD.html}"
 BUNDLES_JSON="${STATE_DIR}/w1_scout_bundles.json"
 SHA_FILE="${STATE_DIR}/.scout_bundles.sha"
 STATUS_FILE="${STATE_DIR}/scout_cycle_status.json"
@@ -309,36 +310,23 @@ missing_scout_reads() {
   W1_SCOUT_FUTURES="$FUTURES" \
   W1_SCOUT_CALLS_JSON="${STATE_DIR}/w1_scout_calls.json" \
   W1_SCOUT_LOCK_JSONL="${STATE_DIR}/scout_lock.jsonl" \
-  W1_SCOUT_DASHBOARD_HTML="reports/dashboard/W1_VISUAL_DASHBOARD.html" \
   "$PYTHON_BIN" - <<'PY'
-import json, os, re
+import json, os
 from pathlib import Path
 
 futures = [fid for fid in os.environ.get("W1_SCOUT_FUTURES", "").split() if fid]
 if not futures:
     print("")
     raise SystemExit(0)
-missing = set(futures)
+has_call = set()
 
 calls_path = Path(os.environ["W1_SCOUT_CALLS_JSON"])
 if calls_path.is_file():
     try:
         for call in json.loads(calls_path.read_text(encoding="utf-8")).get("calls", []):
             fid = str(call.get("fixture_id") or "")
-            if fid in missing and isinstance(call.get("read"), dict) and call.get("independent_edge") is False:
-                missing.discard(fid)
-    except Exception:
-        pass
-
-html_path = Path(os.environ["W1_SCOUT_DASHBOARD_HTML"])
-if html_path.is_file():
-    try:
-        m = re.search(r'<script id="w1-scout-calls" type="application/json">(.*?)</script>', html_path.read_text(encoding="utf-8"), re.S)
-        if m:
-            for call in json.loads(m.group(1)).get("calls", []):
-                fid = str(call.get("fixture_id") or "")
-                if fid in missing and isinstance(call.get("read"), dict) and call.get("independent_edge") is False:
-                    missing.discard(fid)
+            if fid in futures and isinstance(call.get("read"), dict) and call.get("independent_edge") is False:
+                has_call.add(fid)
     except Exception:
         pass
 
@@ -353,8 +341,50 @@ if lock_path.is_file():
     except Exception:
         pass
 
-missing.update(fid for fid in futures if fid not in locked)
+missing = {fid for fid in futures if fid not in has_call or fid not in locked}
 print(" ".join(fid for fid in futures if fid in missing))
+PY
+}
+
+dashboard_missing_embeds() {
+  W1_SCOUT_FUTURES="$FUTURES" \
+  W1_SCOUT_CALLS_JSON="${STATE_DIR}/w1_scout_calls.json" \
+  W1_SCOUT_DASHBOARD_HTML="$DASHBOARD_HTML" \
+  "$PYTHON_BIN" - <<'PY'
+import json, os, re
+from pathlib import Path
+
+futures = [fid for fid in os.environ.get("W1_SCOUT_FUTURES", "").split() if fid]
+if not futures:
+    print("")
+    raise SystemExit(0)
+
+has_call = set()
+calls_path = Path(os.environ["W1_SCOUT_CALLS_JSON"])
+if calls_path.is_file():
+    try:
+        for call in json.loads(calls_path.read_text(encoding="utf-8")).get("calls", []):
+            fid = str(call.get("fixture_id") or "")
+            if fid in futures and isinstance(call.get("read"), dict) and call.get("independent_edge") is False:
+                has_call.add(fid)
+    except Exception:
+        pass
+
+has_embed = set()
+html_path = Path(os.environ["W1_SCOUT_DASHBOARD_HTML"])
+if html_path.is_file():
+    try:
+        m = re.search(r'<script id="w1-scout-calls" type="application/json">(.*?)</script>', html_path.read_text(encoding="utf-8"), re.S)
+        if m:
+            for call in json.loads(m.group(1)).get("calls", []):
+                fid = str(call.get("fixture_id") or "")
+                if fid in futures and isinstance(call.get("read"), dict) and call.get("independent_edge") is False:
+                    has_embed.add(fid)
+    except Exception:
+        pass
+
+missing = [fid for fid in futures if fid in has_call and fid not in has_embed]
+print(" ".join(missing))
 PY
 }
 
@@ -369,12 +399,19 @@ fi
 NEW="$(effective_hash)"
 PREV="$(cat "$SHA_FILE" 2>/dev/null || echo "")"
 MISSING_READS="$(missing_scout_reads)"
+DASHBOARD_MISSING_EMBEDS="$(dashboard_missing_embeds)"
 if [ -n "$MISSING_READS" ]; then
   log "存在未生成赛前解读的 fixture，本轮强制生成首版解读: ${MISSING_READS}"
   record_status "missing_read" "running" "存在未生成赛前解读的 fixture，本轮强制生成首版解读。"
 fi
 if [ "$NEW" = "$PREV" ] && [ -z "$MISSING_READS" ]; then
   if [ "${W1_SCOUT_PREMATCH_ONLY:-0}" = "1" ]; then
+    if [ -n "$DASHBOARD_MISSING_EMBEDS" ]; then
+      log "no effective delta -> existing Scout read found but dashboard embed missing: ${DASHBOARD_MISSING_EMBEDS}; embedding without AI/lock"
+      ${EMBED_CMD}
+      record_status "embed_existing" "ok" "已有合法赛前解读；本轮补写 dashboard 上屏，不重复调用 AI、不重新锁定。"
+      exit 0
+    fi
     log "no effective delta -> existing pre-match Scout read/lock is current; skip audit/review/calibration for manual refresh"
     record_status "no_delta" "ok" "已有有效赛前解读；手动强刷不重复调用 AI、不重新锁定。"
     exit 0

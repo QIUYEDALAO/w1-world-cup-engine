@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import threading
 import time
@@ -39,6 +40,7 @@ LINEUP_RUNTIME_OVERLAY = ROOT / "state/w1_lineup_runtime_overlay.json"
 MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
+DASHBOARD_HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
 SCOUT_CYCLE = ROOT / "scripts/run_w1_scout_cycle.sh"
 WEATHER_CLIENT = ROOT / "scripts/w1_weather_client.py"
@@ -977,6 +979,37 @@ def manual_scout_enabled() -> bool:
     return os.environ.get("W1_MANUAL_REFRESH_TRIGGER_SCOUT", "0") == "1"
 
 
+def scout_call_exists(fixture_id: str) -> bool:
+    calls_path = ROOT / "state/w1_scout_calls.json"
+    if not calls_path.is_file():
+        return False
+    try:
+        calls = load_json(calls_path).get("calls", [])
+    except Exception:
+        return False
+    for call in calls:
+        if str(call.get("fixture_id") or "") == str(fixture_id) and isinstance(call.get("read"), dict):
+            return True
+    return False
+
+
+def scout_embedded_in_dashboard(fixture_id: str) -> bool:
+    if not DASHBOARD_HTML.is_file():
+        return False
+    try:
+        html = DASHBOARD_HTML.read_text(encoding="utf-8")
+        match = re.search(r'<script id="w1-scout-calls" type="application/json">(.*?)</script>', html, re.S)
+        if not match:
+            return False
+        calls = json.loads(match.group(1)).get("calls", [])
+    except Exception:
+        return False
+    for call in calls:
+        if str(call.get("fixture_id") or "") == str(fixture_id) and isinstance(call.get("read"), dict):
+            return True
+    return False
+
+
 def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
     fixture_id = str(match.get("fixture_id") or "")
     if not manual_scout_enabled():
@@ -1005,7 +1038,16 @@ def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
     if proc.returncode != 0:
         tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-1:] or ["Scout cycle failed"]
         return "AI 解读未生成：Scout 单场周期失败；未推进旧内容。" + (" " + tail[0] if tail else "")
-    return "Scout 单场赛前解读已生成并上屏，已按首次合法赛前 call 锁定。"
+    has_call = scout_call_exists(fixture_id)
+    has_embed = scout_embedded_in_dashboard(fixture_id)
+    if has_call and has_embed:
+        stdout = proc.stdout or ""
+        if "embed_existing" in stdout or "补写 dashboard 上屏" in stdout or "dashboard embed missing" in stdout:
+            return "已有合法赛前解读，本轮已补写 dashboard 上屏；未重复调用 AI。"
+        return "Scout 单场赛前解读已生成并上屏，已按首次合法赛前 call 锁定。"
+    if has_call and not has_embed:
+        return "AI 解读已生成但未上屏：dashboard embed 校验失败，请检查 w1_scout_embed.py。"
+    return "AI 解读未生成：Scout 单场周期未产出合法 read；未推进旧内容。"
 
 
 def run_prediction(job_id: str, match: dict[str, Any]) -> None:
