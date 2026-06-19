@@ -29,6 +29,11 @@ except Exception:  # noqa: BLE001 - collection is WARN_ONLY for predict runtime
     append_records = None
     records_from_api_payload = None
 
+try:
+    import w1_scout_embed as SCOUT_EMBED
+except Exception:  # noqa: BLE001 - dashboard can still serve without Scout display helpers
+    SCOUT_EMBED = None
+
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = "127.0.0.1"
@@ -45,6 +50,9 @@ DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 DASHBOARD_HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
 SCOUT_CYCLE = ROOT / "scripts/run_w1_scout_cycle.sh"
+SCOUT_CALLS = ROOT / "state/w1_scout_calls.json"
+SCOUT_REVIEWS = ROOT / "state/scout_reviews.jsonl"
+SCOUT_CALIBRATION = ROOT / "state/scout_calibration.json"
 WEATHER_CLIENT = ROOT / "scripts/w1_weather_client.py"
 VENUES_JSON = ROOT / "data/static/world_cup_2026_venues.json"
 SCOPE_JSON = ROOT / "config/w1_competition_scope.json"
@@ -230,7 +238,7 @@ def autopilot_enabled() -> bool:
 
 
 def load_scout_calls() -> list[dict[str, Any]]:
-    path = ROOT / "state/w1_scout_calls.json"
+    path = SCOUT_CALLS
     if not path.is_file():
         return []
     try:
@@ -238,6 +246,57 @@ def load_scout_calls() -> list[dict[str, Any]]:
         return calls if isinstance(calls, list) else []
     except Exception:
         return []
+
+
+def load_scout_calls_for_dashboard() -> dict[str, Any]:
+    if not SCOUT_CALLS.is_file():
+        return {"generated_by": None, "calls": []}
+    try:
+        payload = load_json(SCOUT_CALLS)
+    except Exception:
+        return {"generated_by": None, "calls": []}
+    calls = payload.get("calls", [])
+    if not isinstance(calls, list):
+        calls = []
+    if SCOUT_EMBED is None:
+        display_calls = [call for call in calls if isinstance(call, dict)]
+    else:
+        try:
+            SCOUT_EMBED.BUNDLE_BY_FIXTURE = SCOUT_EMBED.load_bundle_map()
+            display_calls = [SCOUT_EMBED.display_call(call) for call in calls if isinstance(call, dict)]
+        except Exception:
+            display_calls = [call for call in calls if isinstance(call, dict)]
+    return {
+        "generated_by": payload.get("generated_by"),
+        "calls": display_calls,
+        "source_cn": "dynamic /dashboard-data; static HTML embed is offline fallback only",
+    }
+
+
+def load_scout_reviews_for_dashboard() -> dict[str, Any]:
+    if SCOUT_EMBED is not None:
+        try:
+            return {"reviews": SCOUT_EMBED.read_reviews(), "source_cn": "dynamic /dashboard-data"}
+        except Exception:
+            pass
+    rows: list[dict[str, Any]] = []
+    if SCOUT_REVIEWS.is_file():
+        try:
+            rows = [json.loads(line) for line in SCOUT_REVIEWS.read_text(encoding="utf-8").splitlines() if line.strip()]
+        except Exception:
+            rows = []
+    return {"reviews": rows, "source_cn": "dynamic /dashboard-data"}
+
+
+def load_scout_calibration_for_dashboard() -> dict[str, Any]:
+    if SCOUT_CALIBRATION.is_file():
+        try:
+            payload = load_json(SCOUT_CALIBRATION)
+            payload["source_cn"] = "dynamic /dashboard-data"
+            return payload
+        except Exception:
+            pass
+    return {"schema_version": "W1_SCOUT_CALIBRATION_V1", "note_cn": "这是 Scout 解读的自我体检与校准,不是战胜市场的证据。", "source_cn": "dynamic /dashboard-data"}
 
 
 def load_scout_lock_ids() -> set[str]:
@@ -402,6 +461,9 @@ def dashboard_data_payload() -> dict[str, Any] | None:
     if not isinstance(records, list) or not records:
         return None
     payload["scout_cycle_status"] = scheduler_status_for_dashboard(records)
+    payload["scout_calls"] = load_scout_calls_for_dashboard()
+    payload["scout_reviews"] = load_scout_reviews_for_dashboard()
+    payload["scout_calibration"] = load_scout_calibration_for_dashboard()
     return payload
 
 

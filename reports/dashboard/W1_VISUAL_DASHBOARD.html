@@ -54311,6 +54311,7 @@ const $=(s,e=document)=>e.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const fmtP=v=>v==null?'–':(v*100).toFixed(1)+'%';
 let D=null,RECS=[],active=0,selStage=null,busy=false,selDay=null,DAYS=[],backendConnected=false,expertOpen=false;
+let SCOUT_CALLS=null,SCOUT_REVIEWS=null,SCOUT_CALIBRATION=null;
 
 // ---- Dixon-Coles 还原 (与引擎一致) ----
 const fact=[1];for(let i=1;i<=12;i++)fact[i]=fact[i-1]*i;
@@ -54372,11 +54373,21 @@ function pMarketStateBar(r){
 async function fetchBackendDashboardData(){
   const r=await fetch('/dashboard-data',{cache:'no-store'});
   if(!r.ok)throw new Error('dashboard-data '+r.status);
-  return await r.json();
+  const j=await r.json();
+  syncDynamicScoutPayload(j);
+  return j;
 }
 async function loadData(){
   try{const j=await fetchBackendDashboardData();backendConnected=true;markSource(true);return j;}catch(e){}
   backendConnected=false;markSource(false);return JSON.parse($('#w1-data').textContent);
+}
+function scriptJsonPayload(id, fallback){
+  try{const el=document.getElementById(id);return el?JSON.parse(el.textContent||'{}'):fallback;}catch(e){return fallback;}
+}
+function syncDynamicScoutPayload(payload){
+  if(payload&&payload.scout_calls&&Array.isArray(payload.scout_calls.calls))SCOUT_CALLS=payload.scout_calls;
+  if(payload&&payload.scout_reviews&&Array.isArray(payload.scout_reviews.reviews))SCOUT_REVIEWS=payload.scout_reviews;
+  if(payload&&payload.scout_calibration)SCOUT_CALIBRATION=payload.scout_calibration;
 }
 function markSource(live){const p=$('#srcPill');p.classList.toggle('off',!live);$('#srcTxt').textContent=live?'实时 · 后端在线':'静态快照';}
 function dashboardEmptyMessage(){
@@ -54842,15 +54853,14 @@ function scoutHasReadableCall(c){
   return !!(r&&(r.asian_handicap_card||r.recommendation_card));
 }
 function scoutCallFor(fid){
-  try{const el=document.getElementById('w1-scout-calls');if(!el)return null;
-    const d=JSON.parse(el.textContent||'{}');
+  try{const d=SCOUT_CALLS||scriptJsonPayload('w1-scout-calls',{});
     const arr=(d.calls||[]).filter(c=>String(c.fixture_id)===String(fid)&&scoutHasReadableCall(c));
     arr.sort((a,b)=>(scoutStageRank(b.stage_id)-scoutStageRank(a.stage_id))||String(b.generated_at||'').localeCompare(String(a.generated_at||'')));
     return arr[0]||null;}catch(e){return null;}
 }
 function scoutReviewFor(fid){
-  try{const el=document.getElementById('w1-scout-reviews');if(!el)return null;
-    const d=JSON.parse(el.textContent||'{}');return (d.reviews||[]).find(c=>String(c.fixture_id)===String(fid))||null;}catch(e){return null;}
+  try{const d=SCOUT_REVIEWS||scriptJsonPayload('w1-scout-reviews',{});
+    return (d.reviews||[]).find(c=>String(c.fixture_id)===String(fid))||null;}catch(e){return null;}
 }
 function scoutCycleStatus(){
   if(D&&D.scout_cycle_status)return D.scout_cycle_status;
@@ -54860,7 +54870,7 @@ function scoutLearningStatus(){
   try{const el=document.getElementById('w1-scout-learning-status');if(!el)return null;return JSON.parse(el.textContent||'{}');}catch(e){return null;}
 }
 function scoutCalibration(){
-  try{const el=document.getElementById('w1-scout-calibration');if(!el)return null;return JSON.parse(el.textContent||'{}');}catch(e){return null;}
+  try{return SCOUT_CALIBRATION||scriptJsonPayload('w1-scout-calibration',{});}catch(e){return null;}
 }
 function fmtCst(v){
   if(!v)return '暂无';

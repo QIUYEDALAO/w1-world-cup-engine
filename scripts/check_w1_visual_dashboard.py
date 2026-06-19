@@ -529,6 +529,8 @@ def assert_first_screen(text: str) -> None:
     scout_call = _func_body(text, "function scoutCallFor(")
     if not scout_call:
         fail("scoutCallFor function missing")
+    if "SCOUT_CALLS||scriptJsonPayload" not in scout_call:
+        fail("scoutCallFor must prefer dynamic /dashboard-data scout_calls and use static HTML only as fallback")
     scout_readable = _func_body(text, "function scoutHasReadableCall(")
     if not scout_readable:
         fail("scoutHasReadableCall function missing")
@@ -542,6 +544,13 @@ def assert_first_screen(text: str) -> None:
         fail("pScoutAnalyst must use scoutCallFor(r.fixture_id) as the single source for card vs pending state")
     if "if(!c||!c.read)" not in scout:
         fail("pScoutAnalyst pending state must only render when no best readable Scout call exists")
+    fetch_backend = _func_body(text, "async function fetchBackendDashboardData(")
+    if "syncDynamicScoutPayload(j)" not in fetch_backend:
+        fail("fetchBackendDashboardData must refresh dynamic Scout calls from /dashboard-data")
+    sync_dynamic = _func_body(text, "function syncDynamicScoutPayload(")
+    for need in ("payload.scout_calls", "SCOUT_CALLS=payload.scout_calls", "payload.scout_reviews", "payload.scout_calibration"):
+        if need not in sync_dynamic:
+            fail(f"dynamic dashboard payload must refresh Scout memory: {need}")
     for need in (
         "AI亚盘推荐卡 · DeepSeek",
         "asian_handicap_card",

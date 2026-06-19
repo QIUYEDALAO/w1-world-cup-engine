@@ -58,13 +58,15 @@ def assert_scheduler_static() -> None:
         "--once", "--daemon", "--interval", "--dry-run", "--now-override", "--fixture-id", "--stage", "--max-fixtures",
         "config/w1_scout_schedule_policy.json", "due_queue", "kickoff", "window_grace_minutes", "trigger <= now < due_end", "now >= kickoff",
         "W1_SCOUT_FORCE_FIXTURE", "W1_SCOUT_FORCE_HASH", "W1_SCOUT_FORCE_REFRESH", "W1_SCOUT_SCHEDULE_STAGE", "W1_SCOUT_SCHEDULE_STAGE_LABEL", "W1_SCOUT_LOCK_CMD", "stage_id", "stage_label_cn",
-        "data_snapshot_digest", "w1_scout_embed.py", "w1_scout_ledger.py", "pending_remaining_count", "pending_remaining_preview", "timeout", "partial", "dashboard 仅展示 scheduler 产物",
-        "verify_embedded_fixture", "embed_missing", "已生成 read，但 dashboard embed 未找到该 fixture/stage",
+        "data_snapshot_digest", "w1_scout_ledger.py", "pending_remaining_count", "pending_remaining_preview", "timeout", "partial", "dashboard 仅展示 scheduler 产物",
+        "dashboard_scout_calls_payload", "verify_dashboard_payload_fixture", "dashboard_payload_missing", "/dashboard-data scout_calls",
     ):
         if token not in text:
             fail(f"scheduler missing token: {token}")
     if "embedded_count = len(success) if embed.returncode == 0 else 0" in text:
         fail("scheduler must not count embed success from returncode only")
+    if "verify_embedded_fixture(fid, sid)" in text:
+        fail("scheduler embedded_count must be based on dynamic dashboard payload, not static HTML embed")
     if "w1_score_engine" in text or "DEFAULT_RHO" in text:
         fail("scheduler must not touch score engine/RHO")
 
@@ -130,6 +132,9 @@ def assert_viewer_runtime_contract() -> None:
         fail("server autopilot must default disabled")
     if "SCOUT_SCHEDULER_STATUS" not in server or "scheduler_status_for_dashboard" not in server:
         fail("/dashboard-data must read scheduler status, not server autopilot as primary flow")
+    for token in ("load_scout_calls_for_dashboard", 'payload["scout_calls"]', "SCOUT_EMBED.display_call", "scout_reviews", "scout_calibration"):
+        if token not in server:
+            fail(f"/dashboard-data must serve dynamic Scout display payload: {token}")
     html = HTML.read_text(encoding="utf-8") if HTML.is_file() else ""
     for bad in ("server 兜底检查开启", "等待下一次自动周期", "下一次检查"):
         if bad in html:

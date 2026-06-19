@@ -30,6 +30,11 @@ EMBED = ROOT / "scripts/w1_scout_embed.py"
 LEDGER = ROOT / "scripts/w1_scout_ledger.py"
 HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 
+try:
+    import w1_scout_embed as SCOUT_EMBED
+except Exception:  # noqa: BLE001 - scheduler can still produce status with empty dashboard payload
+    SCOUT_EMBED = None
+
 
 def now_utc() -> datetime:
     return datetime.now(timezone.utc).replace(microsecond=0)
@@ -93,6 +98,37 @@ def load_calls() -> dict[str, Any]:
     return load_json(CALLS, {"stage": "W1_SCOUT", "schema_version": "W1_SCOUT_READ_V1", "generated_by": None, "calls": []})
 
 
+def dashboard_scout_calls_payload() -> dict[str, Any]:
+    calls_doc = load_calls()
+    calls = calls_doc.get("calls", [])
+    if not isinstance(calls, list):
+        calls = []
+    if SCOUT_EMBED is None:
+        display_calls = [call for call in calls if isinstance(call, dict)]
+    else:
+        try:
+            SCOUT_EMBED.BUNDLE_BY_FIXTURE = SCOUT_EMBED.load_bundle_map()
+            display_calls = [SCOUT_EMBED.display_call(call) for call in calls if isinstance(call, dict)]
+        except Exception:
+            display_calls = [call for call in calls if isinstance(call, dict)]
+    return {"generated_by": calls_doc.get("generated_by"), "calls": display_calls}
+
+
+def verify_dashboard_payload_fixture(fixture_id: str, stage_id: str | None = None) -> bool:
+    """Verify the dynamic /dashboard-data scout_calls payload."""
+    for call in dashboard_scout_calls_payload().get("calls", []):
+        if str(call.get("fixture_id")) != str(fixture_id):
+            continue
+        if stage_id is not None and str(call.get("stage_id") or "") != str(stage_id):
+            continue
+        read = call.get("read")
+        if not isinstance(read, dict):
+            continue
+        if isinstance(read.get("asian_handicap_card"), dict) or isinstance(read.get("recommendation_card"), dict):
+            return True
+    return False
+
+
 def _html_scout_calls() -> list[dict[str, Any]]:
     if not HTML.is_file():
         return []
@@ -113,7 +149,7 @@ def _html_scout_calls() -> list[dict[str, Any]]:
 
 
 def verify_embedded_fixture(fixture_id: str, stage_id: str | None = None) -> bool:
-    """Verify dashboard embedded JSON, not a loose HTML substring."""
+    """Verify dashboard embedded JSON for offline snapshot fallback."""
     for call in _html_scout_calls():
         if str(call.get("fixture_id")) != str(fixture_id):
             continue
@@ -308,23 +344,20 @@ def run_once(args: argparse.Namespace) -> int:
     failed_results = [r for r in results if r.get("result") != "success"]
     embedded_count = 0
     if success:
-        embed = subprocess.run([sys.executable, str(EMBED)], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if embed.returncode != 0:
-            failed_results.append({"fixture_id": "dashboard", "stage_id": "embed", "result": "failed", "message_cn": "dashboard embed 失败"})
-        else:
-            for row in success:
-                fid = str(row.get("fixture_id") or "")
-                sid = str(row.get("stage_id") or "")
-                if verify_embedded_fixture(fid, sid):
-                    embedded_count += 1
-                else:
-                    row["embed_verified"] = False
-                    failed_results.append({
-                        "fixture_id": fid,
-                        "stage_id": sid,
-                        "result": "embed_missing",
-                        "message_cn": "已生成 read，但 dashboard embed 未找到该 fixture/stage",
-                    })
+        for row in success:
+            fid = str(row.get("fixture_id") or "")
+            sid = str(row.get("stage_id") or "")
+            if verify_dashboard_payload_fixture(fid, sid):
+                embedded_count += 1
+                row["dashboard_payload_verified"] = True
+            else:
+                row["dashboard_payload_verified"] = False
+                failed_results.append({
+                    "fixture_id": fid,
+                    "stage_id": sid,
+                    "result": "dashboard_payload_missing",
+                    "message_cn": "已生成 read，但 /dashboard-data scout_calls 未找到该 fixture/stage",
+                })
     if failed_results and success:
         overall = "partial"
     elif failed_results:
