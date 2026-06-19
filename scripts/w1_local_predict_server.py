@@ -129,6 +129,7 @@ def progress_payload(
     match: dict[str, Any],
     error: str | None = None,
     job_type: str = "manual",
+    extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     fixture_id = str(match.get("fixture_id") or match.get("requested_fixture_id") or "").strip()
     match_name = str(match.get("match") or "").strip()
@@ -146,7 +147,7 @@ def progress_payload(
             state = "waiting"
         steps.append({"index": index, "label": label, "state": state})
 
-    return {
+    payload = {
         "schema_version": "w1_predict_progress.v1",
         "job_id": job_id,
         "job_type": job_type,
@@ -165,6 +166,9 @@ def progress_payload(
         "dashboard_data_path": str(DASHBOARD_DATA.relative_to(ROOT)),
         "updated_at": now_ts(),
     }
+    if extra:
+        payload.update(extra)
+    return payload
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -365,6 +369,15 @@ def dashboard_data_payload() -> dict[str, Any] | None:
     }
     if not autopilot_enabled():
         status["message_cn"] = "自动周期未启用；请启动 server 时设置 W1_SCOUT_AUTOPILOT=1，或使用手动强刷。"
+    elif status.get("result") in {"failed", "partial"} and status.get("message_cn"):
+        status["message_cn"] = str(status.get("message_cn"))
+    elif fixture_status["missing_read_count"] and int(status.get("processed_count") or 0) > 0:
+        status["message_cn"] = (
+            f"本轮处理 {int(status.get('processed_count') or 0)} 场，"
+            f"已生成 {int(status.get('generated_count') or 0)} 场，"
+            f"已上屏 {int(status.get('embedded_count') or 0)} 场，"
+            f"仍有 {fixture_status['missing_read_count']} 场待生成；下次自动周期继续。"
+        )
     elif fixture_status["missing_read_count"]:
         status["message_cn"] = "AI推荐卡待生成；自动周期将在下次检查时处理，也可手动强刷。"
     elif fixture_status["missing_embed_count"]:
@@ -1492,32 +1505,62 @@ def run_scout_autopilot_once(reason: str = "scheduled") -> bool:
             "W1_SCOUT_LOOKAHEAD_HOURS": str(SCOUT_AUTOPILOT_LOOKAHEAD_HOURS),
             "W1_SCOUT_DISABLE_MEMORY_COMMIT": env.get("W1_SCOUT_DISABLE_MEMORY_COMMIT", "1"),
         }
-        proc = run_command(["bash", str(SCOUT_CYCLE)], cycle_env, timeout=900)
+        proc = run_command(["bash", str(SCOUT_CYCLE)], cycle_env, timeout=int(env.get("W1_SCOUT_AUTOPILOT_TIMEOUT_SECONDS", "420")))
         status_payload = dashboard_data_payload() or {"match_records": []}
         fixture_status = scout_fixture_status(status_payload.get("match_records") or [])
+        cycle_status: dict[str, Any] = {}
+        try:
+            if SCOUT_CYCLE_STATUS.is_file():
+                cycle_status = load_json(SCOUT_CYCLE_STATUS)
+        except Exception:
+            cycle_status = {}
+        progress_counts = {
+            "phase": cycle_status.get("phase"),
+            "generated_count": int(cycle_status.get("generated_count") or 0),
+            "embedded_count": int(cycle_status.get("embedded_count") or 0),
+            "failed_count": int(cycle_status.get("failed_count") or 0),
+            "pending_count": int(fixture_status.get("pending_count") or cycle_status.get("pending_count") or 0),
+            "failed_fixtures": cycle_status.get("failed_fixtures") or [],
+        }
         if proc.returncode != 0:
-            msg = "Scout 自动周期失败；未推进旧内容。"
-            write_scout_cycle_status("autopilot", "failed", msg, {**fixture_status, "failed_count": 1})
-            write_progress(progress_payload(job_id=job_id, job_type="autopilot", status="failed", step_index=11, message=msg, match={"fixture_id": "", "match": "Scout 自动周期"}, error=(proc.stderr or proc.stdout or "").splitlines()[-1] if (proc.stderr or proc.stdout) else msg))
+            msg = cycle_status.get("message_cn") or "Scout 自动周期失败；已保留当前快照，未覆盖旧推荐。"
+            err = (proc.stderr or proc.stdout or "").splitlines()[-1] if (proc.stderr or proc.stdout) else msg
+            progress_counts["failed_count"] = max(1, int(progress_counts.get("failed_count") or 0))
+            write_scout_cycle_status("autopilot", "failed", msg, {**fixture_status, **progress_counts})
+            write_progress(progress_payload(job_id=job_id, job_type="autopilot", status="failed", step_index=11, message=msg, match={"fixture_id": "", "match": "Scout 自动周期"}, error=err, extra=progress_counts))
             return False
         generated = 0
         for line in (proc.stdout or "").splitlines():
             if "DeepSeek analyst" in line or "强制生成首版解读" in line:
                 generated = max(generated, int(before_status.get("missing_read_count") or 1))
-        msg = "自动周期运行中；已完成本轮未来赛程检查。"
+        result = str(cycle_status.get("result") or "ok")
+        if result == "partial":
+            msg = cycle_status.get("message_cn") or "Scout 自动周期部分完成；剩余 fixture 将在下轮重试。"
+        else:
+            msg = cycle_status.get("message_cn") or "自动周期运行中；已完成本轮未来赛程检查。"
+        progress_counts["generated_count"] = int(cycle_status.get("generated_count") or generated or 0)
+        progress_counts["embedded_count"] = int(cycle_status.get("embedded_count") or progress_counts["generated_count"])
+        progress_counts["failed_count"] = int(cycle_status.get("failed_count") or 0)
         write_scout_cycle_status(
             "autopilot",
-            "ok",
+            "partial" if result == "partial" else "ok",
             msg,
             {
                 **fixture_status,
-                "generated_count": generated,
+                "generated_count": progress_counts["generated_count"],
+                "embedded_count": progress_counts["embedded_count"],
                 "skipped_count": 1 if generated == 0 else 0,
-                "failed_count": 0,
+                "failed_count": progress_counts["failed_count"],
+                "failed_fixtures": progress_counts["failed_fixtures"],
             },
         )
-        write_progress(progress_payload(job_id=job_id, job_type="autopilot", status="done", step_index=11, message=msg, match={"fixture_id": "", "match": "Scout 自动周期"}))
+        write_progress(progress_payload(job_id=job_id, job_type="autopilot", status="done", step_index=11, message=msg, match={"fixture_id": "", "match": "Scout 自动周期"}, extra=progress_counts))
         return True
+    except subprocess.TimeoutExpired as exc:
+        msg = "AI 分析师超时；本轮未覆盖旧推荐，将在下轮自动周期重试。"
+        write_scout_cycle_status("autopilot", "failed", msg, {"failed_count": 1})
+        write_progress(progress_payload(job_id=job_id, job_type="autopilot", status="failed", step_index=11, message=msg, match={"fixture_id": "", "match": "Scout 自动周期"}, error=str(exc), extra={"failed_count": 1}))
+        return False
     except Exception as exc:  # noqa: BLE001 - autopilot must not crash the server
         msg = f"Scout 自动周期异常；未推进旧内容。{exc}"
         write_scout_cycle_status("autopilot", "failed", msg)

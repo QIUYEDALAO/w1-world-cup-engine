@@ -774,13 +774,27 @@ def build_calls(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[tu
 
 def write_calls(calls: list[dict[str, Any]], cfg: dict[str, str]) -> None:
     CALLS_P.parent.mkdir(parents=True, exist_ok=True)
+    merged: dict[str, dict[str, Any]] = {}
+    if CALLS_P.is_file():
+        try:
+            prior = json.loads(CALLS_P.read_text(encoding="utf-8"))
+            for call in prior.get("calls", []):
+                fid = str(call.get("fixture_id") or "")
+                if fid:
+                    merged[fid] = call
+        except Exception:
+            merged = {}
+    for call in calls:
+        fid = str(call.get("fixture_id") or "")
+        if fid:
+            merged[fid] = call
     CALLS_P.write_text(
         json.dumps(
             {
                 "stage": "W1_SCOUT",
                 "schema_version": "W1_SCOUT_READ_V1",
                 "generated_by": f"{cfg['provider']}:{cfg['model']}",
-                "calls": calls,
+                "calls": list(merged.values()),
             },
             ensure_ascii=False,
             indent=2,
@@ -813,6 +827,13 @@ def main() -> int:
     if failed:
         for fixture_id, reason in failed[:12]:
             print(f"FAIL: fixture {fixture_id}: {reason}", file=sys.stderr)
+        if calls and os.environ.get("W1_SCOUT_ALLOW_PARTIAL_WRITES", "").strip().lower() in {"1", "true", "yes", "on"}:
+            write_calls(calls, cfg)
+            print(
+                f"scout analyst PARTIAL: provider={cfg['provider']} model={cfg['model']} wrote {len(calls)} accepted read(s), failed={len(failed)} -> {CALLS_P.relative_to(ROOT)}",
+                file=sys.stderr,
+            )
+            return 2
         print(f"scout analyst wrote nothing because {len(failed)} fixture(s) failed validation.", file=sys.stderr)
         return 1
     write_calls(calls, cfg)

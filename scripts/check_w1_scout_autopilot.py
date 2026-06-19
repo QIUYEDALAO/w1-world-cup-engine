@@ -95,7 +95,11 @@ def assert_runner_static() -> None:
         "W1_SCOUT_ENABLE_REVIEW",
         "W1_SCOUT_CALIBRATION_CMD",
         "W1_SCOUT_REVIEW_CMD",
-        "analyst failed -> do not update sha, do not embed, do not lock; audit only",
+        "analyst failed/partial -> try embedding validated partial reads; do not discard successes",
+        "W1_SCOUT_AUTOPILOT_MAX_FIXTURES_PER_RUN",
+        "W1_SCOUT_ANALYST_TIMEOUT_SECONDS",
+        "Scout 自动周期部分完成",
+        "command timed out after",
         "future fixtures selected",
         "scout_cycle_status.json",
         "scout_cycle_errors.log",
@@ -138,6 +142,8 @@ def assert_runner_static() -> None:
         "_active_job_started_at",
         "_active_job_type",
         "cleanup_finished_or_stale_active_job_locked",
+        "progress_counts",
+        "AI 分析师超时",
         "已有手动强刷任务正在进行，请等待当前任务完成。",
     ):
         if token not in server:
@@ -438,6 +444,151 @@ def assert_analyst_fail_blocks_progress() -> None:
             fail("analyst failure must write failed cycle status")
 
 
+def assert_analyst_timeout_finishes_failed() -> None:
+    with tempfile.TemporaryDirectory(prefix="w1_scout_g2_timeout_") as td:
+        root = Path(td)
+        state = root / "state"
+        state.mkdir()
+        (state / "w1_scout_bundles.json").write_text('{"bundles":[{"fixture_id":"F1"}]}\n', encoding="utf-8")
+        dash = root / "dash.json"
+        dash.write_text('{"match_records":[{"fixture_id":"F1","kickoff_utc":"2099-01-01T00:00:00Z"}]}\n', encoding="utf-8")
+        marker = root / "marker"
+        marker.mkdir()
+        write_cmd(root / "ok.sh", "exit 0")
+        write_cmd(root / "slow.sh", "sleep 5")
+        write_cmd(root / "embed.sh", "touch \"" + str(marker) + "/embed\"")
+        write_cmd(root / "lock.sh", "touch \"" + str(marker) + "/lock\"")
+        env = {
+            "W1_SCOUT_STATE_DIR": str(state),
+            "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_LOOKAHEAD_HOURS": "640000",
+            "W1_SCOUT_FORCE_HASH": "timeout",
+            "W1_SCOUT_ANALYST_TIMEOUT_SECONDS": "1",
+            "W1_SCOUT_FETCH_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_BUILD_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_ANALYST_CMD": str(root / "slow.sh"),
+            "W1_SCOUT_CHECK_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
+            "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
+            "W1_SCOUT_AUDIT_CMD": str(root / "ok.sh"),
+            "W1_RESULT_SYNC_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_CALIBRATION_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
+        }
+        proc = run(["bash", str(RUNNER)], env=env)
+        if proc.returncode == 0:
+            fail("analyst timeout must make runner exit nonzero when no read was produced")
+        status = json.loads((state / "scout_cycle_status.json").read_text(encoding="utf-8"))
+        if status.get("result") != "failed" or "未生成可上屏解读" not in status.get("message_cn", ""):
+            fail("analyst timeout must finish with failed status, not running")
+        for name in ("embed", "lock"):
+            if (marker / name).exists():
+                fail(f"analyst timeout without reads must not call {name}")
+
+
+def assert_partial_success_embeds_and_marks_partial() -> None:
+    with tempfile.TemporaryDirectory(prefix="w1_scout_g2_partial_") as td:
+        root = Path(td)
+        state = root / "state"
+        state.mkdir()
+        (state / "w1_scout_bundles.json").write_text('{"bundles":[{"fixture_id":"F1"},{"fixture_id":"F2"}]}\n', encoding="utf-8")
+        dash = root / "dash.json"
+        dash.write_text(
+            '{"match_records":[{"fixture_id":"F1","kickoff_utc":"2099-01-01T00:00:00Z"},{"fixture_id":"F2","kickoff_utc":"2099-01-01T00:00:00Z"}]}\n',
+            encoding="utf-8",
+        )
+        marker = root / "marker"
+        marker.mkdir()
+        write_cmd(root / "ok.sh", "exit 0")
+        write_cmd(
+            root / "partial.sh",
+            "mkdir -p \"$W1_SCOUT_STATE_DIR\"\n"
+            "cat > \"$W1_SCOUT_STATE_DIR/w1_scout_calls.json\" <<'JSON'\n"
+            '{"calls":[{"fixture_id":"F1","read":{"tilt_cn":"x"},"independent_edge":false}]}\n'
+            "JSON\n"
+            "exit 2",
+        )
+        for name in ("embed", "lock"):
+            write_cmd(root / f"{name}.sh", "touch \"" + str(marker) + f"/{name}\"")
+        env = {
+            "W1_SCOUT_STATE_DIR": str(state),
+            "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_LOOKAHEAD_HOURS": "640000",
+            "W1_SCOUT_FORCE_HASH": "partial",
+            "W1_SCOUT_FETCH_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_BUILD_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_ANALYST_CMD": str(root / "partial.sh"),
+            "W1_SCOUT_CHECK_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
+            "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
+            "W1_SCOUT_AUDIT_CMD": str(root / "ok.sh"),
+            "W1_RESULT_SYNC_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_CALIBRATION_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
+        }
+        proc = run(["bash", str(RUNNER)], env=env)
+        if proc.returncode != 0:
+            fail(f"partial success should exit 0 after embedding valid reads: stdout={proc.stdout} stderr={proc.stderr}")
+        for name in ("embed", "lock"):
+            if not (marker / name).exists():
+                fail(f"partial success must call {name} for accepted fixture")
+        status = json.loads((state / "scout_cycle_status.json").read_text(encoding="utf-8"))
+        if status.get("result") != "partial" or status.get("embedded_count", 0) < 1:
+            fail("partial success must write partial status with embedded_count")
+
+
+def assert_max_fixtures_per_run_limits_analyst_scope() -> None:
+    with tempfile.TemporaryDirectory(prefix="w1_scout_g2_max_") as td:
+        root = Path(td)
+        state = root / "state"
+        state.mkdir()
+        (state / "w1_scout_bundles.json").write_text('{"bundles":[{"fixture_id":"F1"},{"fixture_id":"F2"},{"fixture_id":"F3"}]}\n', encoding="utf-8")
+        dash = root / "dash.json"
+        dash.write_text(
+            '{"match_records":[{"fixture_id":"F1","kickoff_utc":"2099-01-01T00:00:00Z"},{"fixture_id":"F2","kickoff_utc":"2099-01-01T00:00:00Z"},{"fixture_id":"F3","kickoff_utc":"2099-01-01T00:00:00Z"}]}\n',
+            encoding="utf-8",
+        )
+        marker = root / "marker"
+        marker.mkdir()
+        write_cmd(root / "ok.sh", "exit 0")
+        write_cmd(
+            root / "analyst.sh",
+            "printf '%s\\n' \"$@\" > \"" + str(marker) + "/analyst_args\"\n"
+            "mkdir -p \"$W1_SCOUT_STATE_DIR\"\n"
+            "cat > \"$W1_SCOUT_STATE_DIR/w1_scout_calls.json\" <<'JSON'\n"
+            '{"calls":[{"fixture_id":"F1","read":{"tilt_cn":"x"},"independent_edge":false},{"fixture_id":"F2","read":{"tilt_cn":"x"},"independent_edge":false}]}\n'
+            "JSON\n",
+        )
+        for name in ("embed", "lock"):
+            write_cmd(root / f"{name}.sh", "touch \"" + str(marker) + f"/{name}\"")
+        env = {
+            "W1_SCOUT_STATE_DIR": str(state),
+            "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_LOOKAHEAD_HOURS": "640000",
+            "W1_SCOUT_AUTOPILOT_MAX_FIXTURES_PER_RUN": "2",
+            "W1_SCOUT_FORCE_HASH": "max",
+            "W1_SCOUT_FETCH_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_BUILD_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_ANALYST_CMD": str(root / "analyst.sh"),
+            "W1_SCOUT_CHECK_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_EMBED_CMD": str(root / "embed.sh"),
+            "W1_SCOUT_LOCK_CMD": str(root / "lock.sh"),
+            "W1_SCOUT_AUDIT_CMD": str(root / "ok.sh"),
+            "W1_RESULT_SYNC_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_CALIBRATION_CMD": str(root / "ok.sh"),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
+        }
+        proc = run(["bash", str(RUNNER)], env=env)
+        if proc.returncode != 0:
+            fail(f"max fixtures runner failed: stdout={proc.stdout} stderr={proc.stderr}")
+        args = (marker / "analyst_args").read_text(encoding="utf-8")
+        if "F3" in args or "F1" not in args or "F2" not in args:
+            fail("autopilot must pass only the first max fixtures to analyst")
+        status = json.loads((state / "scout_cycle_status.json").read_text(encoding="utf-8"))
+        if status.get("processed_count") != 2 or status.get("pending_count") != 1:
+            fail("autopilot max fixture status must record processed=2 and pending=1")
+
+
 def assert_gitignored_runtime() -> None:
     tracked = set(x for x in run("git ls-files state data/scout").stdout.splitlines() if x.strip())
     unexpected = sorted(tracked - SCOUT_MEMORY_ALLOWLIST)
@@ -459,6 +610,9 @@ def main() -> int:
     assert_missing_read_forces_ai()
     assert_force_fixture_mode()
     assert_analyst_fail_blocks_progress()
+    assert_analyst_timeout_finishes_failed()
+    assert_partial_success_embeds_and_marks_partial()
+    assert_max_fixtures_per_run_limits_analyst_scope()
     assert_gitignored_runtime()
     for required in (HTML_CHECK, SCOUT_CHECK):
         if not required.is_file():
