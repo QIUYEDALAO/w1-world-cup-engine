@@ -15,6 +15,7 @@ import ssl
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from statistics import median
 from typing import Any
 from urllib import error, parse, request
 
@@ -280,6 +281,248 @@ def stat_value(stats_rows: list[dict[str, Any]], team_id: int, names: set[str]) 
     return None
 
 
+def as_float(value: Any) -> float | None:
+    if value in (None, "", [], {}):
+        return None
+    text = str(value).strip().replace("+", "")
+    try:
+        return float(text)
+    except (TypeError, ValueError):
+        return None
+
+
+def median_or_none(values: list[float]) -> float | None:
+    values = [value for value in values if value is not None]
+    if not values:
+        return None
+    return round(float(median(values)), 3)
+
+
+def devig_probs(odds: dict[str, float | None]) -> dict[str, float | None]:
+    implied = {}
+    for key, odd in odds.items():
+        implied[key] = (1.0 / odd) if odd and odd > 0 else None
+    total = sum(value for value in implied.values() if value is not None)
+    if total <= 0 or any(value is None for value in implied.values()):
+        return {key.replace("_odds", ""): None for key in odds}
+    return {key.replace("_odds", ""): round(float(value) / total, 4) for key, value in implied.items() if value is not None}
+
+
+def norm_text(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def is_match_winner_market(name: str) -> bool:
+    low = name.lower()
+    # API-Football commonly labels 1X2 as "Match Winner".
+    return any(token in low for token in ("match winner", "1x2", "fulltime result", "full time result", "winner"))
+
+
+def is_ou_market(name: str) -> bool:
+    low = name.lower()
+    excluded = ("first half", "1st half", "second half", "2nd half", "home team", "away team", "total - home", "total - away", "corners", "cards", "shots", "offsides", "fouls")
+    if any(token in low for token in excluded):
+        return False
+    # API-Football commonly labels this market as "Over/Under".
+    return low in {"over/under", "goals over/under", "total goals", "totals"}
+
+
+def is_ah_market(name: str) -> bool:
+    low = name.lower()
+    excluded = ("first half", "1st half", "second half", "2nd half", "corners", "cards")
+    if any(token in low for token in excluded):
+        return False
+    return low == "asian handicap"
+
+
+def extract_line(value: str, row: dict[str, Any]) -> float | None:
+    direct = as_float(row.get("handicap") or row.get("line"))
+    if direct is not None:
+        return direct
+    for token in value.replace("(", " ").replace(")", " ").split():
+        number = as_float(token)
+        if number is not None:
+            return number
+    return None
+
+
+def normalize_pick(value: str, home_name: str, away_name: str) -> str | None:
+    low = value.lower()
+    if low in {"home", "1"} or low.startswith("home ") or home_name.lower() and home_name.lower() in low:
+        return "home"
+    if low in {"away", "2"} or low.startswith("away ") or away_name.lower() and away_name.lower() in low:
+        return "away"
+    if low in {"draw", "x"}:
+        return "draw"
+    if low.startswith("over"):
+        return "over"
+    if low.startswith("under"):
+        return "under"
+    return None
+
+
+def line_choice_key(line: float, count: int, preferred: list[float]) -> tuple[int, float, float]:
+    return (-count, min(abs(abs(line) - p) for p in preferred), abs(line))
+
+
+def choose_1x2(samples: dict[str, list[float]]) -> dict[str, Any]:
+    odds = {
+        "home_odds": median_or_none(samples.get("home", [])),
+        "draw_odds": median_or_none(samples.get("draw", [])),
+        "away_odds": median_or_none(samples.get("away", [])),
+    }
+    probs = devig_probs(odds)
+    if not all(odds.values()) or not all(probs.values()):
+        return {"availability": "missing"}
+    return {
+        **odds,
+        "p_home": probs["home"],
+        "p_draw": probs["draw"],
+        "p_away": probs["away"],
+        "bookmaker_count": min(len(samples.get("home", [])), len(samples.get("draw", [])), len(samples.get("away", []))),
+        "source": "api-football /odds median bookmakers",
+        "availability": "available",
+    }
+
+
+def choose_ah(lines: dict[float, dict[str, list[float]]]) -> dict[str, Any]:
+    complete = []
+    for line, sides in lines.items():
+        if sides.get("home") and sides.get("away"):
+            complete.append((line, min(len(sides["home"]), len(sides["away"])), sides))
+    if not complete:
+        return {"availability": "missing"}
+    line, count, sides = sorted(complete, key=lambda item: line_choice_key(item[0], item[1], [0.25, 0.5, 0.75, 1.0, 1.25, 1.5]))[0]
+    home_price = median_or_none(sides["home"])
+    away_price = median_or_none(sides["away"])
+    return {
+        "line": line,
+        "home_handicap": line,
+        "away_handicap": round(-line, 3),
+        "home_price": home_price,
+        "away_price": away_price,
+        "median_line": line,
+        "median_home_price": home_price,
+        "median_away_price": away_price,
+        "current_line": line,
+        "opening_line": line,
+        "line_movement": "盘口基本稳定",
+        "bookmaker_count": count,
+        "source": "api-football /odds median Asian Handicap",
+        "availability": "available",
+    }
+
+
+def choose_ou(lines: dict[float, dict[str, list[float]]]) -> dict[str, Any]:
+    complete = []
+    for line, sides in lines.items():
+        if sides.get("over") and sides.get("under"):
+            complete.append((line, min(len(sides["over"]), len(sides["under"])), sides))
+    if not complete:
+        return {"availability": "missing"}
+    line, count, sides = sorted(complete, key=lambda item: line_choice_key(item[0], item[1], [2.5, 2.25, 2.75, 3.0, 2.0, 3.25]))[0]
+    return {
+        "line": line,
+        "over_price": median_or_none(sides["over"]),
+        "under_price": median_or_none(sides["under"]),
+        "current_line": line,
+        "opening_line": line,
+        "movement": "盘口基本稳定",
+        "bookmaker_count": count,
+        "source": "api-football /odds median totals",
+        "availability": "available",
+    }
+
+
+def build_market_odds(api: ApiFootball, fixture_id: str, home_name: str, away_name: str) -> dict[str, Any]:
+    rows = response_rows(api.get("/odds", fixture=fixture_id))
+    captured = iso_now()
+    if not rows:
+        return {
+            "availability": {"market_1x2": "missing", "market_ah": "missing", "market_ou": "missing", "market": "missing"},
+            "one_x_two": {"availability": "missing"},
+            "ah": {"availability": "missing"},
+            "ou": {"availability": "missing"},
+            "market_source": "api-football /odds",
+            "odds_updated_at": captured,
+        }
+    samples_1x2: dict[str, list[float]] = {"home": [], "draw": [], "away": []}
+    ah_lines: dict[float, dict[str, list[float]]] = {}
+    ou_lines: dict[float, dict[str, list[float]]] = {}
+    bookmakers_seen: set[str] = set()
+    for fixture_odds in rows:
+        for bookmaker in fixture_odds.get("bookmakers") or []:
+            bookmaker_name = norm_text(bookmaker.get("name") or bookmaker.get("id"))
+            if bookmaker_name:
+                bookmakers_seen.add(bookmaker_name)
+            for bet in bookmaker.get("bets") or []:
+                market_name = norm_text(bet.get("name"))
+                for item in bet.get("values") or []:
+                    value = norm_text(item.get("value"))
+                    odd = as_float(item.get("odd"))
+                    if odd is None:
+                        continue
+                    pick = normalize_pick(value, home_name, away_name)
+                    if is_match_winner_market(market_name) and pick in {"home", "draw", "away"}:
+                        samples_1x2[pick].append(odd)
+                        continue
+                    if is_ah_market(market_name) and pick in {"home", "away"}:
+                        line = extract_line(value, item)
+                        if line is None:
+                            continue
+                        # API-Football lists sides as "Home -1" / "Away -1" on
+                        # the same market line. Keep that line for pairing, then
+                        # downstream code stores it as the home handicap context.
+                        ah_lines.setdefault(float(line), {"home": [], "away": []})[pick].append(odd)
+                        continue
+                    if is_ou_market(market_name) and pick in {"over", "under"}:
+                        line = extract_line(value, item)
+                        if line is None:
+                            continue
+                        ou_lines.setdefault(float(abs(line)), {"over": [], "under": []})[pick].append(odd)
+
+    one_x_two = choose_1x2(samples_1x2)
+    ah = choose_ah(ah_lines)
+    ou = choose_ou(ou_lines)
+    market_1x2 = "available" if one_x_two.get("availability") == "available" else "missing"
+    market_ah = "available" if ah.get("availability") == "available" else "missing"
+    market_ou = "available" if ou.get("availability") == "available" else "missing"
+    overall = "available" if all(v == "available" for v in (market_1x2, market_ah, market_ou)) else "partial" if "available" in {market_1x2, market_ah, market_ou} else "missing"
+    out = {
+        "one_x_two": one_x_two,
+        "ah": ah,
+        "ou": ou,
+        "availability": {
+            "market": overall,
+            "market_1x2": market_1x2,
+            "market_ah": market_ah,
+            "market_ou": market_ou,
+        },
+        "bookmaker_count": len(bookmakers_seen) or None,
+        "market_source": "api-football /odds median bookmakers",
+        "odds_updated_at": captured,
+    }
+    if market_1x2 == "available":
+        out.update({
+            "p_home": one_x_two.get("p_home"),
+            "p_draw": one_x_two.get("p_draw"),
+            "p_away": one_x_two.get("p_away"),
+        })
+    if market_ah == "available":
+        out.update({
+            "ah_line": ah.get("home_handicap"),
+            "ah_home_price": ah.get("home_price"),
+            "ah_away_price": ah.get("away_price"),
+        })
+    if market_ou == "available":
+        out.update({
+            "ou_line": ou.get("line"),
+            "over_price": ou.get("over_price"),
+            "under_price": ou.get("under_price"),
+        })
+    return strip_forbidden_postmatch_fields(out)
+
+
 def build_xg_roll(api: ApiFootball, recent: list[dict[str, Any]], team_id: int, n: int = 5) -> dict[str, Any]:
     xg_for: list[float] = []
     shots: list[float] = []
@@ -459,7 +702,7 @@ def build_fixture_bundle(api: ApiFootball, rec: dict[str, Any]) -> dict[str, Any
     away_recent = fetch_recent_fixtures(api, away_id, int(season), kickoff)
     lineup, _, _ = build_lineup(api, fid)
     injuries_home, injuries_away = build_injuries(api, fid, home_id, away_id)
-    oxt = (rec.get("market_probability_panel") or {}).get("one_x_two") or {}
+    market = build_market_odds(api, fid, team_name(fixture_row, "home", rec), team_name(fixture_row, "away", rec))
 
     bundle: dict[str, Any] = {
         "schema_version": "W1_SCOUT_BUNDLE_V1",
@@ -471,13 +714,7 @@ def build_fixture_bundle(api: ApiFootball, rec: dict[str, Any]) -> dict[str, Any
         "season": season,
         "asof_pre_kickoff": True,
         "fetched_at_utc": iso_now(),
-        "market": {
-            "p_home": oxt.get("home_win"),
-            "p_draw": oxt.get("draw"),
-            "p_away": oxt.get("away_win"),
-            "ah_line": None,
-            "ou_line": None,
-        },
+        "market": market,
         "form_home": build_form(home_recent, home_id),
         "form_away": build_form(away_recent, away_id),
         "xg_roll_home": build_xg_roll(api, home_recent, home_id),
@@ -500,10 +737,12 @@ def build_fixture_bundle(api: ApiFootball, rec: dict[str, Any]) -> dict[str, Any
                 "/fixtures/headtohead?h2h=",
                 "/standings?league=&season=",
                 "/predictions?fixture=",
+                "/odds?fixture=",
             ],
         },
     }
     bundle["availability"] = availability_from_blocks(bundle)
+    bundle["availability"].update(market.get("availability") or {})
     bundle["missing_fields"] = [k for k, v in bundle["availability"].items() if v == "missing"]
     return bundle
 

@@ -24,6 +24,7 @@ POLICY_P = ROOT / "config/w1_scout_policy.json"
 SCHEMA_P = ROOT / "schemas/w1_scout_bundle_schema.json"
 BUNDLE_MOD = ROOT / "scripts/w1_scout_bundle.py"
 FETCHER = ROOT / "scripts/w1_scout_fetch_api_football.py"
+MARKET_DEBUG = ROOT / "scripts/w1_scout_market_debug.py"
 ANALYST = ROOT / "scripts/w1_scout_analyst.py"
 REVIEW_MOD = ROOT / "scripts/w1_scout_review.py"
 CALIBRATION_MOD = ROOT / "scripts/w1_scout_calibration.py"
@@ -41,7 +42,7 @@ errors: list[str] = []
 TAIL_TRIGGER_TOKENS = ("如果", "若", "一旦", "前 30 分钟", "前30分钟", "早球", "红牌", "被迫前压", "转换", "定位球", "门将失误")
 REVERSE_FAILURE_TOKENS = ("如果上半场仍是 0-0", "如果上半场仍是0-0", "如果久攻不下", "如果低位防守成功", "如果首发进攻点缺席", "如果射门质量无法转化", "该剧本降权", "大比分剧本失效", "失效")
 MARKET_TERMS = ("盘口", "让球", "大小球", "水位", "早盘", "临场", "盘口样本", "隐含")
-MARKET_MISSING_TERMS = ("盘口数据缺失", "无法展开盘口剧本", "不展开盘口剧本")
+MARKET_MISSING_TERMS = ("盘口数据缺失", "无法展开盘口剧本", "不展开盘口剧本", "盘口缺失", "让球盘口缺失", "大小球盘口缺失", "欧盘缺失", "市场读数缺失")
 RECOMMENDATION_CARD_KEYS = (
     "one_x_two_cn",
     "score_picks_cn",
@@ -394,6 +395,10 @@ def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
     card = read.get("recommendation_card") if isinstance(read.get("recommendation_card"), dict) else {}
     ah_card = read.get("asian_handicap_card") if isinstance(read.get("asian_handicap_card"), dict) else {}
     card_text = "\n".join(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
+    availability = bundle.get("availability") if isinstance(bundle.get("availability"), dict) else {}
+    has_ah = availability.get("market_ah") == "available"
+    has_ou = availability.get("market_ou") == "available"
+    has_1x2 = availability.get("market_1x2") == "available"
     if market_has_lines(bundle):
         if "盘口数据缺失" in market_script or "无法展开盘口剧本" in market_script or "不展开盘口剧本" in market_script:
             errs.append("market AH/OU available but call still says market data is missing")
@@ -401,16 +406,35 @@ def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
             errs.append("market AH/OU available but recommendation_card still says odds are missing")
         if not ("让球" in market_script and "大小球" in market_script and any(token in market_script for token in REVERSE_FAILURE_TOKENS + TAIL_TRIGGER_TOKENS)):
             errs.append("market AH/OU available but market_expert_script_cn lacks handicap/totals/condition language")
+    if has_ah:
+        ah_text = "\n".join(str(ah_card.get(key) or "") for key in AH_CARD_KEYS) + "\n" + str(card.get("ah_pick_cn") or "")
+        if any(token in ah_text for token in ("让球盘口缺失", "盘口缺失", "暂不输出让球推荐", "W1覆盖概率缺失")):
+            errs.append("market AH available but AH card/recommendation says handicap or W1 cover is missing")
+    if has_ou:
+        ou_text = str(card.get("ou_pick_cn") or "") + "\n" + str(ah_card.get("ou_pick_cn") or "")
+        if any(token in ou_text for token in ("大小球盘口缺失", "盘口缺失", "暂不输出大小球推荐", "totals missing")):
+            errs.append("market OU available but recommendation_card says totals are missing")
+    if has_1x2:
+        one_x_two_text = str(card.get("one_x_two_cn") or "") + "\n" + str(ah_card.get("market_consensus_cn") or "")
+        if any(token in one_x_two_text for token in ("市场读数缺失", "欧盘缺失", "1X2 数据缺失", "暂不展开胜平负推荐")):
+            errs.append("market 1X2 available but recommendation_card says 1X2 is missing")
     market = bundle.get("market") if isinstance(bundle.get("market"), dict) else {}
     ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
-    if (bundle.get("availability") or {}).get("market_ah") == "available" and ah.get("cover_probability_model") is not None:
+    if has_ah and availability.get("model_1x2") == "available" and ah.get("cover_probability_model") is None:
+        errs.append("market AH + W1 matrix available but bundle missing W1 cover probability")
+    if has_ah and ah.get("cover_probability_model") is not None:
         if ah_card.get("cover_probability_model") is None:
             errs.append("AH available with score matrix but asian_handicap_card missing cover_probability_model")
         if str(ah_card.get("recommendation_grade") or "") in {"A", "B+", "B"} and not str(ah_card.get("final_action_cn") or "").startswith("亚盘主推"):
             errs.append("graded AH card must be an Asian-handicap primary recommendation")
-    if (bundle.get("availability") or {}).get("market_ah") != "available":
+    if not has_ah:
         if str(ah_card.get("recommendation_grade") or "") in {"A", "B+", "B"}:
             errs.append("AH missing but asian_handicap_card still makes a graded recommendation")
+    if str(ah_card.get("recommendation_grade") or "") in {"PASS", "C/观察"}:
+        reason = str(ah_card.get("pass_reason_cn") or "").strip()
+        allowed_reason = any(token in reason for token in ("覆盖差", "cover edge", "盘口缺失", "AH盘口", "模型覆盖概率缺失", "W1覆盖概率缺失", "数据就绪度", "低", "冲突", "观察", "≤ 0", "<= 0", "无正向覆盖"))
+        if not allowed_reason:
+            errs.append("PASS/C AH card must include a machine-readable pass_reason tied to edge/data/conflict/missing")
     if model_has_1x2(bundle):
         one_x_two = str(card.get("one_x_two_cn") or "")
         if "缺失" in one_x_two or "暂不展开胜平负推荐" in one_x_two:
@@ -616,7 +640,7 @@ def validate_memory_consistency(track: dict, audit_rows: int) -> list[str]:
 
 
 def main() -> int:
-    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, ANALYST, REVIEW_MOD, CALIBRATION_MOD, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
+    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, MARKET_DEBUG, ANALYST, REVIEW_MOD, CALIBRATION_MOD, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
         if not p.is_file():
             fail(f"missing artifact: {p.relative_to(ROOT)}")
     if errors:
@@ -649,6 +673,9 @@ def main() -> int:
     for token in ("FORBIDDEN_POSTMATCH_KEYS", "strip_forbidden_postmatch_fields", "build_api_pred"):
         if token not in fetcher:
             fail(f"fetcher missing api response post-match scrub token: {token}")
+    for token in ("/odds", "build_market_odds", "api-football /odds", "Asian Handicap", "Over/Under", "Match Winner"):
+        if token not in fetcher:
+            fail(f"fetcher missing odds-ingest token: {token}")
     for token in ("external_api_prediction", "third_party_model", "not_independent_edge"):
         if token not in fetcher:
             fail(f"api_pred must be labelled as third-party comparison only: {token}")
@@ -707,6 +734,10 @@ def main() -> int:
     for token in ("state/scout_calibration.json", "direction_calibration", "avg_readiness_dims", "不是战胜市场的证据"):
         if token not in calibration_src:
             fail(f"calibration script missing token: {token}")
+    market_debug_src = MARKET_DEBUG.read_text(encoding="utf-8")
+    for token in ("--fixture-id", "scout_file_exists", "cover_probability_model", "pass_reason"):
+        if token not in market_debug_src:
+            fail(f"market debug script missing token: {token}")
 
     # bundle leakage
     leaks = bundle_leak(bundles, forbidden_pm)
@@ -730,11 +761,10 @@ def main() -> int:
             for key in ("home_handicap", "home_price", "away_price", "cover_probability_model", "cover_probability_market", "cover_edge"):
                 if key not in ah:
                     fail(f"bundle {b.get('fixture_id')} market.ah missing key {key}")
-        if availability.get("market_1x2") == "available" and availability.get("market_ou") == "available":
-            if availability.get("model_1x2") != "available":
-                fail(f"bundle {b.get('fixture_id')} has 1X2+OU inputs but missing W1 model_1x2")
-            if not isinstance(market.get("score_picks"), list) or not market.get("score_picks"):
-                fail(f"bundle {b.get('fixture_id')} has 1X2+OU inputs but missing score_picks")
+        if availability.get("market_ah") == "available" and availability.get("model_1x2") == "available":
+            ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+            if "cover_probability_model" not in ah:
+                fail(f"bundle {b.get('fixture_id')} has AH+W1 matrix inputs but missing cover_probability_model")
 
     if SCOUT_DIR.is_dir():
         for path in sorted(SCOUT_DIR.glob("*.json")):

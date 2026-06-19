@@ -578,7 +578,21 @@ def build_bundle(rec: dict) -> dict:
     return bundle
 
 
-def _merge_user_bundle(fid: str, base: dict) -> dict:
+def _merge_nonempty(base: dict, rich: dict) -> dict:
+    merged = dict(base)
+    for key, value in rich.items():
+        if value in (None, "", [], {}):
+            continue
+        if key == "availability" and value == "missing" and merged.get(key) in {"available", "partial"}:
+            continue
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _merge_nonempty(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def _merge_user_bundle(fid: str, base: dict, rec: dict) -> dict:
     """If the user's pipeline dropped a richer bundle, prefer its fetched fields."""
     p = SCOUT_DIR / f"{fid}.json"
     if not p.is_file():
@@ -588,28 +602,34 @@ def _merge_user_bundle(fid: str, base: dict) -> dict:
     except Exception:
         return base
     # User-fetched non-null values win, but nested maps merge so fetched factors
-    # cannot erase W1 base market availability/source fields.
+    # cannot erase W1 base model probabilities / score-picks unless explicitly
+    # replaced by richer pre-match data.
     for k, v in rich.items():
         if k in {"home", "away"}:
             # Keep canonical Chinese display names from dashboard/card universe.
             continue
         if v not in (None, "", [], {}):
             if isinstance(v, dict) and isinstance(base.get(k), dict):
-                merged = dict(base[k])
-                merged.update({nk: nv for nk, nv in v.items() if nv not in (None, "", [], {})})
-                base[k] = merged
+                base[k] = _merge_nonempty(base[k], v)
             else:
                 base[k] = v
     if isinstance(base.get("market"), dict):
         base["market"] = _sync_market_nested(base["market"])
+        base["market"] = _attach_ah_cover_from_rec(base["market"], rec)
         base.setdefault("availability", {}).update(_market_availability(base["market"]))
+    if isinstance(rich.get("market"), dict) and isinstance((rich.get("market") or {}).get("availability"), dict):
+        base.setdefault("availability", {}).update({
+            key: value for key, value in (rich.get("market") or {}).get("availability", {}).items()
+            if value in {"available", "partial", "missing"}
+        })
+        base.setdefault("availability", {}).update(_market_availability(base.get("market") or {}))
     base["missing_fields"] = [k for k, a in (base.get("availability") or {}).items() if a == "missing"]
     return base
 
 
 def build_all() -> dict:
     recs = json.loads(DASH.read_text(encoding="utf-8")).get("match_records", []) if DASH.is_file() else []
-    bundles = [_merge_user_bundle(str(r.get("fixture_id")), build_bundle(r)) for r in recs]
+    bundles = [_merge_user_bundle(str(r.get("fixture_id")), build_bundle(r), r) for r in recs]
     return {"stage": "W1_SCOUT", "schema_version": "W1_SCOUT_BUNDLE_V1",
             "asof_pre_kickoff": True, "n": len(bundles), "bundles": bundles}
 
