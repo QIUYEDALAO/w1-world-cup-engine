@@ -252,6 +252,22 @@ def run_once(args: argparse.Namespace) -> int:
             st = item["stage"]
             print(f"DUE fixture={item['fixture_id']} match={item.get('match')} stage={st.get('stage_id')} label={st.get('label_cn')} trigger={item['trigger_at_utc']} due_end={item['due_end_utc']} kickoff={item['kickoff_utc']}")
         return 0
+    write_json(STATUS, {
+        "schema_version": "W1_SCOUT_SCHEDULER_STATUS_V1",
+        "updated_at_utc": iso(now_utc()),
+        "result": "running",
+        "generated_count": 0,
+        "embedded_count": 0,
+        "failed_count": 0,
+        "pending_total": len(queue),
+        "processed_count": len(process_queue),
+        "pending_remaining_count": len(remaining),
+        "pending_remaining_preview": [{"fixture_id": r["fixture_id"], "stage_id": r["stage"].get("stage_id"), "match": r.get("match")} for r in remaining[:8]],
+        "failed_fixtures": [],
+        "results": [],
+        "message_cn": "Scout Scheduler 正在按赛前时间窗生产本批推荐卡。",
+        "redlines_cn": "kickoff 后不补写赛前 read；dashboard 仅展示 scheduler 产物。",
+    })
     results = [run_stage(item, False) for item in process_queue]
     success = [r for r in results if r.get("result") == "success"]
     failed_results = [r for r in results if r.get("result") != "success"]

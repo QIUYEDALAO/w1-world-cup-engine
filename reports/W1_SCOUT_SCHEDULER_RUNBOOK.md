@@ -13,6 +13,41 @@ Scheduler 按比赛 kickoff 自动检查这些时间窗：
 
 已开赛或完赛后不得补写赛前 read；赛后只进入 audit / review / calibration。
 
+## 本地体验需要两个进程
+
+dashboard 打开不会自动生产推荐卡。完整本地形态需要同时运行：
+
+1. dashboard viewer：
+
+```bash
+python3 scripts/w1_local_predict_server.py
+```
+
+2. scheduler producer：
+
+```bash
+DEEPSEEK_API_KEY="$DEEPSEEK_API_KEY" \
+APIFOOTBALL_KEY="$APIFOOTBALL_KEY" \
+python3 scripts/w1_scout_scheduler.py --daemon --interval 60
+```
+
+如果只启动 dashboard server，页面只展示已有结果，不会按 T 阶段生成新推荐。
+
+也可以用一键脚本同时启动两个进程：
+
+```bash
+DEEPSEEK_API_KEY="$DEEPSEEK_API_KEY" \
+APIFOOTBALL_KEY="$APIFOOTBALL_KEY" \
+bash scripts/run_w1_local_with_scheduler.sh
+```
+
+日志分别写入：
+
+- `logs/w1_local_server.log`
+- `logs/w1_scout_scheduler.log`
+
+`logs/*.log` 属于本地运行日志，不入 git。
+
 ## 手动单次运行
 
 ```bash

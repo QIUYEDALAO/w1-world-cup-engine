@@ -14,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 POLICY = ROOT / "config/w1_scout_schedule_policy.json"
 SCHED = ROOT / "scripts/w1_scout_scheduler.py"
 HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
+SERVER = ROOT / "scripts/w1_local_predict_server.py"
+RUN_LOCAL = ROOT / "scripts/run_w1_local_with_scheduler.sh"
+RUNBOOK = ROOT / "reports/W1_SCOUT_SCHEDULER_RUNBOOK.md"
 errors: list[str] = []
 
 REQ = ["early_48h", "early_24h", "watch_12h", "watch_6h", "watch_2h", "official_1h", "final_30m"]
@@ -117,11 +120,38 @@ def assert_dashboard_contract() -> None:
         fail("Scout analyst card must not use old waiting-for-next-autopilot wording")
 
 
+def assert_viewer_runtime_contract() -> None:
+    server = SERVER.read_text(encoding="utf-8") if SERVER.is_file() else ""
+    if 'os.environ.get("W1_SCOUT_AUTOPILOT", "0")' not in server:
+        fail("server autopilot must default disabled")
+    if "SCOUT_SCHEDULER_STATUS" not in server or "scheduler_status_for_dashboard" not in server:
+        fail("/dashboard-data must read scheduler status, not server autopilot as primary flow")
+    html = HTML.read_text(encoding="utf-8") if HTML.is_file() else ""
+    for bad in ("server 兜底检查开启", "等待下一次自动周期", "下一次检查"):
+        if bad in html:
+            fail(f"dashboard must not show old server autopilot primary wording: {bad}")
+    if not RUN_LOCAL.is_file():
+        fail("missing scripts/run_w1_local_with_scheduler.sh")
+    else:
+        run_local = RUN_LOCAL.read_text(encoding="utf-8")
+        for token in ("w1_local_predict_server.py", "w1_scout_scheduler.py", "--daemon", "logs/w1_local_server.log", "logs/w1_scout_scheduler.log", "trap cleanup"):
+            if token not in run_local:
+                fail(f"local scheduler launcher missing token: {token}")
+    if not RUNBOOK.is_file():
+        fail("missing scheduler runbook")
+    else:
+        runbook = RUNBOOK.read_text(encoding="utf-8")
+        for token in ("两个进程", "dashboard viewer", "scheduler producer", "run_w1_local_with_scheduler.sh", "dashboard 打开不会自动生产"):
+            if token not in runbook:
+                fail(f"scheduler runbook missing two-process guidance: {token}")
+
+
 def main() -> int:
     assert_policy()
     assert_scheduler_static()
     assert_dry_run_no_write_and_due_logic()
     assert_dashboard_contract()
+    assert_viewer_runtime_contract()
     if errors:
         for e in errors:
             print(f"FAIL: {e}", file=sys.stderr)

@@ -35,6 +35,7 @@ HOST = "127.0.0.1"
 PORT = int(os.environ.get("W1_DASHBOARD_PORT", "8765"))
 PROGRESS = ROOT / "state/w1_predict_progress.json"
 SCOUT_CYCLE_STATUS = ROOT / "state/scout_cycle_status.json"
+SCOUT_SCHEDULER_STATUS = ROOT / "state/w1_scout_scheduler_status.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 LINEUP_RUNTIME_OVERLAY = ROOT / "state/w1_lineup_runtime_overlay.json"
@@ -224,7 +225,7 @@ def cleanup_finished_or_stale_active_job_locked() -> str | None:
 
 
 def autopilot_enabled() -> bool:
-    value = os.environ.get("W1_SCOUT_AUTOPILOT", "1").strip().lower()
+    value = os.environ.get("W1_SCOUT_AUTOPILOT", "0").strip().lower()
     return value not in {"0", "false", "no", "off"}
 
 
@@ -344,6 +345,52 @@ def write_scout_cycle_status(phase: str, result: str, message: str, extra: dict[
     write_json(SCOUT_CYCLE_STATUS, payload)
 
 
+def scheduler_status_for_dashboard(records: list[dict[str, Any]]) -> dict[str, Any]:
+    status: dict[str, Any] = {}
+    if SCOUT_SCHEDULER_STATUS.is_file():
+        try:
+            status = load_json(SCOUT_SCHEDULER_STATUS)
+        except Exception:
+            status = {}
+    fixture_status = scout_fixture_status(records)
+    scheduler_seen = bool(status)
+    result = str(status.get("result") or ("unknown" if scheduler_seen else "not_running"))
+    updated_at = status.get("updated_at_utc")
+    message = status.get("message_cn")
+    if not message:
+        if scheduler_seen:
+            message = (
+                f"Scout Scheduler 最近运行结果：{result}；"
+                f"本轮生成 {int(status.get('generated_count') or 0)} 场，"
+                f"上屏 {int(status.get('embedded_count') or 0)} 场，"
+                f"待处理 {int(status.get('pending_remaining_count') or 0)} 场。"
+            )
+        else:
+            message = "Scout Scheduler 未运行；请启动 w1_scout_scheduler.py 或配置 launchd。dashboard 仅展示已有结果。"
+    return {
+        "schema_version": "W1_SCOUT_SCHEDULER_VIEW_STATUS_V1",
+        "scheduler_enabled": scheduler_seen,
+        "scheduler_status_path": str(SCOUT_SCHEDULER_STATUS.relative_to(ROOT)),
+        "scheduler_last_run_at": updated_at,
+        "scheduler_result": result,
+        "phase": "scheduler_viewer",
+        "result": result,
+        "message_cn": message,
+        "generated_count": int(status.get("generated_count") or 0),
+        "embedded_count": int(status.get("embedded_count") or 0),
+        "failed_count": int(status.get("failed_count") or 0),
+        "pending_total": int(status.get("pending_total") or 0),
+        "processed_count": int(status.get("processed_count") or 0),
+        "pending_remaining_count": int(status.get("pending_remaining_count") or 0),
+        "pending_remaining_preview": status.get("pending_remaining_preview") or [],
+        "failed_fixtures": status.get("failed_fixtures") or [],
+        "autopilot_enabled": False,
+        "server_fallback_enabled": autopilot_enabled(),
+        **fixture_status,
+        "redlines_cn": "dashboard 仅展示 scheduler 结果；研究用途 · 非推介 · 非独立优势；server autopilot 默认关闭，仅保留 legacy fallback。",
+    }
+
+
 def dashboard_data_payload() -> dict[str, Any] | None:
     if not DASHBOARD_DATA.is_file():
         return None
@@ -354,37 +401,7 @@ def dashboard_data_payload() -> dict[str, Any] | None:
     records = payload.get("match_records")
     if not isinstance(records, list) or not records:
         return None
-    status: dict[str, Any] = {}
-    try:
-        if SCOUT_CYCLE_STATUS.is_file():
-            status = load_json(SCOUT_CYCLE_STATUS)
-    except Exception:
-        status = {}
-    fixture_status = scout_fixture_status(records)
-    status = {
-        **status,
-        "autopilot_enabled": autopilot_enabled(),
-        "next_autopilot_run_at": status.get("next_autopilot_run_at") or next_autopilot_run_utc(status.get("last_autopilot_run_at") or status.get("last_run_utc")),
-        **fixture_status,
-    }
-    if not autopilot_enabled():
-        status["message_cn"] = "自动周期未启用；请启动 server 时设置 W1_SCOUT_AUTOPILOT=1，或使用手动强刷。"
-    elif status.get("result") in {"failed", "partial"} and status.get("message_cn"):
-        status["message_cn"] = str(status.get("message_cn"))
-    elif fixture_status["missing_read_count"] and int(status.get("processed_count") or 0) > 0:
-        status["message_cn"] = (
-            f"本轮处理 {int(status.get('processed_count') or 0)} 场，"
-            f"已生成 {int(status.get('generated_count') or 0)} 场，"
-            f"已上屏 {int(status.get('embedded_count') or 0)} 场，"
-            f"仍有 {fixture_status['missing_read_count']} 场待生成；下次自动周期继续。"
-        )
-    elif fixture_status["missing_read_count"]:
-        status["message_cn"] = "AI推荐卡待生成；自动周期将在下次检查时处理，也可手动强刷。"
-    elif fixture_status["missing_embed_count"]:
-        status["message_cn"] = "已有赛前推荐，本轮将补写 dashboard 上屏。"
-    else:
-        status["message_cn"] = status.get("message_cn") or "自动周期运行中；未来窗口内暂无缺失赛前推荐。"
-    payload["scout_cycle_status"] = status
+    payload["scout_cycle_status"] = scheduler_status_for_dashboard(records)
     return payload
 
 
@@ -1472,10 +1489,10 @@ def run_scout_autopilot_once(reason: str = "scheduled") -> bool:
     load_api_key_env_bridge()
     env = os.environ.copy()
     if not autopilot_enabled():
-        write_scout_cycle_status("autopilot", "disabled", "自动周期未启用；请启动 server 时设置 W1_SCOUT_AUTOPILOT=1，或使用手动强刷。")
+        write_scout_cycle_status("legacy_fallback", "disabled", "server fallback disabled；Scout 自动生产请运行 w1_scout_scheduler.py。")
         return False
     if not deepseek_key_available(env):
-        write_scout_cycle_status("autopilot", "missing_key", "自动周期未运行：当前 W1 server 进程未读取到 DEEPSEEK_API_KEY。")
+        write_scout_cycle_status("legacy_fallback", "missing_key", "server fallback 未运行：当前 W1 server 进程未读取到 DEEPSEEK_API_KEY。")
         return False
     with _job_lock:
         cleanup_note = cleanup_finished_or_stale_active_job_locked()
@@ -1537,7 +1554,7 @@ def run_scout_autopilot_once(reason: str = "scheduled") -> bool:
         if result == "partial":
             msg = cycle_status.get("message_cn") or "Scout 自动周期部分完成；剩余 fixture 将在下轮重试。"
         else:
-            msg = cycle_status.get("message_cn") or "自动周期运行中；已完成本轮未来赛程检查。"
+            msg = cycle_status.get("message_cn") or "server fallback 已完成本轮检查；正式生产仍由 w1_scout_scheduler.py 执行。"
         progress_counts["generated_count"] = int(cycle_status.get("generated_count") or generated or 0)
         progress_counts["embedded_count"] = int(cycle_status.get("embedded_count") or progress_counts["generated_count"])
         progress_counts["failed_count"] = int(cycle_status.get("failed_count") or 0)
@@ -1715,9 +1732,9 @@ def main() -> int:
     print(env_status_line())
     if autopilot_enabled():
         threading.Thread(target=scout_autopilot_loop, daemon=True).start()
-        write_scout_cycle_status("autopilot", "scheduled", "自动周期运行中；server 已启动后台 Scout 检查。", {"next_autopilot_run_at": next_autopilot_run_utc(now_utc())})
+        write_scout_cycle_status("legacy_fallback", "scheduled", "server fallback enabled；仅作遗留兜底，正式生产请运行 w1_scout_scheduler.py。", {"next_autopilot_run_at": next_autopilot_run_utc(now_utc())})
     else:
-        write_scout_cycle_status("autopilot", "disabled", "自动周期未启用；请启动 server 时设置 W1_SCOUT_AUTOPILOT=1，或使用手动强刷。")
+        print("W1 server Scout fallback: disabled (scheduler is the producer)")
     server.serve_forever()
     return 0
 

@@ -92,7 +92,13 @@ def load_json(path: Path) -> dict:
 
 
 def assert_no_forbidden_terms(path: Path) -> None:
-    text = read(path).replace("pending_fixtures", "scout_autopilot_waiting_fixtures")
+    text = (
+        read(path)
+        .replace("pending_fixtures", "scout_autopilot_waiting_fixtures")
+        .replace("pending_total", "scheduler_total")
+        .replace("pending_remaining_count", "scheduler_remaining_count")
+        .replace("pending_remaining", "scheduler_remaining")
+    )
     for term in FORBIDDEN_SOURCE_TERMS:
         if term.isascii():
             if re.search(rf"(?<![A-Za-z]){re.escape(term)}(?![A-Za-z])", text, re.I):
@@ -442,9 +448,9 @@ def assert_scout_embed(text: str) -> None:
         status_payload = json.loads(status.group(1))
     except json.JSONDecodeError as exc:
         fail(f"Embedded Scout cycle status JSON is not parseable: {exc}")
-    for key in ("schema_version", "phase", "result", "message_cn", "dry_run", "redlines_cn", "autopilot_enabled", "next_autopilot_run_at", "pending_fixtures", "missing_read_count"):
+    for key in ("schema_version", "phase", "result", "message_cn", "redlines_cn", "scheduler_enabled", "scheduler_status_path", "generated_count", "embedded_count", "failed_count", "pending_total", "pending_remaining_count"):
         if key not in status_payload:
-            fail(f"Embedded Scout cycle status missing {key}")
+            fail(f"Embedded Scout scheduler view status missing {key}")
     if "非推介" not in str(status_payload.get("redlines_cn", "")):
         fail("Embedded Scout cycle status must keep non-promotional disclaimer")
     learning = re.search(r'<script id="w1-scout-learning-status" type="application/json">(.*?)</script>', text, re.S)
@@ -534,11 +540,14 @@ def assert_first_screen(text: str) -> None:
     cycle = _func_body(text, "function pScoutCycleStatus(")
     if not cycle:
         fail("pScoutCycleStatus function missing")
-    for need in ("运行 / 错误日志", "scheduler", "下次检查", "待生成", "待补上屏", "上次抓取", "本轮结果", "累计成功抓取", "盘口异动", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "已开赛只做赛后复盘", "刷新视图", "专家视图"):
+    for need in ("运行 / 错误日志", "scheduler", "scheduler 上次运行", "pending_total", "pending_remaining", "generated", "embedded", "failed", "盘口异动", "state/w1_scout_scheduler_status.json", "dashboard 仅展示结果", "手动按钮仅用于临时补救", "已开赛只做赛后复盘", "刷新视图", "专家视图"):
         if need not in cycle:
             fail(f"Scout cycle status card missing token: {need}")
     if "等待下一次自动周期" in scout:
         fail("Scout analyst empty state must not unconditionally say waiting for next automatic cycle")
+    for bad in ("server 兜底检查开启", "自动周期运行中", "下一次检查"):
+        if bad in cycle:
+            fail(f"Scout cycle status must not present server autopilot as primary flow: {bad}")
     for need in ("尚未进入赛前生产窗口", "早盘参考待生成", "赛前观察待生成", "正式判断待生成", "最终版待生成", "赛前窗口已关闭", "等待赛后复盘"):
         if need not in scout:
             fail(f"Scout analyst empty state missing autopilot wording: {need}")
@@ -610,9 +619,10 @@ def assert_html(data: dict) -> None:
             "/predict",
             "/progress",
             "后端未连接",
-            "正在手动强刷",
-            "手动强刷 + AI解读",
-            "已开赛，仅刷新基础数据 / 等待赛后复盘",
+            "正在手动兜底",
+            "手动兜底生成",
+            "手动刷新当前阶段",
+            "已开赛，仅刷新基础数据",
             "w1_selected_fixture_id",
             "localStorage.setItem",
             "location.hash",
@@ -622,9 +632,12 @@ def assert_html(data: dict) -> None:
             "W1 Scout Scheduler",
             "dashboard 仅展示结果",
             "手动强刷仅作兜底",
-            "Scout 单场赛前解读",
+            "Scout Scheduler 未运行",
+            "仅用于临时补救",
+            "正式推荐由 W1 Scout Scheduler",
             "scheduler 应生成",
-            "缺少赛前解读/lock 时会强制生成首版解读",
+            "state/w1_scout_scheduler_status.json",
+            "dashboard 仅展示结果",
             "已保留当前快照，未覆盖",
             "teamName",
             "Czechia':'捷克",
