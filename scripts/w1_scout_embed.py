@@ -141,6 +141,36 @@ def load_bundle_map() -> dict[str, dict]:
 BUNDLE_BY_FIXTURE = load_bundle_map()
 
 
+def parse_embedded_calls(html: str) -> list[dict]:
+    match = TAG_RE.search(html)
+    if not match:
+        return []
+    text = match.group(0)
+    text = text[text.find(">") + 1:text.rfind("</script>")]
+    try:
+        payload = json.loads(text)
+    except Exception:
+        return []
+    calls = payload.get("calls", [])
+    return calls if isinstance(calls, list) else []
+
+
+def verify_embedded_fixture(fixture_id: str, stage_id: str | None = None) -> bool:
+    if not HTML.is_file():
+        return False
+    for call in parse_embedded_calls(HTML.read_text(encoding="utf-8")):
+        if str(call.get("fixture_id")) != str(fixture_id):
+            continue
+        if stage_id is not None and str(call.get("stage_id") or "") != str(stage_id):
+            continue
+        read = call.get("read")
+        if not isinstance(read, dict):
+            continue
+        if isinstance(read.get("asian_handicap_card"), dict) or isinstance(read.get("recommendation_card"), dict):
+            return True
+    return False
+
+
 def main() -> int:
     calls = json.loads(CALLS.read_text(encoding="utf-8")) if CALLS.is_file() else {"calls": []}
     generated_by = calls.get("generated_by")
@@ -152,7 +182,13 @@ def main() -> int:
     calibration = json.loads(CALIBRATION.read_text(encoding="utf-8")) if CALIBRATION.is_file() else {"schema_version": "W1_SCOUT_CALIBRATION_V1", "note_cn": "这是 Scout 解读的自我体检与校准,不是战胜市场的证据。"}
     html = upsert_tag(html, "w1-scout-calibration", calibration, CALIBRATION_TAG_RE)
     HTML.write_text(html, encoding="utf-8")
-    print(f"embedded {len(calls.get('calls', []))} scout reads into dashboard ({HTML.relative_to(ROOT)})")
+    embedded_calls = parse_embedded_calls(html)
+    embedded_keys = {
+        (str(call.get("fixture_id")), str(call.get("stage_id") or ""))
+        for call in embedded_calls
+        if call.get("fixture_id") and isinstance(call.get("read"), dict)
+    }
+    print(f"embedded {len(embedded_keys)} scout fixture/stage reads into dashboard ({HTML.relative_to(ROOT)})")
     return 0
 
 

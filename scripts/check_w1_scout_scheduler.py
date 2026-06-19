@@ -59,9 +59,12 @@ def assert_scheduler_static() -> None:
         "config/w1_scout_schedule_policy.json", "due_queue", "kickoff", "window_grace_minutes", "trigger <= now < due_end", "now >= kickoff",
         "W1_SCOUT_FORCE_FIXTURE", "W1_SCOUT_FORCE_HASH", "W1_SCOUT_FORCE_REFRESH", "W1_SCOUT_SCHEDULE_STAGE", "W1_SCOUT_SCHEDULE_STAGE_LABEL", "W1_SCOUT_LOCK_CMD", "stage_id", "stage_label_cn",
         "data_snapshot_digest", "w1_scout_embed.py", "w1_scout_ledger.py", "pending_remaining_count", "pending_remaining_preview", "timeout", "partial", "dashboard 仅展示 scheduler 产物",
+        "verify_embedded_fixture", "embed_missing", "已生成 read，但 dashboard embed 未找到该 fixture/stage",
     ):
         if token not in text:
             fail(f"scheduler missing token: {token}")
+    if "embedded_count = len(success) if embed.returncode == 0 else 0" in text:
+        fail("scheduler must not count embed success from returncode only")
     if "w1_score_engine" in text or "DEFAULT_RHO" in text:
         fail("scheduler must not touch score engine/RHO")
 
@@ -112,6 +115,7 @@ def assert_dashboard_contract() -> None:
         "W1 Scout Scheduler", "T-48/T-24/T-12/T-6/T-2/T-1/T-30m", "dashboard 仅展示结果",
         "尚未进入赛前生产窗口", "早盘参考待生成", "赛前观察待生成", "正式判断待生成", "最终版待生成",
         "无赛前推荐，不参与命中统计", "阶段：", "scoutStageRank", "final_30m", "offi'+'cial_1h",
+        "scoutHasReadableCall", "generated_at", "asian_handicap_card", "recommendation_card",
     ):
         if token not in text:
             fail(f"dashboard missing scheduler/stage token: {token}")

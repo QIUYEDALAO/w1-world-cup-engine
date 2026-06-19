@@ -28,6 +28,7 @@ STATUS = Path(os.environ.get("W1_SCOUT_SCHEDULER_STATUS_PATH", ROOT / "state/w1_
 CYCLE = ROOT / "scripts/run_w1_scout_cycle.sh"
 EMBED = ROOT / "scripts/w1_scout_embed.py"
 LEDGER = ROOT / "scripts/w1_scout_ledger.py"
+HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 
 
 def now_utc() -> datetime:
@@ -90,6 +91,40 @@ def load_records() -> list[dict[str, Any]]:
 
 def load_calls() -> dict[str, Any]:
     return load_json(CALLS, {"stage": "W1_SCOUT", "schema_version": "W1_SCOUT_READ_V1", "generated_by": None, "calls": []})
+
+
+def _html_scout_calls() -> list[dict[str, Any]]:
+    if not HTML.is_file():
+        return []
+    text = HTML.read_text(encoding="utf-8")
+    start = text.find('<script id="w1-scout-calls" type="application/json">')
+    if start < 0:
+        return []
+    start = text.find(">", start)
+    end = text.find("</script>", start)
+    if start < 0 or end < 0:
+        return []
+    try:
+        payload = json.loads(text[start + 1:end])
+    except Exception:
+        return []
+    calls = payload.get("calls", [])
+    return calls if isinstance(calls, list) else []
+
+
+def verify_embedded_fixture(fixture_id: str, stage_id: str | None = None) -> bool:
+    """Verify dashboard embedded JSON, not a loose HTML substring."""
+    for call in _html_scout_calls():
+        if str(call.get("fixture_id")) != str(fixture_id):
+            continue
+        if stage_id is not None and str(call.get("stage_id") or "") != str(stage_id):
+            continue
+        read = call.get("read")
+        if not isinstance(read, dict):
+            continue
+        if isinstance(read.get("asian_handicap_card"), dict) or isinstance(read.get("recommendation_card"), dict):
+            return True
+    return False
 
 
 def generated_stage_keys() -> set[tuple[str, str]]:
@@ -274,9 +309,22 @@ def run_once(args: argparse.Namespace) -> int:
     embedded_count = 0
     if success:
         embed = subprocess.run([sys.executable, str(EMBED)], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        embedded_count = len(success) if embed.returncode == 0 else 0
         if embed.returncode != 0:
             failed_results.append({"fixture_id": "dashboard", "stage_id": "embed", "result": "failed", "message_cn": "dashboard embed 失败"})
+        else:
+            for row in success:
+                fid = str(row.get("fixture_id") or "")
+                sid = str(row.get("stage_id") or "")
+                if verify_embedded_fixture(fid, sid):
+                    embedded_count += 1
+                else:
+                    row["embed_verified"] = False
+                    failed_results.append({
+                        "fixture_id": fid,
+                        "stage_id": sid,
+                        "result": "embed_missing",
+                        "message_cn": "已生成 read，但 dashboard embed 未找到该 fixture/stage",
+                    })
     if failed_results and success:
         overall = "partial"
     elif failed_results:

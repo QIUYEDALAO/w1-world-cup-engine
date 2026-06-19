@@ -54837,11 +54837,15 @@ function pCalibration(r){
 
 const SCOUT_STAGE_ORDER=['early_48h','early_24h','watch_12h','watch_6h','watch_2h','offi'+'cial_1h','final_30m'];
 function scoutStageRank(stage){const i=SCOUT_STAGE_ORDER.indexOf(String(stage||''));return i<0?-1:i;}
+function scoutHasReadableCall(c){
+  const r=c&&c.read;
+  return !!(r&&(r.asian_handicap_card||r.recommendation_card));
+}
 function scoutCallFor(fid){
   try{const el=document.getElementById('w1-scout-calls');if(!el)return null;
     const d=JSON.parse(el.textContent||'{}');
-    const arr=(d.calls||[]).filter(c=>String(c.fixture_id)===String(fid));
-    arr.sort((a,b)=>scoutStageRank(b.stage_id)-scoutStageRank(a.stage_id));
+    const arr=(d.calls||[]).filter(c=>String(c.fixture_id)===String(fid)&&scoutHasReadableCall(c));
+    arr.sort((a,b)=>(scoutStageRank(b.stage_id)-scoutStageRank(a.stage_id))||String(b.generated_at||'').localeCompare(String(a.generated_at||'')));
     return arr[0]||null;}catch(e){return null;}
 }
 function scoutReviewFor(fid){

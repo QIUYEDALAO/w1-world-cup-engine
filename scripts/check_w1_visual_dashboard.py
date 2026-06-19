@@ -526,6 +526,22 @@ def assert_first_screen(text: str) -> None:
     scout = _func_body(text, "function pScoutAnalyst(")
     if not scout:
         fail("pScoutAnalyst function missing")
+    scout_call = _func_body(text, "function scoutCallFor(")
+    if not scout_call:
+        fail("scoutCallFor function missing")
+    scout_readable = _func_body(text, "function scoutHasReadableCall(")
+    if not scout_readable:
+        fail("scoutHasReadableCall function missing")
+    for need in ("asian_handicap_card", "recommendation_card"):
+        if need not in scout_readable:
+            fail(f"scoutHasReadableCall must require displayable Scout read content: {need}")
+    for need in ("scoutHasReadableCall(c)", "generated_at", "scoutStageRank(b.stage_id)-scoutStageRank(a.stage_id)"):
+        if need not in scout_call:
+            fail(f"scoutCallFor must select the highest readable staged Scout call: {need}")
+    if "const c=scoutCallFor(r.fixture_id)" not in scout:
+        fail("pScoutAnalyst must use scoutCallFor(r.fixture_id) as the single source for card vs pending state")
+    if "if(!c||!c.read)" not in scout:
+        fail("pScoutAnalyst pending state must only render when no best readable Scout call exists")
     for need in (
         "AI亚盘推荐卡 · DeepSeek",
         "asian_handicap_card",
