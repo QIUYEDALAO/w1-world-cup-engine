@@ -52,10 +52,10 @@ def assert_scheduler_static() -> None:
         return
     text = SCHED.read_text(encoding="utf-8")
     for token in (
-        "--once", "--daemon", "--interval", "--dry-run", "--now-override", "--fixture-id", "--stage",
-        "config/w1_scout_schedule_policy.json", "due_queue", "kickoff", "now >= trigger", "now >= kickoff",
-        "W1_SCOUT_FORCE_FIXTURE", "W1_SCOUT_FORCE_HASH", "W1_SCOUT_LOCK_CMD", "stage_id", "stage_label_cn",
-        "data_snapshot_digest", "w1_scout_embed.py", "w1_scout_ledger.py", "dashboard 仅展示 scheduler 产物",
+        "--once", "--daemon", "--interval", "--dry-run", "--now-override", "--fixture-id", "--stage", "--max-fixtures",
+        "config/w1_scout_schedule_policy.json", "due_queue", "kickoff", "window_grace_minutes", "trigger <= now < due_end", "now >= kickoff",
+        "W1_SCOUT_FORCE_FIXTURE", "W1_SCOUT_FORCE_HASH", "W1_SCOUT_FORCE_REFRESH", "W1_SCOUT_SCHEDULE_STAGE", "W1_SCOUT_SCHEDULE_STAGE_LABEL", "W1_SCOUT_LOCK_CMD", "stage_id", "stage_label_cn",
+        "data_snapshot_digest", "w1_scout_embed.py", "w1_scout_ledger.py", "pending_remaining_count", "pending_remaining_preview", "timeout", "partial", "dashboard 仅展示 scheduler 产物",
     ):
         if token not in text:
             fail(f"scheduler missing token: {token}")
@@ -78,17 +78,26 @@ def assert_dry_run_no_write_and_due_logic() -> None:
             "W1_SCOUT_BUNDLES_PATH": str(bundles),
             "W1_SCOUT_SCHEDULER_STATUS_PATH": str(status),
         }
-        proc = run([sys.executable, str(SCHED), "--dry-run", "--now-override", "2026-06-20T02:00:00+08:00"], env=dry_env)
-        proc2 = run([sys.executable, str(SCHED), "--dry-run", "--now-override", "2026-06-20T01:40:00+08:00", "--stage", "final_30m"], env=dry_env)
+        proc = run([sys.executable, str(SCHED), "--dry-run", "--now-override", "2026-06-20T02:00:00+08:00", "--fixture-id", "1489391"], env=dry_env)
+        proc_mid = run([sys.executable, str(SCHED), "--dry-run", "--now-override", "2026-06-20T02:10:00+08:00", "--fixture-id", "1489391"], env=dry_env)
+        proc_final = run([sys.executable, str(SCHED), "--dry-run", "--now-override", "2026-06-20T02:30:00+08:00", "--fixture-id", "1489391"], env=dry_env)
+        proc2 = run([sys.executable, str(SCHED), "--dry-run", "--now-override", "2026-06-20T01:40:00+08:00", "--stage", "final_30m", "--fixture-id", "1489391"], env=dry_env)
         proc3 = run([sys.executable, str(SCHED), "--dry-run", "--now-override", "2026-06-20T04:00:00+08:00", "--fixture-id", "1489391"], env=dry_env)
+        proc4 = run([sys.executable, str(SCHED), "--dry-run", "--now-override", "2026-06-20T02:00:00+08:00", "--max-fixtures", "1"], env=dry_env)
     if proc.returncode != 0:
         fail(f"scheduler dry-run failed: {proc.stderr or proc.stdout}")
-    if "official_1h" not in proc.stdout:
-        fail("T-1h now override should make an official_1h stage due for a 03:00 CST fixture")
+    if "official_1h" not in proc.stdout or "early_48h" in proc.stdout or "watch_2h" in proc.stdout:
+        fail("T-1h now override should produce only official_1h for the 03:00 CST fixture")
+    if "official_1h" not in proc_mid.stdout or any(stage in proc_mid.stdout for stage in ("early_48h", "early_24h", "watch_12h", "watch_6h", "watch_2h")):
+        fail("T-50m window must not backfill earlier stages for the same fixture")
+    if "final_30m" not in proc_final.stdout or "official_1h" in proc_final.stdout:
+        fail("T-30m now override should produce only final_30m for the 03:00 CST fixture")
     if "final_30m" in proc2.stdout:
         fail("T-30m must not be due at T-80m for the 03:00 CST fixture")
     if "DUE" in proc3.stdout:
         fail("scheduler dry-run must not queue already-started fixture")
+    if "processed_count=1" not in proc4.stdout or "pending_remaining_count=" not in proc4.stdout:
+        fail("--max-fixtures must limit processed fixtures and expose remaining count")
     after = {p: (p.stat().st_mtime_ns if p.exists() else None) for p in watched}
     if before != after:
         fail("scheduler dry-run must not write runtime files")
