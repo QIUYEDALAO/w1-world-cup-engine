@@ -8,8 +8,10 @@ import json
 import math
 import os
 import re
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from statistics import median
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -24,6 +26,7 @@ DASHBOARD_HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 STATE_JSON = ROOT / "state/w1_refresh_state.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
+ODDS_RAW = ROOT / "data/odds_snapshots/raw"
 LINEUP_RUNTIME_OVERLAY = ROOT / "state/w1_lineup_runtime_overlay.json"
 MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
@@ -1438,6 +1441,169 @@ def _round_prob(value: float | None) -> float | None:
     return round(float(value), 4) if value is not None else None
 
 
+def _odds_float(value: Any) -> float | None:
+    if value in (None, "", [], {}):
+        return None
+    try:
+        return float(str(value).replace("+", ""))
+    except (TypeError, ValueError):
+        return None
+
+
+def _median_odd(values: list[float]) -> float | None:
+    values = [value for value in values if value is not None]
+    if not values:
+        return None
+    return round(float(median(values)), 3)
+
+
+def _odds_snapshot_rows(fid: str) -> list[dict[str, Any]]:
+    if not ODDS_RAW.is_dir():
+        return []
+    matched: list[dict[str, Any]] = []
+    for path in sorted(ODDS_RAW.glob("*/*.jsonl")):
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            if fid not in line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            ids = {str(row.get("fixture_id") or ""), str(row.get("local_card_id") or "")}
+            ids.update(str(item) for item in (row.get("alias_fixture_ids") or []))
+            if fid not in ids:
+                continue
+            if row.get("stale") is True or row.get("suspended") is True:
+                continue
+            matched.append(row)
+    if not matched:
+        return []
+    latest = max(str(row.get("captured_at_utc") or "") for row in matched)
+    return [row for row in matched if str(row.get("captured_at_utc") or "") == latest]
+
+
+def _opposite_line(line: str) -> str:
+    value = str(line or "").replace("−", "-").strip()
+    if value.startswith("-"):
+        return "+" + value[1:]
+    if value.startswith("+"):
+        return "-" + value[1:]
+    return value
+
+
+def _line_sort_key(line: str | None, count: int, target: float) -> tuple[int, float, float]:
+    number = _odds_float(line)
+    if number is None:
+        number = 99.0
+    return (-count, abs(abs(number) - target), abs(number))
+
+
+def _snapshot_1x2(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    sides: dict[str, list[float]] = {"home": [], "draw": [], "away": []}
+    for row in rows:
+        if row.get("market") != "1X2":
+            continue
+        raw = row.get("raw_odds") or {}
+        label = str(raw.get("label") or "").lower()
+        price = _odds_float(raw.get("odds"))
+        if price is None:
+            continue
+        if label.startswith("home"):
+            sides["home"].append(price)
+        elif label.startswith("draw"):
+            sides["draw"].append(price)
+        elif label.startswith("away"):
+            sides["away"].append(price)
+    values = {key: _median_odd(value) for key, value in sides.items()}
+    if not all(values.values()):
+        return None
+    return {
+        "available": True,
+        "bookmakers_count": min(len(value) for value in sides.values()),
+        "source": "api-football odds snapshots",
+        "lines": [{**values, "raw": f"Home={values['home']} Draw={values['draw']} Away={values['away']}"}],
+    }
+
+
+def _snapshot_pair_market(rows: list[dict[str, Any]], market: str) -> tuple[str, dict[str, Any]] | None:
+    by_line: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    for row in rows:
+        if row.get("market") != market:
+            continue
+        raw = row.get("raw_odds") or {}
+        label = str(raw.get("label") or "")
+        price = _odds_float(raw.get("odds"))
+        line = str(row.get("line") or "").strip()
+        if not line or price is None:
+            continue
+        lower = label.lower()
+        if market == "AH":
+            if lower.startswith("home"):
+                by_line[line]["home"].append(price)
+            elif lower.startswith("away"):
+                by_line[line]["away"].append(price)
+        elif market == "OU":
+            if lower.startswith("over"):
+                by_line[line]["over"].append(price)
+            elif lower.startswith("under"):
+                by_line[line]["under"].append(price)
+    complete = []
+    for line, sides in by_line.items():
+        if market == "AH" and sides.get("home") and sides.get("away"):
+            complete.append((line, len(sides["home"]) + len(sides["away"]), sides))
+        if market == "OU" and sides.get("over") and sides.get("under"):
+            complete.append((line, len(sides["over"]) + len(sides["under"]), sides))
+    if not complete:
+        return None
+    target = 1.0 if market == "AH" else 2.5
+    line, count, sides = sorted(complete, key=lambda item: _line_sort_key(item[0], item[1], target))[0]
+    if market == "AH":
+        entries = [
+            {"line": f"Home {line}", "odds": _median_odd(sides["home"])},
+            {"line": f"Away {_opposite_line(line)}", "odds": _median_odd(sides["away"])},
+        ]
+        key = "odds_AH"
+    else:
+        entries = [
+            {"line": f"Over {line}", "odds": _median_odd(sides["over"])},
+            {"line": f"Under {line}", "odds": _median_odd(sides["under"])},
+        ]
+        key = "odds_OU"
+    if not all(item.get("odds") for item in entries):
+        return None
+    return key, {
+        "available": True,
+        "bookmakers_count": count // 2,
+        "source": "api-football odds snapshots",
+        "lines": [{"entries": entries}],
+    }
+
+
+def card_with_odds_snapshot_overlay(card: dict[str, Any]) -> dict[str, Any]:
+    raw_fid = str(card.get("match", {}).get("match_id") or card.get("fixture_id") or "")
+    match = re.search(r"(\d+)$", raw_fid)
+    fid = match.group(1) if match else raw_fid
+    rows = _odds_snapshot_rows(fid)
+    if not rows:
+        return card
+    updated = json.loads(json.dumps(card, ensure_ascii=False))
+    markets = updated.setdefault("markets", {})
+    oxt = _snapshot_1x2(rows)
+    if oxt and not (markets.get("odds_1X2") or {}).get("available"):
+        markets["odds_1X2"] = oxt
+    for market in ("AH", "OU"):
+        pair = _snapshot_pair_market(rows, market)
+        if pair and not (markets.get(pair[0]) or {}).get("available"):
+            markets[pair[0]] = pair[1]
+    if any((markets.get(key) or {}).get("available") for key in ("odds_1X2", "odds_AH", "odds_OU")):
+        markets["odds_snapshot_time_utc"] = max(str(row.get("captured_at_utc") or "") for row in rows)
+    return updated
+
+
 def _matrix_from_score_distribution(score_distribution: dict[str, Any]) -> Any | None:
     model = score_distribution.get("matrix_model", {}) if score_distribution else {}
     try:
@@ -2251,16 +2417,17 @@ def build_record(
         if include_runtime_state
         else embedded_baseline_live_refresh(fid)
     )
-    raw_score_distribution = W1ENGINE.build_score_distribution(card, actual=actual_tuple(score), rho=W1_RHO) if W1_SCORE_ENGINE_ON else {"status": "skipped", "skip_reason": "W1_SCORE_ENGINE=off"}
+    score_card = card_with_odds_snapshot_overlay(card)
+    raw_score_distribution = W1ENGINE.build_score_distribution(score_card, actual=actual_tuple(score), rho=W1_RHO) if W1_SCORE_ENGINE_ON else {"status": "skipped", "skip_reason": "W1_SCORE_ENGINE=off"}
     score_distribution = normalize_score_distribution(raw_score_distribution)
     score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
     recommendation_view = recommendation_view_from_score_distribution(score_distribution)
-    market_probability_panel = market_probability_panel_from_score_distribution(score_distribution, card)
+    market_probability_panel = market_probability_panel_from_score_distribution(score_distribution, score_card)
     candidates_snapshot = W1CANDIDATES.build_candidates(
         matrix=W1CANDIDATES.matrix_from_dashboard_record(
             {"score_distribution": score_distribution, "score_matrix_summary": score_matrix_summary}
         ),
-        card=card,
+        card=score_card,
         score_distribution=score_distribution,
     )
     safe_view = build_safe_view(score_distribution)

@@ -445,8 +445,10 @@ def normalize_recommendation_card(call: dict[str, Any], bundle: dict[str, Any] |
     for key in ("one_x_two_cn", "score_picks_cn", "ou_pick_cn", "ah_pick_cn"):
         if bundle_card.get(key):
             current = str(card.get(key) or "")
+            force_bundle_value = True
             if (
-                not current
+                force_bundle_value
+                or not current
                 or "来源：" not in current
                 or ("缺失" in current and "来源：缺失" not in bundle_card[key])
                 or ("W1分布" in current and "W1分布" not in bundle_card[key])

@@ -629,6 +629,11 @@ def main() -> int:
         for key in ("p_home", "p_draw", "p_away", "model_p_home", "model_p_draw", "model_p_away", "model_1x2_source", "score_picks", "ah_line", "ah_home_price", "ah_away_price", "ou_line", "over_price", "under_price", "bookmaker_count", "market_source", "odds_updated_at"):
             if key not in market:
                 fail(f"bundle {b.get('fixture_id')} market missing key {key}")
+        if availability.get("market_1x2") == "available" and availability.get("market_ou") == "available":
+            if availability.get("model_1x2") != "available":
+                fail(f"bundle {b.get('fixture_id')} has 1X2+OU inputs but missing W1 model_1x2")
+            if not isinstance(market.get("score_picks"), list) or not market.get("score_picks"):
+                fail(f"bundle {b.get('fixture_id')} has 1X2+OU inputs but missing score_picks")
 
     if SCOUT_DIR.is_dir():
         for path in sorted(SCOUT_DIR.glob("*.json")):
