@@ -1,0 +1,14 @@
+{
+  "policy_version": "W1_SCOUT_SCHEDULE_POLICY_V1",
+  "display_priority": ["final_30m", "official_1h", "watch_2h", "watch_6h", "watch_12h", "early_24h", "early_48h"],
+  "stages": [
+    {"stage_id": "early_48h", "label_cn": "早盘参考", "offset_minutes": -2880, "window_grace_minutes": 180, "lock_mode": "updateable"},
+    {"stage_id": "early_24h", "label_cn": "早盘参考", "offset_minutes": -1440, "window_grace_minutes": 180, "lock_mode": "updateable"},
+    {"stage_id": "watch_12h", "label_cn": "赛前观察", "offset_minutes": -720, "window_grace_minutes": 120, "lock_mode": "updateable"},
+    {"stage_id": "watch_6h", "label_cn": "赛前观察", "offset_minutes": -360, "window_grace_minutes": 90, "lock_mode": "updateable"},
+    {"stage_id": "watch_2h", "label_cn": "赛前观察", "offset_minutes": -120, "window_grace_minutes": 45, "lock_mode": "updateable"},
+    {"stage_id": "official_1h", "label_cn": "正式判断", "offset_minutes": -60, "window_grace_minutes": 30, "lock_mode": "lock"},
+    {"stage_id": "final_30m", "label_cn": "最终版", "offset_minutes": -30, "window_grace_minutes": 20, "lock_mode": "lock"}
+  ],
+  "redlines_cn": "dashboard 只展示结果；scheduler 才是赛前生产器；kickoff 后不得补写赛前 read；不改 W1 score engine/DEFAULT_RHO/λ/概率/Primary Read。"
+}

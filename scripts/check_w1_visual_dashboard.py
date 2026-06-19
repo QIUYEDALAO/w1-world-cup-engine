@@ -534,12 +534,12 @@ def assert_first_screen(text: str) -> None:
     cycle = _func_body(text, "function pScoutCycleStatus(")
     if not cycle:
         fail("pScoutCycleStatus function missing")
-    for need in ("运行 / 错误日志", "自动周期运行中", "自动周期未启用", "下次检查", "待生成", "待补上屏", "上次抓取", "本轮结果", "累计成功抓取", "盘口异动", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "已开赛只做赛后复盘", "刷新视图", "专家视图"):
+    for need in ("运行 / 错误日志", "scheduler", "下次检查", "待生成", "待补上屏", "上次抓取", "本轮结果", "累计成功抓取", "盘口异动", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "已开赛只做赛后复盘", "刷新视图", "专家视图"):
         if need not in cycle:
             fail(f"Scout cycle status card missing token: {need}")
     if "等待下一次自动周期" in scout:
         fail("Scout analyst empty state must not unconditionally say waiting for next automatic cycle")
-    for need in ("AI推荐卡待生成", "自动周期将在下次检查时处理", "自动周期未启用", "赛前窗口已关闭", "等待赛后复盘", "已有赛前推荐，待补写上屏"):
+    for need in ("尚未进入赛前生产窗口", "早盘参考待生成", "赛前观察待生成", "正式判断待生成", "最终版待生成", "赛前窗口已关闭", "等待赛后复盘"):
         if need not in scout:
             fail(f"Scout analyst empty state missing autopilot wording: {need}")
     learning_func = _func_body(text, "function pScoutLearningStatus(")
@@ -619,10 +619,11 @@ def assert_html(data: dict) -> None:
             "setActiveByFixture",
             "ACTIVE_JOB",
             "已有强刷任务进行中，请等待当前任务完成",
-            "若 DEEPSEEK_API_KEY 可用",
-            "实时 API 缺失时使用本地缓存，不伪造缺失数据",
+            "W1 Scout Scheduler",
+            "dashboard 仅展示结果",
+            "手动强刷仅作兜底",
             "Scout 单场赛前解读",
-            "缺 key / no-delta / not due / analyst failed",
+            "scheduler 应生成",
             "缺少赛前解读/lock 时会强制生成首版解读",
             "已保留当前快照，未覆盖",
             "teamName",
