@@ -154,7 +154,7 @@ run_audit_review_calibration() {
 future_fixtures() {
   W1_SCOUT_DASHBOARD_DATA="$DASHBOARD_DATA" "$PYTHON_BIN" - <<'PY'
 import json, os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 def parse_dt(value):
@@ -176,11 +176,17 @@ if not path.is_file():
     print("")
     raise SystemExit(0)
 now = datetime.now(timezone.utc)
+try:
+    lookahead_hours = float(os.environ.get("W1_SCOUT_LOOKAHEAD_HOURS", "48"))
+except ValueError:
+    lookahead_hours = 48.0
+force_fixture = os.environ.get("W1_SCOUT_FORCE_FIXTURE", "").strip()
+until = now + timedelta(hours=max(1.0, lookahead_hours))
 records = json.loads(path.read_text(encoding="utf-8")).get("match_records", [])
 ids = []
 for rec in records:
     kickoff = parse_dt(rec.get("kickoff_utc") or rec.get("kickoff"))
-    if kickoff and kickoff > now:
+    if kickoff and kickoff > now and (kickoff <= until or str(rec.get("fixture_id")) == force_fixture):
         ids.append(str(rec.get("fixture_id")))
 print(" ".join(ids))
 PY

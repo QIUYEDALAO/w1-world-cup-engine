@@ -116,6 +116,16 @@ def assert_runner_static() -> None:
         fail("runner must not touch score engine/RHO")
     server = (ROOT / "scripts/w1_local_predict_server.py").read_text(encoding="utf-8")
     for token in (
+        "W1_SCOUT_AUTOPILOT",
+        "autopilot_enabled",
+        "scout_autopilot_loop",
+        "run_scout_autopilot_once",
+        "W1_SCOUT_LOOKAHEAD_HOURS",
+        "job_type=\"autopilot\"",
+        "已有自动周期任务运行中，请等待完成。",
+        "next_autopilot_run_at",
+        "pending_fixtures",
+        "missing_read_count",
         "scout_embedded_in_dashboard",
         "AI 解读已生成但未上屏",
         "已有合法赛前解读，本轮已补写 dashboard 上屏",
@@ -126,6 +136,7 @@ def assert_runner_static() -> None:
         "ACTIVE_JOB",
         "retryable",
         "_active_job_started_at",
+        "_active_job_type",
         "cleanup_finished_or_stale_active_job_locked",
         "已有手动强刷任务正在进行，请等待当前任务完成。",
     ):
@@ -142,6 +153,7 @@ def assert_local_env_contract() -> None:
         "DEEPSEEK_API_KEY: {deepseek}",
         "APIFOOTBALL_KEY: {api}",
         "W1_MANUAL_REFRESH_TRIGGER_SCOUT: {scout}",
+        "W1_SCOUT_AUTOPILOT: {autopilot}",
         '"OK" if',
         "MISSING",
         "enabled",
@@ -175,6 +187,13 @@ def assert_dry_run() -> None:
             fail("dry-run output must state no AI/no state write")
 
 
+def assert_runner_lookahead() -> None:
+    text = RUNNER.read_text(encoding="utf-8")
+    for token in ("W1_SCOUT_LOOKAHEAD_HOURS", "timedelta(hours=max(1.0, lookahead_hours))", "kickoff <= until or str(rec.get(\"fixture_id\")) == force_fixture"):
+        if token not in text:
+            fail(f"runner must limit autopilot fixture universe with token: {token}")
+
+
 def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
     with tempfile.TemporaryDirectory(prefix="w1_scout_g2_nodelta_") as td:
         root = Path(td)
@@ -200,6 +219,7 @@ def assert_no_delta_blocks_ai_lock_allows_review_calibration_embed() -> None:
         env = {
             "W1_SCOUT_STATE_DIR": str(state),
             "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_LOOKAHEAD_HOURS": "640000",
             "W1_SCOUT_FORCE_HASH": "same",
             "W1_SCOUT_FETCH_CMD": str(root / "fetch.sh"),
             "W1_SCOUT_BUILD_CMD": str(root / "build.sh"),
@@ -254,6 +274,7 @@ def assert_prematch_only_repairs_missing_dashboard_embed() -> None:
             "W1_SCOUT_STATE_DIR": str(state),
             "W1_SCOUT_DASHBOARD_DATA": str(dash),
             "W1_SCOUT_FORCE_FIXTURE": "F1",
+            "W1_SCOUT_LOOKAHEAD_HOURS": "640000",
             "W1_SCOUT_PREMATCH_ONLY": "1",
             "W1_SCOUT_SKIP_FETCH": "1",
             "W1_SCOUT_FORCE_HASH": "changed",
@@ -300,6 +321,7 @@ def assert_missing_read_forces_ai() -> None:
         env = {
             "W1_SCOUT_STATE_DIR": str(state),
             "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_LOOKAHEAD_HOURS": "640000",
             "W1_SCOUT_FORCE_HASH": "same",
             "W1_SCOUT_FETCH_CMD": str(root / "fetch.sh"),
             "W1_SCOUT_BUILD_CMD": str(root / "build.sh"),
@@ -341,6 +363,7 @@ def assert_force_fixture_mode() -> None:
             "W1_SCOUT_STATE_DIR": str(state),
             "W1_SCOUT_DASHBOARD_DATA": str(dash),
             "W1_SCOUT_FORCE_FIXTURE": "F9",
+            "W1_SCOUT_LOOKAHEAD_HOURS": "640000",
             "W1_SCOUT_FORCE_HASH": "force-hash",
             "W1_SCOUT_FETCH_CMD": str(root / "fetch.sh"),
             "W1_SCOUT_BUILD_CMD": str(root / "build.sh"),
@@ -368,7 +391,7 @@ def assert_analyst_fail_blocks_progress() -> None:
         state = root / "state"
         state.mkdir()
         (state / ".scout_bundles.sha").write_text("old\n", encoding="utf-8")
-        (state / "w1_scout_bundles.json").write_text('{"bundles":[]}\n', encoding="utf-8")
+        (state / "w1_scout_bundles.json").write_text('{"bundles":[{"fixture_id":"F1"}]}\n', encoding="utf-8")
         dash = root / "dash.json"
         dash.write_text('{"match_records":[{"fixture_id":"F1","kickoff_utc":"2099-01-01T00:00:00Z"}]}\n', encoding="utf-8")
         marker = root / "marker"
@@ -383,6 +406,7 @@ def assert_analyst_fail_blocks_progress() -> None:
         env = {
             "W1_SCOUT_STATE_DIR": str(state),
             "W1_SCOUT_DASHBOARD_DATA": str(dash),
+            "W1_SCOUT_LOOKAHEAD_HOURS": "640000",
             "W1_SCOUT_FORCE_HASH": "new",
             "W1_SCOUT_FETCH_CMD": str(root / "ok.sh"),
             "W1_SCOUT_BUILD_CMD": str(root / "ok.sh"),
@@ -429,6 +453,7 @@ def main() -> int:
     assert_runner_static()
     assert_local_env_contract()
     assert_dry_run()
+    assert_runner_lookahead()
     assert_no_delta_blocks_ai_lock_allows_review_calibration_embed()
     assert_prematch_only_repairs_missing_dashboard_embed()
     assert_missing_read_forces_ai()

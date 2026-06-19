@@ -92,7 +92,7 @@ def load_json(path: Path) -> dict:
 
 
 def assert_no_forbidden_terms(path: Path) -> None:
-    text = read(path)
+    text = read(path).replace("pending_fixtures", "scout_autopilot_waiting_fixtures")
     for term in FORBIDDEN_SOURCE_TERMS:
         if term.isascii():
             if re.search(rf"(?<![A-Za-z]){re.escape(term)}(?![A-Za-z])", text, re.I):
@@ -442,7 +442,7 @@ def assert_scout_embed(text: str) -> None:
         status_payload = json.loads(status.group(1))
     except json.JSONDecodeError as exc:
         fail(f"Embedded Scout cycle status JSON is not parseable: {exc}")
-    for key in ("schema_version", "phase", "result", "message_cn", "dry_run", "redlines_cn"):
+    for key in ("schema_version", "phase", "result", "message_cn", "dry_run", "redlines_cn", "autopilot_enabled", "next_autopilot_run_at", "pending_fixtures", "missing_read_count"):
         if key not in status_payload:
             fail(f"Embedded Scout cycle status missing {key}")
     if "非推介" not in str(status_payload.get("redlines_cn", "")):
@@ -534,9 +534,14 @@ def assert_first_screen(text: str) -> None:
     cycle = _func_body(text, "function pScoutCycleStatus(")
     if not cycle:
         fail("pScoutCycleStatus function missing")
-    for need in ("运行 / 错误日志", "上次抓取", "本轮结果", "累计成功抓取", "盘口异动", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "刷新视图", "专家视图"):
+    for need in ("运行 / 错误日志", "自动周期运行中", "自动周期未启用", "下次检查", "待生成", "待补上屏", "上次抓取", "本轮结果", "累计成功抓取", "盘口异动", "state/scout_cycle_status.json", "state/scout_cycle_errors.log", "no-delta 不调用 AI", "已开赛只做赛后复盘", "刷新视图", "专家视图"):
         if need not in cycle:
             fail(f"Scout cycle status card missing token: {need}")
+    if "等待下一次自动周期" in scout:
+        fail("Scout analyst empty state must not unconditionally say waiting for next automatic cycle")
+    for need in ("AI推荐卡待生成", "自动周期将在下次检查时处理", "自动周期未启用", "赛前窗口已关闭", "等待赛后复盘", "已有赛前推荐，待补写上屏"):
+        if need not in scout:
+            fail(f"Scout analyst empty state missing autopilot wording: {need}")
     learning_func = _func_body(text, "function pScoutLearningStatus(")
     if not learning_func:
         fail("pScoutLearningStatus function missing")

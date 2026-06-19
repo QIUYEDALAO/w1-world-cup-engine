@@ -34,6 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("W1_DASHBOARD_PORT", "8765"))
 PROGRESS = ROOT / "state/w1_predict_progress.json"
+SCOUT_CYCLE_STATUS = ROOT / "state/scout_cycle_status.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 LINEUP_RUNTIME_OVERLAY = ROOT / "state/w1_lineup_runtime_overlay.json"
@@ -81,7 +82,10 @@ STEPS = [
 _job_lock = threading.Lock()
 _active_job: str | None = None
 _active_job_started_at: float | None = None
+_active_job_type: str | None = None
 ACTIVE_JOB_STALE_SECONDS = 10 * 60
+SCOUT_AUTOPILOT_INTERVAL_SECONDS = int(os.environ.get("W1_SCOUT_AUTOPILOT_INTERVAL_SECONDS", "900"))
+SCOUT_AUTOPILOT_LOOKAHEAD_HOURS = float(os.environ.get("W1_SCOUT_AUTOPILOT_LOOKAHEAD_HOURS", "48"))
 
 
 def now_ts() -> str:
@@ -124,6 +128,7 @@ def progress_payload(
     message: str,
     match: dict[str, Any],
     error: str | None = None,
+    job_type: str = "manual",
 ) -> dict[str, Any]:
     fixture_id = str(match.get("fixture_id") or match.get("requested_fixture_id") or "").strip()
     match_name = str(match.get("match") or "").strip()
@@ -144,6 +149,7 @@ def progress_payload(
     return {
         "schema_version": "w1_predict_progress.v1",
         "job_id": job_id,
+        "job_type": job_type,
         "status": status,
         "fixture_id": fixture_id,
         "target_fixture_id": fixture_id,
@@ -192,7 +198,7 @@ def progress_updated_age_seconds() -> float | None:
 
 def cleanup_finished_or_stale_active_job_locked() -> str | None:
     """Called with _job_lock held. Clears only clearly finished/stale jobs."""
-    global _active_job, _active_job_started_at
+    global _active_job, _active_job_started_at, _active_job_type
     if not _active_job:
         return None
     status = progress_status()
@@ -200,6 +206,7 @@ def cleanup_finished_or_stale_active_job_locked() -> str | None:
         old = _active_job
         _active_job = None
         _active_job_started_at = None
+        _active_job_type = None
         return f"cleared finished active job {old} status={status}"
     started_age = time.time() - _active_job_started_at if _active_job_started_at else 0
     progress_age = progress_updated_age_seconds()
@@ -207,8 +214,130 @@ def cleanup_finished_or_stale_active_job_locked() -> str | None:
         old = _active_job
         _active_job = None
         _active_job_started_at = None
+        _active_job_type = None
         return f"cleared stale active job {old} started_age={started_age:.0f}s progress_age={progress_age}"
     return None
+
+
+def autopilot_enabled() -> bool:
+    value = os.environ.get("W1_SCOUT_AUTOPILOT", "1").strip().lower()
+    return value not in {"0", "false", "no", "off"}
+
+
+def load_scout_calls() -> list[dict[str, Any]]:
+    path = ROOT / "state/w1_scout_calls.json"
+    if not path.is_file():
+        return []
+    try:
+        calls = load_json(path).get("calls", [])
+        return calls if isinstance(calls, list) else []
+    except Exception:
+        return []
+
+
+def load_scout_lock_ids() -> set[str]:
+    path = ROOT / "state/scout_lock.jsonl"
+    locked: set[str] = set()
+    if not path.is_file():
+        return locked
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            locked.add(str(json.loads(line).get("fixture_id") or ""))
+    except Exception:
+        return locked
+    return locked
+
+
+def embedded_scout_ids() -> set[str]:
+    ids: set[str] = set()
+    if not DASHBOARD_HTML.is_file():
+        return ids
+    try:
+        html = DASHBOARD_HTML.read_text(encoding="utf-8")
+        match = re.search(r'<script id="w1-scout-calls" type="application/json">(.*?)</script>', html, re.S)
+        if not match:
+            return ids
+        for call in json.loads(match.group(1)).get("calls", []):
+            if isinstance(call.get("read"), dict):
+                ids.add(str(call.get("fixture_id") or ""))
+    except Exception:
+        return set()
+    return ids
+
+
+def scout_fixture_status(records: list[dict[str, Any]]) -> dict[str, Any]:
+    now = datetime.now(timezone.utc)
+    until = now + timedelta(hours=SCOUT_AUTOPILOT_LOOKAHEAD_HOURS)
+    calls = {
+        str(call.get("fixture_id") or "")
+        for call in load_scout_calls()
+        if isinstance(call.get("read"), dict) and call.get("independent_edge") is False
+    }
+    locks = load_scout_lock_ids()
+    embeds = embedded_scout_ids()
+    pending: list[str] = []
+    embed_missing: list[str] = []
+    started_without_lock: list[str] = []
+    for rec in records:
+        fid = str(rec.get("fixture_id") or "")
+        kickoff = parse_utc_datetime(rec.get("kickoff_utc") or rec.get("kickoff"))
+        if not fid or not kickoff:
+            continue
+        if now < kickoff <= until:
+            if fid not in calls or fid not in locks:
+                pending.append(fid)
+            elif fid not in embeds:
+                embed_missing.append(fid)
+        elif kickoff <= now and fid not in locks:
+            started_without_lock.append(fid)
+    return {
+        "pending_fixtures": pending[:24],
+        "pending_count": len(pending),
+        "missing_read_count": len(pending),
+        "missing_embed_fixtures": embed_missing[:24],
+        "missing_embed_count": len(embed_missing),
+        "started_without_prematch_lock_count": len(started_without_lock),
+    }
+
+
+def next_autopilot_run_utc(last_run_utc: str | None = None) -> str:
+    base = parse_utc_datetime(last_run_utc) if last_run_utc else datetime.now(timezone.utc)
+    if base is None:
+        base = datetime.now(timezone.utc)
+    return (base + timedelta(seconds=SCOUT_AUTOPILOT_INTERVAL_SECONDS)).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def write_scout_cycle_status(phase: str, result: str, message: str, extra: dict[str, Any] | None = None) -> None:
+    SCOUT_CYCLE_STATUS.parent.mkdir(parents=True, exist_ok=True)
+    prior: dict[str, Any] = {}
+    try:
+        if SCOUT_CYCLE_STATUS.is_file():
+            prior = load_json(SCOUT_CYCLE_STATUS)
+    except Exception:
+        prior = {}
+    now = now_utc()
+    payload = {
+        **prior,
+        "schema_version": "W1_SCOUT_CYCLE_STATUS_G2_V1",
+        "updated_at_utc": now,
+        "last_autopilot_run_at": now,
+        "last_run_utc": now,
+        "next_autopilot_run_at": next_autopilot_run_utc(now),
+        "autopilot_enabled": autopilot_enabled(),
+        "phase": phase,
+        "result": result,
+        "last_autopilot_result": result,
+        "message_cn": message,
+        "generated_count": 0,
+        "skipped_count": 0,
+        "failed_count": 1 if result == "failed" else 0,
+        "redlines_cn": "研究用途 · 非推介 · 非独立优势；失败不推进旧 call。",
+    }
+    if extra:
+        payload.update(extra)
+    write_json(SCOUT_CYCLE_STATUS, payload)
 
 
 def dashboard_data_payload() -> dict[str, Any] | None:
@@ -221,6 +350,28 @@ def dashboard_data_payload() -> dict[str, Any] | None:
     records = payload.get("match_records")
     if not isinstance(records, list) or not records:
         return None
+    status: dict[str, Any] = {}
+    try:
+        if SCOUT_CYCLE_STATUS.is_file():
+            status = load_json(SCOUT_CYCLE_STATUS)
+    except Exception:
+        status = {}
+    fixture_status = scout_fixture_status(records)
+    status = {
+        **status,
+        "autopilot_enabled": autopilot_enabled(),
+        "next_autopilot_run_at": status.get("next_autopilot_run_at") or next_autopilot_run_utc(status.get("last_autopilot_run_at") or status.get("last_run_utc")),
+        **fixture_status,
+    }
+    if not autopilot_enabled():
+        status["message_cn"] = "自动周期未启用；请启动 server 时设置 W1_SCOUT_AUTOPILOT=1，或使用手动强刷。"
+    elif fixture_status["missing_read_count"]:
+        status["message_cn"] = "AI推荐卡待生成；自动周期将在下次检查时处理，也可手动强刷。"
+    elif fixture_status["missing_embed_count"]:
+        status["message_cn"] = "已有赛前推荐，本轮将补写 dashboard 上屏。"
+    else:
+        status["message_cn"] = status.get("message_cn") or "自动周期运行中；未来窗口内暂无缺失赛前推荐。"
+    payload["scout_cycle_status"] = status
     return payload
 
 
@@ -265,11 +416,13 @@ def env_status_line() -> str:
     deepseek = "OK" if (os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("W1_SCOUT_API_KEY")) else "MISSING"
     api = "OK" if (os.environ.get(ENV_KEY_NAME) or os.environ.get("OPENCLAW_APIFOOTBALL_KEY")) else "MISSING"
     scout = "enabled" if manual_scout_enabled() else "disabled"
+    autopilot = "enabled" if autopilot_enabled() else "disabled"
     return (
         "W1 server env: "
         f"DEEPSEEK_API_KEY: {deepseek} | "
         f"APIFOOTBALL_KEY: {api} | "
-        f"W1_MANUAL_REFRESH_TRIGGER_SCOUT: {scout}"
+        f"W1_MANUAL_REFRESH_TRIGGER_SCOUT: {scout} | "
+        f"W1_SCOUT_AUTOPILOT: {autopilot}"
     )
 
 
@@ -1073,8 +1226,8 @@ def refresh_weather_module(match: dict[str, Any], env: dict[str, str]) -> dict[s
     return live_module(source="live_api", status="error", message_cn=reason)
 
 
-def run_command(cmd: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, cwd=ROOT, env=env, text=True, capture_output=True, timeout=180)
+def run_command(cmd: list[str], env: dict[str, str], timeout: int = 180) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(cmd, cwd=ROOT, env=env, text=True, capture_output=True, timeout=timeout)
 
 
 def is_future_match(match: dict[str, Any]) -> bool:
@@ -1184,7 +1337,7 @@ def final_refresh_message(live_status: str, scout_message: str) -> str:
 
 
 def run_prediction(job_id: str, match: dict[str, Any]) -> None:
-    global _active_job, _active_job_started_at
+    global _active_job, _active_job_started_at, _active_job_type
     load_local_env_files()
     load_api_key_env_bridge()
     env = os.environ.copy()
@@ -1199,6 +1352,7 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                     step_index=idx,
                     message=f"{label}中…",
                     match=match,
+                    job_type="manual",
                 )
             )
             time.sleep(0.25)
@@ -1262,6 +1416,7 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                 step_index=len(STEPS) - 1,
                 message=scout_message,
                 match=match,
+                job_type="manual",
             )
         )
 
@@ -1275,6 +1430,7 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                 step_index=len(STEPS),
                 message=final_refresh_message(str(live_refresh.get("overall_status") or ""), scout_message),
                 match=progress_match(selected, match.get("stage_cn", "")) if selected else match,
+                job_type="manual",
             )
         )
     except Exception as exc:  # noqa: BLE001 - convert all runtime failures to progress JSON
@@ -1286,6 +1442,7 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
                 message="数据暂缺，保留上一版。",
                 match=match,
                 error=str(exc) or "数据暂缺，保留上一版。",
+                job_type="manual",
             )
         )
     finally:
@@ -1293,6 +1450,92 @@ def run_prediction(job_id: str, match: dict[str, Any]) -> None:
             if _active_job == job_id:
                 _active_job = None
                 _active_job_started_at = None
+                _active_job_type = None
+
+
+def run_scout_autopilot_once(reason: str = "scheduled") -> bool:
+    global _active_job, _active_job_started_at, _active_job_type
+    load_local_env_files()
+    load_api_key_env_bridge()
+    env = os.environ.copy()
+    if not autopilot_enabled():
+        write_scout_cycle_status("autopilot", "disabled", "自动周期未启用；请启动 server 时设置 W1_SCOUT_AUTOPILOT=1，或使用手动强刷。")
+        return False
+    if not deepseek_key_available(env):
+        write_scout_cycle_status("autopilot", "missing_key", "自动周期未运行：当前 W1 server 进程未读取到 DEEPSEEK_API_KEY。")
+        return False
+    with _job_lock:
+        cleanup_note = cleanup_finished_or_stale_active_job_locked()
+        if cleanup_note:
+            print(f"WARN: {cleanup_note}")
+        if _active_job:
+            write_scout_cycle_status("autopilot", "skipped", "已有手动强刷或自动周期任务运行中；本轮自动检查跳过。")
+            return False
+        job_id = "auto-" + uuid.uuid4().hex[:8]
+        _active_job = job_id
+        _active_job_started_at = time.time()
+        _active_job_type = "autopilot"
+    write_progress(
+        progress_payload(
+            job_id=job_id,
+            job_type="autopilot",
+            status="running",
+            step_index=10,
+            message=f"Scout 自动周期检查中（{reason}）…",
+            match={"fixture_id": "", "match": "Scout 自动周期", "stage_cn": "autopilot"},
+        )
+    )
+    try:
+        before_status = scout_fixture_status((dashboard_data_payload() or {}).get("match_records") or [])
+        cycle_env = {
+            **env,
+            "W1_SCOUT_LOOKAHEAD_HOURS": str(SCOUT_AUTOPILOT_LOOKAHEAD_HOURS),
+            "W1_SCOUT_DISABLE_MEMORY_COMMIT": env.get("W1_SCOUT_DISABLE_MEMORY_COMMIT", "1"),
+        }
+        proc = run_command(["bash", str(SCOUT_CYCLE)], cycle_env, timeout=900)
+        status_payload = dashboard_data_payload() or {"match_records": []}
+        fixture_status = scout_fixture_status(status_payload.get("match_records") or [])
+        if proc.returncode != 0:
+            msg = "Scout 自动周期失败；未推进旧内容。"
+            write_scout_cycle_status("autopilot", "failed", msg, {**fixture_status, "failed_count": 1})
+            write_progress(progress_payload(job_id=job_id, job_type="autopilot", status="failed", step_index=11, message=msg, match={"fixture_id": "", "match": "Scout 自动周期"}, error=(proc.stderr or proc.stdout or "").splitlines()[-1] if (proc.stderr or proc.stdout) else msg))
+            return False
+        generated = 0
+        for line in (proc.stdout or "").splitlines():
+            if "DeepSeek analyst" in line or "强制生成首版解读" in line:
+                generated = max(generated, int(before_status.get("missing_read_count") or 1))
+        msg = "自动周期运行中；已完成本轮未来赛程检查。"
+        write_scout_cycle_status(
+            "autopilot",
+            "ok",
+            msg,
+            {
+                **fixture_status,
+                "generated_count": generated,
+                "skipped_count": 1 if generated == 0 else 0,
+                "failed_count": 0,
+            },
+        )
+        write_progress(progress_payload(job_id=job_id, job_type="autopilot", status="done", step_index=11, message=msg, match={"fixture_id": "", "match": "Scout 自动周期"}))
+        return True
+    except Exception as exc:  # noqa: BLE001 - autopilot must not crash the server
+        msg = f"Scout 自动周期异常；未推进旧内容。{exc}"
+        write_scout_cycle_status("autopilot", "failed", msg)
+        write_progress(progress_payload(job_id=job_id, job_type="autopilot", status="failed", step_index=11, message=msg, match={"fixture_id": "", "match": "Scout 自动周期"}, error=str(exc)))
+        return False
+    finally:
+        with _job_lock:
+            if _active_job == job_id:
+                _active_job = None
+                _active_job_started_at = None
+                _active_job_type = None
+
+
+def scout_autopilot_loop() -> None:
+    time.sleep(2)
+    while True:
+        run_scout_autopilot_once()
+        time.sleep(max(60, SCOUT_AUTOPILOT_INTERVAL_SECONDS))
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -1344,7 +1587,7 @@ class Handler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self) -> None:  # noqa: N802 - stdlib handler name
-        global _active_job, _active_job_started_at
+        global _active_job, _active_job_started_at, _active_job_type
         path = urlparse(self.path).path
         if path != "/predict":
             self.send_json({"ok": False, "error_cn": "接口不存在。"}, HTTPStatus.NOT_FOUND)
@@ -1390,12 +1633,15 @@ class Handler(SimpleHTTPRequestHandler):
                 print(f"WARN: {cleanup_note}")
             if _active_job:
                 print(f"POST /predict ACTIVE_JOB active_job={_active_job} requested_fixture_id={requested_fixture_id or match.get('fixture_id') or ''}")
+                active_kind = _active_job_type or "manual"
+                active_msg = "已有自动周期任务运行中，请等待完成。" if active_kind == "autopilot" else "已有手动强刷任务正在进行，请等待当前任务完成。"
                 self.send_json(
                     {
                         "ok": False,
                         "code": "ACTIVE_JOB",
-                        "error_cn": "已有手动强刷任务正在进行，请等待当前任务完成。",
+                        "error_cn": active_msg,
                         "job_id": _active_job,
+                        "job_type": active_kind,
                         "retryable": True,
                     },
                     HTTPStatus.CONFLICT,
@@ -1404,10 +1650,11 @@ class Handler(SimpleHTTPRequestHandler):
             job_id = uuid.uuid4().hex[:12]
             _active_job = job_id
             _active_job_started_at = time.time()
+            _active_job_type = "manual"
             print(f"POST /predict start job_id={job_id} active_job={_active_job} fixture_id={requested_fixture_id or match.get('fixture_id') or ''}")
 
         init_message = f"初始化比赛中：fixture_id={match.get('fixture_id', '未提供')}，{match.get('match') or ''}"
-        write_progress(progress_payload(job_id=job_id, status="running", step_index=1, message=init_message, match=match))
+        write_progress(progress_payload(job_id=job_id, status="running", step_index=1, message=init_message, match=match, job_type="manual"))
         thread = threading.Thread(target=run_prediction, args=(job_id, match), daemon=True)
         thread.start()
         self.send_json({"ok": True, "job_id": job_id, "message_cn": "已开始查询。"})
@@ -1423,6 +1670,11 @@ def main() -> int:
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     print(f"W1 dashboard server: http://{HOST}:{PORT}/reports/dashboard/W1_VISUAL_DASHBOARD.html")
     print(env_status_line())
+    if autopilot_enabled():
+        threading.Thread(target=scout_autopilot_loop, daemon=True).start()
+        write_scout_cycle_status("autopilot", "scheduled", "自动周期运行中；server 已启动后台 Scout 检查。", {"next_autopilot_run_at": next_autopilot_run_utc(now_utc())})
+    else:
+        write_scout_cycle_status("autopilot", "disabled", "自动周期未启用；请启动 server 时设置 W1_SCOUT_AUTOPILOT=1，或使用手动强刷。")
     server.serve_forever()
     return 0
 
