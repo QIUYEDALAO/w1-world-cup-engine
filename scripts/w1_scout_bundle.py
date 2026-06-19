@@ -17,6 +17,9 @@ import json
 from collections import defaultdict
 from pathlib import Path
 from statistics import median
+from typing import Any
+
+import w1_ah_cover as W1AH
 
 ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
@@ -195,13 +198,22 @@ def _odds_snapshot_market(fid: str) -> dict:
 
 
 def _market_availability(market: dict) -> dict:
-    has_1x2 = all(isinstance(market.get(key), (int, float)) for key in ("p_home", "p_draw", "p_away"))
+    one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
+    ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+    ou = market.get("ou") if isinstance(market.get("ou"), dict) else {}
+    has_1x2 = all(isinstance(market.get(key), (int, float)) for key in ("p_home", "p_draw", "p_away")) or all(
+        isinstance(one_x_two.get(key), (int, float)) for key in ("p_home", "p_draw", "p_away")
+    )
     has_model_1x2 = all(isinstance(market.get(key), (int, float)) for key in ("model_p_home", "model_p_draw", "model_p_away"))
     has_ah = market.get("ah_line") not in (None, "") and all(
         isinstance(market.get(key), (int, float)) for key in ("ah_home_price", "ah_away_price")
+    ) or ah.get("home_handicap") not in (None, "") and all(
+        isinstance(ah.get(key), (int, float)) for key in ("home_price", "away_price")
     )
     has_ou = market.get("ou_line") not in (None, "") and all(
         isinstance(market.get(key), (int, float)) for key in ("over_price", "under_price")
+    ) or ou.get("line") not in (None, "") and all(
+        isinstance(ou.get(key), (int, float)) for key in ("over_price", "under_price")
     )
     if has_1x2 and has_ah and has_ou:
         overall = "available"
@@ -216,6 +228,94 @@ def _market_availability(market: dict) -> dict:
         "market_ah": "available" if has_ah else "missing",
         "market_ou": "available" if has_ou else "missing",
     }
+
+
+def _sync_market_nested(market: dict) -> dict:
+    one_x_two = dict(market.get("one_x_two") or {})
+    if all(isinstance(market.get(key), (int, float)) for key in ("p_home", "p_draw", "p_away")):
+        one_x_two.update({
+            "p_home": market.get("p_home"),
+            "p_draw": market.get("p_draw"),
+            "p_away": market.get("p_away"),
+            "source": one_x_two.get("source") or market.get("market_source") or "market",
+        })
+    market["one_x_two"] = {k: v for k, v in one_x_two.items() if v not in (None, "", [], {})}
+
+    ah = dict(market.get("ah") or {})
+    if market.get("ah_line") not in (None, ""):
+        ah.setdefault("line", market.get("ah_line"))
+        ah.setdefault("home_handicap", _as_float(market.get("ah_line")))
+        if ah.get("home_handicap") is not None:
+            ah.setdefault("away_handicap", -float(ah["home_handicap"]))
+        ah.setdefault("home_price", market.get("ah_home_price"))
+        ah.setdefault("away_price", market.get("ah_away_price"))
+        ah.setdefault("bookmaker_count", market.get("bookmaker_count"))
+        ah.setdefault("median_line", market.get("ah_line"))
+        ah.setdefault("median_home_price", market.get("ah_home_price"))
+        ah.setdefault("median_away_price", market.get("ah_away_price"))
+        ah.setdefault("current_line", market.get("ah_line"))
+        ah.setdefault("opening_line", market.get("ah_line"))
+        ah.setdefault("line_movement", _movement_label(ah.get("current_line"), ah.get("opening_line")))
+        ah.setdefault("water_movement", _water_label(ah.get("home_price"), ah.get("away_price"), ah.get("selected_side")))
+        ah.setdefault("source", market.get("market_source") or "odds")
+        ah.setdefault("odds_updated_at", market.get("odds_updated_at"))
+    market["ah"] = {k: v for k, v in ah.items() if v not in (None, "", [], {})}
+
+    ou = dict(market.get("ou") or {})
+    if market.get("ou_line") not in (None, ""):
+        ou.setdefault("line", market.get("ou_line"))
+        ou.setdefault("over_price", market.get("over_price"))
+        ou.setdefault("under_price", market.get("under_price"))
+        ou.setdefault("current_line", market.get("ou_line"))
+        ou.setdefault("opening_line", market.get("ou_line"))
+        ou.setdefault("movement", _movement_label(ou.get("current_line"), ou.get("opening_line")))
+        ou.setdefault("source", market.get("market_source") or "odds")
+    market["ou"] = {k: v for k, v in ou.items() if v not in (None, "", [], {})}
+    return market
+
+
+def _attach_ah_cover_from_rec(market: dict, rec: dict) -> dict:
+    ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+    line = ah.get("home_handicap", ah.get("line", market.get("ah_line")))
+    if line in (None, ""):
+        return market
+    payload = _model_matrix_payload(rec)
+    if not payload:
+        return market
+    home_price = ah.get("home_price", market.get("ah_home_price"))
+    away_price = ah.get("away_price", market.get("ah_away_price"))
+    try:
+        matrix = W1AH.matrix_from_payload(payload)
+        cover = W1AH.cover_from_matrix(matrix, float(line), _as_float(home_price), _as_float(away_price))
+    except Exception:
+        return market
+    ah.update(cover)
+    hp = _as_float(home_price)
+    ap = _as_float(away_price)
+    if hp and ap:
+        ih = 1.0 / hp
+        ia = 1.0 / ap
+        total = ih + ia
+        if total > 0:
+            ah["home_market_cover_prob"] = round(ih / total, 4)
+            ah["away_market_cover_prob"] = round(ia / total, 4)
+    market_home = ah.get("home_market_cover_prob")
+    market_away = ah.get("away_market_cover_prob")
+    home_edge = None if not isinstance(market_home, (int, float)) else round(cover["home_cover_prob"] - float(market_home), 4)
+    away_edge = None if not isinstance(market_away, (int, float)) else round(cover["away_cover_prob"] - float(market_away), 4)
+    if away_edge is not None and (home_edge is None or away_edge >= home_edge):
+        ah["selected_side"] = "away"
+        ah["cover_probability_model"] = cover["away_cover_prob"]
+        ah["cover_probability_market"] = market_away
+        ah["cover_edge"] = away_edge
+    elif home_edge is not None:
+        ah["selected_side"] = "home"
+        ah["cover_probability_model"] = cover["home_cover_prob"]
+        ah["cover_probability_market"] = market_home
+        ah["cover_edge"] = home_edge
+    ah["water_movement"] = _water_label(ah.get("home_price"), ah.get("away_price"), ah.get("selected_side"))
+    market["ah"] = {k: v for k, v in ah.items() if v not in (None, "", [], {})}
+    return market
 
 
 def _prob_triplet_from_rec(rec: dict) -> dict:
@@ -245,6 +345,165 @@ def _prob_triplet_from_rec(rec: dict) -> dict:
         out["model_p_home"], out["model_p_draw"], out["model_p_away"] = model_hda[:3]
     if all(isinstance(out.get(key), (int, float)) for key in ("model_p_home", "model_p_draw", "model_p_away")):
         out["model_1x2_source"] = "W1模型"
+    return out
+
+
+def _price_from_prob(prob: Any) -> float | None:
+    value = _as_float(prob)
+    if not value or value <= 0:
+        return None
+    return round(1.0 / value, 3)
+
+
+def _movement_label(current: Any, opening: Any) -> str | None:
+    cur = _as_float(current)
+    opn = _as_float(opening)
+    if cur is None or opn is None:
+        return None
+    if abs(cur - opn) < 0.01:
+        return "盘口基本稳定"
+    return "升盘" if abs(cur) > abs(opn) else "退盘"
+
+
+def _water_label(home_price: Any, away_price: Any, selected_side: str | None = None) -> str | None:
+    hp = _as_float(home_price)
+    ap = _as_float(away_price)
+    if hp is None or ap is None:
+        return None
+    if abs(hp - ap) < 0.04:
+        return "两侧水位接近"
+    if selected_side == "home":
+        return "主让方向低水" if hp < ap else "主让方向高水"
+    if selected_side == "away":
+        return "受让方向低水" if ap < hp else "受让方向高水"
+    return "主队低水" if hp < ap else "客队低水"
+
+
+def _model_matrix_payload(rec: dict) -> dict[str, Any] | None:
+    model = ((rec.get("score_distribution") or {}).get("matrix_model") or {})
+    if model.get("lambda_home") is None or model.get("lambda_away") is None:
+        summary = rec.get("score_matrix_summary") or {}
+        model = {
+            "lambda_home": summary.get("lambda_home"),
+            "lambda_away": summary.get("lambda_away"),
+            "rho": summary.get("dixon_coles_rho"),
+            "max_goals": 10,
+        }
+    if model.get("lambda_home") is None or model.get("lambda_away") is None:
+        return None
+    return model
+
+
+def _panel_market_from_rec(rec: dict) -> dict:
+    panel = rec.get("market_probability_panel") or {}
+    comparison = panel.get("market_comparison") or {}
+    movement = rec.get("odds_movement") or {}
+    liquidity = movement.get("liquidity") or {}
+    snapshot = {}
+    for row in movement.get("snapshots") or []:
+        if row.get("phase") == "LATEST":
+            snapshot = row
+            break
+    out: dict[str, Any] = {}
+
+    market_oxt = comparison.get("one_x_two_market") or {}
+    oxt = {
+        "home_odds": _price_from_prob(market_oxt.get("home_win")),
+        "draw_odds": _price_from_prob(market_oxt.get("draw")),
+        "away_odds": _price_from_prob(market_oxt.get("away_win")),
+        "p_home": market_oxt.get("home_win"),
+        "p_draw": market_oxt.get("draw"),
+        "p_away": market_oxt.get("away_win"),
+        "source": "market_comparison" if market_oxt else None,
+    }
+
+    ah_market = comparison.get("ah_main_market") or {}
+    ah_default = panel.get("handicap_default") or {}
+    home_handicap = ah_market.get("home_handicap", ah_default.get("home_handicap"))
+    home_price = _price_from_prob(ah_market.get("home_cover"))
+    away_price = _price_from_prob(ah_market.get("away_cover"))
+    ah = {
+        "line": home_handicap,
+        "home_handicap": home_handicap,
+        "away_handicap": -float(home_handicap) if home_handicap not in (None, "") else None,
+        "home_price": home_price,
+        "away_price": away_price,
+        "selected_side": None,
+        "bookmaker_count": liquidity.get("book_count_latest") or None,
+        "median_line": home_handicap,
+        "median_home_price": home_price,
+        "median_away_price": away_price,
+        "opening_line": ((snapshot.get("ah") or {}).get("main_line") if snapshot else None),
+        "current_line": home_handicap,
+        "line_movement": None,
+        "water_movement": None,
+        "odds_updated_at": snapshot.get("captured_at_utc") or None,
+        "source": "market_probability_panel.ah_main_market" if home_handicap not in (None, "") else None,
+    }
+    if ah["opening_line"] is None:
+        ah["opening_line"] = home_handicap
+    ah["line_movement"] = _movement_label(ah["current_line"], ah["opening_line"])
+
+    if home_handicap not in (None, ""):
+        payload = _model_matrix_payload(rec)
+        if payload:
+            try:
+                matrix = W1AH.matrix_from_payload(payload)
+                cover = W1AH.cover_from_matrix(matrix, float(home_handicap), home_price, away_price)
+                ah.update(cover)
+                market_home = ah_market.get("home_cover")
+                market_away = ah_market.get("away_cover")
+                if isinstance(market_home, (int, float)):
+                    ah["home_market_cover_prob"] = market_home
+                if isinstance(market_away, (int, float)):
+                    ah["away_market_cover_prob"] = market_away
+                home_edge = None if not isinstance(market_home, (int, float)) else round(cover["home_cover_prob"] - float(market_home), 4)
+                away_edge = None if not isinstance(market_away, (int, float)) else round(cover["away_cover_prob"] - float(market_away), 4)
+                if away_edge is not None and (home_edge is None or away_edge >= home_edge):
+                    ah["selected_side"] = "away"
+                    ah["cover_probability_model"] = cover["away_cover_prob"]
+                    ah["cover_probability_market"] = market_away
+                    ah["cover_edge"] = away_edge
+                elif home_edge is not None:
+                    ah["selected_side"] = "home"
+                    ah["cover_probability_model"] = cover["home_cover_prob"]
+                    ah["cover_probability_market"] = market_home
+                    ah["cover_edge"] = home_edge
+            except Exception:
+                pass
+    ah["water_movement"] = _water_label(ah.get("home_price"), ah.get("away_price"), ah.get("selected_side"))
+
+    ou_market = comparison.get("ou_2_5_market") or {}
+    totals_default = panel.get("totals_default") or {}
+    ou_line = totals_default.get("line")
+    ou = {
+        "line": ou_line,
+        "over_price": _price_from_prob(ou_market.get("over")),
+        "under_price": _price_from_prob(ou_market.get("under")),
+        "opening_line": ((snapshot.get("ou") or {}).get("main_line") if snapshot else None) or ou_line,
+        "current_line": ou_line,
+        "movement": None,
+        "source": "market_probability_panel.ou_2_5_market" if ou_line not in (None, "") else None,
+    }
+    ou["movement"] = _movement_label(ou["current_line"], ou["opening_line"])
+
+    out["one_x_two"] = {k: v for k, v in oxt.items() if v not in (None, "", [], {})}
+    out["ah"] = {k: v for k, v in ah.items() if v not in (None, "", [], {})}
+    out["ou"] = {k: v for k, v in ou.items() if v not in (None, "", [], {})}
+    if out["ah"]:
+        out["ah_line"] = out["ah"].get("home_handicap")
+        out["ah_home_price"] = out["ah"].get("home_price")
+        out["ah_away_price"] = out["ah"].get("away_price")
+    if out["ou"]:
+        out["ou_line"] = out["ou"].get("line")
+        out["over_price"] = out["ou"].get("over_price")
+        out["under_price"] = out["ou"].get("under_price")
+    if out["one_x_two"]:
+        out["p_home"] = out["one_x_two"].get("p_home")
+        out["p_draw"] = out["one_x_two"].get("p_draw")
+        out["p_away"] = out["one_x_two"].get("p_away")
+    if liquidity.get("book_count_latest") is not None:
+        out["bookmaker_count"] = liquidity.get("book_count_latest")
     return out
 
 
@@ -281,8 +540,11 @@ def build_bundle(rec: dict) -> dict:
               "ah_line": None, "ah_home_price": None,
               "ah_away_price": None, "ou_line": None, "over_price": None,
               "under_price": None, "bookmaker_count": None, "market_source": None,
-              "odds_updated_at": None}
+              "odds_updated_at": None, "one_x_two": {}, "ah": {}, "ou": {}}
+    market.update(_panel_market_from_rec(rec))
     market.update(_odds_snapshot_market(fid))
+    market = _sync_market_nested(market)
+    market = _attach_ah_cover_from_rec(market, rec)
 
     bundle = {
         "schema_version": "W1_SCOUT_BUNDLE_V1",
@@ -328,6 +590,9 @@ def _merge_user_bundle(fid: str, base: dict) -> dict:
     # User-fetched non-null values win, but nested maps merge so fetched factors
     # cannot erase W1 base market availability/source fields.
     for k, v in rich.items():
+        if k in {"home", "away"}:
+            # Keep canonical Chinese display names from dashboard/card universe.
+            continue
         if v not in (None, "", [], {}):
             if isinstance(v, dict) and isinstance(base.get(k), dict):
                 merged = dict(base[k])
@@ -336,6 +601,7 @@ def _merge_user_bundle(fid: str, base: dict) -> dict:
             else:
                 base[k] = v
     if isinstance(base.get("market"), dict):
+        base["market"] = _sync_market_nested(base["market"])
         base.setdefault("availability", {}).update(_market_availability(base["market"]))
     base["missing_fields"] = [k for k, a in (base.get("availability") or {}).items() if a == "missing"]
     return base

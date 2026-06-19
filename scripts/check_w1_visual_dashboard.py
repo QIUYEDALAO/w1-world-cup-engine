@@ -71,7 +71,21 @@ SCOUT_RECOMMENDATION_CARD_KEYS = (
     "risk_cn",
     "confidence_cn",
 )
+SCOUT_AH_CARD_KEYS = (
+    "schema_version",
+    "fixture_id",
+    "data_readiness",
+    "main_ah_pick_cn",
+    "ah_side_cn",
+    "ah_line",
+    "ah_confidence_cn",
+    "recommendation_grade",
+    "cover_probability_model",
+    "risk_cn",
+    "final_action_cn",
+)
 SCOUT_FUNDS_FORBIDDEN_TOKENS = ("下注", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中")
+SCOUT_PROMISE_FORBIDDEN_TOKENS = ("必穿", "稳赢", "包赢")
 SCOUT_RECOMMENDATION_SOURCE_TOKENS = ("来源：市场", "来源：市场赔率", "来源：W1模型", "来源：score matrix", "来源：缺失", "来源：盘口")
 
 
@@ -418,6 +432,21 @@ def assert_scout_embed(text: str) -> None:
             card_text = "\n".join(str(card.get(key) or "") for key in SCOUT_RECOMMENDATION_CARD_KEYS)
             if not any(token in card_text for token in SCOUT_RECOMMENDATION_SOURCE_TOKENS):
                 fail(f"Embedded Scout call {call.get('fixture_id')} recommendation_card lacks source label")
+        ah_card = read.get("asian_handicap_card")
+        if not isinstance(ah_card, dict):
+            fail(f"Embedded Scout call {call.get('fixture_id')} asian_handicap_card missing")
+        else:
+            for key in SCOUT_AH_CARD_KEYS:
+                if key not in ah_card:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} asian_handicap_card.{key} missing")
+            if ah_card.get("schema_version") != "scout_ah_recommendation_v1":
+                fail(f"Embedded Scout call {call.get('fixture_id')} asian_handicap_card schema mismatch")
+            if str(ah_card.get("recommendation_grade") or "") in {"A", "B+", "B"}:
+                if ah_card.get("cover_probability_model") is None or ah_card.get("ah_line") is None:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} graded AH card missing line/cover")
+                if "亚盘主推" not in str(ah_card.get("final_action_cn") or ""):
+                    fail(f"Embedded Scout call {call.get('fixture_id')} graded AH card must be AH-first")
+            visible_chunks.extend(str(ah_card.get(key) or "") for key in ah_card)
         visible_text = "\n".join(visible_chunks)
         for token in SCOUT_VISIBLE_FORBIDDEN_TOKENS:
             if token in visible_text:
@@ -425,6 +454,9 @@ def assert_scout_embed(text: str) -> None:
         for token in SCOUT_FUNDS_FORBIDDEN_TOKENS:
             if token in visible_text:
                 fail(f"Embedded Scout visible text contains forbidden funds token {token}: fixture {call.get('fixture_id')}")
+        for token in SCOUT_PROMISE_FORBIDDEN_TOKENS:
+            if token in visible_text:
+                fail(f"Embedded Scout visible text contains forbidden promise token {token}: fixture {call.get('fixture_id')}")
         for old_key in ("market_divergence", "conviction"):
             if old_key in call:
                 fail(f"Embedded Scout call {call.get('fixture_id')} must not expose old field {old_key}")
@@ -495,15 +527,22 @@ def assert_first_screen(text: str) -> None:
     if not scout:
         fail("pScoutAnalyst function missing")
     for need in (
-        "AI推荐卡 · DeepSeek",
-        "recommendation_card",
-        "one_x_two_cn",
-        "score_picks_cn",
-        "ou_pick_cn",
-        "ah_pick_cn",
-        "main_recommendation_cn",
+        "AI亚盘推荐卡 · DeepSeek",
+        "asian_handicap_card",
+        "亚盘主推",
+        "推荐等级",
+        "当前盘口 / 水位",
+        "W1覆盖概率 vs 市场隐含概率",
+        "盘口变化",
+        "大小球辅助",
+        "比分路径",
+        "失效条件",
+        "欧盘参考",
+        "main_ah_pick_cn",
+        "recommendation_grade",
+        "cover_probability_model",
+        "final_action_cn",
         "risk_cn",
-        "confidence_cn",
         "scout-rec-grid",
         "核心判断",
         "推荐理由",
@@ -533,8 +572,8 @@ def assert_first_screen(text: str) -> None:
             fail(f"AI-first scout card must not display raw internal token: {raw}")
     if "stripAiDisplayText(" not in scout:
         fail("AI-first scout card must sanitize probability-like text from AI display")
-    if "fmtP(" in scout or "probability" in scout:
-        fail("AI-first scout card must not render internal probability helpers as its main read")
+    if "fmtP(" in scout:
+        fail("AI-first scout card must not render old internal probability helpers as its main read")
     if re.search(r"(?<![A-Za-z])V4(?![A-Za-z])", scout, re.I):
         fail("AI-first scout card must not expose old V4 token")
     cycle = _func_body(text, "function pScoutCycleStatus(")

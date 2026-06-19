@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import copy
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +19,7 @@ HTML = ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html"
 CALLS = ROOT / "state/w1_scout_calls.json"
 REVIEWS = ROOT / "state/scout_reviews.jsonl"
 CALIBRATION = ROOT / "state/scout_calibration.json"
+BUNDLES = ROOT / "state/w1_scout_bundles.json"
 TAG_RE = re.compile(r'<script id="w1-scout-calls" type="application/json">.*?</script>', re.S)
 REVIEWS_TAG_RE = re.compile(r'<script id="w1-scout-reviews" type="application/json">.*?</script>', re.S)
 CALIBRATION_TAG_RE = re.compile(r'<script id="w1-scout-calibration" type="application/json">.*?</script>', re.S)
@@ -46,6 +48,12 @@ REPLACEMENTS = (
     ("若干", "样本不足"),
     ("1-历史样本-0", SCORE_BAND_FALLBACK),
     ("历史样本-0", SCORE_BAND_FALLBACK),
+    ("Australia", "澳大利亚"),
+    ("Türkiye", "土耳其"),
+    ("Turkey", "土耳其"),
+    ("South Korea", "韩国"),
+    ("Mexico", "墨西哥"),
+    ("USA", "美国"),
 )
 STRONG_REPLACEMENTS = (
     ("零封概率较高", "存在零封分支，但证据不足，需临场确认"),
@@ -57,6 +65,9 @@ STRONG_REPLACEMENTS = (
     ("强烈", "偏向"),
     ("明显", "相对"),
 )
+
+sys.path.insert(0, str(ROOT / "scripts"))
+import w1_scout_analyst as W1ANALYST  # noqa: E402
 
 
 def read_reviews() -> list[dict]:
@@ -96,8 +107,10 @@ def clean_visible_text(value: object, *, score_band: bool = False, market_script
 def display_call(call: dict) -> dict:
     """Dashboard embeds only display text; structured evidence stays in state."""
     out = copy.deepcopy(call)
+    bundle = BUNDLE_BY_FIXTURE.get(str(out.get("fixture_id") or ""))
     read = out.get("read")
     if isinstance(read, dict):
+        W1ANALYST.normalize_asian_handicap_card(out, bundle)
         read.pop("evidence", None)
         for key in VISIBLE_TEXT_KEYS:
             if key in read:
@@ -113,6 +126,19 @@ def display_call(call: dict) -> dict:
             elif isinstance(value, str):
                 read[key] = [clean_visible_text(value)]
     return out
+
+
+def load_bundle_map() -> dict[str, dict]:
+    if not BUNDLES.is_file():
+        return {}
+    try:
+        payload = json.loads(BUNDLES.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return {str(row.get("fixture_id")): row for row in payload.get("bundles", []) if row.get("fixture_id")}
+
+
+BUNDLE_BY_FIXTURE = load_bundle_map()
 
 
 def main() -> int:

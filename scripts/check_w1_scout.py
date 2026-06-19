@@ -52,7 +52,34 @@ RECOMMENDATION_CARD_KEYS = (
     "confidence_cn",
 )
 RECOMMENDATION_CARD_OPTIONAL_KEYS = ("data_status_cn",)
+AH_CARD_KEYS = (
+    "schema_version",
+    "fixture_id",
+    "stage_id",
+    "stage_label_cn",
+    "data_readiness",
+    "main_ah_pick_cn",
+    "ah_side_cn",
+    "ah_line",
+    "ah_price",
+    "ah_confidence_cn",
+    "recommendation_grade",
+    "ah_logic_cn",
+    "cover_probability_model",
+    "cover_probability_market",
+    "cover_edge",
+    "line_movement_cn",
+    "water_movement_cn",
+    "market_consensus_cn",
+    "ou_pick_cn",
+    "score_path_cn",
+    "risk_cn",
+    "pass_reason_cn",
+    "final_action_cn",
+)
 FUNDS_FORBIDDEN_TOKENS = ("下注", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中")
+PROMISE_FORBIDDEN_TOKENS = ("必穿", "稳赢", "包赢")
+ENGLISH_TEAM_TOKENS = ("Australia", "Türkiye", "Turkey", "South Korea", "Mexico", "USA")
 RECOMMENDATION_SOURCE_TOKENS = ("来源：市场", "来源：市场赔率", "来源：W1模型", "来源：score matrix", "来源：缺失", "来源：盘口")
 VISIBLE_FORBIDDEN_TOKENS = (
     "p_home",
@@ -132,6 +159,9 @@ def visible_text_chunks(read: dict) -> list[str]:
     card = read.get("recommendation_card")
     if isinstance(card, dict):
         chunks.extend(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
+    ah_card = read.get("asian_handicap_card")
+    if isinstance(ah_card, dict):
+        chunks.extend(str(ah_card.get(key) or "") for key in AH_CARD_KEYS)
     return chunks
 
 
@@ -222,6 +252,12 @@ def validate_visible_text(read: dict, readiness: str) -> list[str]:
     for token in FUNDS_FORBIDDEN_TOKENS:
         if token in visible:
             errs.append(f"recommendation card / visible Scout text contains forbidden funds token: {token}")
+    for token in PROMISE_FORBIDDEN_TOKENS:
+        if token in visible:
+            errs.append(f"visible Scout text contains forbidden promise token: {token}")
+    for token in ENGLISH_TEAM_TOKENS:
+        if token in visible:
+            errs.append(f"visible Scout text contains English team token: {token}")
     score_band = str(read.get("score_band_cn") or "")
     if "历史样本" in score_band or "若干" in score_band:
         errs.append("score_band_cn must not contain machine fallback tokens")
@@ -275,6 +311,53 @@ def validate_recommendation_card(read: dict, readiness: str) -> list[str]:
     return errs
 
 
+def _is_num(value) -> bool:
+    return isinstance(value, (int, float))
+
+
+def validate_asian_handicap_card(read: dict, readiness: str) -> list[str]:
+    errs: list[str] = []
+    card = read.get("asian_handicap_card")
+    if not isinstance(card, dict):
+        return ["read.asian_handicap_card must be an object"]
+    for key in AH_CARD_KEYS:
+        if key not in card:
+            errs.append(f"read.asian_handicap_card.{key} missing")
+    if card.get("schema_version") != "scout_ah_recommendation_v1":
+        errs.append("read.asian_handicap_card.schema_version mismatch")
+    grade = str(card.get("recommendation_grade") or "")
+    if grade not in {"A", "B+", "B", "C/观察", "PASS"}:
+        errs.append(f"invalid AH recommendation_grade {grade}")
+    text = "\n".join(str(card.get(key) or "") for key in AH_CARD_KEYS)
+    if "1X2" in str(card.get("main_ah_pick_cn") or "") or "主胜" in str(card.get("main_ah_pick_cn") or ""):
+        errs.append("AH card must not use 1X2 as primary pick")
+    if not any(token in text for token in ("亚盘", "让球", "受让", "主推", "PASS / 观察")):
+        errs.append("AH card must prioritize Asian handicap wording")
+    for token in FUNDS_FORBIDDEN_TOKENS + PROMISE_FORBIDDEN_TOKENS:
+        if token in text:
+            errs.append(f"AH card contains forbidden token: {token}")
+    for token in ENGLISH_TEAM_TOKENS:
+        if token in text:
+            errs.append(f"AH card contains English team token: {token}")
+    if readiness == "低" and grade not in {"PASS", "C/观察"}:
+        errs.append("low data_readiness AH card must be PASS/C observation")
+    if readiness == "低" and "观察" not in text:
+        errs.append("low data_readiness AH card must explicitly show 观察")
+    if grade in {"A", "B+", "B"}:
+        for key in ("ah_side_cn", "ah_confidence_cn", "risk_cn", "final_action_cn"):
+            if not str(card.get(key) or "").strip():
+                errs.append(f"grade {grade} AH card missing {key}")
+        for key in ("ah_line", "cover_probability_model"):
+            if not _is_num(card.get(key)):
+                errs.append(f"grade {grade} AH card missing numeric {key}")
+        if "亚盘主推" not in str(card.get("final_action_cn") or ""):
+            errs.append(f"grade {grade} final_action_cn must say 亚盘主推")
+    else:
+        if not str(card.get("pass_reason_cn") or "").strip():
+            errs.append("PASS/C AH card must include pass_reason_cn")
+    return errs
+
+
 def market_has_lines(bundle: dict) -> bool:
     market = bundle.get("market") if isinstance(bundle.get("market"), dict) else {}
     availability = bundle.get("availability") if isinstance(bundle.get("availability"), dict) else {}
@@ -309,6 +392,7 @@ def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
     read = call.get("read") if isinstance(call.get("read"), dict) else {}
     market_script = str(read.get("market_expert_script_cn") or "")
     card = read.get("recommendation_card") if isinstance(read.get("recommendation_card"), dict) else {}
+    ah_card = read.get("asian_handicap_card") if isinstance(read.get("asian_handicap_card"), dict) else {}
     card_text = "\n".join(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
     if market_has_lines(bundle):
         if "盘口数据缺失" in market_script or "无法展开盘口剧本" in market_script or "不展开盘口剧本" in market_script:
@@ -317,6 +401,16 @@ def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
             errs.append("market AH/OU available but recommendation_card still says odds are missing")
         if not ("让球" in market_script and "大小球" in market_script and any(token in market_script for token in REVERSE_FAILURE_TOKENS + TAIL_TRIGGER_TOKENS)):
             errs.append("market AH/OU available but market_expert_script_cn lacks handicap/totals/condition language")
+    market = bundle.get("market") if isinstance(bundle.get("market"), dict) else {}
+    ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+    if (bundle.get("availability") or {}).get("market_ah") == "available" and ah.get("cover_probability_model") is not None:
+        if ah_card.get("cover_probability_model") is None:
+            errs.append("AH available with score matrix but asian_handicap_card missing cover_probability_model")
+        if str(ah_card.get("recommendation_grade") or "") in {"A", "B+", "B"} and not str(ah_card.get("final_action_cn") or "").startswith("亚盘主推"):
+            errs.append("graded AH card must be an Asian-handicap primary recommendation")
+    if (bundle.get("availability") or {}).get("market_ah") != "available":
+        if str(ah_card.get("recommendation_grade") or "") in {"A", "B+", "B"}:
+            errs.append("AH missing but asian_handicap_card still makes a graded recommendation")
     if model_has_1x2(bundle):
         one_x_two = str(card.get("one_x_two_cn") or "")
         if "缺失" in one_x_two or "暂不展开胜平负推荐" in one_x_two:
@@ -344,6 +438,7 @@ def validate_call(c: dict, policy: dict) -> list[str]:
         if f not in read:
             errs.append(f"read.{f} missing")
     errs.extend(validate_recommendation_card(read, str(c.get("data_readiness") or "")))
+    errs.extend(validate_asian_handicap_card(read, str(c.get("data_readiness") or "")))
     watch = read.get("watch_points_cn")
     risks = read.get("risks_cn")
     if not isinstance(watch, list) or len([x for x in watch if str(x).strip()]) < 2:
@@ -580,6 +675,7 @@ def main() -> int:
     for token in (
         "read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn",
         "evidence[{claim,source,fields[],availability,weight}]",
+        "asian_handicap_card{schema_version,fixture_id,stage_id,stage_label_cn,data_readiness,main_ah_pick_cn,ah_side_cn,ah_line,ah_price,ah_confidence_cn,recommendation_grade,ah_logic_cn,cover_probability_model,cover_probability_market,cover_edge,line_movement_cn,water_movement_cn,market_consensus_cn,ou_pick_cn,score_path_cn,risk_cn,pass_reason_cn,final_action_cn}",
         "recommendation_card{one_x_two_cn,score_picks_cn,ou_pick_cn,ah_pick_cn,main_recommendation_cn,risk_cn,confidence_cn,data_status_cn}",
         "evidence_chain_cn",
         "regular_script_cn",
@@ -626,9 +722,14 @@ def main() -> int:
             if availability.get(key) not in {"available", "missing"}:
                 fail(f"bundle {b.get('fixture_id')} availability.{key} missing or invalid")
         market = b.get("market") or {}
-        for key in ("p_home", "p_draw", "p_away", "model_p_home", "model_p_draw", "model_p_away", "model_1x2_source", "score_picks", "ah_line", "ah_home_price", "ah_away_price", "ou_line", "over_price", "under_price", "bookmaker_count", "market_source", "odds_updated_at"):
+        for key in ("p_home", "p_draw", "p_away", "model_p_home", "model_p_draw", "model_p_away", "model_1x2_source", "score_picks", "ah_line", "ah_home_price", "ah_away_price", "ou_line", "over_price", "under_price", "bookmaker_count", "market_source", "odds_updated_at", "one_x_two", "ah", "ou"):
             if key not in market:
                 fail(f"bundle {b.get('fixture_id')} market missing key {key}")
+        if availability.get("market_ah") == "available" and availability.get("model_1x2") == "available":
+            ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+            for key in ("home_handicap", "home_price", "away_price", "cover_probability_model", "cover_probability_market", "cover_edge"):
+                if key not in ah:
+                    fail(f"bundle {b.get('fixture_id')} market.ah missing key {key}")
         if availability.get("market_1x2") == "available" and availability.get("market_ou") == "available":
             if availability.get("model_1x2") != "available":
                 fail(f"bundle {b.get('fixture_id')} has 1X2+OU inputs but missing W1 model_1x2")
@@ -700,6 +801,31 @@ def main() -> int:
                          "risk_cn": "若客队先球或主队久攻不下，主线降权。",
                          "confidence_cn": "中",
                          "data_status_cn": "市场赔率可用 / 数据部分缺失"
+                     },
+                     "asian_handicap_card": {
+                         "schema_version": "scout_ah_recommendation_v1",
+                         "fixture_id": "X",
+                         "stage_id": "watch_6h",
+                         "stage_label_cn": "赛前观察",
+                         "data_readiness": "中",
+                         "main_ah_pick_cn": "主队 -0.25",
+                         "ah_side_cn": "主队让球",
+                         "ah_line": -0.25,
+                         "ah_price": 1.9,
+                         "ah_confidence_cn": "中",
+                         "recommendation_grade": "B",
+                         "ah_logic_cn": "W1覆盖率 53% vs 市场隐含 51%，覆盖差 2%；主队让球方向只在盘口与水位维持时成立。",
+                         "cover_probability_model": 0.53,
+                         "cover_probability_market": 0.51,
+                         "cover_edge": 0.02,
+                         "line_movement_cn": "盘口基本稳定",
+                         "water_movement_cn": "两侧水位接近",
+                         "market_consensus_cn": "欧盘参考：主胜45%｜平29%｜客胜26%。",
+                         "ou_pick_cn": "小2.5｜信心：中｜失效：早球",
+                         "score_path_cn": "主线 1-0 12% / 1-1 11%；风险 2-1 9%",
+                         "risk_cn": "早球、首发关键点缺席、盘口退盘或水位反向，会削弱当前亚盘方向。",
+                         "pass_reason_cn": "",
+                         "final_action_cn": "亚盘主推：主队 -0.25；若临场退盘或水位反向，降级观察。"
                      },
                      "evidence_chain_cn": ["市场读数主队略低水", "阵容信息部分缺失,只作降权证据"],
                      "regular_script_cn": "常规剧本是市场读数主队略低水支撑主队压住节奏,通过边路和二点球慢慢建立优势。",

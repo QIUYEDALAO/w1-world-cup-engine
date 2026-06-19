@@ -1,0 +1,41 @@
+{
+  "policy_version": "W1_AH_RECOMMENDATION_POLICY_V1",
+  "purpose": "Scout 亚盘主导推荐卡分级。只用于赛前研究展示，不改 W1 score engine / lambda / probability algorithm。",
+  "grade_rules": {
+    "A": {
+      "cover_edge_min": 0.06,
+      "data_readiness": ["高"],
+      "requires": ["ah_line", "cover_probability_model", "cover_probability_market", "no_major_reverse_risk"],
+      "label_cn": "A"
+    },
+    "B+": {
+      "cover_edge_min": 0.03,
+      "cover_edge_max": 0.06,
+      "data_readiness": ["高", "中"],
+      "requires": ["clear_logic", "risk_count_1_to_2"],
+      "label_cn": "B+"
+    },
+    "B": {
+      "cover_edge_min": 0.01,
+      "cover_edge_max": 0.03,
+      "data_readiness": ["高", "中"],
+      "requires": ["clear_logic"],
+      "label_cn": "B"
+    },
+    "C": {
+      "cover_edge_max": 0.01,
+      "label_cn": "C/观察"
+    },
+    "PASS": {
+      "triggers": ["missing_ah", "missing_score_matrix", "severe_conflict", "low_readiness"],
+      "label_cn": "PASS / 观察"
+    }
+  },
+  "forbidden_terms": ["下注金额", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中", "必穿", "稳赢", "包赢"],
+  "allowed_market_terms": ["推荐", "主推", "亚盘方向", "穿盘", "受让保护", "让深盘", "退盘", "升盘", "水位"],
+  "redlines": [
+    "不输出资金建议",
+    "不承诺结果",
+    "不修改 score engine / DEFAULT_RHO / lambda / probability algorithm / Primary Read"
+  ]
+}
