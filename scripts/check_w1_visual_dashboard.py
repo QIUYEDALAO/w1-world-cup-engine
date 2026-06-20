@@ -113,6 +113,7 @@ def assert_no_forbidden_terms(path: Path) -> None:
         .replace("pending_remaining_count", "scheduler_remaining_count")
         .replace("pending_remaining", "scheduler_remaining")
         .replace("pending_preview", "scheduler_preview")
+        .replace("official_1h", "scout_formal_1h")
     )
     for term in FORBIDDEN_SOURCE_TERMS:
         if term.isascii():
@@ -543,9 +544,16 @@ def assert_first_screen(text: str) -> None:
     for need in ("asian_handicap_card", "recommendation_card"):
         if need not in scout_readable:
             fail(f"scoutHasReadableCall must require displayable Scout read content: {need}")
-    for need in ("scoutHasReadableCall(c)", "generated_at", "scoutStageRank(b.stage_id)-scoutStageRank(a.stage_id)"):
+    for need in ("scoutHasReadableCall(c)", "schema_version==='scout_ah_recommendation_v2'", "generated_at", "scoutStageRank(b.stage_id)-scoutStageRank(a.stage_id)", "scoutGeneratedAt(b)-scoutGeneratedAt(a)"):
         if need not in scout_call:
             fail(f"scoutCallFor must select the highest readable staged Scout call: {need}")
+    for forbidden in ("阶段未标注", "客队受让 -", "主队让球 +"):
+        if forbidden in text:
+            fail(f"dashboard visible source must not contain forbidden stale Scout text: {forbidden}")
+    rail = _func_body(text, "function renderRail(")
+    for need in ("scoutScoreLabels(call.read)", "主 ${esc(scoreLab.main", "备 ${esc(scoreLab.backup", "比分待生成"):
+        if need not in rail:
+            fail(f"left rail must show Scout main/backup score labels: {need}")
     if "const c=scoutCallFor(r.fixture_id)" not in scout:
         fail("pScoutAnalyst must use scoutCallFor(r.fixture_id) as the single source for card vs queued state")
     if "if(!c||!c.read)" not in scout:

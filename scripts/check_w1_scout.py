@@ -66,6 +66,7 @@ AH_CARD_KEYS = (
     "ah_side_cn",
     "ah_line",
     "ah_price",
+    "current_handicap_cn",
     "ah_confidence_cn",
     "recommendation_grade",
     "ah_logic_cn",
@@ -77,6 +78,8 @@ AH_CARD_KEYS = (
     "market_consensus_cn",
     "ou_pick_cn",
     "score_path_cn",
+    "score_main_cn",
+    "score_backup_cn",
     "risk_cn",
     "pass_reason_cn",
     "final_action_cn",
@@ -511,6 +514,11 @@ def validate_call(c: dict, policy: dict) -> list[str]:
     errs: list[str] = []
     if c.get("schema_version") != "scout_ah_recommendation_v2":
         errs.append("schema_version must be scout_ah_recommendation_v2")
+    legacy_runtime = c.get("_legacy_runtime_normalized") is True
+    if not str(c.get("generated_at") or "").strip() and not legacy_runtime:
+        errs.append("generated_at required for Scout v2 call ordering")
+    if not (str(c.get("stage_id") or "").strip() or str(c.get("stage_label_cn") or "").strip()) and not legacy_runtime:
+        errs.append("Scout v2 call requires stage_id or stage_label_cn")
     if c.get("style_mode") not in {"conservative", "balanced", "aggressive_script"}:
         errs.append(f"invalid style_mode {c.get('style_mode')}")
     if c.get("safety_label") != "亚盘研究推荐 · 非资金指令 · 不承诺结果":
@@ -619,7 +627,10 @@ def normalize_runtime_call_for_validation(call: dict, bundle: dict | None) -> di
     """
     fid = str(call.get("fixture_id") or (bundle or {}).get("fixture_id") or "")
     try:
-        return analyst_mod.harden_call(deepcopy(call), fid, deepcopy(bundle) if bundle else None)
+        normalized = analyst_mod.harden_call(deepcopy(call), fid, deepcopy(bundle) if bundle else None)
+        if call.get("schema_version") != "scout_ah_recommendation_v2":
+            normalized["_legacy_runtime_normalized"] = True
+        return normalized
     except Exception:
         return deepcopy(call)
 
@@ -788,7 +799,7 @@ def main() -> int:
         "script_layers{base_script_cn,tail_script_cn,reverse_script_cn,market_script_cn}",
         "read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn",
         "evidence[{claim,source,fields[],availability,weight}]",
-        "asian_handicap_card{schema_version,fixture_id,stage_id,stage_label_cn,data_readiness,main_ah_pick_cn,ah_side_cn,ah_line,ah_price,ah_confidence_cn,recommendation_grade,ah_logic_cn,cover_probability_model,cover_probability_market,cover_edge,line_movement_cn,water_movement_cn,market_consensus_cn,ou_pick_cn,score_path_cn,risk_cn,pass_reason_cn,final_action_cn}",
+        "asian_handicap_card{schema_version,fixture_id,stage_id,stage_label_cn,data_readiness,main_ah_pick_cn,ah_side_cn,ah_line,ah_price,current_handicap_cn,ah_confidence_cn,recommendation_grade,ah_logic_cn,cover_probability_model,cover_probability_market,cover_edge,line_movement_cn,water_movement_cn,market_consensus_cn,ou_pick_cn,score_path_cn,score_main_cn,score_backup_cn,risk_cn,pass_reason_cn,final_action_cn}",
         "recommendation_card{one_x_two_cn,score_picks_cn,ou_pick_cn,ah_pick_cn,main_recommendation_cn,risk_cn,confidence_cn,data_status_cn}",
         "evidence_chain_cn",
         "regular_script_cn",
@@ -901,7 +912,7 @@ def main() -> int:
                     fail(f"call {fid}: {e}")
 
     # --- reverse tests ---
-    base = {"schema_version": "scout_ah_recommendation_v2", "fixture_id": "X", "style_mode": "balanced", "safety_label": "亚盘研究推荐 · 非资金指令 · 不承诺结果",
+    base = {"schema_version": "scout_ah_recommendation_v2", "fixture_id": "X", "generated_at": "2026-06-20T00:00:00Z", "stage_id": "watch_6h", "stage_label_cn": "赛前观察", "style_mode": "balanced", "safety_label": "亚盘研究推荐 · 非资金指令 · 不承诺结果",
             "read": {"tilt_cn": "主队小优", "score_band_cn": "偏 1-0/2-0,但单场看区间、别当真",
                      "watch_points_cn": ["主队边路推进", "客队转换防守"], "risks_cn": ["早球会改变节奏"],
                      "vs_market_cn": "与市场差异不大,仅作讨论点",
@@ -929,6 +940,7 @@ def main() -> int:
                          "ah_side_cn": "主队让球",
                          "ah_line": -0.25,
                          "ah_price": 1.9,
+                         "current_handicap_cn": "主队 -0.25 @ 1.9",
                          "ah_confidence_cn": "中",
                          "recommendation_grade": "B",
                          "ah_logic_cn": "W1覆盖率 53% vs 市场隐含 51%，覆盖差 2%；主队让球方向只在盘口与水位维持时成立。",
@@ -940,6 +952,8 @@ def main() -> int:
                          "market_consensus_cn": "欧盘参考：主胜45%｜平29%｜客胜26%。",
                          "ou_pick_cn": "小2.5｜信心：中｜失效：早球",
                          "score_path_cn": "主线 1-0 12% / 1-1 11%；风险 2-1 9%",
+                         "score_main_cn": "1-0",
+                         "score_backup_cn": "1-1 / 2-1",
                          "risk_cn": "早球、首发关键点缺席、盘口退盘或水位反向，会削弱当前亚盘方向。",
                          "pass_reason_cn": "",
                          "final_action_cn": "亚盘主推：主队 -0.25；若临场退盘或水位反向，降级观察。"

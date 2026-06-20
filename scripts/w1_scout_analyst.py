@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib import request
@@ -101,7 +102,7 @@ SYSTEM_PROMPT = """你是足球亚盘盘口研究员。任务是【把这场球�
   fixture_id,
   read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn,
        evidence[{claim,source,fields[],availability,weight}],
-       asian_handicap_card{schema_version,fixture_id,stage_id,stage_label_cn,data_readiness,main_ah_pick_cn,ah_side_cn,ah_line,ah_price,ah_confidence_cn,recommendation_grade,ah_logic_cn,cover_probability_model,cover_probability_market,cover_edge,line_movement_cn,water_movement_cn,market_consensus_cn,ou_pick_cn,score_path_cn,risk_cn,pass_reason_cn,final_action_cn},
+        asian_handicap_card{schema_version,fixture_id,stage_id,stage_label_cn,data_readiness,main_ah_pick_cn,ah_side_cn,ah_line,ah_price,current_handicap_cn,ah_confidence_cn,recommendation_grade,ah_logic_cn,cover_probability_model,cover_probability_market,cover_edge,line_movement_cn,water_movement_cn,market_consensus_cn,ou_pick_cn,score_path_cn,score_main_cn,score_backup_cn,risk_cn,pass_reason_cn,final_action_cn},
        recommendation_card{one_x_two_cn,score_picks_cn,ou_pick_cn,ah_pick_cn,main_recommendation_cn,risk_cn,confidence_cn,data_status_cn},
        evidence_chain_cn[],regular_script_cn,high_variance_tail_script_cn,
        reverse_risks_cn[],market_expert_script_cn},
@@ -164,6 +165,7 @@ AH_CARD_KEYS = (
     "ah_side_cn",
     "ah_line",
     "ah_price",
+    "current_handicap_cn",
     "ah_confidence_cn",
     "recommendation_grade",
     "ah_logic_cn",
@@ -175,6 +177,8 @@ AH_CARD_KEYS = (
     "market_consensus_cn",
     "ou_pick_cn",
     "score_path_cn",
+    "score_main_cn",
+    "score_backup_cn",
     "risk_cn",
     "pass_reason_cn",
     "final_action_cn",
@@ -436,6 +440,31 @@ def _line_cn(value: Any) -> str:
     return f"{n:+g}"
 
 
+def _display_ah_line(side: str | None, home_handicap: Any) -> float | None:
+    line = _num(home_handicap)
+    if line is None:
+        return None
+    if side == "home":
+        return -abs(line)
+    if side == "away":
+        return abs(line)
+    return line
+
+
+def _price_cn(value: Any) -> str:
+    n = _num(value)
+    if n is None:
+        return ""
+    return f"{n:.2f}".rstrip("0").rstrip(".")
+
+
+def _score_labels(score_picks: list[dict[str, Any]]) -> tuple[str, str]:
+    scores = [str(row.get("score") or "").strip() for row in score_picks if isinstance(row, dict) and row.get("score")]
+    main = scores[0] if scores else ""
+    backup = " / ".join(scores[1:3]) if len(scores) > 1 else ""
+    return main, backup
+
+
 def _pct1(value: Any) -> str:
     n = _num(value)
     return "--" if n is None else f"{n * 100:.0f}%"
@@ -478,16 +507,26 @@ def ah_card_from_bundle(bundle: dict[str, Any], call: dict[str, Any] | None = No
     away = str(bundle.get("away") or "客队")
     side = str(ah.get("selected_side") or "")
     line = ah.get("home_handicap", ah.get("line"))
+    if side not in {"home", "away"} and line not in (None, ""):
+        home_price = _num(ah.get("home_price"))
+        away_price = _num(ah.get("away_price"))
+        if home_price is not None and away_price is not None:
+            side = "away" if away_price <= home_price else "home"
     price = ah.get("home_price") if side == "home" else ah.get("away_price") if side == "away" else None
+    display_line = _display_ah_line(side, line)
     cover_model = ah.get("cover_probability_model")
     cover_market = ah.get("cover_probability_market")
     edge = ah.get("cover_edge")
-    has_required = line not in (None, "") and _num(cover_model) is not None
+    has_line = line not in (None, "") and side in {"home", "away"}
+    has_cover_model = _num(cover_model) is not None
+    has_required = has_line
     grade = _grade_from_edge(_num(edge), readiness, has_required)
     pick = _ah_pick_name(home, away, side if has_required and grade in {"A", "B+", "B"} else None, line)
     pass_reason = "" if has_required and grade in {"A", "B+", "B"} else "覆盖差不足或数据冲突，亚盘推荐降级为 PASS / 观察。"
-    if not has_required:
-        pass_reason = "AH盘口或模型覆盖概率缺失，无法形成高质量推荐。"
+    if has_line and not has_cover_model:
+        pass_reason = "比分矩阵覆盖率未就绪，盘口只保留观察，不形成高质量推荐。"
+    elif not has_required:
+        pass_reason = "AH盘口缺失或无法识别方向，无法形成高质量推荐。"
     if readiness == "低":
         pass_reason = "数据就绪度低，亚盘推荐降级为 PASS / 观察。"
         pick = "亚盘推荐：PASS / 观察"
@@ -502,6 +541,7 @@ def ah_card_from_bundle(bundle: dict[str, Any], call: dict[str, Any] | None = No
     elif all(isinstance(market.get(k), (int, float)) for k in ("model_p_home", "model_p_draw", "model_p_away")):
         market_consensus = f"欧盘参考(W1)：主胜 {_pct1(market.get('model_p_home'))}｜平 {_pct1(market.get('model_p_draw'))}｜客胜 {_pct1(market.get('model_p_away'))}。"
     score_picks = market.get("score_picks") if isinstance(market.get("score_picks"), list) else []
+    score_main, score_backup = _score_labels(score_picks)
     score_path = "比分路径暂不展开。"
     if score_picks:
         pieces = []
@@ -516,6 +556,11 @@ def ah_card_from_bundle(bundle: dict[str, Any], call: dict[str, Any] | None = No
         over_price = _num(ou.get("over_price"))
         side_ou = "小" if under_price is not None and over_price is not None and under_price <= over_price else "大"
         ou_pick = f"{side_ou}{ou.get('line')}｜信心：中｜失效：早球"
+    current_handicap = "盘口缺失"
+    if side in {"home", "away"} and display_line is not None:
+        subject = home if side == "home" else away
+        price_text = _price_cn(price)
+        current_handicap = f"{subject} {_line_cn(display_line)}" + (f" @ {price_text}" if price_text else "")
     return {
         "schema_version": "scout_ah_recommendation_v1",
         "fixture_id": str(bundle.get("fixture_id") or ""),
@@ -526,6 +571,7 @@ def ah_card_from_bundle(bundle: dict[str, Any], call: dict[str, Any] | None = No
         "ah_side_cn": _ah_side_label(side),
         "ah_line": _num(line),
         "ah_price": _num(price),
+        "current_handicap_cn": current_handicap,
         "ah_confidence_cn": "中高" if grade in {"A", "B+"} else "中" if grade == "B" else "低",
         "recommendation_grade": grade,
         "ah_logic_cn": _short_text(ah_logic, 96),
@@ -537,6 +583,8 @@ def ah_card_from_bundle(bundle: dict[str, Any], call: dict[str, Any] | None = No
         "market_consensus_cn": _short_text(market_consensus, 96),
         "ou_pick_cn": _short_text(ou_pick, 80),
         "score_path_cn": _short_text(score_path, 96),
+        "score_main_cn": score_main,
+        "score_backup_cn": score_backup,
         "risk_cn": "早球、首发关键点缺席、盘口退盘或水位反向，会削弱当前亚盘方向。",
         "pass_reason_cn": pass_reason,
         "final_action_cn": (
@@ -711,13 +759,27 @@ def normalize_asian_handicap_card(call: dict[str, Any], bundle: dict[str, Any] |
     card["schema_version"] = "scout_ah_recommendation_v1"
     card["fixture_id"] = str(call.get("fixture_id") or card.get("fixture_id") or "")
     card["data_readiness"] = str(call.get("data_readiness") or card.get("data_readiness") or "低")
+    if not str(card.get("current_handicap_cn") or "").strip():
+        side = "home" if str(card.get("ah_side_cn") or "") == "主队让球" else "away" if str(card.get("ah_side_cn") or "") == "客队受让" else None
+        display_line = _display_ah_line(side, card.get("ah_line"))
+        if display_line is not None:
+            price_text = _price_cn(card.get("ah_price"))
+            card["current_handicap_cn"] = f"{card.get('ah_side_cn')} {_line_cn(display_line)}" + (f" @ {price_text}" if price_text else "")
+    if not str(card.get("score_main_cn") or "").strip():
+        match = re.search(r"主线\s*([0-9]+-[0-9]+)", str(card.get("score_path_cn") or ""))
+        if match:
+            card["score_main_cn"] = match.group(1)
+    if not str(card.get("score_backup_cn") or "").strip():
+        scores = re.findall(r"([0-9]+-[0-9]+)", str(card.get("score_path_cn") or ""))
+        if len(scores) > 1:
+            card["score_backup_cn"] = " / ".join(scores[1:3])
     grade = str(card.get("recommendation_grade") or "PASS")
     if card["data_readiness"] == "低" and grade not in {"PASS", "C/观察"}:
         card["recommendation_grade"] = "PASS"
         card["main_ah_pick_cn"] = "亚盘推荐：PASS / 观察"
         card["pass_reason_cn"] = "数据就绪度低，亚盘推荐降级为 PASS / 观察。"
         card["final_action_cn"] = "亚盘推荐：PASS / 观察。"
-    for key in ("main_ah_pick_cn", "ah_confidence_cn", "recommendation_grade", "ah_logic_cn", "line_movement_cn", "water_movement_cn", "market_consensus_cn", "ou_pick_cn", "score_path_cn", "risk_cn", "pass_reason_cn", "final_action_cn"):
+    for key in ("main_ah_pick_cn", "current_handicap_cn", "ah_confidence_cn", "recommendation_grade", "ah_logic_cn", "line_movement_cn", "water_movement_cn", "market_consensus_cn", "ou_pick_cn", "score_path_cn", "score_main_cn", "score_backup_cn", "risk_cn", "pass_reason_cn", "final_action_cn"):
         card[key] = sanitize_visible_text(card.get(key))
     read["asian_handicap_card"] = card
 
@@ -1024,6 +1086,7 @@ def harden_call(call: dict[str, Any], fixture_id: str, bundle: dict[str, Any] | 
             call["read"] = lifted
     call["schema_version"] = "scout_ah_recommendation_v2"
     call["fixture_id"] = fixture_id
+    call["generated_at"] = call.get("generated_at") or datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     call["style_mode"] = call.get("style_mode") if str(call.get("style_mode") or "") in STYLE_MODES else os.environ.get("W1_SCOUT_STYLE_MODE", "balanced")
     call["safety_label"] = "亚盘研究推荐 · 非资金指令 · 不承诺结果"
     if os.environ.get("W1_SCOUT_SCHEDULE_STAGE"):

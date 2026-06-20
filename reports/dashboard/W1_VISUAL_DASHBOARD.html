@@ -54481,6 +54481,8 @@ function renderRail(){
     b.className='mrow'+(idx===active?' on':'');
     b.onclick=()=>{active=idx;persistFixture(r.fixture_id);selStage=null;renderRail();renderPanel();$('#panel').scrollTop=0;};
     const rec=(r.recommendation_view&&r.recommendation_view.primary_score)||'–';
+    const call=scoutCallFor(r.fixture_id);
+    const scoreLab=call?scoutScoreLabels(call.read):null;
     const band=((r.safe_view||{}).total_goals_range||{}).most_likely_band;
     const hasResult=r.status==='finished'&&r.actual_score&&r.actual_score.home!=null;
     let res;
@@ -54493,8 +54495,10 @@ function renderRail(){
       res=`<span class="tag main sm">主 ${esc(rec)}</span><span class="tag ft">终 ${ah}-${aa}</span>${oc}`;
     }else if(r._ko&&r._ko.getTime()<now){
       res=`<span class="tag pend">赛果待同步</span>`;
+    }else if(scoreLab&&(scoreLab.main||scoreLab.backup)){
+      res=`<span class="tag main sm">主 ${esc(scoreLab.main||'比分待生成')}</span>${scoreLab.backup?`<span class="tag">备 ${esc(scoreLab.backup)}</span>`:''}`;
     }else{
-      res=`<span class="tag main">未开赛</span>${band?`<span class="tag">总进球 ${esc(band)}</span>`:''}`;
+      res=`<span class="tag main">未开赛</span><span class="tag">比分待生成</span>`;
     }
     const ai=scoutFixtureQueueStatus(r);
     const aiCls=ai.status==='ready'?'main':(ai.status==='failed'?'pend':'');
@@ -54850,6 +54854,16 @@ function pCalibration(r){
 
 const SCOUT_STAGE_ORDER=['early_48h','early_24h','watch_12h','watch_6h','watch_2h','offi'+'cial_1h','final_30m'];
 function scoutStageRank(stage){const i=SCOUT_STAGE_ORDER.indexOf(String(stage||''));return i<0?-1:i;}
+function scoutStageLabel(c){
+  const id=String((c&&c.stage_id)||'');
+  const explicit=String((c&&c.stage_label_cn)||'');
+  const mapped=id==='final_30m'?'最终版':id==='official_1h'?'正式判断':id.indexOf('watch_')===0?'赛前观察':id.indexOf('early_')===0?'早盘参考':'阶段待确认';
+  return explicit&&id?`${explicit} · ${id}`:(explicit||mapped+(id?` · ${id}`:''));
+}
+function scoutGeneratedAt(c){
+  const t=Date.parse(String((c&&c.generated_at)||''));
+  return Number.isFinite(t)?t:0;
+}
 function scoutHasReadableCall(c){
   const r=c&&c.read;
   return !!(r&&(r.asian_handicap_card||r.recommendation_card));
@@ -54857,7 +54871,11 @@ function scoutHasReadableCall(c){
 function scoutCallFor(fid){
   try{const d=SCOUT_CALLS||scriptJsonPayload('w1-scout-calls',{});
     const arr=(d.calls||[]).filter(c=>String(c.fixture_id)===String(fid)&&scoutHasReadableCall(c));
-    arr.sort((a,b)=>(scoutStageRank(b.stage_id)-scoutStageRank(a.stage_id))||String(b.generated_at||'').localeCompare(String(a.generated_at||'')));
+    // generated_at is the final tie-breaker after schema, AH-card presence, and stage priority.
+    arr.sort((a,b)=>((b.schema_version==='scout_ah_recommendation_v2')-(a.schema_version==='scout_ah_recommendation_v2'))
+      ||((!!((b.read||{}).asian_handicap_card))-(!!((a.read||{}).asian_handicap_card)))
+      ||(scoutStageRank(b.stage_id)-scoutStageRank(a.stage_id))
+      ||(scoutGeneratedAt(b)-scoutGeneratedAt(a)));
     return arr[0]||null;}catch(e){return null;}
 }
 function scoutReviewFor(fid){
@@ -54921,6 +54939,37 @@ function stripAiDisplayText(v){
   s=s.replace(/零封概率较高/g,'存在零封分支，但证据不足，需临场确认').replace(/大胜概率较高/g,'大胜只作为尾部路径').replace(/明显打穿|穿盘路径明确/g,'盘口覆盖不展开').replace(/概率较高/g,'倾向存在').replace(/强烈/g,'偏向').replace(/确定/g,'倾向');
   return s;
 }
+function scoutScoreLabels(read){
+  const ah=(read&&read.asian_handicap_card)||{};
+  const main=String(ah.score_main_cn||'').trim();
+  const backup=String(ah.score_backup_cn||'').trim();
+  if(main||backup)return {main,backup};
+  const path=String(ah.score_path_cn||'');
+  const scores=[...path.matchAll(/([0-9]+-[0-9]+)/g)].map(m=>m[1]);
+  if(scores.length)return {main:scores[0]||'',backup:scores.slice(1,3).join(' / ')};
+  const rec=(read&&read.recommendation_card)||{};
+  const text=String(rec.score_picks_cn||'');
+  const picks=[...text.matchAll(/([0-9]+-[0-9]+)/g)].map(m=>m[1]);
+  return {main:picks[0]||'',backup:picks.slice(1,3).join(' / ')};
+}
+function signedLine(n){
+  const x=Number(n);
+  if(!Number.isFinite(x))return '';
+  if(Math.abs(x)<1e-9)return '0';
+  return (x>0?'+':'')+String(x).replace(/\.0$/,'');
+}
+function displayAhLine(ah){
+  if(ah&&ah.current_handicap_cn)return stripAiDisplayText(ah.current_handicap_cn);
+  const side=String((ah&&ah.ah_side_cn)||'');
+  let line=Number(ah&&ah.ah_line);
+  if(Number.isFinite(line)){
+    if(side.indexOf('客队受让')>=0)line=Math.abs(line);
+    if(side.indexOf('主队让球')>=0)line=-Math.abs(line);
+    const price=(ah&&ah.ah_price!=null)?` @ ${Number(ah.ah_price).toFixed(2).replace(/0$/,'').replace(/\\.0$/,'')}`:'';
+    return `${side||'亚盘'} ${signedLine(line)}${price}`;
+  }
+  return '盘口缺失';
+}
 function pScoutReview(r){
   const rv=scoutReviewFor(r.fixture_id);
   if(!rv)return `<div class="card"><h3>赛后复盘<span class="r">等待完赛对照</span></h3><div class="cycle-log"><div><div class="msg">本场暂无赛后复盘；复盘只读取不可变赛前解读 lock 与本地赛果。</div><div class="mini">赛前解读不回写，赛后只追加 review。</div></div></div></div>`;
@@ -54948,8 +54997,9 @@ function pScoutAnalyst(r){
   const read=c.read||{};
   const ah=read.asian_handicap_card||{};
   const card=read.recommendation_card||{};
-  const stageLabel=c.stage_label_cn&&c.stage_id?`${c.stage_label_cn} · ${c.stage_id}`:(c.stage_label_cn||c.stage_id||'阶段未标注');
-  const currentLine=ah.ah_line!==undefined&&ah.ah_line!==null?`${ah.ah_side_cn||'亚盘'} ${ah.ah_line>0?'+':''}${ah.ah_line}${ah.ah_price?` @ ${ah.ah_price}`:''}`:'盘口缺失';
+  const scoreLab=scoutScoreLabels(read);
+  const stageLabel=scoutStageLabel(c);
+  const currentLine=displayAhLine(ah);
   const coverLine=(ah.cover_probability_model!==undefined&&ah.cover_probability_model!==null)
     ?`W1 ${Math.round(Number(ah.cover_probability_model)*100)}%｜市场 ${ah.cover_probability_market!==undefined&&ah.cover_probability_market!==null?Math.round(Number(ah.cover_probability_market)*100)+'%':'--'}｜差 ${ah.cover_edge!==undefined&&ah.cover_edge!==null?Math.round(Number(ah.cover_edge)*100)+'%':'--'}`
     :'W1覆盖概率缺失';
@@ -54960,6 +55010,8 @@ function pScoutAnalyst(r){
     ['W1覆盖概率 vs 市场隐含概率',coverLine],
     ['盘口变化',ah.line_movement_cn],
     ['大小球辅助',ah.ou_pick_cn],
+    ['主比分',scoreLab.main||'比分待生成'],
+    ['备选比分',scoreLab.backup||'比分待生成'],
     ['比分路径',ah.score_path_cn],
     ['失效条件',ah.risk_cn],
     ['欧盘参考',ah.market_consensus_cn],
