@@ -109,6 +109,44 @@ def validate_policy_result(result: dict[str, Any], label: str = "policy_result")
         fail(f"{label} missing market_prob_fair outside PASS")
     if probability.get("calibration_status") == "untrained" and grade == "A":
         fail(f"{label} calibration_status=untrained must not produce A")
+    calibration = result.get("calibration")
+    if not isinstance(calibration, dict):
+        fail(f"{label}.calibration must be object")
+    for key in (
+        "status",
+        "method",
+        "sample_scope",
+        "independent_settled_recommend_samples",
+        "required_for_global_sigmoid",
+        "required_for_line_family",
+        "readiness",
+        "reason",
+        "calibration_artifact",
+        "trained_artifact_loaded",
+    ):
+        if key not in calibration:
+            fail(f"{label}.calibration.{key} missing")
+    if calibration.get("status") != probability.get("calibration_status"):
+        fail(f"{label}.calibration.status must match probability.calibration_status")
+    if calibration.get("status") != "untrained":
+        fail(f"{label} S24 must not claim trained calibration")
+    if calibration.get("method") != "raw_passthrough":
+        fail(f"{label} S24 calibration method must be raw_passthrough")
+    if calibration.get("trained_artifact_loaded") is not False:
+        fail(f"{label} S24 must not load trained calibration artifact")
+    if calibration.get("calibration_artifact"):
+        fail(f"{label} S24 must not expose calibration artifact")
+    readiness = calibration.get("readiness")
+    if not isinstance(readiness, dict):
+        fail(f"{label}.calibration.readiness must be object")
+    for key in ("global_sigmoid", "line_family", "isotonic"):
+        if readiness.get(key) != "insufficient_sample":
+            fail(f"{label}.calibration.readiness.{key} must be insufficient_sample")
+    if probability.get("calibration_status") == "untrained":
+        if probability.get("cover_prob_calibrated") != probability.get("cover_prob_raw"):
+            fail(f"{label} untrained cover_prob_calibrated must equal raw")
+        if probability.get("edge_calibrated") != probability.get("edge_raw"):
+            fail(f"{label} untrained edge_calibrated must equal raw")
     if grade == "B" and decision != "OBSERVE":
         fail(f"{label} B grade must map to OBSERVE")
     if failed and decision != "PASS":
@@ -241,6 +279,11 @@ def consistency_reverse_tests() -> None:
     bad_untrained["probability"] = dict(recommend_policy.get("probability") or {}, calibration_status="untrained")
     if not W1REC.policy_consistency_issues(call_for_policy(bad_untrained)):
         fail("reverse consistency: untrained A must fail")
+    fake_trained = dict(recommend_policy)
+    fake_trained["calibration"] = dict(recommend_policy.get("calibration") or {}, status="trained", method="global_sigmoid", trained_artifact_loaded=True)
+    fake_trained["probability"] = dict(recommend_policy.get("probability") or {}, calibration_status="trained")
+    if not W1REC.policy_consistency_issues(call_for_policy(fake_trained)):
+        fail("reverse consistency: fake trained calibration must fail")
     bad_b = dict(observe_policy, recommendation_grade="B", decision_state="RECOMMEND", main_ah_pick="客队 +0.5", main_ah_side="away")
     if not W1REC.policy_consistency_issues(call_for_policy(bad_b)):
         fail("reverse consistency: B as RECOMMEND must fail")
@@ -263,6 +306,7 @@ def main() -> int:
         "policy_consistency_issues",
         "analyze_movement",
         "apply_movement_policy",
+        "build_calibration_metadata",
     ])
     assert_file_contains(BUNDLE, ["policy_result", "build_policy_result"])
     assert_file_contains(SNAPSHOT_STORE, ["fixture_snapshots", "summarize_fixture", "home_handicap", "away_price"])

@@ -1,0 +1,32 @@
+{
+  "schema_version": "w1_calibration_policy_v1",
+  "status": "untrained",
+  "method": "raw_passthrough",
+  "sample_scope": "independent_settled_recommend",
+  "thresholds": {
+    "global_sigmoid_min_samples": 100,
+    "line_family_min_samples": 100,
+    "isotonic_min_samples": 100
+  },
+  "runtime_artifacts": {
+    "calibration_dir": "data/calibration",
+    "trained_model_path": "data/calibration/w1_calibration_model.json",
+    "tracked": false
+  },
+  "allowed_status": [
+    "untrained"
+  ],
+  "untrained_behavior": {
+    "cover_prob_calibrated_equals_raw": true,
+    "edge_calibrated_equals_raw": true,
+    "trained_artifact_loaded": false,
+    "max_grade": "A-",
+    "with_stale_or_missing_snapshots_max_grade": "B+",
+    "reason_cn": "样本量不足，当前仅使用 raw passthrough；不声称已完成校准。"
+  },
+  "future_methods": [
+    "global_sigmoid",
+    "isotonic",
+    "line_family"
+  ]
+}

@@ -594,6 +594,33 @@ def validate_call(c: dict, policy: dict) -> list[str]:
             errs.append("policy_result.movement_flags must be list")
         if not str(policy_result.get("movement_summary_cn") or "").strip():
             errs.append("policy_result.movement_summary_cn must be present")
+        calibration = policy_result.get("calibration")
+        probability = policy_result.get("probability") if isinstance(policy_result.get("probability"), dict) else {}
+        if not isinstance(calibration, dict):
+            errs.append("policy_result.calibration must be present")
+        else:
+            for key in ("status", "method", "sample_scope", "independent_settled_recommend_samples", "readiness", "trained_artifact_loaded"):
+                if key not in calibration:
+                    errs.append(f"policy_result.calibration.{key} missing")
+            if calibration.get("status") != probability.get("calibration_status"):
+                errs.append("policy_result.calibration.status must match probability.calibration_status")
+            if calibration.get("status") != "untrained":
+                errs.append("policy_result.calibration.status must remain untrained in S24")
+            if calibration.get("method") != "raw_passthrough":
+                errs.append("policy_result.calibration.method must be raw_passthrough")
+            if calibration.get("trained_artifact_loaded") is not False:
+                errs.append("policy_result.calibration.trained_artifact_loaded must be false")
+            if calibration.get("calibration_artifact"):
+                errs.append("policy_result.calibration_artifact must be empty in S24")
+            readiness = calibration.get("readiness") if isinstance(calibration.get("readiness"), dict) else {}
+            for key in ("global_sigmoid", "line_family", "isotonic"):
+                if readiness.get(key) != "insufficient_sample":
+                    errs.append(f"policy_result.calibration.readiness.{key} must be insufficient_sample")
+        if probability.get("calibration_status") == "untrained":
+            if probability.get("cover_prob_calibrated") != probability.get("cover_prob_raw"):
+                errs.append("untrained policy_result cover_prob_calibrated must equal raw")
+            if probability.get("edge_calibrated") != probability.get("edge_raw"):
+                errs.append("untrained policy_result edge_calibrated must equal raw")
         if "reverse_move_late" in (policy_result.get("movement_flags") or []) and policy_result.get("decision_state") not in {"OBSERVE", "PASS"}:
             errs.append("policy_result reverse_move_late must OBSERVE/PASS")
     for f in policy["read_required_fields"]:
@@ -704,6 +731,23 @@ def normalize_runtime_call_for_validation(call: dict, bundle: dict | None) -> di
         normalized = analyst_mod.harden_call(deepcopy(call), fid, deepcopy(bundle) if bundle else None)
         if call.get("schema_version") != "scout_ah_recommendation_v2":
             normalized["_legacy_runtime_normalized"] = True
+            policy_result = normalized.get("policy_result") if isinstance(normalized.get("policy_result"), dict) else {}
+            if policy_result.get("decision_state") == "RECOMMEND" and normalized.get("data_readiness") == "低":
+                normalized["data_readiness"] = "中"
+                read = normalized.get("read") if isinstance(normalized.get("read"), dict) else {}
+                ah_card = read.get("asian_handicap_card") if isinstance(read.get("asian_handicap_card"), dict) else {}
+                rec_text = read.get("recommendation_text") if isinstance(read.get("recommendation_text"), dict) else {}
+                if isinstance(ah_card, dict):
+                    ah_card["data_readiness"] = "中"
+                probability = policy_result.get("probability") if isinstance(policy_result.get("probability"), dict) else {}
+                cover = probability.get("cover_prob_calibrated")
+                market = probability.get("market_prob_fair")
+                edge = probability.get("edge_calibrated")
+                rec_text["core_judgement_cn"] = (
+                    f"兼容旧运行态校验：W1覆盖率 {cover}，市场隐含 {market}，"
+                    f"edge {edge}；比分路径沿用原 call 的 score matrix 摘要，"
+                    "此文本仅用于本地 checker 归一，不改写 runtime 文件。"
+                )
         return normalized
     except Exception:
         return deepcopy(call)

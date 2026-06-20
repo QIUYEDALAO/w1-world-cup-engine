@@ -217,6 +217,7 @@ def summarize(samples: list[dict[str, Any]]) -> dict[str, Any]:
         for flag in flags:
             movement_groups.setdefault(str(flag), empty_metric())
             add_metric(movement_groups[str(flag)], sample)
+    calibration = W1REC.build_calibration_metadata(len(settled_recommend))
     return {
         "schema_version": "W1_SCOUT_AH_BACKTEST_SUMMARY_V1",
         "total_fixtures": len({s.get("fixture_id") for s in samples}),
@@ -226,6 +227,11 @@ def summarize(samples: list[dict[str, Any]]) -> dict[str, Any]:
         "settled_recommend_samples": len(settled_recommend),
         "missing_result_samples": len(missing_result),
         "primary_performance": finish_metric(primary),
+        "calibration_readiness": calibration,
+        "calibration_status": calibration.get("status"),
+        "calibration_method": calibration.get("method"),
+        "independent_settled_recommend_samples": calibration.get("independent_settled_recommend_samples"),
+        "calibration_sample_scope": calibration.get("sample_scope"),
         "groups": groups,
         "movement_flags": {key: finish_metric(metric) for key, metric in sorted(movement_groups.items())},
         "samples": samples,
@@ -256,6 +262,15 @@ def print_summary(summary: dict[str, Any]) -> None:
     print(f"pass_samples={summary['pass_samples']}")
     print(f"settled_recommend_samples={summary['settled_recommend_samples']}")
     print(f"missing_result_samples={summary['missing_result_samples']}")
+    calibration = summary.get("calibration_readiness") or {}
+    readiness = calibration.get("readiness") or {}
+    print(f"calibration_status={calibration.get('status')}")
+    print(f"calibration_method={calibration.get('method')}")
+    print(f"calibration_sample_scope={calibration.get('sample_scope')}")
+    print(f"independent_settled_recommend_samples={calibration.get('independent_settled_recommend_samples')}")
+    print(f"global_sigmoid_status={readiness.get('global_sigmoid')}")
+    print(f"line_family_status={readiness.get('line_family')}")
+    print(f"isotonic_status={readiness.get('isotonic')}")
     print(f"net_settlement_points={perf['net_settlement_points']}")
     print(f"average_settlement_points={perf['average_settlement_points']}")
     print(f"win_like_rate={perf['win_like_rate']}")
@@ -315,6 +330,13 @@ def self_test() -> None:
         raise AssertionError("RECOMMEND sample must enter primary settlement")
     if summary["primary_performance"]["settled"] != 1:
         raise AssertionError("OBSERVE/PASS must not enter primary settlement")
+    calibration = summary.get("calibration_readiness") or {}
+    if calibration.get("status") != "untrained" or calibration.get("method") != "raw_passthrough":
+        raise AssertionError("S24 calibration must remain untrained raw_passthrough")
+    if calibration.get("independent_settled_recommend_samples") != 1:
+        raise AssertionError("calibration settled sample count must follow settled RECOMMEND samples")
+    if set((calibration.get("readiness") or {}).values()) != {"insufficient_sample"}:
+        raise AssertionError("synthetic calibration readiness must be insufficient_sample")
     if AH.line_bucket(0.74) != "0.75" or AH.side_role(-0.5) != "favorite" or AH.side_role(0.5) != "underdog" or AH.side_role(0) != "pickem":
         raise AssertionError("line bucket / side role failed")
     print("W1 Scout AH backtest self-test PASS")

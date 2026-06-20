@@ -20,8 +20,10 @@ import w1_odds_snapshot_store as SNAPSHOTS
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/w1_recommendation_policy.json"
+CALIBRATION_CONFIG = ROOT / "config/w1_calibration_policy.json"
 BUNDLES = ROOT / "state/w1_scout_bundles.json"
 BUNDLE_SCRIPT = ROOT / "scripts/w1_scout_bundle.py"
+CALLS = ROOT / "state/w1_scout_calls.json"
 
 GRADE_ORDER = {"PASS": 0, "B": 1, "B+": 2, "A-": 3, "A": 4}
 GRADE_BY_ORDER = {value: key for key, value in GRADE_ORDER.items()}
@@ -33,6 +35,115 @@ def load_policy_config(path: str | Path = DEFAULT_CONFIG) -> dict[str, Any]:
     if mode:
         config["mode"] = mode.strip().lower()
     return config
+
+
+def load_calibration_config(path: str | Path = CALIBRATION_CONFIG) -> dict[str, Any]:
+    if not Path(path).is_file():
+        return {
+            "schema_version": "w1_calibration_policy_v1",
+            "status": "untrained",
+            "method": "raw_passthrough",
+            "sample_scope": "independent_settled_recommend",
+            "thresholds": {
+                "global_sigmoid_min_samples": 100,
+                "line_family_min_samples": 100,
+                "isotonic_min_samples": 100,
+            },
+            "untrained_behavior": {
+                "trained_artifact_loaded": False,
+                "reason_cn": "样本量不足，当前仅使用 raw passthrough；不声称已完成校准。",
+            },
+        }
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def _root_path(path: str | Path) -> Path:
+    p = Path(path)
+    return p if p.is_absolute() else ROOT / p
+
+
+def _load_local_results_for_calibration() -> dict[str, dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
+    # Keep this lightweight and read-only so recommendation policy never imports
+    # the backtest module. Overlay is later in the list, so it overrides legacy.
+    for rel in (
+        "data/results/round1_results.json",
+        "data/results/world_cup_2026_results.json",
+    ):
+        path = _root_path(rel)
+        if not path.is_file():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        for fid, row in (payload.get("results") or {}).items():
+            if not isinstance(row, dict):
+                continue
+            out[str(fid)] = row
+            for alias in row.get("alias_fixture_ids", []) or []:
+                out[str(alias)] = row
+    return out
+
+
+def independent_settled_recommend_sample_count() -> int:
+    bundle_policy_by_fixture: dict[str, dict[str, Any]] = {}
+    if BUNDLES.is_file():
+        try:
+            bundle_payload = json.loads(BUNDLES.read_text(encoding="utf-8"))
+            for bundle in bundle_payload.get("bundles") or []:
+                if isinstance(bundle, dict) and isinstance(bundle.get("policy_result"), dict):
+                    bundle_policy_by_fixture[str(bundle.get("fixture_id") or "")] = bundle["policy_result"]
+        except json.JSONDecodeError:
+            bundle_policy_by_fixture = {}
+    if not CALLS.is_file():
+        calls = [{"fixture_id": fid, "policy_result": policy} for fid, policy in bundle_policy_by_fixture.items()]
+    else:
+        try:
+            payload = json.loads(CALLS.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            payload = {}
+        calls = payload.get("calls") or []
+    results = _load_local_results_for_calibration()
+    seen: set[str] = set()
+    for call in calls:
+        if not isinstance(call, dict):
+            continue
+        fid = str(call.get("fixture_id") or "")
+        if not fid or fid in seen or fid not in results:
+            continue
+        policy = call.get("policy_result") if isinstance(call.get("policy_result"), dict) else bundle_policy_by_fixture.get(fid, {})
+        if policy.get("decision_state") == "RECOMMEND":
+            score = results.get(fid, {}).get("actual_score")
+            if isinstance(score, dict) and score.get("home") is not None and score.get("away") is not None:
+                seen.add(fid)
+    return len(seen)
+
+
+def build_calibration_metadata(sample_count: int | None = None) -> dict[str, Any]:
+    cfg = load_calibration_config()
+    thresholds = cfg.get("thresholds") or {}
+    samples = int(independent_settled_recommend_sample_count() if sample_count is None else sample_count)
+    global_required = int(thresholds.get("global_sigmoid_min_samples", 100))
+    line_required = int(thresholds.get("line_family_min_samples", 100))
+    iso_required = int(thresholds.get("isotonic_min_samples", 100))
+    readiness = {
+        "global_sigmoid": "ready" if samples >= global_required else "insufficient_sample",
+        "line_family": "ready" if samples >= line_required else "insufficient_sample",
+        "isotonic": "ready" if samples >= iso_required else "insufficient_sample",
+    }
+    return {
+        "status": "untrained",
+        "method": "raw_passthrough",
+        "sample_scope": str(cfg.get("sample_scope") or "independent_settled_recommend"),
+        "independent_settled_recommend_samples": samples,
+        "required_for_global_sigmoid": global_required,
+        "required_for_line_family": line_required,
+        "readiness": readiness,
+        "reason": str((cfg.get("untrained_behavior") or {}).get("reason_cn") or "样本量不足，当前仅使用 raw passthrough；不声称已完成校准。"),
+        "calibration_artifact": "",
+        "trained_artifact_loaded": False,
+    }
 
 
 def _num(value: Any) -> float | None:
@@ -83,6 +194,7 @@ def _empty_result(config: dict[str, Any]) -> dict[str, Any]:
             "edge_calibrated": None,
             "calibration_status": (config.get("calibration") or {}).get("default_status", "untrained"),
         },
+        "calibration": build_calibration_metadata(),
         "hard_gates": {
             "has_ah": False,
             "has_price": False,
@@ -553,6 +665,7 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
         "edge_calibrated": _round(edge),
         "calibration_status": calibration_status,
     })
+    result["calibration"] = build_calibration_metadata()
     result["hard_gates"] = failed_info["hard_gates"]
     result["failed_gates"] = failed_info["failed_gates"]
     result["gate_severity"] = "hard" if result["failed_gates"] else "none"
@@ -658,6 +771,17 @@ def policy_consistency_issues(call: dict[str, Any]) -> list[str]:
         issues.append("hard gate failed but decision_state is not PASS")
     if (policy.get("probability") or {}).get("calibration_status") == "untrained" and grade == "A":
         issues.append("untrained policy must not grade A")
+    calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
+    if not calibration:
+        issues.append("calibration metadata missing")
+    elif calibration.get("status") != "untrained":
+        issues.append("S24 calibration status must remain untrained")
+    elif calibration.get("method") != "raw_passthrough":
+        issues.append("S24 calibration method must be raw_passthrough")
+    elif calibration.get("trained_artifact_loaded") is not False:
+        issues.append("S24 must not load trained calibration artifact")
+    if calibration and calibration.get("status") != (policy.get("probability") or {}).get("calibration_status"):
+        issues.append("probability.calibration_status must match calibration.status")
     if grade == "B" and decision != "OBSERVE":
         issues.append("B grade must be OBSERVE")
     if decision == "RECOMMEND":
@@ -897,6 +1021,12 @@ def self_test() -> None:
         result = build_policy_result(bundle, cfg)
         _assert(result["recommendation_grade"] == grade, f"{name}: grade {result['recommendation_grade']} != {grade}")
         _assert(result["decision_state"] == decision, f"{name}: decision {result['decision_state']} != {decision}")
+        calibration = result.get("calibration") or {}
+        _assert(calibration.get("status") == "untrained", f"{name}: calibration must stay untrained")
+        _assert(calibration.get("method") == "raw_passthrough", f"{name}: calibration method must be raw_passthrough")
+        _assert(calibration.get("trained_artifact_loaded") is False, f"{name}: trained artifact must not load")
+        _assert((result.get("probability") or {}).get("cover_prob_calibrated") == (result.get("probability") or {}).get("cover_prob_raw"), f"{name}: cover calibrated must equal raw")
+        _assert((result.get("probability") or {}).get("edge_calibrated") == (result.get("probability") or {}).get("edge_raw"), f"{name}: edge calibrated must equal raw")
         if decision == "RECOMMEND":
             _assert(bool(result["main_ah_pick"]), f"{name}: recommend must have main pick")
         if decision in {"PASS", "OBSERVE"}:

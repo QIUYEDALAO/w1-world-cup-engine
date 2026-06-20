@@ -135,13 +135,11 @@ def pass_reason(bundle: dict[str, Any]) -> str:
 
 
 def policy_result(bundle: dict[str, Any]) -> dict[str, Any]:
-    result = bundle.get("policy_result")
-    if isinstance(result, dict):
-        return result
     try:
         return W1REC.build_policy_result(bundle)
     except Exception:
-        return {}
+        result = bundle.get("policy_result")
+        return result if isinstance(result, dict) else {}
 
 
 def odds_snapshots_for_fixture(fid: str) -> tuple[int, str]:
@@ -225,6 +223,7 @@ def main() -> int:
     one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
     policy = policy_result(bundle)
     probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
     snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
     movement = policy.get("movement") if isinstance(policy.get("movement"), dict) else {}
     snapshots_count, snapshots_source = odds_snapshots_for_fixture(fid)
@@ -276,6 +275,16 @@ def main() -> int:
     print(f"candidate_ah_pick={fmt(policy.get('candidate_ah_pick'))}")
     print(f"main_ah_pick={fmt(policy.get('main_ah_pick'))}")
     print(f"calibration_status={fmt(probability.get('calibration_status'))}")
+    print(f"calibration.status={fmt(calibration.get('status'))}")
+    print(f"calibration.method={fmt(calibration.get('method'))}")
+    print(f"calibration.sample_scope={fmt(calibration.get('sample_scope'))}")
+    print(f"calibration.independent_settled_recommend_samples={fmt(calibration.get('independent_settled_recommend_samples'))}")
+    print(f"calibration.required_for_global_sigmoid={fmt(calibration.get('required_for_global_sigmoid'))}")
+    print(f"calibration.required_for_line_family={fmt(calibration.get('required_for_line_family'))}")
+    print(f"calibration.readiness={json.dumps(calibration.get('readiness') or {}, ensure_ascii=False, sort_keys=True)}")
+    print(f"calibration.reason={fmt(calibration.get('reason'))}")
+    print(f"calibration.calibration_artifact={fmt(calibration.get('calibration_artifact'))}")
+    print(f"calibration.trained_artifact_loaded={fmt(calibration.get('trained_artifact_loaded'))}")
     print(f"edge_raw={fmt(probability.get('edge_raw'))}")
     print(f"edge_calibrated={fmt(probability.get('edge_calibrated'))}")
     print(f"market_prob_method={fmt(probability.get('market_prob_method'))}")

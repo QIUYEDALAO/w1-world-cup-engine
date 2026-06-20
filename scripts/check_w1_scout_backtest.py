@@ -61,6 +61,19 @@ def check_synthetic_summary() -> None:
     for key in ("total_fixtures", "recommend_samples", "observe_samples", "pass_samples", "settled_recommend_samples", "missing_result_samples", "primary_performance", "groups"):
         if key not in summary:
             fail(f"summary missing {key}")
+    for key in ("calibration_readiness", "calibration_status", "calibration_method", "independent_settled_recommend_samples", "calibration_sample_scope"):
+        if key not in summary:
+            fail(f"summary missing {key}")
+    calibration = summary.get("calibration_readiness") or {}
+    if calibration.get("status") != "untrained":
+        fail("synthetic calibration status must be untrained")
+    if calibration.get("method") != "raw_passthrough":
+        fail("synthetic calibration method must be raw_passthrough")
+    if calibration.get("independent_settled_recommend_samples") != 1:
+        fail("synthetic calibration sample count must equal settled RECOMMEND samples")
+    readiness = calibration.get("readiness") or {}
+    if any(value != "insufficient_sample" for value in readiness.values()):
+        fail("synthetic calibration readiness must be insufficient_sample")
     if summary["recommend_samples"] != 1 or summary["observe_samples"] != 1 or summary["pass_samples"] != 1:
         fail("RECOMMEND / OBSERVE / PASS routing failed")
     if summary["primary_performance"]["settled"] != 1:
@@ -76,14 +89,14 @@ def main() -> int:
     if config.get("version") != "w1_backtest_policy_v1":
         fail("config version mismatch")
     assert_contains(SETTLEMENT, ["split_quarter_line", "settle_single_line", "settle_ah_pick", "line_bucket", "side_role"])
-    assert_contains(BACKTEST, ["one_sample_per_fixture", "diagnostic_only", "filter_only", "settled_recommend_samples", "missing_result_samples", "SKIP: missing runtime input"])
+    assert_contains(BACKTEST, ["one_sample_per_fixture", "diagnostic_only", "filter_only", "settled_recommend_samples", "missing_result_samples", "SKIP: missing runtime input", "calibration_readiness", "independent_settled_recommend_samples"])
     check_settlement_cases()
     check_synthetic_summary()
     subprocess.check_call([sys.executable, str(SETTLEMENT), "--self-test"], cwd=str(ROOT))
     subprocess.check_call([sys.executable, str(BACKTEST), "--self-test"], cwd=str(ROOT))
     out = subprocess.check_output([sys.executable, str(BACKTEST), "--json"], cwd=str(ROOT), text=True)
     parsed = json.loads(out)
-    if "schema_version" not in parsed or "primary_performance" not in parsed:
+    if "schema_version" not in parsed or "primary_performance" not in parsed or "calibration_readiness" not in parsed:
         fail("json output schema incomplete")
     print("W1 scout backtest check PASS")
     return 0
