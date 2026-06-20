@@ -140,11 +140,11 @@ def main() -> int:
             if token not in server_src:
                 fail(f"w1_local_predict_server.py missing dynamic Scout dashboard token: {token}")
         embed_src = read(SCOUT_EMBED)
-        for token in ("policy_result", "policy_enforced", "DISPLAY_CALL_KEYS", "enforce_policy_display_copy", "policy_reason_items"):
+        for token in ("policy_result", "policy_enforced", "decision_card", "DISPLAY_CALL_KEYS", "enforce_policy_display_copy", "policy_reason_items", "W1CARD.build_decision_card"):
             if token not in embed_src:
                 fail(f"w1_scout_embed.py must include policy_result in display Scout calls: {token}")
         html_src = read(ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html")
-        for token in ("policyLeftStatusLabel", "AI PASS", "AI观察", "policyReasonItems(policy)", "候选方向 / 参考方向"):
+        for token in ("policyLeftStatusLabel", "AI PASS", "AI观察", "policyReasonItems(policy)", "候选方向 / 参考方向", "decision_card > policy_result > recommendation_text", "hasDecisionCard?decisionBlock"):
             if token not in html_src:
                 fail(f"dashboard must bind PASS/OBSERVE policy labels from decision_state: {token}")
 

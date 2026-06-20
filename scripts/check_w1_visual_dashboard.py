@@ -18,6 +18,9 @@ DOC = ROOT / "docs/W1_VISUAL_DASHBOARD.md"
 POLICY = ROOT / "docs/W1_UI_REUSE_POLICY.md"
 CAPTURE_DIR = Path("/tmp/w1_original_site_capture")
 
+sys.path.insert(0, str(ROOT / "scripts"))
+import w1_decision_card as W1CARD  # noqa: E402
+
 FORBIDDEN_SOURCE_TERMS = [
     "DeepSeek API Key",
     "微信群机器人",
@@ -373,6 +376,13 @@ def assert_scout_embed(text: str) -> None:
             for key in ("hard_gates", "failed_gates", "movement_flags"):
                 if key not in policy_result:
                     fail(f"Embedded Scout call {call.get('fixture_id')} policy_result.{key} missing")
+            decision_card = call.get("decision_card")
+            if not isinstance(decision_card, dict):
+                fail(f"Embedded Scout call {call.get('fixture_id')} missing decision_card")
+            else:
+                errors = W1CARD.validation_errors(decision_card, policy_result)
+                if errors:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} invalid decision_card: {errors}")
         if call.get("independent_edge") is not False:
             fail(f"Embedded Scout call {call.get('fixture_id')} independent_edge must be false")
         if "AI 解读" not in str(call.get("honesty_label", "")):
@@ -607,6 +617,12 @@ def assert_first_screen(text: str) -> None:
         "AI亚盘推荐卡 · DeepSeek",
         "AI亚盘观察卡 · DeepSeek",
         "policy_result",
+        "decision_card",
+        "hasDecisionCard",
+        "decisionBlock",
+        "w1_decision_card_v1",
+        "AI亚盘决策",
+        "PASS｜无推荐",
         "policyCardType",
         "policyLeftStatusLabel",
         "policyReasonItems",
@@ -694,6 +710,9 @@ def assert_first_screen(text: str) -> None:
             fail(f"today featured preparation missing token: {need}")
     if "今日稳胆" in text or "今日精选强推" in text:
         fail("today featured preparation must not expose strong-pick wording")
+    for need in ("const dc=c.decision_card||{}", "hasDecisionCard?decisionBlock", "decision_card > policy_result > recommendation_text"):
+        if need not in text:
+            fail(f"Dashboard must render decision_card before recommendation_text: {need}")
     for need in ("policyLeftStatusLabel(policy)||'已有AI推荐'", "if(d==='PASS')return 'AI PASS'", "if(d==='OBSERVE')return 'AI观察'", "policyReasonItems(policy)"):
         if need not in text:
             fail(f"PASS/OBSERVE policy label source missing token: {need}")

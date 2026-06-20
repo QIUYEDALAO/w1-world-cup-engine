@@ -1,0 +1,34 @@
+{
+  "schema_version": "w1_decision_card_schema_v1",
+  "required": [
+    "schema_version",
+    "fixture_id",
+    "stage_id",
+    "card_type",
+    "decision_state",
+    "recommendation_grade",
+    "headline_cn",
+    "subheadline_cn",
+    "main_pick_cn",
+    "candidate_pick_cn",
+    "one_line_verdict_cn",
+    "reason_blocks_cn",
+    "score_path_cn",
+    "ou_aux_cn",
+    "invalidation_conditions_cn",
+    "action_status_cn",
+    "policy_snapshot",
+    "display_rules"
+  ],
+  "decision_states": ["RECOMMEND", "OBSERVE", "PASS"],
+  "card_types": ["RECOMMEND_CARD", "OBSERVE_CARD", "PASS_CARD"],
+  "reason_labels": ["盘口结构", "模型优势", "路径一致性"],
+  "redlines": {
+    "policy_result_is_decision_source": true,
+    "llm_must_not_decide": true,
+    "dashboard_renders_decision_card_first": true,
+    "observe_pass_no_main_pick": true,
+    "pass_is_active_filter": true,
+    "calibration_training_forbidden": true
+  }
+}

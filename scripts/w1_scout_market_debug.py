@@ -13,6 +13,7 @@ from typing import Any
 
 import w1_recommendation_policy as W1REC
 import w1_scout_backtest as BT
+import w1_decision_card as W1CARD
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -231,10 +232,10 @@ def dashboard_left_status_label(policy: dict[str, Any]) -> str:
 def dashboard_card_title(policy: dict[str, Any]) -> str:
     decision = str(policy.get("decision_state") or "PASS")
     if decision == "RECOMMEND":
-        return "AI亚盘推荐卡 · DeepSeek"
+        return "AI亚盘决策卡 · RECOMMEND"
     if decision == "OBSERVE":
-        return "AI亚盘观察卡 · DeepSeek"
-    return "AI亚盘PASS卡 · DeepSeek"
+        return "AI亚盘决策卡 · OBSERVE"
+    return "AI亚盘决策卡 · PASS"
 
 
 def dashboard_pass_reason_source(policy: dict[str, Any]) -> str:
@@ -276,6 +277,15 @@ def dashboard_contains_forbidden_recommend_words(policy: dict[str, Any]) -> bool
     return False
 
 
+def decision_card_contains_forbidden_words(card: dict[str, Any]) -> bool:
+    decision = str(card.get("decision_state") or "PASS")
+    if decision == "RECOMMEND":
+        return False
+    forbidden = ("亚盘推荐：", "AI亚盘推荐：", "主推：", "重点推荐", "强推", "A-", "B+")
+    text = json.dumps(card, ensure_ascii=False)
+    return any(token in text for token in forbidden)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Inspect Scout market summary for one fixture.")
     parser.add_argument("--fixture-id", required=True)
@@ -290,6 +300,8 @@ def main() -> int:
     ou = market.get("ou") if isinstance(market.get("ou"), dict) else {}
     one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
     policy = policy_result(bundle)
+    state = state_call(fid) or {}
+    decision_card = W1CARD.build_decision_card({**state, "fixture_id": fid, "policy_result": policy})
     probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
     calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
     snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
@@ -369,15 +381,18 @@ def main() -> int:
     print(f"pass_reason={fmt(policy.get('pass_reason'))}")
     print(f"observe_reason={fmt(policy.get('observe_reason'))}")
     print(f"policy_summary_cn={fmt(policy.get('policy_summary_cn'))}")
-    card_type = dashboard_card_type(policy)
+    card_type = decision_card.get("card_type") or dashboard_card_type(policy)
     show_main = bool(policy.get("decision_state") == "RECOMMEND" and policy.get("main_ah_pick"))
     show_candidate = bool(policy.get("decision_state") in {"OBSERVE", "PASS"} and policy.get("candidate_ah_pick"))
-    print(f"dashboard_display_mode=policy_result_first")
+    print(f"dashboard_display_mode=decision_card_first")
     print(f"dashboard_card_type={card_type}")
+    print(f"dashboard_decision_card_headline={fmt(decision_card.get('headline_cn'))}")
+    print(f"dashboard_decision_card_grade={fmt(decision_card.get('recommendation_grade'))}")
+    print(f"dashboard_decision_card_main_pick={fmt(decision_card.get('main_pick_cn'))}")
     print(f"dashboard_left_status_label={dashboard_left_status_label(policy)}")
     print(f"dashboard_card_title={dashboard_card_title(policy)}")
     print(f"dashboard_pass_reason_source={dashboard_pass_reason_source(policy)}")
-    print(f"dashboard_contains_forbidden_recommend_words={str(dashboard_contains_forbidden_recommend_words(policy)).lower()}")
+    print(f"dashboard_contains_forbidden_recommend_words={str(decision_card_contains_forbidden_words(decision_card)).lower()}")
     print(f"dashboard_would_show_main_pick={str(show_main).lower()}")
     print(f"dashboard_would_show_candidate_only={str(show_candidate).lower()}")
     print(f"ai_policy_consistency={consistency}")

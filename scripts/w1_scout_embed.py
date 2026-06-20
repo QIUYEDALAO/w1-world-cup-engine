@@ -42,6 +42,7 @@ DISPLAY_CALL_KEYS = {
     "data_snapshot_digest",
     "policy_result",
     "policy_enforced",
+    "decision_card",
     "read",
     "data_readiness",
     "honesty_label",
@@ -90,6 +91,7 @@ POLICY_FALLBACK_PASS_REASONS = (
 
 sys.path.insert(0, str(ROOT / "scripts"))
 import w1_scout_analyst as W1ANALYST  # noqa: E402
+import w1_decision_card as W1CARD  # noqa: E402
 
 
 def read_reviews() -> list[dict]:
@@ -142,6 +144,8 @@ def display_call(call: dict) -> dict:
     if out.get("safety_label"):
         out["safety_label"] = clean_visible_text(out.get("safety_label")).replace("非资金指令", "非操作指令")
     enforce_policy_display_copy(out)
+    if isinstance(out.get("policy_result"), dict):
+        out["decision_card"] = W1CARD.build_decision_card(out)
     bundle = BUNDLE_BY_FIXTURE.get(str(out.get("fixture_id") or ""))
     read = out.get("read")
     if isinstance(read, dict):

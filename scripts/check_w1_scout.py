@@ -32,6 +32,8 @@ SCOUT_EMBED = ROOT / "scripts/w1_scout_embed.py"
 ANALYST = ROOT / "scripts/w1_scout_analyst.py"
 REVIEW_MOD = ROOT / "scripts/w1_scout_review.py"
 CALIBRATION_MOD = ROOT / "scripts/w1_scout_calibration.py"
+DECISION_CARD_MOD = ROOT / "scripts/w1_decision_card.py"
+DECISION_CARD_CHECK = ROOT / "scripts/check_w1_decision_card.py"
 BUNDLES_P = ROOT / "state/w1_scout_bundles.json"
 CALLS_P = ROOT / "state/w1_scout_calls.json"
 TRACK_P = ROOT / "state/scout_track_record.json"
@@ -850,7 +852,7 @@ def validate_memory_consistency(track: dict, audit_rows: int) -> list[str]:
 
 
 def main() -> int:
-    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, MARKET_DEBUG, SCOUT_EMBED, ANALYST, REVIEW_MOD, CALIBRATION_MOD, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
+    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, MARKET_DEBUG, SCOUT_EMBED, ANALYST, REVIEW_MOD, CALIBRATION_MOD, DECISION_CARD_MOD, DECISION_CARD_CHECK, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
         if not p.is_file():
             fail(f"missing artifact: {p.relative_to(ROOT)}")
     if errors:
@@ -895,6 +897,9 @@ def main() -> int:
         fail("fetcher must not import/alter score engine")
 
     analyst = ANALYST.read_text(encoding="utf-8")
+    for token in ("你不是决策器", "不能决定推不推", "不能覆盖 policy_result", "decision_card"):
+        if token not in analyst:
+            fail(f"analyst prompt must lock LLM out of decision protocol: {token}")
     for token in (
         "DEEPSEEK_API_KEY",
         "W1_SCOUT_LLM",
@@ -956,9 +961,13 @@ def main() -> int:
         if token not in market_debug_src:
             fail(f"market debug script missing token: {token}")
     embed_src = SCOUT_EMBED.read_text(encoding="utf-8")
-    for token in ("enforce_policy_display_copy", "policy_reason_items", "AI亚盘结论：PASS / 观察", "无正式方向，仅观察"):
+    for token in ("enforce_policy_display_copy", "policy_reason_items", "AI亚盘结论：PASS / 观察", "无正式方向，仅观察", "W1CARD.build_decision_card", "decision_card"):
         if token not in embed_src:
             fail(f"Scout display embed must clean PASS/OBSERVE policy copy: {token}")
+    decision_src = DECISION_CARD_MOD.read_text(encoding="utf-8")
+    for token in ("build_decision_card", "validation_errors", "REASON_LABELS", "RECOMMEND_CARD", "OBSERVE_CARD", "PASS_CARD"):
+        if token not in decision_src:
+            fail(f"decision card module missing protocol token: {token}")
 
     # bundle leakage
     leaks = bundle_leak(bundles, forbidden_pm)
