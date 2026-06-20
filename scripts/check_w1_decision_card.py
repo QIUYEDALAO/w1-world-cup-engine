@@ -21,6 +21,8 @@ GENERIC_PASS_TEXT = (
     "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足",
     "Policy Engine 判定未形成可主推条件。",
     "Policy Engine 判定未形成可推荐条件。",
+    "Policy Engine 未提供具体 pass_reason 或 failed_gates；请复核 policy_result。",
+    "本场不进入推荐池；dashboard 不用泛化比赛剧本替代 Policy 根因。",
 )
 
 
@@ -52,10 +54,13 @@ def main() -> int:
         return 0
     calls = json.loads(CALLS.read_text(encoding="utf-8")).get("calls", [])
     checked = 0
+    fixture_1489393_display: dict | None = None
     for call in calls:
         if not isinstance(call, dict):
             continue
         display = SCOUT_EMBED.display_call(call)
+        if str(display.get("fixture_id") or "") == "1489393":
+            fixture_1489393_display = display
         if not isinstance(display.get("policy_result"), dict):
             continue
         card = display.get("decision_card") if isinstance(display.get("decision_card"), dict) else W1CARD.build_decision_card(display)
@@ -82,6 +87,17 @@ def main() -> int:
         if failed and policy.get("decision_state") != "PASS":
             fail(f"fixture {display.get('fixture_id')} failed_gates must map to PASS")
         checked += 1
+    if fixture_1489393_display:
+        policy = fixture_1489393_display.get("policy_result") if isinstance(fixture_1489393_display.get("policy_result"), dict) else {}
+        card = fixture_1489393_display.get("decision_card") if isinstance(fixture_1489393_display.get("decision_card"), dict) else {}
+        gates = policy.get("hard_gates") if isinstance(policy.get("hard_gates"), dict) else {}
+        if policy.get("decision_state") != "RECOMMEND" or policy.get("recommendation_grade") != "B+":
+            fail("fixture 1489393 display_call must resolve current state to RECOMMEND/B+, not old PASS")
+        if card.get("card_type") != "RECOMMEND_CARD":
+            fail("fixture 1489393 display_call must render RECOMMEND_CARD")
+        for gate in ("has_ah", "has_market_fair_prob", "has_score_matrix"):
+            if gates.get(gate) is not True:
+                fail(f"fixture 1489393 display_call missing {gate}=true")
     if checked == 0:
         print("SKIP: missing runtime input with policy_result calls")
         return 0

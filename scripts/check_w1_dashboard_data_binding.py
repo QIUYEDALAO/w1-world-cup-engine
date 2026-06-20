@@ -38,6 +38,8 @@ GENERIC_PASS_TEXT = (
     "Policy Engine 判定未形成可主推条件。",
     "Policy Engine 判定未形成可推荐条件。",
     "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足",
+    "Policy Engine 未提供具体 pass_reason 或 failed_gates；请复核 policy_result。",
+    "本场不进入推荐池；dashboard 不用泛化比赛剧本替代 Policy 根因。",
 )
 
 
@@ -141,9 +143,13 @@ def main() -> int:
         assert_no_forbidden_text(text, DATA_JSON.relative_to(ROOT).as_posix())
         data = json.loads(text)
         server_src = read(SERVER_SCRIPT)
-        for token in ("payload[\"scout_calls\"]", "load_scout_calls_for_dashboard", "SCOUT_EMBED.display_call", "dynamic /dashboard-data"):
+        for token in ("payload[\"scout_calls\"]", "load_scout_calls_for_dashboard", "SCOUT_EMBED.display_call", "dynamic /dashboard-data", "importlib.reload(SCOUT_EMBED)"):
             if token not in server_src:
                 fail(f"w1_local_predict_server.py missing dynamic Scout dashboard token: {token}")
+        inspect_src = read(ROOT / "scripts/inspect_w1_dashboard_fixture.py") if (ROOT / "scripts/inspect_w1_dashboard_fixture.py").is_file() else ""
+        for token in ("state_raw_calls", "state_display_calls", "static_html_embed", "live_dashboard_data", "scout_lock_reference_only", "scout_lock_display_override=false"):
+            if token not in inspect_src:
+                fail(f"inspect_w1_dashboard_fixture.py missing source audit token: {token}")
         embed_src = read(SCOUT_EMBED)
         for token in ("policy_result", "policy_enforced", "decision_card", "DISPLAY_CALL_KEYS", "enforce_policy_display_copy", "policy_reason_items", "W1CARD.build_decision_card"):
             if token not in embed_src:

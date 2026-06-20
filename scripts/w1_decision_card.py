@@ -161,7 +161,7 @@ def _pass_reason_items(policy: dict) -> list[str]:
         rows.append(_s(cal.get("reason")))
     if prob.get("edge_raw") is not None or prob.get("edge_calibrated") is not None:
         rows.append(f"edge_raw={prob.get('edge_raw')}，edge_calibrated={prob.get('edge_calibrated')}。")
-    return rows or ["Policy Engine 未提供具体 pass_reason 或 failed_gates；请复核 policy_result。"]
+    return rows or ["Policy Engine 缺少可展示的具体风控字段；请复核 policy_result / failed_gates。"]
 
 
 def _reason_blocks_for_recommend(policy: dict, call: dict) -> list[dict]:

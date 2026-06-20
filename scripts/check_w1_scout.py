@@ -960,6 +960,10 @@ def main() -> int:
     for token in ("--fixture-id", "scout_file_exists", "cover_probability_model", "pass_reason", "dashboard_left_status_label", "dashboard_card_title", "dashboard_pass_reason_source", "dashboard_contains_forbidden_recommend_words", "PASS_ROOT_CAUSE_AUDIT", "audit.stale_lock_override"):
         if token not in market_debug_src:
             fail(f"market debug script missing token: {token}")
+    inspect_src = (ROOT / "scripts/inspect_w1_dashboard_fixture.py").read_text(encoding="utf-8")
+    for token in ("state_raw_calls", "state_display_calls", "static_html_embed", "live_dashboard_data", "scout_lock_reference_only", "scout_lock_display_override=false"):
+        if token not in inspect_src:
+            fail(f"dashboard fixture inspector missing source audit token: {token}")
     embed_src = SCOUT_EMBED.read_text(encoding="utf-8")
     for token in ("enforce_policy_display_copy", "policy_reason_items", "AI亚盘结论：PASS / 观察", "无正式方向，仅观察", "W1CARD.build_decision_card", "decision_card"):
         if token not in embed_src:

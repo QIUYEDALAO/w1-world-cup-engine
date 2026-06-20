@@ -9,6 +9,7 @@ state/w1_predict_progress.json.
 from __future__ import annotations
 
 import json
+import importlib
 import os
 import re
 import subprocess
@@ -249,6 +250,7 @@ def load_scout_calls() -> list[dict[str, Any]]:
 
 
 def load_scout_calls_for_dashboard() -> dict[str, Any]:
+    global SCOUT_EMBED
     if not SCOUT_CALLS.is_file():
         return {"generated_by": None, "calls": []}
     try:
@@ -262,6 +264,10 @@ def load_scout_calls_for_dashboard() -> dict[str, Any]:
         display_calls = [call for call in calls if isinstance(call, dict)]
     else:
         try:
+            # /dashboard-data is the live display path. Reload the display helper
+            # so a long-running local server does not keep stale PASS/decision-card
+            # formatting after a branch update.
+            SCOUT_EMBED = importlib.reload(SCOUT_EMBED)
             SCOUT_EMBED.BUNDLE_BY_FIXTURE = SCOUT_EMBED.load_bundle_map()
             display_calls = [SCOUT_EMBED.display_call(call) for call in calls if isinstance(call, dict)]
         except Exception:

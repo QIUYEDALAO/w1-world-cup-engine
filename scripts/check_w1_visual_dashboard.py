@@ -94,6 +94,8 @@ GENERIC_PASS_TEXT = (
     "Policy Engine 判定未形成可主推条件。",
     "Policy Engine 判定未形成可推荐条件。",
     "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足",
+    "Policy Engine 未提供具体 pass_reason 或 failed_gates；请复核 policy_result。",
+    "本场不进入推荐池；dashboard 不用泛化比赛剧本替代 Policy 根因。",
 )
 
 
@@ -360,6 +362,41 @@ def assert_scout_embed(text: str) -> None:
     calls = payload.get("calls")
     if not isinstance(calls, list) or not calls:
         fail("Embedded Scout JSON calls must be a non-empty array")
+    def _stage_rank(call: dict) -> int:
+        return {
+            "final_30m": 7,
+            "official_1h": 6,
+            "watch_2h": 5,
+            "watch_6h": 4,
+            "watch_12h": 3,
+            "early_24h": 2,
+            "early_48h": 1,
+        }.get(str(call.get("stage_id") or ""), 0)
+
+    def _best_display_call(rows: list[dict]) -> dict:
+        return sorted(
+            rows,
+            key=lambda row: (
+                1 if isinstance(row.get("policy_result"), dict) else 0,
+                1 if isinstance(row.get("decision_card"), dict) else 0,
+                str(row.get("generated_at") or ""),
+                _stage_rank(row),
+            ),
+        )[-1]
+
+    fixture_1489393 = [call for call in calls if isinstance(call, dict) and str(call.get("fixture_id") or "") == "1489393"]
+    if fixture_1489393:
+        selected_1489393 = _best_display_call(fixture_1489393)
+        policy_1489393 = selected_1489393.get("policy_result") if isinstance(selected_1489393.get("policy_result"), dict) else {}
+        card_1489393 = selected_1489393.get("decision_card") if isinstance(selected_1489393.get("decision_card"), dict) else {}
+        gates_1489393 = policy_1489393.get("hard_gates") if isinstance(policy_1489393.get("hard_gates"), dict) else {}
+        if policy_1489393.get("decision_state") != "RECOMMEND" or policy_1489393.get("recommendation_grade") != "B+":
+            fail("Fixture 1489393 static dashboard display must resolve to current RECOMMEND/B+ decision, not old PASS")
+        if card_1489393.get("card_type") != "RECOMMEND_CARD":
+            fail("Fixture 1489393 static dashboard card must render RECOMMEND_CARD")
+        for gate in ("has_ah", "has_market_fair_prob", "has_score_matrix"):
+            if gates_1489393.get(gate) is not True:
+                fail(f"Fixture 1489393 static dashboard display missing policy gate {gate}=true")
     for idx, call in enumerate(calls):
         if not isinstance(call, dict):
             fail(f"Embedded Scout call #{idx} must be an object")
