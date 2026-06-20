@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""W1 Scout AH recommendation policy engine (shadow mode).
+"""W1 Scout AH recommendation policy engine (enforced mode).
 
 This layer turns already-built W1 AH cover probabilities and market prices into
 a structured policy_result. It is intentionally read-only: no score-engine,
@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -25,7 +26,11 @@ GRADE_BY_ORDER = {value: key for key, value in GRADE_ORDER.items()}
 
 
 def load_policy_config(path: str | Path = DEFAULT_CONFIG) -> dict[str, Any]:
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+    config = json.loads(Path(path).read_text(encoding="utf-8"))
+    mode = os.environ.get("W1_RECOMMENDATION_POLICY_MODE")
+    if mode:
+        config["mode"] = mode.strip().lower()
+    return config
 
 
 def _num(value: Any) -> float | None:
@@ -55,6 +60,7 @@ def _empty_result(config: dict[str, Any]) -> dict[str, Any]:
         "recommendation_grade": "PASS",
         "main_ah_pick": "",
         "candidate_ah_pick": "",
+        "candidate_ah_side": "",
         "main_ah_side": "",
         "market": {
             "home_handicap": None,
@@ -362,6 +368,7 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
     result["recommendation_grade"] = grade
     result["decision_state"] = decision
     result["candidate_ah_pick"] = candidate_pick
+    result["candidate_ah_side"] = candidate_side
     result["main_ah_side"] = candidate_side if decision == "RECOMMEND" else ""
     result["main_ah_pick"] = candidate_pick if decision == "RECOMMEND" else ""
     result["market"].update({
@@ -400,6 +407,190 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
         f"edge={_round(edge)}; calibration={calibration_status}; mode={result['policy_mode']}"
     )
     return result
+
+
+def _read(call: dict[str, Any]) -> dict[str, Any]:
+    return call.get("read") if isinstance(call.get("read"), dict) else {}
+
+
+def _ah_card(call: dict[str, Any]) -> dict[str, Any]:
+    read = _read(call)
+    return read.get("asian_handicap_card") if isinstance(read.get("asian_handicap_card"), dict) else {}
+
+
+def _rec_text(call: dict[str, Any]) -> dict[str, Any]:
+    read = _read(call)
+    return read.get("recommendation_text") if isinstance(read.get("recommendation_text"), dict) else {}
+
+
+def visible_text_values(call: dict[str, Any]) -> list[str]:
+    read = _read(call)
+    out: list[str] = []
+    for value in read.values():
+        if isinstance(value, str):
+            out.append(value)
+        elif isinstance(value, list):
+            out.extend(str(item) for item in value if not isinstance(item, dict))
+        elif isinstance(value, dict):
+            for nested in value.values():
+                if isinstance(nested, str):
+                    out.append(nested)
+                elif isinstance(nested, list):
+                    out.extend(str(item) for item in nested if not isinstance(item, dict))
+    out.extend(str(call.get(key) or "") for key in ("honesty_label", "safety_label"))
+    return out
+
+
+def _joined_visible(call: dict[str, Any]) -> str:
+    return "\n".join(visible_text_values(call))
+
+
+def _clean_non_recommend_visible(value: Any) -> Any:
+    replacements = (
+        ("AI亚盘推荐：", "AI亚盘结论："),
+        ("亚盘推荐：", "亚盘结论："),
+        ("亚盘主推：", "亚盘结论："),
+        ("重点推荐", "重点观察"),
+        ("强推", "强判断"),
+        ("主推", "方向输出"),
+        ("推荐：", "结论："),
+    )
+    if isinstance(value, str):
+        out = value
+        for src, dst in replacements:
+            out = out.replace(src, dst)
+        return out
+    if isinstance(value, list):
+        return [_clean_non_recommend_visible(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _clean_non_recommend_visible(item) for key, item in value.items()}
+    return value
+
+
+def policy_consistency_issues(call: dict[str, Any]) -> list[str]:
+    policy = call.get("policy_result") if isinstance(call.get("policy_result"), dict) else {}
+    if not policy:
+        return ["policy_result missing"]
+    issues: list[str] = []
+    if policy.get("policy_mode") != "enforced":
+        issues.append("policy_mode must be enforced")
+    decision = str(policy.get("decision_state") or "")
+    grade = str(policy.get("recommendation_grade") or "")
+    main_pick = str(policy.get("main_ah_pick") or "")
+    text = _rec_text(call)
+    ah = _ah_card(call)
+    joined = _joined_visible(call)
+    if policy.get("failed_gates") and policy.get("gate_severity") == "hard" and decision != "PASS":
+        issues.append("hard gate failed but decision_state is not PASS")
+    if (policy.get("probability") or {}).get("calibration_status") == "untrained" and grade == "A":
+        issues.append("untrained policy must not grade A")
+    if grade == "B" and decision != "OBSERVE":
+        issues.append("B grade must be OBSERVE")
+    if decision == "RECOMMEND":
+        if not main_pick:
+            issues.append("RECOMMEND must have main_ah_pick")
+        if main_pick and main_pick not in str(text.get("headline_cn") or ""):
+            issues.append("RECOMMEND headline must include policy main_ah_pick")
+        if grade and grade not in str(text.get("grade_cn") or ""):
+            issues.append("RECOMMEND grade text must match policy grade")
+        if main_pick and str(ah.get("main_ah_pick_cn") or "") not in {main_pick, f"亚盘主推：{main_pick}"} and main_pick not in str(ah.get("main_ah_pick_cn") or ""):
+            issues.append("asian_handicap_card main pick conflicts with policy")
+    elif decision in {"OBSERVE", "PASS"}:
+        if policy.get("main_ah_pick"):
+            issues.append(f"{decision} must not have policy main_ah_pick")
+        forbidden = ("主推", "强推", "重点推荐", "AI亚盘推荐：", "推荐：", "A-", "B+", "A｜信心", "A | 信心")
+        for token in forbidden:
+            if token in joined:
+                issues.append(f"{decision} visible text contains forbidden token: {token}")
+        if str(ah.get("main_ah_pick_cn") or "") and "PASS" not in str(ah.get("main_ah_pick_cn")) and "观察" not in str(ah.get("main_ah_pick_cn")):
+            issues.append(f"{decision} asian_handicap_card must not show main pick")
+        if str(ah.get("recommendation_grade") or "") not in {"PASS", "B", "C/观察", "观察"}:
+            issues.append(f"{decision} asian_handicap_card grade must not show strong grade")
+    else:
+        issues.append(f"invalid decision_state: {decision}")
+    return issues
+
+
+def enforce_call_with_policy(call: dict[str, Any], policy_result: dict[str, Any] | None = None) -> dict[str, Any]:
+    if policy_result is not None:
+        call["policy_result"] = json.loads(json.dumps(policy_result, ensure_ascii=False))
+    policy = call.get("policy_result") if isinstance(call.get("policy_result"), dict) else None
+    if not policy:
+        return call
+    call["policy_enforced"] = policy.get("policy_mode") == "enforced"
+    read = call.setdefault("read", {})
+    if not isinstance(read, dict):
+        read = {}
+        call["read"] = read
+    text = read.setdefault("recommendation_text", {})
+    if not isinstance(text, dict):
+        text = {}
+        read["recommendation_text"] = text
+    ah = read.setdefault("asian_handicap_card", {})
+    if not isinstance(ah, dict):
+        ah = {}
+        read["asian_handicap_card"] = ah
+
+    decision = str(policy.get("decision_state") or "PASS")
+    grade = str(policy.get("recommendation_grade") or "PASS")
+    candidate = str(policy.get("candidate_ah_pick") or "")
+    main_pick = str(policy.get("main_ah_pick") or "")
+    probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    edge = probability.get("edge_calibrated")
+    market_prob = probability.get("market_prob_fair")
+
+    if decision == "RECOMMEND":
+        text["headline_cn"] = f"AI亚盘推荐：{main_pick}"
+        text["grade_cn"] = f"{grade}｜信心：中高" if grade in {"A", "A-"} else f"{grade}｜信心：中"
+        text.setdefault("core_judgement_cn", policy.get("policy_summary_cn") or f"Policy Engine 允许输出 {main_pick}，edge={edge}，市场公平概率={market_prob}。")
+        ah["main_ah_pick_cn"] = main_pick
+        ah["recommendation_grade"] = grade
+        ah["final_action_cn"] = f"亚盘主推：{main_pick}；若临场条件反向，降级观察。"
+    elif decision == "OBSERVE":
+        text["headline_cn"] = "AI亚盘结论：观察，不进入强判断"
+        text["grade_cn"] = "B｜观察"
+        text["core_judgement_cn"] = policy.get("observe_reason") or "Policy Engine 仅允许观察，不允许写成强判断。"
+        text["reason_bullets_cn"] = [
+            policy.get("observe_reason") or "edge 只达到观察档，不进入强判断。",
+            f"候选方向：{candidate or '无'}。",
+            "等待盘口快照、首发或水位进一步确认。",
+        ]
+        text["live_invalidation_cn"] = [
+            "若 edge 扩大并通过硬门槛，可重新评估。",
+            "若盘口退盘或水位反向，继续降级观察。",
+            "若首发关键点缺席，维持观察或 PASS。",
+        ]
+        ah["main_ah_pick_cn"] = "亚盘结论：PASS / 观察"
+        ah["recommendation_grade"] = "B"
+        ah["pass_reason_cn"] = policy.get("observe_reason") or ""
+        ah["final_action_cn"] = f"观察方向：{candidate or '无'}；不进入强判断。"
+    else:
+        text["headline_cn"] = "AI亚盘结论：PASS / 观察"
+        text["grade_cn"] = "PASS｜观察"
+        text["core_judgement_cn"] = policy.get("pass_reason") or "Policy Engine 硬门槛未通过，不允许输出亚盘推荐。"
+        text["reason_bullets_cn"] = [
+            policy.get("pass_reason") or "Policy Engine 未放行。",
+            "当前不形成方向输出。",
+            "只保留重新评估条件。",
+        ]
+        text["live_invalidation_cn"] = [
+            "若 AH、价格和 W1覆盖概率补齐，可重新评估。",
+            "若 edge 达到 1.5pp 以上并通过硬门槛，可重新评估。",
+            "若盘口和水位稳定，再复核。",
+        ]
+        ah["main_ah_pick_cn"] = "亚盘结论：PASS / 观察"
+        ah["recommendation_grade"] = "PASS"
+        ah["pass_reason_cn"] = policy.get("pass_reason") or ""
+        ah["final_action_cn"] = "亚盘结论：PASS / 观察。"
+    if decision in {"OBSERVE", "PASS"}:
+        read = _clean_non_recommend_visible(read)
+        call["read"] = read
+        text = read.setdefault("recommendation_text", {})
+    if not isinstance(text.get("reason_bullets_cn"), list) or len(text.get("reason_bullets_cn") or []) < 3:
+        text["reason_bullets_cn"] = list(text.get("reason_bullets_cn") or []) + ["Policy Engine 结论优先，AI 只解释不改写。"]
+    if not isinstance(text.get("live_invalidation_cn"), list) or len(text.get("live_invalidation_cn") or []) < 3:
+        text["live_invalidation_cn"] = list(text.get("live_invalidation_cn") or []) + ["若关键输入变化，重新运行 policy。"]
+    return call
 
 
 def _load_bundle_by_fixture(fid: str) -> dict[str, Any]:

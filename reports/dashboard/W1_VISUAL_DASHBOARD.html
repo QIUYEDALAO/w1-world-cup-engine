@@ -54998,14 +54998,20 @@ function pScoutAnalyst(r){
   const ah=read.asian_handicap_card||{};
   const card=read.recommendation_card||{};
   const text=read.recommendation_text||{};
+  const policy=c.policy_result||{};
+  const policyDecision=String(policy.decision_state||'');
+  const policyMainPick=String(policy.main_ah_pick||'');
+  const policyAllowsRecommend=policyDecision==='RECOMMEND'&&!!policyMainPick;
   const scoreLab=scoutScoreLabels(read);
   const stageLabel=scoutStageLabel(c);
   const currentLine=displayAhLine(ah);
   const coverLine=(ah.cover_probability_model!==undefined&&ah.cover_probability_model!==null)
     ?`W1 ${Math.round(Number(ah.cover_probability_model)*100)}%｜市场 ${ah.cover_probability_market!==undefined&&ah.cover_probability_market!==null?Math.round(Number(ah.cover_probability_market)*100)+'%':'--'}｜差 ${ah.cover_edge!==undefined&&ah.cover_edge!==null?Math.round(Number(ah.cover_edge)*100)+'%':'--'}`
     :'W1覆盖概率缺失';
-  const headline=stripAiDisplayText(text.headline_cn||ah.final_action_cn||ah.main_ah_pick_cn||'AI亚盘结论：PASS / 观察');
-  const gradeText=stripAiDisplayText(text.grade_cn||(ah.recommendation_grade?`${ah.recommendation_grade}｜信心：${ah.ah_confidence_cn||'低'}`:'PASS / 观察'));
+  const fallbackHeadline=policyDecision==='OBSERVE'?'AI亚盘结论：观察，不进入强判断':(policyDecision==='PASS'?'AI亚盘结论：PASS / 观察':'AI亚盘结论：PASS / 观察');
+  const rawHeadline=stripAiDisplayText(text.headline_cn||ah.final_action_cn||ah.main_ah_pick_cn||fallbackHeadline);
+  const headline=policyAllowsRecommend?rawHeadline:rawHeadline.replace(/AI亚盘推荐：/g,'AI亚盘结论：').replace(/亚盘主推：/g,'亚盘结论：');
+  const gradeText=policyDecision==='OBSERVE'?'B｜观察':(policyDecision==='PASS'?'PASS｜观察':stripAiDisplayText(text.grade_cn||(ah.recommendation_grade?`${ah.recommendation_grade}｜信心：${ah.ah_confidence_cn||'低'}`:'PASS / 观察')));
   const coreText=stripAiDisplayText(text.core_judgement_cn||ah.ah_logic_cn||read.tilt_cn||'核心判断待生成');
   const reasons=((text.reason_bullets_cn&&text.reason_bullets_cn.length)?text.reason_bullets_cn:(read.watch_points_cn||[])).slice(0,4).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
   const invalid=((text.live_invalidation_cn&&text.live_invalidation_cn.length)?text.live_invalidation_cn:(read.risks_cn||[])).slice(0,4).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
@@ -55015,8 +55021,8 @@ function pScoutAnalyst(r){
     ['当前盘口 / 水位',`${currentLine}｜${ah.water_movement_cn||'水位暂无确认'}`],
     ['W1覆盖概率 vs 市场隐含概率',coverLine],
     ['盘口变化',ah.line_movement_cn],
-    ['推荐等级',ah.recommendation_grade?`${ah.recommendation_grade}｜信心：${ah.ah_confidence_cn||'低'}`:'PASS / 观察'],
-    ['亚盘主推',ah.main_ah_pick_cn||'亚盘推荐：PASS / 观察'],
+    [policyAllowsRecommend?'推荐等级':'结论等级',policyAllowsRecommend&&ah.recommendation_grade?`${ah.recommendation_grade}｜信心：${ah.ah_confidence_cn||'低'}`:gradeText],
+    [policyAllowsRecommend?'亚盘主推':'亚盘结论',policyAllowsRecommend?(ah.main_ah_pick_cn||policyMainPick):(policyDecision==='OBSERVE'?'观察，不进入强判断':'PASS / 观察')],
     ['失效条件',ah.risk_cn],
   ].filter(row=>row[1]).map(row=>`<div class="scout-rec-item"><b>${esc(row[0])}</b><div>${esc(stripAiDisplayText(row[1]))}</div></div>`).join('');
   const modelRows=[
@@ -55038,7 +55044,8 @@ function pScoutAnalyst(r){
   const normal=stripAiDisplayText(layers.base_script_cn||read.regular_script_cn||'');
   const tail=stripAiDisplayText(layers.tail_script_cn||read.high_variance_tail_script_cn||'');
   const marketScript=stripAiDisplayText(layers.market_script_cn||read.market_expert_script_cn||'');
-  return `<div class="card scout-hero"><h3>AI亚盘推荐卡 · DeepSeek<span class="r">阶段：${esc(stageLabel)} · 数据就绪度：${esc(String(c.data_readiness||'低'))}</span></h3>
+  const scoutCardTitle=policyAllowsRecommend?'AI亚盘推荐卡 · DeepSeek':'AI亚盘观察卡 · DeepSeek';
+  return `<div class="card scout-hero"><h3>${scoutCardTitle}<span class="r">阶段：${esc(stageLabel)} · 数据就绪度：${esc(String(c.data_readiness||'低'))}</span></h3>
     <div class="scout-rec-main">${esc(headline)}</div>
     <div class="why"><b>等级</b> ${esc(gradeText)}</div>
     <div class="why"><b>核心判断</b> ${esc(coreText)}</div>

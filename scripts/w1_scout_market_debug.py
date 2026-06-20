@@ -103,6 +103,14 @@ def has_state_call(fid: str) -> bool:
     return any(str(call.get("fixture_id") or "") == fid and isinstance(call.get("read"), dict) for call in payload.get("calls") or [])
 
 
+def state_call(fid: str) -> dict[str, Any]:
+    payload = load_json(CALLS)
+    for call in payload.get("calls") or []:
+        if str(call.get("fixture_id") or "") == fid and isinstance(call, dict):
+            return call
+    return {}
+
+
 def in_scheduler_pending(fid: str) -> bool:
     payload = load_json(SCHEDULER_STATUS)
     rows = payload.get("pending_remaining_preview") or []
@@ -166,6 +174,19 @@ def odds_snapshots_for_fixture(fid: str) -> tuple[int, str]:
     return matched, ",".join(sorted(sources)) if sources else "missing"
 
 
+def consistency_for_fixture(fid: str, bundle: dict[str, Any], policy: dict[str, Any]) -> tuple[str, list[str], list[str]]:
+    call = state_call(fid)
+    if not call:
+        call = {"fixture_id": fid, "policy_result": policy, "read": {"recommendation_text": {}, "asian_handicap_card": {}}}
+    else:
+        call = json.loads(json.dumps(call, ensure_ascii=False))
+        call["policy_result"] = policy
+    W1REC.enforce_call_with_policy(call, policy)
+    issues = W1REC.policy_consistency_issues(call)
+    visible_conflicts = [item for item in issues if "visible text" in item or "headline" in item or "grade text" in item]
+    return ("PASS" if not issues else "FAIL", issues, visible_conflicts)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Inspect Scout market summary for one fixture.")
     parser.add_argument("--fixture-id", required=True)
@@ -182,6 +203,7 @@ def main() -> int:
     policy = policy_result(bundle)
     probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
     snapshots_count, snapshots_source = odds_snapshots_for_fixture(fid)
+    consistency, conflict_flags, visible_conflicts = consistency_for_fixture(fid, bundle, policy)
 
     rec = match_record(fid)
     stage_id, stage_label, due = current_stage(rec)
@@ -210,6 +232,7 @@ def main() -> int:
     print(f"snapshots_source={snapshots_source}")
     print(f"policy_version={fmt(policy.get('policy_version'))}")
     print(f"policy_mode={fmt(policy.get('policy_mode'))}")
+    print(f"policy_enforced={policy.get('policy_mode') == 'enforced'}")
     print(f"decision_state={fmt(policy.get('decision_state'))}")
     print(f"recommendation_grade={fmt(policy.get('recommendation_grade'))}")
     print(f"candidate_ah_pick={fmt(policy.get('candidate_ah_pick'))}")
@@ -228,6 +251,9 @@ def main() -> int:
     print(f"pass_reason={fmt(policy.get('pass_reason'))}")
     print(f"observe_reason={fmt(policy.get('observe_reason'))}")
     print(f"policy_summary_cn={fmt(policy.get('policy_summary_cn'))}")
+    print(f"ai_policy_consistency={consistency}")
+    print(f"ai_conflict_flags={json.dumps(conflict_flags, ensure_ascii=False)}")
+    print(f"visible_text_policy_conflicts={json.dumps(visible_conflicts, ensure_ascii=False)}")
     print(f"legacy_pass_reason={pass_reason(bundle)}")
     print(f"missing_recommendation_reason={reason}")
     return 0

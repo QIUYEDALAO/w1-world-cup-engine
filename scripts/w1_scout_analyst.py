@@ -31,6 +31,9 @@ CALLS_P = ROOT / "state/w1_scout_calls.json"
 POLICY_P = ROOT / "config/w1_scout_policy.json"
 CHECKER_P = ROOT / "scripts/check_w1_scout.py"
 
+sys.path.insert(0, str(ROOT / "scripts"))
+import w1_recommendation_policy as W1REC  # noqa: E402
+
 PROVIDERS = {
     "deepseek": {
         "base_url": "https://api.deepseek.com/chat/completions",
@@ -52,6 +55,10 @@ PROVIDERS = {
 SYSTEM_PROMPT = """你是足球亚盘盘口研究员。任务是【把这场球读透并形成亚盘主导推荐卡】——不是资金建议,不承诺结果。
 
 硬规则：
+- Policy Engine 已经决定 decision_state、recommendation_grade、candidate_ah_pick、main_ah_pick、edge_raw、edge_calibrated、hard_gates、failed_gates、gate_severity、pass_reason、observe_reason；你不能修改这些字段，只能解释这些字段。
+- 如果 policy_result.decision_state=RECOMMEND，只能输出与 policy_result.main_ah_pick 和 policy_result.recommendation_grade 完全一致的推荐正文。
+- 如果 policy_result.decision_state=OBSERVE，不能写“主推/重点推荐/AI亚盘推荐/A-/B+”，必须写“AI亚盘结论：观察，不进入强推荐”，可写“候选方向”。
+- 如果 policy_result.decision_state=PASS，不能写“主推/推荐：XXX/AI亚盘推荐/A-/B+”，必须写“AI亚盘结论：PASS / 观察”和不推原因。
 - 第一主轴是亚洲让球盘(AH)：主让/客受让/PASS观察、盘口深度、水位、W1覆盖概率、市场隐含覆盖概率、覆盖差、失效条件。
 - 1X2 只能作为欧盘参考，不得作为主推荐轴，不得把胜平负概率放在默认结论最前面。
 - 必须输出 read.asian_handicap_card，字段为 schema_version, fixture_id, stage_id, stage_label_cn, data_readiness, main_ah_pick_cn, ah_side_cn, ah_line, ah_price, current_handicap_cn, ah_confidence_cn, recommendation_grade, ah_logic_cn, cover_probability_model, cover_probability_market, cover_edge, line_movement_cn, water_movement_cn, market_consensus_cn, ou_pick_cn, score_path_cn, score_main_cn, score_backup_cn, risk_cn, pass_reason_cn, final_action_cn。
@@ -358,6 +365,35 @@ def market_prompt_line(market: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def policy_prompt_line(bundle: dict[str, Any]) -> str:
+    policy = bundle.get("policy_result") if isinstance(bundle.get("policy_result"), dict) else None
+    if not policy:
+        return "policy_result 缺失；必须降级为 PASS / 观察。"
+    keys = (
+        "policy_mode",
+        "decision_state",
+        "recommendation_grade",
+        "candidate_ah_pick",
+        "main_ah_pick",
+        "candidate_ah_side",
+        "main_ah_side",
+        "failed_gates",
+        "gate_severity",
+        "pass_reason",
+        "observe_reason",
+        "movement_flags",
+        "grade_caps_applied",
+        "policy_summary_cn",
+    )
+    compact = {key: policy.get(key) for key in keys}
+    probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    compact["probability"] = {
+        key: probability.get(key)
+        for key in ("edge_raw", "edge_calibrated", "calibration_status", "market_prob_fair", "market_prob_method", "overround")
+    }
+    return json.dumps(compact, ensure_ascii=False)
+
+
 def user_prompt(bundle: dict[str, Any], track: dict[str, Any], lessons: str, style_mode: str, validator_errors: list[str] | None = None) -> str:
     market = bundle.get("market") or {}
     retry_note = ""
@@ -372,6 +408,7 @@ def user_prompt(bundle: dict[str, Any], track: dict[str, Any], lessons: str, sty
     return (
         f"[比赛] {bundle.get('home')} vs {bundle.get('away')} (fixture_id={bundle.get('fixture_id')})\n"
         f"[市场读数] {market_prompt_line(market)}\n"
+        f"[Policy Engine 强制结论] {policy_prompt_line(bundle)}\n"
         f"[style_mode] {style_mode}\n"
         f"[因子包] {json.dumps(compact_factor_view(bundle), ensure_ascii=False)}\n"
         f"[你的历史战绩] {json.dumps(track, ensure_ascii=False)[:1200]}\n"
@@ -1209,6 +1246,8 @@ def harden_call(call: dict[str, Any], fixture_id: str, bundle: dict[str, Any] | 
         call["stage_label_cn"] = os.environ.get("W1_SCOUT_SCHEDULE_STAGE_LABEL", "")
     call["honesty_label"] = "AI 解读·非预测·非推介·可能错"
     call["independent_edge"] = False
+    if isinstance((bundle or {}).get("policy_result"), dict):
+        call["policy_result"] = json.loads(json.dumps((bundle or {}).get("policy_result"), ensure_ascii=False))
     complete_read_defaults(call, bundle)
     if isinstance(call.get("read"), dict):
         read = call["read"]
@@ -1229,6 +1268,8 @@ def harden_call(call: dict[str, Any], fixture_id: str, bundle: dict[str, Any] | 
         normalize_asian_handicap_card(call, bundle)
         normalize_recommendation_text(call, bundle)
         sync_script_layers(read)
+    if isinstance(call.get("policy_result"), dict):
+        W1REC.enforce_call_with_policy(call, call["policy_result"])
     return call
 
 

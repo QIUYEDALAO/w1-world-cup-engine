@@ -1,6 +1,6 @@
 {
   "policy_version": "w1_recommendation_policy_v1",
-  "mode": "shadow",
+  "mode": "enforced",
   "edge_thresholds_pp": {
     "A": 7.0,
     "A-": 5.0,

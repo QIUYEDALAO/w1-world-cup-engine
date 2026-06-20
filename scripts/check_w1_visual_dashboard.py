@@ -448,7 +448,7 @@ def assert_scout_embed(text: str) -> None:
                     fail(f"Embedded Scout call {call.get('fixture_id')} asian_handicap_card.{key} missing")
             if ah_card.get("schema_version") != "scout_ah_recommendation_v1":
                 fail(f"Embedded Scout call {call.get('fixture_id')} asian_handicap_card schema mismatch")
-            if str(ah_card.get("recommendation_grade") or "") in {"A", "B+", "B"}:
+            if str(ah_card.get("recommendation_grade") or "") in {"A", "A-", "B+"}:
                 if ah_card.get("cover_probability_model") is None or ah_card.get("ah_line") is None:
                     fail(f"Embedded Scout call {call.get('fixture_id')} graded AH card missing line/cover")
                 if "亚盘主推" not in str(ah_card.get("final_action_cn") or ""):
@@ -567,6 +567,13 @@ def assert_first_screen(text: str) -> None:
             fail(f"dynamic dashboard payload must refresh Scout memory: {need}")
     for need in (
         "AI亚盘推荐卡 · DeepSeek",
+        "AI亚盘观察卡 · DeepSeek",
+        "policy_result",
+        "policyDecision",
+        "policyAllowsRecommend",
+        "policyMainPick",
+        "结论等级",
+        "亚盘结论",
         "recommendation_text",
         "asian_handicap_card",
         "headline_cn",

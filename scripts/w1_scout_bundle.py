@@ -641,6 +641,7 @@ def build_all() -> dict:
     for rec in recs:
         bundle = _merge_user_bundle(str(rec.get("fixture_id")), build_bundle(rec), rec)
         bundle["policy_result"] = W1REC.build_policy_result(bundle, policy_config)
+        bundle["policy_enforced"] = bundle["policy_result"].get("policy_mode") == "enforced"
         bundles.append(bundle)
     return {"stage": "W1_SCOUT", "schema_version": "W1_SCOUT_BUNDLE_V1",
             "asof_pre_kickoff": True, "n": len(bundles), "bundles": bundles}

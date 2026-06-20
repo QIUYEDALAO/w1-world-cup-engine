@@ -20,6 +20,7 @@ from copy import deepcopy
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from w1_results_overlay import load_results_map  # noqa: E402
 import w1_scout_analyst as analyst_mod  # noqa: E402
+import w1_recommendation_policy as W1REC  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_P = ROOT / "config/w1_scout_policy.json"
@@ -392,7 +393,7 @@ def validate_asian_handicap_card(read: dict, readiness: str) -> list[str]:
     if card.get("schema_version") != "scout_ah_recommendation_v1":
         errs.append("read.asian_handicap_card.schema_version mismatch")
     grade = str(card.get("recommendation_grade") or "")
-    if grade not in {"A", "B+", "B", "C/观察", "PASS"}:
+    if grade not in {"A", "A-", "B+", "B", "C/观察", "PASS"}:
         errs.append(f"invalid AH recommendation_grade {grade}")
     text = "\n".join(str(card.get(key) or "") for key in AH_CARD_KEYS)
     if "1X2" in str(card.get("main_ah_pick_cn") or "") or "主胜" in str(card.get("main_ah_pick_cn") or ""):
@@ -417,7 +418,7 @@ def validate_asian_handicap_card(read: dict, readiness: str) -> list[str]:
         errs.append("low data_readiness AH card must be PASS/C observation")
     if readiness == "低" and "观察" not in text:
         errs.append("low data_readiness AH card must explicitly show 观察")
-    if grade in {"A", "B+", "B"}:
+    if grade in {"A", "A-", "B+"}:
         for key in ("main_ah_pick_cn", "ah_side_cn", "ah_confidence_cn", "risk_cn", "final_action_cn"):
             if not str(card.get(key) or "").strip():
                 errs.append(f"grade {grade} AH card missing {key}")
@@ -498,14 +499,14 @@ def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
     if has_ah and ah.get("cover_probability_model") is not None:
         if ah_card.get("cover_probability_model") is None:
             errs.append("AH available with score matrix but asian_handicap_card missing cover_probability_model")
-        if str(ah_card.get("recommendation_grade") or "") in {"A", "B+", "B"} and not str(ah_card.get("final_action_cn") or "").startswith("亚盘主推"):
+        if str(ah_card.get("recommendation_grade") or "") in {"A", "A-", "B+"} and not str(ah_card.get("final_action_cn") or "").startswith("亚盘主推"):
             errs.append("graded AH card must be an Asian-handicap primary recommendation")
     if not has_ah:
-        if str(ah_card.get("recommendation_grade") or "") in {"A", "B+", "B"}:
+        if str(ah_card.get("recommendation_grade") or "") in {"A", "A-", "B+"}:
             errs.append("AH missing but asian_handicap_card still makes a graded recommendation")
     if str(ah_card.get("recommendation_grade") or "") in {"PASS", "C/观察"}:
         reason = str(ah_card.get("pass_reason_cn") or "").strip()
-        allowed_reason = any(token in reason for token in ("覆盖差", "cover edge", "盘口缺失", "AH盘口", "模型覆盖概率缺失", "W1覆盖概率缺失", "数据就绪度", "低", "冲突", "观察", "≤ 0", "<= 0", "无正向覆盖"))
+        allowed_reason = any(token in reason for token in ("覆盖差", "cover edge", "盘口缺失", "AH盘口", "AH 盘口", "模型覆盖概率缺失", "W1覆盖概率缺失", "覆盖概率缺失", "数据就绪度", "低", "冲突", "异常", "观察", "≤ 0", "<= 0", "无正向覆盖"))
         if not allowed_reason:
             errs.append("PASS/C AH card must include a machine-readable pass_reason tied to edge/data/conflict/missing")
     if model_has_1x2(bundle):
@@ -577,6 +578,14 @@ def validate_call(c: dict, policy: dict) -> list[str]:
         errs.append(f"invalid style_mode {c.get('style_mode')}")
     if c.get("safety_label") != "亚盘研究推荐 · 非资金指令 · 不承诺结果":
         errs.append("safety_label mismatch")
+    policy_result = c.get("policy_result")
+    if not isinstance(policy_result, dict):
+        errs.append("policy_result must be present")
+    else:
+        for issue in W1REC.policy_consistency_issues(c):
+            errs.append(f"policy_result consistency: {issue}")
+        if c.get("policy_enforced") is not True:
+            errs.append("policy_enforced must be true")
     for f in policy["read_required_fields"]:
         if f not in c:
             errs.append(f"missing field {f}")
@@ -978,7 +987,7 @@ def main() -> int:
                      ],
                      "recommendation_text": {
                          "headline_cn": "AI亚盘推荐：主队 -0.25",
-                         "grade_cn": "B｜信心：中",
+                         "grade_cn": "A-｜信心：中",
                          "core_judgement_cn": "主队略占优，但当前盘口仍需水位确认。主队 -0.25 有浅盘保护，W1覆盖率 53%，市场隐含 51%，模型侧多出约 2%，因此主线更偏向主队浅让。",
                          "reason_bullets_cn": ["主队 -0.25 覆盖小胜路径，盘口容错高于深盘。", "欧盘参考主胜45%、平29%、客胜26%，平局权重不低。", "比分路径集中在 1-0 / 1-1，不是大胜结构。"],
                          "score_recommendation_cn": "主比分：1-0；备选：1-1 / 2-1；风险：2-1",
@@ -1007,7 +1016,7 @@ def main() -> int:
                          "ah_price": 1.9,
                          "current_handicap_cn": "主队 -0.25 @ 1.9",
                          "ah_confidence_cn": "中",
-                         "recommendation_grade": "B",
+                         "recommendation_grade": "A-",
                          "ah_logic_cn": "W1覆盖率 53% vs 市场隐含 51%，覆盖差 2%；主队让球方向只在盘口与水位维持时成立。",
                          "cover_probability_model": 0.53,
                          "cover_probability_market": 0.51,
@@ -1036,6 +1045,19 @@ def main() -> int:
                      }},
             "data_readiness": "中", "honesty_label": "AI 解读·非预测·非推介·可能错",
             "independent_edge": False}
+    base_policy = W1REC.build_policy_result(W1REC._sample_bundle(0.055), W1REC.load_policy_config())
+    base_policy.update({
+        "decision_state": "RECOMMEND",
+        "recommendation_grade": "A-",
+        "main_ah_pick": "主队 -0.25",
+        "candidate_ah_pick": "主队 -0.25",
+        "main_ah_side": "home",
+        "candidate_ah_side": "home",
+        "failed_gates": [],
+        "gate_severity": "none",
+    })
+    base["policy_result"] = base_policy
+    base["policy_enforced"] = True
     if validate_call(base, policy):
         fail("reverse: a clean match read should pass")
     no_card = dict(base, read={**base["read"]})
