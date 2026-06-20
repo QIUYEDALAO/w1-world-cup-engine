@@ -473,6 +473,26 @@ def assert_scout_embed(text: str) -> None:
                     fail(f"Embedded Scout call {call.get('fixture_id')} graded AH card must be AH-first")
             visible_chunks.extend(str(ah_card.get(key) or "") for key in ah_card)
         visible_text = "\n".join(visible_chunks)
+        decision = (call.get("policy_result") or {}).get("decision_state") if isinstance(call.get("policy_result"), dict) else ""
+        if decision == "PASS":
+            for token in ("亚盘推荐：", "AI亚盘推荐：", "主推：", "重点推荐", "强推", "A-", "B+"):
+                if token in visible_text:
+                    fail(f"PASS Scout display copy must not contain recommend wording {token}: fixture {call.get('fixture_id')}")
+            policy = call.get("policy_result") or {}
+            policy_reason_sources = (
+                policy.get("pass_reason"),
+                policy.get("failed_gates"),
+                policy.get("gate_severity"),
+                policy.get("conflict_flags"),
+                policy.get("movement_flags"),
+                (policy.get("calibration") or {}).get("reason") if isinstance(policy.get("calibration"), dict) else None,
+            )
+            if not any(policy_reason_sources):
+                fail(f"PASS Scout display copy must have policy-derived pass reason source: fixture {call.get('fixture_id')}")
+        if decision == "OBSERVE":
+            for token in ("AI亚盘推荐：", "亚盘主推", "重点推荐", "强推", "A-", "B+"):
+                if token in visible_text:
+                    fail(f"OBSERVE Scout display copy must not contain recommend wording {token}: fixture {call.get('fixture_id')}")
         for token in SCOUT_VISIBLE_FORBIDDEN_TOKENS:
             if token in visible_text:
                 fail(f"Embedded Scout visible text contains forbidden token {token}: fixture {call.get('fixture_id')}")
@@ -588,6 +608,8 @@ def assert_first_screen(text: str) -> None:
         "AI亚盘观察卡 · DeepSeek",
         "policy_result",
         "policyCardType",
+        "policyLeftStatusLabel",
+        "policyReasonItems",
         "RECOMMEND_CARD",
         "OBSERVE_CARD",
         "PASS_CARD",
@@ -595,6 +617,8 @@ def assert_first_screen(text: str) -> None:
         "policyAllowsRecommend",
         "policyMainPick",
         "candidatePick",
+        "AI PASS",
+        "AI观察",
         "Policy Engine 证据",
         "盘口变化证据",
         "校准状态",
@@ -670,6 +694,12 @@ def assert_first_screen(text: str) -> None:
             fail(f"today featured preparation missing token: {need}")
     if "今日稳胆" in text or "今日精选强推" in text:
         fail("today featured preparation must not expose strong-pick wording")
+    for need in ("policyLeftStatusLabel(policy)||'已有AI推荐'", "if(d==='PASS')return 'AI PASS'", "if(d==='OBSERVE')return 'AI观察'", "policyReasonItems(policy)"):
+        if need not in text:
+            fail(f"PASS/OBSERVE policy label source missing token: {need}")
+    status_label = _func_body(text, "function policyLeftStatusLabel(")
+    if "if(d==='PASS')return 'AI PASS'" not in status_label or "if(d==='OBSERVE')return 'AI观察'" not in status_label:
+        fail("PASS/OBSERVE decision branches must map to AI PASS / AI观察")
     first_grid = scout.find("scout-rec-grid")
     first_details = scout.find("<details")
     if first_grid >= 0 and (first_details < 0 or first_grid < first_details):

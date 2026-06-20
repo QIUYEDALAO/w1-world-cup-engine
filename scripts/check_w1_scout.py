@@ -28,6 +28,7 @@ SCHEMA_P = ROOT / "schemas/w1_scout_bundle_schema.json"
 BUNDLE_MOD = ROOT / "scripts/w1_scout_bundle.py"
 FETCHER = ROOT / "scripts/w1_scout_fetch_api_football.py"
 MARKET_DEBUG = ROOT / "scripts/w1_scout_market_debug.py"
+SCOUT_EMBED = ROOT / "scripts/w1_scout_embed.py"
 ANALYST = ROOT / "scripts/w1_scout_analyst.py"
 REVIEW_MOD = ROOT / "scripts/w1_scout_review.py"
 CALIBRATION_MOD = ROOT / "scripts/w1_scout_calibration.py"
@@ -849,7 +850,7 @@ def validate_memory_consistency(track: dict, audit_rows: int) -> list[str]:
 
 
 def main() -> int:
-    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, MARKET_DEBUG, ANALYST, REVIEW_MOD, CALIBRATION_MOD, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
+    for p in (POLICY_P, SCHEMA_P, BUNDLE_MOD, FETCHER, MARKET_DEBUG, SCOUT_EMBED, ANALYST, REVIEW_MOD, CALIBRATION_MOD, BUNDLES_P, TRACK_P, LESSONS_P, AUDIT_P, LOCK_P):
         if not p.is_file():
             fail(f"missing artifact: {p.relative_to(ROOT)}")
     if errors:
@@ -951,9 +952,13 @@ def main() -> int:
         if token not in calibration_src:
             fail(f"calibration script missing token: {token}")
     market_debug_src = MARKET_DEBUG.read_text(encoding="utf-8")
-    for token in ("--fixture-id", "scout_file_exists", "cover_probability_model", "pass_reason"):
+    for token in ("--fixture-id", "scout_file_exists", "cover_probability_model", "pass_reason", "dashboard_left_status_label", "dashboard_card_title", "dashboard_pass_reason_source", "dashboard_contains_forbidden_recommend_words"):
         if token not in market_debug_src:
             fail(f"market debug script missing token: {token}")
+    embed_src = SCOUT_EMBED.read_text(encoding="utf-8")
+    for token in ("enforce_policy_display_copy", "policy_reason_items", "AI亚盘结论：PASS / 观察", "无正式方向，仅观察"):
+        if token not in embed_src:
+            fail(f"Scout display embed must clean PASS/OBSERVE policy copy: {token}")
 
     # bundle leakage
     leaks = bundle_leak(bundles, forbidden_pm)

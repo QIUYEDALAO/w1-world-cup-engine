@@ -217,6 +217,65 @@ def dashboard_card_type(policy: dict[str, Any]) -> str:
     return "PASS_CARD"
 
 
+def dashboard_left_status_label(policy: dict[str, Any]) -> str:
+    decision = str(policy.get("decision_state") or "")
+    if decision == "RECOMMEND":
+        return "已有AI推荐"
+    if decision == "OBSERVE":
+        return "AI观察"
+    if decision == "PASS":
+        return "AI PASS"
+    return "待生成"
+
+
+def dashboard_card_title(policy: dict[str, Any]) -> str:
+    decision = str(policy.get("decision_state") or "PASS")
+    if decision == "RECOMMEND":
+        return "AI亚盘推荐卡 · DeepSeek"
+    if decision == "OBSERVE":
+        return "AI亚盘观察卡 · DeepSeek"
+    return "AI亚盘PASS卡 · DeepSeek"
+
+
+def dashboard_pass_reason_source(policy: dict[str, Any]) -> str:
+    if policy.get("pass_reason"):
+        return "policy_result.pass_reason"
+    if policy.get("failed_gates"):
+        return "policy_result.failed_gates"
+    if policy.get("gate_severity") and policy.get("gate_severity") != "none":
+        return "policy_result.gate_severity"
+    if policy.get("conflict_flags"):
+        return "policy_result.conflict_flags"
+    if policy.get("movement_flags"):
+        return "policy_result.movement_flags"
+    calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
+    if calibration.get("reason"):
+        return "policy_result.calibration.reason"
+    probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    if probability.get("edge_raw") is not None or probability.get("edge_calibrated") is not None:
+        return "policy_result.probability.edge"
+    return "policy_fallback"
+
+
+def dashboard_contains_forbidden_recommend_words(policy: dict[str, Any]) -> bool:
+    decision = str(policy.get("decision_state") or "PASS")
+    if decision == "RECOMMEND":
+        return False
+    forbidden = ("亚盘推荐：", "AI亚盘推荐：", "主推：", "重点推荐", "强推", "A-", "B+")
+    title = dashboard_card_title(policy)
+    if any(token in title for token in forbidden):
+        return True
+    if decision == "PASS":
+        candidate = str(policy.get("candidate_ah_pick") or "")
+        pass_line = f"候选方向 / 参考方向：{candidate}，但仅观察" if candidate else "候选方向 / 参考方向：无正式方向，仅观察"
+        return any(token in pass_line for token in forbidden)
+    if decision == "OBSERVE":
+        candidate = str(policy.get("candidate_ah_pick") or "")
+        observe_line = f"候选方向：{candidate}" if candidate else "候选方向待确认"
+        return any(token in observe_line for token in forbidden)
+    return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Inspect Scout market summary for one fixture.")
     parser.add_argument("--fixture-id", required=True)
@@ -315,6 +374,10 @@ def main() -> int:
     show_candidate = bool(policy.get("decision_state") in {"OBSERVE", "PASS"} and policy.get("candidate_ah_pick"))
     print(f"dashboard_display_mode=policy_result_first")
     print(f"dashboard_card_type={card_type}")
+    print(f"dashboard_left_status_label={dashboard_left_status_label(policy)}")
+    print(f"dashboard_card_title={dashboard_card_title(policy)}")
+    print(f"dashboard_pass_reason_source={dashboard_pass_reason_source(policy)}")
+    print(f"dashboard_contains_forbidden_recommend_words={str(dashboard_contains_forbidden_recommend_words(policy)).lower()}")
     print(f"dashboard_would_show_main_pick={str(show_main).lower()}")
     print(f"dashboard_would_show_candidate_only={str(show_candidate).lower()}")
     print(f"ai_policy_consistency={consistency}")

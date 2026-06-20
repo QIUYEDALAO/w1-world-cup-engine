@@ -83,6 +83,10 @@ STRONG_REPLACEMENTS = (
     ("强烈", "偏向"),
     ("明显", "相对"),
 )
+POLICY_FALLBACK_PASS_REASONS = (
+    "Policy Engine 判定未形成可主推条件。",
+    "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足。",
+)
 
 sys.path.insert(0, str(ROOT / "scripts"))
 import w1_scout_analyst as W1ANALYST  # noqa: E402
@@ -137,6 +141,7 @@ def display_call(call: dict) -> dict:
     out = {key: copy.deepcopy(value) for key, value in working.items() if key in DISPLAY_CALL_KEYS}
     if out.get("safety_label"):
         out["safety_label"] = clean_visible_text(out.get("safety_label")).replace("非资金指令", "非操作指令")
+    enforce_policy_display_copy(out)
     bundle = BUNDLE_BY_FIXTURE.get(str(out.get("fixture_id") or ""))
     read = out.get("read")
     if isinstance(read, dict):
@@ -166,6 +171,75 @@ def display_call(call: dict) -> dict:
                 elif isinstance(value, str):
                     rec_text[key] = [clean_visible_text(value)]
     return out
+
+
+def policy_reason_items(policy: dict) -> list[str]:
+    if not isinstance(policy, dict):
+        return list(POLICY_FALLBACK_PASS_REASONS)
+    items: list[str] = []
+    for key in ("pass_reason", "observe_reason"):
+        value = str(policy.get(key) or "").strip()
+        if value:
+            items.append(value)
+    failed = policy.get("failed_gates") if isinstance(policy.get("failed_gates"), list) else []
+    if failed:
+        items.append("未通过风控门槛：" + " / ".join(str(x) for x in failed if str(x).strip()))
+    severity = str(policy.get("gate_severity") or "").strip()
+    if severity and severity != "none":
+        items.append(f"gate_severity={severity}，Policy Engine 未放行主方向。")
+    for key, label in (("conflict_flags", "冲突标记"), ("movement_flags", "盘口变化标记"), ("grade_caps_applied", "等级封顶")):
+        rows = policy.get(key) if isinstance(policy.get(key), list) else []
+        if rows:
+            items.append(f"{label}：" + " / ".join(str(x) for x in rows if str(x).strip()))
+    calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
+    if calibration.get("reason"):
+        items.append(str(calibration.get("reason")))
+    probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    edge_raw = probability.get("edge_raw")
+    edge_calibrated = probability.get("edge_calibrated")
+    cal_status = probability.get("calibration_status")
+    if edge_raw is not None or edge_calibrated is not None or cal_status:
+        items.append(f"edge_raw={edge_raw if edge_raw is not None else 'missing'}，edge_calibrated={edge_calibrated if edge_calibrated is not None else 'missing'}，calibration_status={cal_status or 'missing'}。")
+    return items or list(POLICY_FALLBACK_PASS_REASONS)
+
+
+def enforce_policy_display_copy(out: dict) -> None:
+    policy = out.get("policy_result") if isinstance(out.get("policy_result"), dict) else {}
+    decision = str(policy.get("decision_state") or "")
+    if decision not in {"PASS", "OBSERVE"}:
+        return
+    read = out.get("read") if isinstance(out.get("read"), dict) else {}
+    ah = read.get("asian_handicap_card") if isinstance(read.get("asian_handicap_card"), dict) else {}
+    rec_text = read.get("recommendation_text") if isinstance(read.get("recommendation_text"), dict) else {}
+    card = read.get("recommendation_card") if isinstance(read.get("recommendation_card"), dict) else {}
+    reasons = policy_reason_items(policy)
+    candidate = str(policy.get("candidate_ah_pick") or "").strip()
+
+    if decision == "PASS":
+        rec_text["headline_cn"] = "AI亚盘结论：PASS / 观察"
+        rec_text["grade_cn"] = "PASS｜信心：低"
+        rec_text["core_judgement_cn"] = reasons[0]
+        rec_text["reason_bullets_cn"] = reasons[:4]
+        rec_text["live_invalidation_cn"] = (
+            policy.get("reassess_triggers")
+            if isinstance(policy.get("reassess_triggers"), list) and policy.get("reassess_triggers")
+            else ["若 hard gate、edge、盘口变化与校准状态重新满足条件，再复核。"]
+        )
+        ah["main_ah_pick_cn"] = "亚盘结论：PASS / 观察"
+        ah["final_action_cn"] = "亚盘结论：PASS / 观察。"
+        ah["recommendation_grade"] = "PASS"
+        ah["pass_reason_cn"] = reasons[0]
+        card["ah_pick_cn"] = "无正式方向，仅观察｜来源：Policy Engine"
+        card["main_recommendation_cn"] = reasons[0]
+    elif decision == "OBSERVE":
+        rec_text["headline_cn"] = "AI亚盘结论：观察，不进入强推荐"
+        rec_text["grade_cn"] = "B / 观察"
+        rec_text["core_judgement_cn"] = str(policy.get("observe_reason") or "Policy Engine 判定仅保留观察方向。")
+        rec_text["reason_bullets_cn"] = reasons[:4]
+        ah["main_ah_pick_cn"] = "亚盘结论：观察"
+        ah["final_action_cn"] = "亚盘结论：观察。"
+        ah["recommendation_grade"] = "观察"
+        card["ah_pick_cn"] = (f"{candidate}｜仅观察｜来源：Policy Engine" if candidate else "候选方向待确认｜仅观察｜来源：Policy Engine")
 
 
 def load_bundle_map() -> dict[str, dict]:
