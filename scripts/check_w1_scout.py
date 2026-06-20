@@ -55,6 +55,15 @@ RECOMMENDATION_CARD_KEYS = (
     "confidence_cn",
 )
 RECOMMENDATION_CARD_OPTIONAL_KEYS = ("data_status_cn",)
+RECOMMENDATION_TEXT_KEYS = (
+    "headline_cn",
+    "grade_cn",
+    "core_judgement_cn",
+    "reason_bullets_cn",
+    "score_recommendation_cn",
+    "ou_aux_cn",
+    "live_invalidation_cn",
+)
 SCRIPT_LAYER_KEYS = ("base_script_cn", "tail_script_cn", "reverse_script_cn", "market_script_cn")
 AH_CARD_KEYS = (
     "schema_version",
@@ -171,6 +180,14 @@ def visible_text_chunks(read: dict) -> list[str]:
     card = read.get("recommendation_card")
     if isinstance(card, dict):
         chunks.extend(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
+    rec_text = read.get("recommendation_text")
+    if isinstance(rec_text, dict):
+        for key in RECOMMENDATION_TEXT_KEYS:
+            value = rec_text.get(key)
+            if isinstance(value, list):
+                chunks.extend(str(item or "") for item in value)
+            else:
+                chunks.append(str(value or ""))
     ah_card = read.get("asian_handicap_card")
     if isinstance(ah_card, dict):
         chunks.extend(str(ah_card.get(key) or "") for key in AH_CARD_KEYS)
@@ -320,6 +337,43 @@ def validate_recommendation_card(read: dict, readiness: str) -> list[str]:
         errs.append("recommendation_card.ou_pick_cn must mention totals / 大小球")
     if "让球" not in str(card.get("ah_pick_cn") or "") and not any(token in str(card.get("ah_pick_cn") or "") for token in ("受让", "+", "-")):
         errs.append("recommendation_card.ah_pick_cn must mention handicap / 让球")
+    return errs
+
+
+def validate_recommendation_text(read: dict, ah_grade: str) -> list[str]:
+    errs: list[str] = []
+    text = read.get("recommendation_text")
+    if not isinstance(text, dict):
+        return ["read.recommendation_text must be an object"]
+    for key in RECOMMENDATION_TEXT_KEYS:
+        if key not in text:
+            errs.append(f"read.recommendation_text.{key} missing")
+    headline = str(text.get("headline_cn") or "")
+    core = str(text.get("core_judgement_cn") or "")
+    reasons = text.get("reason_bullets_cn")
+    invalid = text.get("live_invalidation_cn")
+    if not ("AI亚盘推荐" in headline or "AI亚盘结论" in headline):
+        errs.append("recommendation_text.headline_cn must start as AI AH recommendation/conclusion")
+    if not isinstance(reasons, list) or len([x for x in reasons if str(x).strip()]) < 3:
+        errs.append("recommendation_text.reason_bullets_cn needs at least 3 bullets")
+    if not isinstance(invalid, list) or len([x for x in invalid if str(x).strip()]) < 3:
+        errs.append("recommendation_text.live_invalidation_cn needs at least 3 conditions")
+    if ah_grade in {"A", "A-", "B+", "B"}:
+        for token in ("W1覆盖率", "市场隐含"):
+            if token not in core:
+                errs.append(f"graded recommendation core_judgement_cn must mention {token}")
+        joined = "\n".join(str(x) for x in (reasons or [])) + "\n" + "\n".join(str(x) for x in (invalid or [])) + "\n" + core
+        for token in ("盘口", "水位", "比分"):
+            if token not in joined:
+                errs.append(f"graded recommendation_text must mention {token}")
+        if not any(token in joined for token in ("失效", "降权", "降级")):
+            errs.append("graded recommendation_text must mention invalidation/degrade semantics")
+    if ah_grade in {"PASS", "C/观察"}:
+        joined = headline + "\n" + core + "\n" + "\n".join(str(x) for x in (reasons or [])) + "\n" + "\n".join(str(x) for x in (invalid or []))
+        if not any(token in joined for token in ("PASS", "观察", "降级")):
+            errs.append("PASS/observation recommendation_text must state PASS/观察/降级")
+        if not any(token in joined for token in ("重新评估", "等待", "再确认", "观察")):
+            errs.append("PASS/observation recommendation_text must include observation/re-evaluation condition")
     return errs
 
 
@@ -536,6 +590,7 @@ def validate_call(c: dict, policy: dict) -> list[str]:
     errs.extend(validate_recommendation_card(read, str(c.get("data_readiness") or "")))
     errs.extend(validate_asian_handicap_card(read, str(c.get("data_readiness") or "")))
     ah_grade = str((read.get("asian_handicap_card") or {}).get("recommendation_grade") or "") if isinstance(read.get("asian_handicap_card"), dict) else ""
+    errs.extend(validate_recommendation_text(read, ah_grade))
     errs.extend(validate_script_layers(read, str(c.get("style_mode") or ""), str(c.get("data_readiness") or ""), ah_grade))
     watch = read.get("watch_points_cn")
     risks = read.get("risks_cn")
@@ -800,6 +855,7 @@ def main() -> int:
         "read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn",
         "evidence[{claim,source,fields[],availability,weight}]",
         "asian_handicap_card{schema_version,fixture_id,stage_id,stage_label_cn,data_readiness,main_ah_pick_cn,ah_side_cn,ah_line,ah_price,current_handicap_cn,ah_confidence_cn,recommendation_grade,ah_logic_cn,cover_probability_model,cover_probability_market,cover_edge,line_movement_cn,water_movement_cn,market_consensus_cn,ou_pick_cn,score_path_cn,score_main_cn,score_backup_cn,risk_cn,pass_reason_cn,final_action_cn}",
+        "recommendation_text{headline_cn,grade_cn,core_judgement_cn,reason_bullets_cn[],score_recommendation_cn,ou_aux_cn,live_invalidation_cn[]}",
         "recommendation_card{one_x_two_cn,score_picks_cn,ou_pick_cn,ah_pick_cn,main_recommendation_cn,risk_cn,confidence_cn,data_status_cn}",
         "evidence_chain_cn",
         "regular_script_cn",
@@ -920,6 +976,15 @@ def main() -> int:
                          {"claim": "市场读数主队略低水", "source": "market", "fields": ["market"], "availability": "partial", "weight": "medium"},
                          {"claim": "阵容信息部分缺失", "source": "lineups", "fields": ["lineup"], "availability": "partial", "weight": "low"},
                      ],
+                     "recommendation_text": {
+                         "headline_cn": "AI亚盘推荐：主队 -0.25",
+                         "grade_cn": "B｜信心：中",
+                         "core_judgement_cn": "主队略占优，但当前盘口仍需水位确认。主队 -0.25 有浅盘保护，W1覆盖率 53%，市场隐含 51%，模型侧多出约 2%，因此主线更偏向主队浅让。",
+                         "reason_bullets_cn": ["主队 -0.25 覆盖小胜路径，盘口容错高于深盘。", "欧盘参考主胜45%、平29%、客胜26%，平局权重不低。", "比分路径集中在 1-0 / 1-1，不是大胜结构。"],
+                         "score_recommendation_cn": "主比分：1-0；备选：1-1 / 2-1；风险：2-1",
+                         "ou_aux_cn": "小2.5，信心中。若早球出现，小球方向失效。",
+                         "live_invalidation_cn": ["主队 -0.25 退盘或水位明显反向。", "主队20分钟内早球后比赛进入开放节奏。", "主队首发进攻点缺席，当前方向降级观察。"]
+                     },
                      "recommendation_card": {
                          "one_x_two_cn": "主胜 45%｜平 29%｜客胜 26%｜来源：市场赔率",
                          "score_picks_cn": "首选 1-0｜次选 1-1｜风险 2-1｜来源：score matrix",
@@ -977,6 +1042,10 @@ def main() -> int:
     no_card["read"].pop("recommendation_card", None)
     if not validate_call(no_card, policy):
         fail("reverse: missing recommendation_card must be rejected")
+    no_text = dict(base, read={**base["read"]})
+    no_text["read"].pop("recommendation_text", None)
+    if not validate_call(no_text, policy):
+        fail("reverse: missing recommendation_text must be rejected")
     legacy = dict(base, call={"outcome_lean": "主", "scoreline_lean": "1-0", "confidence": "LOW"})
     if not validate_call(legacy, policy):
         fail("reverse: old prediction call field must be rejected")

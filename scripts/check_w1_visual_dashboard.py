@@ -567,35 +567,41 @@ def assert_first_screen(text: str) -> None:
             fail(f"dynamic dashboard payload must refresh Scout memory: {need}")
     for need in (
         "AI亚盘推荐卡 · DeepSeek",
+        "recommendation_text",
         "asian_handicap_card",
-        "亚盘主推",
-        "推荐等级",
+        "headline_cn",
+        "grade_cn",
+        "core_judgement_cn",
+        "reason_bullets_cn",
+        "score_recommendation_cn",
+        "ou_aux_cn",
+        "live_invalidation_cn",
+        "等级",
+        "核心判断",
+        "推荐理由",
+        "比分推荐",
+        "大小球辅助",
+        "临场失效条件",
+        "盘口证据",
+        "模型与比分证据",
+        "专家剧本展开",
         "当前盘口 / 水位",
         "W1覆盖概率 vs 市场隐含概率",
-        "盘口变化",
-        "大小球辅助",
-        "比分路径",
-        "失效条件",
-        "欧盘参考",
         "main_ah_pick_cn",
         "recommendation_grade",
         "cover_probability_model",
         "final_action_cn",
         "risk_cn",
         "scout-rec-grid",
-        "核心判断",
-        "推荐理由",
         "已读",
         "AI 解读",
         "非独立优势",
         "研究用途 · 非推介 · 非独立优势",
-        "数据证据链",
-        "常规剧本",
-        "尾部高方差剧本",
-        "看点",
-        "风险",
-        "反向风险",
-        "专家盘口剧本",
+        "base_script_cn",
+        "tail_script_cn",
+        "reverse_script_cn",
+        "market_script_cn",
+        "evidence",
         "与市场差异(讨论点)",
         "数据就绪度",
         "evidence_chain_cn",
@@ -611,6 +617,10 @@ def assert_first_screen(text: str) -> None:
     ):
         if need not in scout:
             fail(f"AI-first scout card missing token: {need}")
+    first_grid = scout.find("scout-rec-grid")
+    first_details = scout.find("<details")
+    if first_grid >= 0 and (first_details < 0 or first_grid < first_details):
+        fail("Scout default card must be narrative first; data grid belongs inside details")
     for raw in ("home win", "away win", "draw", "MEDIUM", "HIGH", "LOW", "independent_edge=false", "outcome_lean", "scoreline_lean", "conviction", "market_divergence", "FADE_MARKET", "LEAN_DIFFERENT"):
         if raw in scout:
             fail(f"AI-first scout card must not display raw internal token: {raw}")

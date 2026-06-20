@@ -54997,36 +54997,38 @@ function pScoutAnalyst(r){
   const read=c.read||{};
   const ah=read.asian_handicap_card||{};
   const card=read.recommendation_card||{};
+  const text=read.recommendation_text||{};
   const scoreLab=scoutScoreLabels(read);
   const stageLabel=scoutStageLabel(c);
   const currentLine=displayAhLine(ah);
   const coverLine=(ah.cover_probability_model!==undefined&&ah.cover_probability_model!==null)
     ?`W1 ${Math.round(Number(ah.cover_probability_model)*100)}%｜市场 ${ah.cover_probability_market!==undefined&&ah.cover_probability_market!==null?Math.round(Number(ah.cover_probability_market)*100)+'%':'--'}｜差 ${ah.cover_edge!==undefined&&ah.cover_edge!==null?Math.round(Number(ah.cover_edge)*100)+'%':'--'}`
     :'W1覆盖概率缺失';
-  const ahRows=[
-    ['亚盘主推',ah.main_ah_pick_cn||'亚盘推荐：PASS / 观察'],
-    ['推荐等级',ah.recommendation_grade?`${ah.recommendation_grade}｜信心：${ah.ah_confidence_cn||'低'}`:'PASS / 观察'],
+  const headline=stripAiDisplayText(text.headline_cn||ah.final_action_cn||ah.main_ah_pick_cn||'AI亚盘结论：PASS / 观察');
+  const gradeText=stripAiDisplayText(text.grade_cn||(ah.recommendation_grade?`${ah.recommendation_grade}｜信心：${ah.ah_confidence_cn||'低'}`:'PASS / 观察'));
+  const coreText=stripAiDisplayText(text.core_judgement_cn||ah.ah_logic_cn||read.tilt_cn||'核心判断待生成');
+  const reasons=((text.reason_bullets_cn&&text.reason_bullets_cn.length)?text.reason_bullets_cn:(read.watch_points_cn||[])).slice(0,4).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
+  const invalid=((text.live_invalidation_cn&&text.live_invalidation_cn.length)?text.live_invalidation_cn:(read.risks_cn||[])).slice(0,4).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
+  const scoreText=stripAiDisplayText(text.score_recommendation_cn||`主比分：${scoreLab.main||'比分待生成'}；备选：${scoreLab.backup||'比分待生成'}`);
+  const ouText=stripAiDisplayText(text.ou_aux_cn||ah.ou_pick_cn||card.ou_pick_cn||'大小球辅助暂不展开。');
+  const handicapRows=[
     ['当前盘口 / 水位',`${currentLine}｜${ah.water_movement_cn||'水位暂无确认'}`],
     ['W1覆盖概率 vs 市场隐含概率',coverLine],
     ['盘口变化',ah.line_movement_cn],
-    ['大小球辅助',ah.ou_pick_cn],
+    ['推荐等级',ah.recommendation_grade?`${ah.recommendation_grade}｜信心：${ah.ah_confidence_cn||'低'}`:'PASS / 观察'],
+    ['亚盘主推',ah.main_ah_pick_cn||'亚盘推荐：PASS / 观察'],
+    ['失效条件',ah.risk_cn],
+  ].filter(row=>row[1]).map(row=>`<div class="scout-rec-item"><b>${esc(row[0])}</b><div>${esc(stripAiDisplayText(row[1]))}</div></div>`).join('');
+  const modelRows=[
     ['主比分',scoreLab.main||'比分待生成'],
     ['备选比分',scoreLab.backup||'比分待生成'],
     ['比分路径',ah.score_path_cn],
-    ['失效条件',ah.risk_cn],
+    ['大小球辅助',ah.ou_pick_cn],
     ['欧盘参考',ah.market_consensus_cn],
-  ].filter(row=>row[1]).map(row=>`<div class="scout-rec-item"><b>${esc(row[0])}</b><div>${esc(stripAiDisplayText(row[1]))}</div></div>`).join('');
-  const cardRows=[
     ['1X2',card.one_x_two_cn],
     ['比分',card.score_picks_cn],
-    ['大小球',card.ou_pick_cn],
-    ['让球',card.ah_pick_cn],
-    ['信心',card.confidence_cn],
-    ['数据',card.data_status_cn],
   ].filter(row=>row[1]).map(row=>`<div class="scout-rec-item"><b>${esc(row[0])}</b><div>${esc(stripAiDisplayText(row[1]))}</div></div>`).join('');
-  const watch=(read.watch_points_cn||[]).slice(0,3).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
-  const risks=(read.risks_cn||[]).slice(0,2).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
-  const evidence=(read.evidence_chain_cn||[]).slice(0,5).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
+  const evidence=(read.evidence_chain_cn||[]).slice(0,6).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
   const layers=read.script_layers||{};
   const reverseText=layers.reverse_script_cn?String(layers.reverse_script_cn):'';
   const reverseItems=reverseText?[reverseText]:(read.reverse_risks_cn||[]);
@@ -55037,19 +55039,21 @@ function pScoutAnalyst(r){
   const tail=stripAiDisplayText(layers.tail_script_cn||read.high_variance_tail_script_cn||'');
   const marketScript=stripAiDisplayText(layers.market_script_cn||read.market_expert_script_cn||'');
   return `<div class="card scout-hero"><h3>AI亚盘推荐卡 · DeepSeek<span class="r">阶段：${esc(stageLabel)} · 数据就绪度：${esc(String(c.data_readiness||'低'))}</span></h3>
-    <div class="scout-rec-main">${esc(stripAiDisplayText(ah.final_action_cn||ah.main_ah_pick_cn||'亚盘推荐：PASS / 观察'))}</div>
-    ${ahRows?`<div class="scout-rec-grid">${ahRows}</div>`:''}
-    ${cardRows?`<details class="why"><summary>1X2 / 比分 / 旧推荐卡参考</summary><div class="scout-rec-grid">${cardRows}</div></details>`:''}
-    <div class="why"><b>核心判断</b> ${esc(stripAiDisplayText(read.tilt_cn||'强弱倾向待观察'))} · ${esc(stripAiDisplayText(read.score_band_cn||'比分看区间·别当真'))}</div>
-    ${watch?`<div class="why"><b>推荐理由 / 看点</b><ul>${watch}</ul></div>`:''}
-    ${risks?`<div class="why"><b>风险</b><ul>${risks}</ul></div>`:''}
-    ${card.risk_cn?`<div class="why"><b>风险触发</b> ${esc(stripAiDisplayText(card.risk_cn))}</div>`:''}
-    ${evidence?`<details class="why"><summary>数据证据链</summary><ul>${evidence}</ul></details>`:''}
-    ${(normal||tail||marketScript||reverse)?`<details class="why"><summary>专家展开 · 常规 / 尾部 / 盘口剧本</summary>
-      ${normal?`<div><b>常规剧本</b> ${esc(normal)}</div>`:''}
-      ${tail?`<div><b>尾部高方差剧本</b> ${esc(tail)}</div>`:''}
-      ${marketScript?`<div><b>专家盘口剧本</b> ${esc(marketScript)}</div>`:''}
-      ${reverse?`<div><b>反向风险</b><ul>${reverse}</ul></div>`:''}
+    <div class="scout-rec-main">${esc(headline)}</div>
+    <div class="why"><b>等级</b> ${esc(gradeText)}</div>
+    <div class="why"><b>核心判断</b> ${esc(coreText)}</div>
+    ${reasons?`<div class="why"><b>推荐理由</b><ul>${reasons}</ul></div>`:''}
+    <div class="why"><b>比分推荐</b> ${esc(scoreText)}</div>
+    <div class="why"><b>大小球辅助</b> ${esc(ouText)}</div>
+    ${invalid?`<div class="why"><b>临场失效条件</b><ul>${invalid}</ul></div>`:''}
+    ${handicapRows?`<details class="why"><summary>盘口证据</summary><div class="scout-rec-grid">${handicapRows}</div></details>`:''}
+    ${modelRows?`<details class="why"><summary>模型与比分证据</summary><div class="scout-rec-grid">${modelRows}</div></details>`:''}
+    ${(normal||tail||marketScript||reverse||evidence)?`<details class="why"><summary>专家剧本展开</summary>
+      ${normal?`<div><b>base_script_cn</b> ${esc(normal)}</div>`:''}
+      ${tail?`<div><b>tail_script_cn</b> ${esc(tail)}</div>`:''}
+      ${marketScript?`<div><b>market_script_cn</b> ${esc(marketScript)}</div>`:''}
+      ${reverse?`<div><b>reverse_script_cn</b><ul>${reverse}</ul></div>`:''}
+      ${evidence?`<div><b>evidence</b><ul>${evidence}</ul></div>`:''}
     </details>`:''}
     ${vs?`<div class="why"><b>与市场差异(讨论点)</b> ${esc(vs)}</div>`:''}
     <div class="src"><span>已读 ${factorN}/7 因子</span><span>非独立优势</span><span>${esc(String(c.honesty_label||'AI 解读·非预测'))}</span><span>研究用途</span></div>

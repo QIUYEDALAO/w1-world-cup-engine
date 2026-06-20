@@ -31,6 +31,9 @@ VISIBLE_TEXT_KEYS = ("tilt_cn", "score_band_cn", "vs_market_cn", "regular_script
 VISIBLE_LIST_KEYS = ("watch_points_cn", "risks_cn", "evidence_chain_cn", "reverse_risks_cn")
 DISPLAY_CALL_KEYS = {
     "fixture_id",
+    "schema_version",
+    "style_mode",
+    "safety_label",
     "stage_id",
     "stage_label_cn",
     "stage_lock_mode",
@@ -119,11 +122,20 @@ def clean_visible_text(value: object, *, score_band: bool = False, market_script
 
 def display_call(call: dict) -> dict:
     """Dashboard embeds only display text; structured evidence stays in state."""
-    out = {key: copy.deepcopy(value) for key, value in call.items() if key in DISPLAY_CALL_KEYS}
+    working = copy.deepcopy(call)
+    fixture_id = str(working.get("fixture_id") or "")
+    bundle = BUNDLE_BY_FIXTURE.get(fixture_id)
+    try:
+        working = W1ANALYST.harden_call(working, fixture_id, copy.deepcopy(bundle) if bundle else None)
+    except Exception:
+        if isinstance(working.get("read"), dict):
+            W1ANALYST.normalize_recommendation_card(working, bundle)
+            W1ANALYST.normalize_asian_handicap_card(working, bundle)
+            W1ANALYST.normalize_recommendation_text(working, bundle)
+    out = {key: copy.deepcopy(value) for key, value in working.items() if key in DISPLAY_CALL_KEYS}
     bundle = BUNDLE_BY_FIXTURE.get(str(out.get("fixture_id") or ""))
     read = out.get("read")
     if isinstance(read, dict):
-        W1ANALYST.normalize_asian_handicap_card(out, bundle)
         read.pop("evidence", None)
         for key in VISIBLE_TEXT_KEYS:
             if key in read:
@@ -138,6 +150,17 @@ def display_call(call: dict) -> dict:
                 read[key] = [clean_visible_text(item) for item in value if str(item or "").strip()]
             elif isinstance(value, str):
                 read[key] = [clean_visible_text(value)]
+        rec_text = read.get("recommendation_text")
+        if isinstance(rec_text, dict):
+            for key in ("headline_cn", "grade_cn", "core_judgement_cn", "score_recommendation_cn", "ou_aux_cn"):
+                if key in rec_text:
+                    rec_text[key] = clean_visible_text(rec_text.get(key))
+            for key in ("reason_bullets_cn", "live_invalidation_cn"):
+                value = rec_text.get(key)
+                if isinstance(value, list):
+                    rec_text[key] = [clean_visible_text(item) for item in value if str(item or "").strip()]
+                elif isinstance(value, str):
+                    rec_text[key] = [clean_visible_text(value)]
     return out
 
 
