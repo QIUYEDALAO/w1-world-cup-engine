@@ -1,0 +1,39 @@
+{
+  "policy_version": "w1_recommendation_policy_v1",
+  "mode": "shadow",
+  "edge_thresholds_pp": {
+    "A": 7.0,
+    "A-": 5.0,
+    "B+": 3.0,
+    "B": 1.5,
+    "PASS": 0.0
+  },
+  "calibration": {
+    "default_status": "untrained",
+    "untrained_max_grade": "A-",
+    "untrained_with_stale_movement_max_grade": "B+",
+    "untrained_with_lineup_unconfirmed_max_grade": "B+"
+  },
+  "market_probability": {
+    "method": "multiplicative",
+    "future_methods": ["shin", "power"]
+  },
+  "grade_to_decision_state": {
+    "A": "RECOMMEND",
+    "A-": "RECOMMEND",
+    "B+": "RECOMMEND",
+    "B": "OBSERVE",
+    "PASS": "PASS"
+  },
+  "hard_gate_policy": {
+    "missing_ah": "PASS",
+    "missing_price": "PASS",
+    "missing_score_matrix": "PASS",
+    "missing_market_fair_probability": "PASS",
+    "edge_below_threshold": "PASS",
+    "invalid_ah_sign": "PASS",
+    "dirty_data": "PASS",
+    "strong_score_path_conflict": "PASS",
+    "strong_reverse_movement": "PASS"
+  }
+}

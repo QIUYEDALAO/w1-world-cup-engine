@@ -20,6 +20,7 @@ from statistics import median
 from typing import Any
 
 import w1_ah_cover as W1AH
+import w1_recommendation_policy as W1REC
 
 ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
@@ -29,6 +30,7 @@ SCOUT_DIR = ROOT / "data/scout"   # user pipeline may drop richer bundles here
 ODDS_RAW = ROOT / "data/odds_snapshots/raw"
 OUT = ROOT / "state/w1_scout_bundles.json"
 POLICY = ROOT / "config/w1_scout_policy.json"
+RECOMMENDATION_POLICY = ROOT / "config/w1_recommendation_policy.json"
 
 
 def _root_path(path: str | Path) -> Path:
@@ -194,6 +196,8 @@ def _odds_snapshot_market(fid: str) -> dict:
     out["bookmaker_count"] = max(market_counts) if market_counts else len(bookmakers) or None
     out["market_source"] = "api-football odds snapshots"
     out["odds_updated_at"] = max(str(row.get("captured_at_utc") or "") for row in rows) or None
+    out["odds_snapshots_count"] = len(rows)
+    out["odds_snapshots_source"] = "data/odds_snapshots/raw"
     return {key: value for key, value in out.items() if value not in (None, "", [], {})}
 
 
@@ -259,6 +263,8 @@ def _sync_market_nested(market: dict) -> dict:
         ah.setdefault("water_movement", _water_label(ah.get("home_price"), ah.get("away_price"), ah.get("selected_side")))
         ah.setdefault("source", market.get("market_source") or "odds")
         ah.setdefault("odds_updated_at", market.get("odds_updated_at"))
+        ah.setdefault("snapshots_count", market.get("odds_snapshots_count"))
+        ah.setdefault("snapshots_source", market.get("odds_snapshots_source"))
     market["ah"] = {k: v for k, v in ah.items() if v not in (None, "", [], {})}
 
     ou = dict(market.get("ou") or {})
@@ -540,7 +546,8 @@ def build_bundle(rec: dict) -> dict:
               "ah_line": None, "ah_home_price": None,
               "ah_away_price": None, "ou_line": None, "over_price": None,
               "under_price": None, "bookmaker_count": None, "market_source": None,
-              "odds_updated_at": None, "one_x_two": {}, "ah": {}, "ou": {}}
+              "odds_updated_at": None, "odds_snapshots_count": None,
+              "odds_snapshots_source": None, "one_x_two": {}, "ah": {}, "ou": {}}
     market.update(_panel_market_from_rec(rec))
     market.update(_odds_snapshot_market(fid))
     market = _sync_market_nested(market)
@@ -629,7 +636,12 @@ def _merge_user_bundle(fid: str, base: dict, rec: dict) -> dict:
 
 def build_all() -> dict:
     recs = json.loads(DASH.read_text(encoding="utf-8")).get("match_records", []) if DASH.is_file() else []
-    bundles = [_merge_user_bundle(str(r.get("fixture_id")), build_bundle(r), r) for r in recs]
+    policy_config = W1REC.load_policy_config(RECOMMENDATION_POLICY)
+    bundles = []
+    for rec in recs:
+        bundle = _merge_user_bundle(str(rec.get("fixture_id")), build_bundle(rec), rec)
+        bundle["policy_result"] = W1REC.build_policy_result(bundle, policy_config)
+        bundles.append(bundle)
     return {"stage": "W1_SCOUT", "schema_version": "W1_SCOUT_BUNDLE_V1",
             "asof_pre_kickoff": True, "n": len(bundles), "bundles": bundles}
 

@@ -11,6 +11,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import w1_recommendation_policy as W1REC
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCOUT_DIR = ROOT / "data/scout"
@@ -19,6 +21,7 @@ BUNDLE_SCRIPT = ROOT / "scripts/w1_scout_bundle.py"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 CALLS = ROOT / "state/w1_scout_calls.json"
 SCHEDULER_STATUS = ROOT / "state/w1_scout_scheduler_status.json"
+ODDS_RAW = ROOT / "data/odds_snapshots/raw"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -122,6 +125,47 @@ def pass_reason(bundle: dict[str, Any]) -> str:
     return "Actionable AH read possible: positive cover edge present; still research-only."
 
 
+def policy_result(bundle: dict[str, Any]) -> dict[str, Any]:
+    result = bundle.get("policy_result")
+    if isinstance(result, dict):
+        return result
+    try:
+        return W1REC.build_policy_result(bundle)
+    except Exception:
+        return {}
+
+
+def odds_snapshots_for_fixture(fid: str) -> tuple[int, str]:
+    market = (bundle_for(fid).get("market") or {})
+    ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+    count = ah.get("snapshots_count", market.get("odds_snapshots_count"))
+    source = ah.get("snapshots_source") or market.get("odds_snapshots_source")
+    if isinstance(count, int) and count > 0:
+        return count, str(source or "bundle")
+    matched = 0
+    sources: set[str] = set()
+    if ODDS_RAW.is_dir():
+        for path in sorted(ODDS_RAW.glob("*/*.jsonl")):
+            try:
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except OSError:
+                continue
+            for line in lines:
+                if fid not in line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                ids = {str(row.get("fixture_id") or ""), str(row.get("local_card_id") or "")}
+                ids.update(str(item) for item in (row.get("alias_fixture_ids") or []))
+                if fid not in ids:
+                    continue
+                matched += 1
+                sources.add(str(path.relative_to(ROOT)))
+    return matched, ",".join(sorted(sources)) if sources else "missing"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Inspect Scout market summary for one fixture.")
     parser.add_argument("--fixture-id", required=True)
@@ -135,6 +179,9 @@ def main() -> int:
     ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
     ou = market.get("ou") if isinstance(market.get("ou"), dict) else {}
     one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
+    policy = policy_result(bundle)
+    probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    snapshots_count, snapshots_source = odds_snapshots_for_fixture(fid)
 
     rec = match_record(fid)
     stage_id, stage_label, due = current_stage(rec)
@@ -159,7 +206,29 @@ def main() -> int:
     print(f"cover_probability_model={fmt(ah.get('cover_probability_model'))}")
     print(f"cover_probability_market={fmt(ah.get('cover_probability_market'))}")
     print(f"cover_edge={fmt(ah.get('cover_edge'))}")
-    print(f"pass_reason={pass_reason(bundle)}")
+    print(f"snapshots_count={snapshots_count}")
+    print(f"snapshots_source={snapshots_source}")
+    print(f"policy_version={fmt(policy.get('policy_version'))}")
+    print(f"policy_mode={fmt(policy.get('policy_mode'))}")
+    print(f"decision_state={fmt(policy.get('decision_state'))}")
+    print(f"recommendation_grade={fmt(policy.get('recommendation_grade'))}")
+    print(f"candidate_ah_pick={fmt(policy.get('candidate_ah_pick'))}")
+    print(f"main_ah_pick={fmt(policy.get('main_ah_pick'))}")
+    print(f"calibration_status={fmt(probability.get('calibration_status'))}")
+    print(f"edge_raw={fmt(probability.get('edge_raw'))}")
+    print(f"edge_calibrated={fmt(probability.get('edge_calibrated'))}")
+    print(f"market_prob_method={fmt(probability.get('market_prob_method'))}")
+    print(f"market_prob_fair={fmt(probability.get('market_prob_fair'))}")
+    print(f"overround={fmt(probability.get('overround'))}")
+    print(f"hard_gates={json.dumps(policy.get('hard_gates') or {}, ensure_ascii=False, sort_keys=True)}")
+    print(f"failed_gates={json.dumps(policy.get('failed_gates') or [], ensure_ascii=False)}")
+    print(f"movement_flags={json.dumps(policy.get('movement_flags') or [], ensure_ascii=False)}")
+    print(f"conflict_flags={json.dumps(policy.get('conflict_flags') or [], ensure_ascii=False)}")
+    print(f"grade_caps_applied={json.dumps(policy.get('grade_caps_applied') or [], ensure_ascii=False)}")
+    print(f"pass_reason={fmt(policy.get('pass_reason'))}")
+    print(f"observe_reason={fmt(policy.get('observe_reason'))}")
+    print(f"policy_summary_cn={fmt(policy.get('policy_summary_cn'))}")
+    print(f"legacy_pass_reason={pass_reason(bundle)}")
     print(f"missing_recommendation_reason={reason}")
     return 0
 
