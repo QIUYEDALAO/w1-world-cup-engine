@@ -1,0 +1,27 @@
+{
+  "version": "w1_backtest_policy_v1",
+  "settlement_values": {
+    "full_win": 1.0,
+    "half_win": 0.5,
+    "push": 0.0,
+    "half_loss": -0.5,
+    "full_loss": -1.0
+  },
+  "line_buckets": [0, 0.25, 0.5, 0.75, 1.0, 1.25],
+  "default_sample_policy": {
+    "one_sample_per_fixture": true,
+    "prefer_stage_order": ["final_30m", "official_1h", "watch_2h", "watch_6h", "watch_12h", "early_24h", "early_48h"],
+    "include_decision_states": ["RECOMMEND", "OBSERVE", "PASS"],
+    "performance_primary_states": ["RECOMMEND"],
+    "observe_as_diagnostic_only": true,
+    "pass_as_filter_only": true
+  },
+  "result_sources": [
+    "data/results/round1_results.json",
+    "data/results/world_cup_2026_results.json"
+  ],
+  "output": {
+    "default_format": "summary",
+    "write_reports_by_default": false
+  }
+}

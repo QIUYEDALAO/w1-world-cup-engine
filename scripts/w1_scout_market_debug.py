@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import w1_recommendation_policy as W1REC
+import w1_scout_backtest as BT
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -187,6 +188,28 @@ def consistency_for_fixture(fid: str, bundle: dict[str, Any], policy: dict[str, 
     return ("PASS" if not issues else "FAIL", issues, visible_conflicts)
 
 
+def settlement_preview(fid: str) -> str:
+    try:
+        config = BT.load_config()
+        results = BT.load_results(config)
+        bundle = bundle_for(fid)
+        call = state_call(fid) or {"fixture_id": fid, "stage_id": "", "policy_result": policy_result(bundle), "read": {}}
+        call = BT.normalize_call(call, bundle)
+        sample = BT.sample_from_call(call, results, config)
+    except Exception as exc:  # debug-only path; never fail market debug on runtime gaps
+        return f"SKIP: {exc}"
+    if sample.get("settlement_value") is None:
+        return f"SKIP: {sample.get('missing_result_reason') or 'not a settled RECOMMEND sample'}"
+    score = sample.get("final_score") or {}
+    return (
+        f"final_score={score.get('home')}-{score.get('away')} "
+        f"selected_side={sample.get('selected_side')} "
+        f"selected_handicap={sample.get('selected_handicap')} "
+        f"settlement_result={sample.get('settlement_result')} "
+        f"settlement_value={sample.get('settlement_value')}"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Inspect Scout market summary for one fixture.")
     parser.add_argument("--fixture-id", required=True)
@@ -272,6 +295,7 @@ def main() -> int:
     print(f"ai_policy_consistency={consistency}")
     print(f"ai_conflict_flags={json.dumps(conflict_flags, ensure_ascii=False)}")
     print(f"visible_text_policy_conflicts={json.dumps(visible_conflicts, ensure_ascii=False)}")
+    print(f"settlement_preview={settlement_preview(fid)}")
     print(f"legacy_pass_reason={pass_reason(bundle)}")
     print(f"missing_recommendation_reason={reason}")
     return 0
