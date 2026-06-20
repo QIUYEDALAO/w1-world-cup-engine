@@ -27,6 +27,7 @@ STATE_JSON = ROOT / "state/w1_refresh_state.json"
 WEATHER_CACHE = ROOT / "state/w1_weather_cache.json"
 LIVE_REFRESH_STATE = ROOT / "state/w1_live_refresh_state.json"
 ODDS_RAW = ROOT / "data/odds_snapshots/raw"
+SCOUT_DIR = ROOT / "data/scout"
 LINEUP_RUNTIME_OVERLAY = ROOT / "state/w1_lineup_runtime_overlay.json"
 MANUAL_LINEUPS_DIR = ROOT / "data/manual_lineups"
 FIXTURE_ALIASES = ROOT / "data/fixture_aliases.json"
@@ -1604,6 +1605,97 @@ def card_with_odds_snapshot_overlay(card: dict[str, Any]) -> dict[str, Any]:
     return updated
 
 
+def _scout_market_payload(fid: str) -> dict[str, Any]:
+    path = SCOUT_DIR / f"{fid}.json"
+    if not path.is_file():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    market = payload.get("market")
+    return market if isinstance(market, dict) else {}
+
+
+def _scout_1x2_market(market: dict[str, Any]) -> dict[str, Any] | None:
+    one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
+    home = _safe_float(one_x_two.get("home_odds"))
+    draw = _safe_float(one_x_two.get("draw_odds"))
+    away = _safe_float(one_x_two.get("away_odds"))
+    if not all(value and value > 1.0 for value in (home, draw, away)):
+        return None
+    return {
+        "available": True,
+        "bookmakers_count": int(_safe_float(one_x_two.get("bookmaker_count")) or _safe_float(market.get("bookmaker_count")) or 0),
+        "source": one_x_two.get("source") or market.get("market_source") or "data/scout local market overlay",
+        "lines": [{"home": home, "draw": draw, "away": away}],
+    }
+
+
+def _scout_ah_market(market: dict[str, Any]) -> dict[str, Any] | None:
+    ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+    line = _safe_float(ah.get("home_handicap", ah.get("line", market.get("ah_line"))))
+    home_price = _safe_float(ah.get("home_price", market.get("ah_home_price")))
+    away_price = _safe_float(ah.get("away_price", market.get("ah_away_price")))
+    if line is None or not all(value and value > 1.0 for value in (home_price, away_price)):
+        return None
+    return {
+        "available": True,
+        "bookmakers_count": int(_safe_float(ah.get("bookmaker_count")) or _safe_float(market.get("bookmaker_count")) or 0),
+        "source": ah.get("source") or market.get("market_source") or "data/scout local market overlay",
+        "lines": [{"entries": [{"line": f"Home {line:g}", "odds": home_price}, {"line": f"Away {-line:g}", "odds": away_price}]}],
+    }
+
+
+def _scout_ou_market(market: dict[str, Any]) -> dict[str, Any] | None:
+    ou = market.get("ou") if isinstance(market.get("ou"), dict) else {}
+    line = _safe_float(ou.get("line", market.get("ou_line")))
+    over_price = _safe_float(ou.get("over_price", market.get("over_price")))
+    under_price = _safe_float(ou.get("under_price", market.get("under_price")))
+    if line is None or not all(value and value > 1.0 for value in (over_price, under_price)):
+        return None
+    return {
+        "available": True,
+        "bookmakers_count": int(_safe_float(ou.get("bookmaker_count")) or _safe_float(market.get("bookmaker_count")) or 0),
+        "source": ou.get("source") or market.get("market_source") or "data/scout local market overlay",
+        "lines": [{"entries": [{"line": f"Over {line:g}", "odds": over_price}, {"line": f"Under {line:g}", "odds": under_price}]}],
+    }
+
+
+def card_with_local_market_overlays(card: dict[str, Any]) -> dict[str, Any]:
+    """Fill missing score-engine market inputs from local runtime odds overlays.
+
+    This does not change score-engine logic. It only makes the same local
+    api-football odds already used by Scout available to dashboard score-matrix
+    generation when the tracked match card still has empty markets.
+    """
+    updated = card_with_odds_snapshot_overlay(card)
+    raw_fid = str(updated.get("match", {}).get("match_id") or updated.get("fixture_id") or "")
+    match = re.search(r"(\d+)$", raw_fid)
+    fid = match.group(1) if match else raw_fid
+    scout_market = _scout_market_payload(fid)
+    if not scout_market:
+        return updated
+    if updated is card:
+        updated = json.loads(json.dumps(card, ensure_ascii=False))
+    markets = updated.setdefault("markets", {})
+    overlays = {
+        "odds_1X2": _scout_1x2_market(scout_market),
+        "odds_AH": _scout_ah_market(scout_market),
+        "odds_OU": _scout_ou_market(scout_market),
+    }
+    applied: list[str] = []
+    for key, overlay in overlays.items():
+        if overlay and not (markets.get(key) or {}).get("available"):
+            markets[key] = overlay
+            applied.append(key)
+    if applied:
+        markets["odds_snapshot_time_utc"] = scout_market.get("odds_updated_at") or markets.get("odds_snapshot_time_utc")
+        markets["local_market_overlay_source"] = "data/scout/<fixture>.json"
+        markets["local_market_overlay_fields"] = applied
+    return updated
+
+
 def _matrix_from_score_distribution(score_distribution: dict[str, Any]) -> Any | None:
     model = score_distribution.get("matrix_model", {}) if score_distribution else {}
     try:
@@ -2417,12 +2509,22 @@ def build_record(
         if include_runtime_state
         else embedded_baseline_live_refresh(fid)
     )
-    score_card = card_with_odds_snapshot_overlay(card)
+    score_card = card_with_local_market_overlays(card)
     raw_score_distribution = W1ENGINE.build_score_distribution(score_card, actual=actual_tuple(score), rho=W1_RHO) if W1_SCORE_ENGINE_ON else {"status": "skipped", "skip_reason": "W1_SCORE_ENGINE=off"}
     score_distribution = normalize_score_distribution(raw_score_distribution)
     score_matrix_summary = score_matrix_summary_from_distribution(score_distribution)
     recommendation_view = recommendation_view_from_score_distribution(score_distribution)
     market_probability_panel = market_probability_panel_from_score_distribution(score_distribution, score_card)
+    local_market_overlay_source = (score_card.get("markets") or {}).get("local_market_overlay_source")
+    if local_market_overlay_source:
+        fields = (score_card.get("markets") or {}).get("local_market_overlay_fields") or []
+        score_distribution["market_input_overlay_source"] = local_market_overlay_source
+        score_distribution["market_input_overlay_fields"] = fields
+        score_matrix_summary["local_market_overlay_source"] = local_market_overlay_source
+        score_matrix_summary["local_market_overlay_fields"] = fields
+        score_matrix_summary["market_source"] = f"{score_matrix_summary.get('market_source') or 'match_card.markets'} + {local_market_overlay_source}"
+        market_probability_panel.setdefault("market_comparison", {})["local_market_overlay_source"] = local_market_overlay_source
+        market_probability_panel.setdefault("market_comparison", {})["local_market_overlay_fields"] = fields
     candidates_snapshot = W1CANDIDATES.build_candidates(
         matrix=W1CANDIDATES.matrix_from_dashboard_record(
             {"score_distribution": score_distribution, "score_matrix_summary": score_matrix_summary}

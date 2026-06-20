@@ -388,6 +388,15 @@ def main() -> int:
     print(f"availability.market_ah={fmt(availability.get('market_ah'))}")
     print(f"availability.market_ou={fmt(availability.get('market_ou'))}")
     print(f"availability.model_1x2={fmt(availability.get('model_1x2'))}")
+    score_distribution = rec.get("score_distribution") if isinstance(rec.get("score_distribution"), dict) else {}
+    score_summary = rec.get("score_matrix_summary") if isinstance(rec.get("score_matrix_summary"), dict) else {}
+    market_panel = rec.get("market_probability_panel") if isinstance(rec.get("market_probability_panel"), dict) else {}
+    comparison = market_panel.get("market_comparison") if isinstance(market_panel.get("market_comparison"), dict) else {}
+    print(f"dashboard_score_distribution_status={fmt(score_distribution.get('status'))}")
+    print(f"dashboard_score_matrix_status={fmt(score_summary.get('status'))}")
+    print(f"dashboard_score_matrix_market_source={fmt(score_summary.get('market_source'))}")
+    print(f"dashboard_local_market_overlay_source={fmt(score_summary.get('local_market_overlay_source') or score_distribution.get('market_input_overlay_source') or comparison.get('local_market_overlay_source'))}")
+    print(f"dashboard_local_market_overlay_fields={json.dumps(score_summary.get('local_market_overlay_fields') or score_distribution.get('market_input_overlay_fields') or comparison.get('local_market_overlay_fields') or [], ensure_ascii=False)}")
     print(f"1x2={fmt(one_x_two.get('p_home'))}/{fmt(one_x_two.get('p_draw'))}/{fmt(one_x_two.get('p_away'))}")
     print(f"ah_line={fmt(ah.get('home_handicap'))} home_price={fmt(ah.get('home_price'))} away_price={fmt(ah.get('away_price'))}")
     print(f"ou_line={fmt(ou.get('line'))} over={fmt(ou.get('over_price'))} under={fmt(ou.get('under_price'))}")

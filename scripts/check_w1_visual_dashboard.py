@@ -90,6 +90,11 @@ SCOUT_AH_CARD_KEYS = (
 SCOUT_FUNDS_FORBIDDEN_TOKENS = ("下注", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中")
 SCOUT_PROMISE_FORBIDDEN_TOKENS = ("必穿", "稳赢", "包赢")
 SCOUT_RECOMMENDATION_SOURCE_TOKENS = ("来源：市场", "来源：市场赔率", "来源：W1模型", "来源：score matrix", "来源：缺失", "来源：盘口")
+GENERIC_PASS_TEXT = (
+    "Policy Engine 判定未形成可主推条件。",
+    "Policy Engine 判定未形成可推荐条件。",
+    "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足",
+)
 
 
 class CheckError(Exception):
@@ -339,6 +344,9 @@ def walk_live_refresh_timestamps(value: object, path: str = "live_refresh") -> l
 
 
 def assert_scout_embed(text: str) -> None:
+    for generic in GENERIC_PASS_TEXT:
+        if generic in text:
+            fail(f"dashboard must not contain generic PASS reason: {generic}")
     embedded = re.search(r'<script id="w1-scout-calls" type="application/json">(.*?)</script>', text, re.S)
     if not embedded:
         fail("HTML must embed Scout calls for AI analyst file-open display")
@@ -388,8 +396,7 @@ def assert_scout_embed(text: str) -> None:
                 if decision_card.get("decision_state") == "PASS":
                     card_text = json.dumps(decision_card, ensure_ascii=False)
                     for generic in (
-                        "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足",
-                        "Policy Engine 判定未形成可推荐条件。",
+                        *GENERIC_PASS_TEXT,
                     ):
                         if generic in card_text:
                             fail(f"Embedded Scout call {call.get('fixture_id')} PASS decision_card uses generic reason")

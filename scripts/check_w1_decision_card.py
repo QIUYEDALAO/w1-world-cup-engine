@@ -19,6 +19,7 @@ import w1_scout_embed as SCOUT_EMBED  # noqa: E402
 
 GENERIC_PASS_TEXT = (
     "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足",
+    "Policy Engine 判定未形成可主推条件。",
     "Policy Engine 判定未形成可推荐条件。",
 )
 

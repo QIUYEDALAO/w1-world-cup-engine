@@ -85,8 +85,8 @@ STRONG_REPLACEMENTS = (
     ("明显", "相对"),
 )
 POLICY_FALLBACK_PASS_REASONS = (
-    "Policy Engine 判定未形成可主推条件。",
-    "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足。",
+    "Policy Engine 未提供具体 pass_reason 或 failed_gates；请复核 policy_result。",
+    "本场不进入推荐池；dashboard 不用泛化比赛剧本替代 Policy 根因。",
 )
 
 sys.path.insert(0, str(ROOT / "scripts"))

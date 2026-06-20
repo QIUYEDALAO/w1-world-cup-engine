@@ -55002,7 +55002,7 @@ function policyReasonItems(policy){
   if((policy.movement_flags||[]).length)rows.push(`盘口变化标记：${(policy.movement_flags||[]).join(' / ')}`);
   if(cal.reason)rows.push(cal.reason);
   if(prob.edge_raw!==undefined||prob.edge_calibrated!==undefined||prob.calibration_status)rows.push(`edge_raw=${prob.edge_raw??'missing'}，edge_calibrated=${prob.edge_calibrated??'missing'}，calibration_status=${prob.calibration_status||'missing'}。`);
-  return rows.length?rows:['Policy Engine 判定未形成可主推条件。','hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足。'];
+  return rows.length?rows:['Policy Engine 未提供具体 pass_reason 或 failed_gates；请复核 policy_result。','本场不进入推荐池；dashboard 不用泛化比赛剧本替代 Policy 根因。'];
 }
 function policyEvidenceRows(policy){
   policy=policy||{};const p=policy.probability||{},m=policy.market||{},cal=policy.calibration||{},ready=cal.readiness||{};
