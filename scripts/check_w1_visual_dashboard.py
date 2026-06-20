@@ -383,6 +383,21 @@ def assert_scout_embed(text: str) -> None:
                 errors = W1CARD.validation_errors(decision_card, policy_result)
                 if errors:
                     fail(f"Embedded Scout call {call.get('fixture_id')} invalid decision_card: {errors}")
+                if policy_result.get("decision_state") == "RECOMMEND" and decision_card.get("decision_state") == "PASS":
+                    fail(f"Embedded Scout call {call.get('fixture_id')} policy RECOMMEND rendered as PASS decision_card")
+                if decision_card.get("decision_state") == "PASS":
+                    card_text = json.dumps(decision_card, ensure_ascii=False)
+                    for generic in (
+                        "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足",
+                        "Policy Engine 判定未形成可推荐条件。",
+                    ):
+                        if generic in card_text:
+                            fail(f"Embedded Scout call {call.get('fixture_id')} PASS decision_card uses generic reason")
+                    gates = policy_result.get("hard_gates") if isinstance(policy_result.get("hard_gates"), dict) else {}
+                    if gates.get("has_ah") is True and "AH 盘口缺失" in card_text:
+                        fail(f"Embedded Scout call {call.get('fixture_id')} PASS decision_card says AH missing despite has_ah=true")
+                    if not policy_result.get("failed_gates") and not policy_result.get("pass_reason"):
+                        fail(f"Embedded Scout call {call.get('fixture_id')} PASS decision_card lacks concrete policy root cause")
         if call.get("independent_edge") is not False:
             fail(f"Embedded Scout call {call.get('fixture_id')} independent_edge must be false")
         if "AI 解读" not in str(call.get("honesty_label", "")):

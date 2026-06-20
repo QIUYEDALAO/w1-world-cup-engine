@@ -957,7 +957,7 @@ def main() -> int:
         if token not in calibration_src:
             fail(f"calibration script missing token: {token}")
     market_debug_src = MARKET_DEBUG.read_text(encoding="utf-8")
-    for token in ("--fixture-id", "scout_file_exists", "cover_probability_model", "pass_reason", "dashboard_left_status_label", "dashboard_card_title", "dashboard_pass_reason_source", "dashboard_contains_forbidden_recommend_words"):
+    for token in ("--fixture-id", "scout_file_exists", "cover_probability_model", "pass_reason", "dashboard_left_status_label", "dashboard_card_title", "dashboard_pass_reason_source", "dashboard_contains_forbidden_recommend_words", "PASS_ROOT_CAUSE_AUDIT", "audit.stale_lock_override"):
         if token not in market_debug_src:
             fail(f"market debug script missing token: {token}")
     embed_src = SCOUT_EMBED.read_text(encoding="utf-8")
@@ -965,7 +965,7 @@ def main() -> int:
         if token not in embed_src:
             fail(f"Scout display embed must clean PASS/OBSERVE policy copy: {token}")
     decision_src = DECISION_CARD_MOD.read_text(encoding="utf-8")
-    for token in ("build_decision_card", "validation_errors", "REASON_LABELS", "RECOMMEND_CARD", "OBSERVE_CARD", "PASS_CARD"):
+    for token in ("build_decision_card", "validation_errors", "REASON_LABELS", "RECOMMEND_CARD", "OBSERVE_CARD", "PASS_CARD", "W1 score matrix 缺失", "当前为价值不足，不是盘口缺失"):
         if token not in decision_src:
             fail(f"decision card module missing protocol token: {token}")
 

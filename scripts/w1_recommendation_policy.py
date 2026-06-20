@@ -357,6 +357,10 @@ def _pick_text(bundle: dict[str, Any], side: str, handicap: float | None) -> str
 def detect_hard_gates(bundle: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
     market_state = validate_ah_market(bundle)
     edge = candidate.get("edge")
+    # Fair probability is a property of valid two-way AH prices. Do not mark it
+    # missing merely because score-matrix cover probability is unavailable and
+    # no candidate side can be selected.
+    has_market_fair_prob = bool(market_state["has_price"])
     failed: list[str] = []
     if not market_state["has_ah"]:
         failed.append("missing_ah")
@@ -364,7 +368,7 @@ def detect_hard_gates(bundle: dict[str, Any], candidate: dict[str, Any]) -> dict
         failed.append("missing_price")
     if not market_state["has_score_matrix"]:
         failed.append("missing_score_matrix")
-    if candidate.get("market_prob_fair") is None:
+    if not has_market_fair_prob:
         failed.append("missing_market_fair_probability")
     if edge is None or float(edge) < 0.015:
         failed.append("edge_below_threshold")
@@ -377,7 +381,7 @@ def detect_hard_gates(bundle: dict[str, Any], candidate: dict[str, Any]) -> dict
             "has_ah": market_state["has_ah"],
             "has_price": market_state["has_price"],
             "has_score_matrix": market_state["has_score_matrix"],
-            "has_market_fair_prob": candidate.get("market_prob_fair") is not None,
+            "has_market_fair_prob": has_market_fair_prob,
             "edge_sufficient": edge is not None and float(edge) >= 0.015,
             "ah_sign_valid": market_state["ah_sign_valid"],
             "dirty_data_free": market_state["dirty_data_free"],
@@ -585,18 +589,18 @@ def _pass_reason(failed: list[str]) -> str:
     if "invalid_ah_sign" in failed:
         return "AH 盘口符号异常，主队让球/客队受让方向不可信。"
     if "missing_ah" in failed:
-        return "AH 盘口缺失，不形成亚盘推荐。"
+        return "AH 盘口缺失，不形成亚盘放行条件。"
     if "missing_price" in failed:
-        return "AH 两边价格缺失或非法，不形成亚盘推荐。"
+        return "AH 两边价格缺失或非法，不形成亚盘放行条件。"
     if "missing_score_matrix" in failed:
-        return "W1 score matrix 覆盖概率缺失，不形成亚盘推荐。"
+        return "W1 score matrix 覆盖概率缺失，不形成亚盘放行条件。"
     if "missing_market_fair_probability" in failed:
-        return "市场公平概率缺失，不形成亚盘推荐。"
+        return "市场公平概率缺失，不形成亚盘放行条件。"
     if "edge_below_threshold" in failed:
-        return "两边校准前 edge 均不足 1.5pp，不形成亚盘推荐价值。"
+        return "两边校准前 edge 均不足 1.5pp，不形成亚盘放行条件。"
     if "dirty_data" in failed:
-        return "输入数据存在异常值，不形成亚盘推荐。"
-    return "hard gate 未通过，不形成亚盘推荐。"
+        return "输入数据存在异常值，不形成亚盘放行条件。"
+    return "hard gate 未通过，不形成亚盘放行条件。"
 
 
 def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:

@@ -124,11 +124,31 @@ def _calibration_cn(policy: dict) -> str:
 
 def _pass_reason_items(policy: dict) -> list[str]:
     rows: list[str] = []
+    gates = policy.get("hard_gates") if isinstance(policy.get("hard_gates"), dict) else {}
+    prob = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    failed = _list(policy.get("failed_gates"))
     if policy.get("pass_reason"):
         rows.append(_s(policy.get("pass_reason")))
-    failed = _list(policy.get("failed_gates"))
+    if "missing_score_matrix" in failed:
+        rows.append("W1 score matrix 缺失，无法计算 AH 覆盖概率。")
+        rows.append("当前不形成可验证放行条件，需等待 score matrix 生成或重新同步 fixture。")
+    if "missing_market_fair_probability" in failed:
+        rows.append("AH 盘口存在，但两边价格不足，market fair probability 未能计算。")
+        rows.append("需重新抓取完整 AH home/away price。")
+    if "edge_below_threshold" in failed:
+        edge = prob.get("edge_calibrated") if prob.get("edge_calibrated") is not None else prob.get("edge_raw")
+        rows.append(f"AH 数据可用，但 edge={_edge_points(edge)}，未达到 1.5pp 最低门槛。")
+        rows.append("当前为价值不足，不是盘口缺失。")
+    if "invalid_ah_sign" in failed:
+        rows.append("AH 盘口符号异常，主队让球/客队受让方向不可信。")
+    if "missing_ah" in failed:
+        rows.append("AH 盘口缺失，无法形成亚盘放行条件。")
+    if "missing_price" in failed:
+        rows.append("AH 两边价格缺失或非法，无法计算市场公平概率。")
     if failed:
         rows.append("未通过风控门槛：" + " / ".join(_s(x) for x in failed if _s(x)))
+    if gates.get("has_ah") is True and "missing_ah" in failed:
+        rows.append("系统检测到 AH 字段可用，盘口缺失不得作为本场主原因；请复核解析链路。")
     severity = _s(policy.get("gate_severity"))
     if severity and severity != "none":
         rows.append(f"门槛严重度={severity}，Policy Engine 未放行。")
@@ -139,10 +159,9 @@ def _pass_reason_items(policy: dict) -> list[str]:
     cal = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
     if cal.get("reason"):
         rows.append(_s(cal.get("reason")))
-    prob = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
     if prob.get("edge_raw") is not None or prob.get("edge_calibrated") is not None:
         rows.append(f"edge_raw={prob.get('edge_raw')}，edge_calibrated={prob.get('edge_calibrated')}。")
-    return rows or ["Policy Engine 判定未形成可推荐条件。", "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足。"]
+    return rows or ["Policy Engine 判定未形成可推荐条件；具体 gate 数据缺失，请复核 policy_result。"]
 
 
 def _reason_blocks_for_recommend(policy: dict, call: dict) -> list[dict]:

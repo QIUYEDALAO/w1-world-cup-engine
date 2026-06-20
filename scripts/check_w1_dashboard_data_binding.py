@@ -143,6 +143,14 @@ def main() -> int:
         for token in ("policy_result", "policy_enforced", "decision_card", "DISPLAY_CALL_KEYS", "enforce_policy_display_copy", "policy_reason_items", "W1CARD.build_decision_card"):
             if token not in embed_src:
                 fail(f"w1_scout_embed.py must include policy_result in display Scout calls: {token}")
+        decision_src = read(ROOT / "scripts/w1_decision_card.py")
+        for token in ("missing_score_matrix", "W1 score matrix 缺失", "edge_below_threshold", "当前为价值不足，不是盘口缺失"):
+            if token not in decision_src:
+                fail(f"decision card must expose concrete PASS root causes: {token}")
+        market_debug_src = read(ROOT / "scripts/w1_scout_market_debug.py")
+        for token in ("PASS_ROOT_CAUSE_AUDIT", "audit.pass_root_cause", "audit.stale_lock_override", "decision_card_source=policy_result"):
+            if token not in market_debug_src:
+                fail(f"market debug must expose PASS root cause audit: {token}")
         html_src = read(ROOT / "reports/dashboard/W1_VISUAL_DASHBOARD.html")
         for token in ("policyLeftStatusLabel", "AI PASS", "AI观察", "policyReasonItems(policy)", "候选方向 / 参考方向", "decision_card > policy_result > recommendation_text", "hasDecisionCard?decisionBlock"):
             if token not in html_src:

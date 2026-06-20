@@ -23,7 +23,17 @@ BUNDLE_SCRIPT = ROOT / "scripts/w1_scout_bundle.py"
 DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 CALLS = ROOT / "state/w1_scout_calls.json"
 SCHEDULER_STATUS = ROOT / "state/w1_scout_scheduler_status.json"
+SCOUT_LOCK = ROOT / "state/scout_lock.jsonl"
 ODDS_RAW = ROOT / "data/odds_snapshots/raw"
+STAGE_PRIORITY = {
+    "final_30m": 7,
+    "official_1h": 6,
+    "watch_2h": 5,
+    "watch_6h": 4,
+    "watch_12h": 3,
+    "early_24h": 2,
+    "early_48h": 1,
+}
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -107,10 +117,31 @@ def has_state_call(fid: str) -> bool:
 
 def state_call(fid: str) -> dict[str, Any]:
     payload = load_json(CALLS)
-    for call in payload.get("calls") or []:
-        if str(call.get("fixture_id") or "") == fid and isinstance(call, dict):
-            return call
-    return {}
+    rows = [call for call in payload.get("calls") or [] if isinstance(call, dict) and str(call.get("fixture_id") or "") == fid]
+    if not rows:
+        return {}
+    def key(call: dict[str, Any]) -> tuple[int, int, str]:
+        schema = 1 if str(call.get("schema_version") or "") == "scout_ah_recommendation_v2" else 0
+        stage = STAGE_PRIORITY.get(str(call.get("stage_id") or ""), 0)
+        generated = str(call.get("generated_at") or "")
+        return (schema, stage, generated)
+    return sorted(rows, key=key)[-1]
+
+
+def lock_call(fid: str) -> dict[str, Any]:
+    if not SCOUT_LOCK.is_file():
+        return {}
+    rows: list[dict[str, Any]] = []
+    for line in SCOUT_LOCK.read_text(encoding="utf-8").splitlines():
+        if fid not in line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if str(row.get("fixture_id") or "") == fid:
+            rows.append(row)
+    return rows[-1] if rows else {}
 
 
 def in_scheduler_pending(fid: str) -> bool:
@@ -286,6 +317,27 @@ def decision_card_contains_forbidden_words(card: dict[str, Any]) -> bool:
     return any(token in text for token in forbidden)
 
 
+def pass_root_cause(policy: dict[str, Any]) -> str:
+    decision = str(policy.get("decision_state") or "PASS")
+    if decision != "PASS":
+        return "not_applicable"
+    failed = policy.get("failed_gates") if isinstance(policy.get("failed_gates"), list) else []
+    for gate in (
+        "missing_ah",
+        "missing_price",
+        "missing_score_matrix",
+        "missing_market_fair_probability",
+        "edge_below_threshold",
+        "invalid_ah_sign",
+        "dirty_data",
+    ):
+        if gate in failed:
+            return gate
+    if failed:
+        return str(failed[0])
+    return "failed_gates_empty"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Inspect Scout market summary for one fixture.")
     parser.add_argument("--fixture-id", required=True)
@@ -312,6 +364,14 @@ def main() -> int:
     consistency, conflict_flags, visible_conflicts = consistency_for_fixture(fid, bundle, policy)
 
     rec = match_record(fid)
+    lock = lock_call(fid)
+    lock_inner = lock.get("call") if isinstance(lock.get("call"), dict) else {}
+    lock_policy = lock_inner.get("policy_result") if isinstance(lock_inner.get("policy_result"), dict) else {}
+    stale_lock_override = bool(
+        lock
+        and lock_policy
+        and lock_policy.get("decision_state") != policy.get("decision_state")
+    )
     stage_id, stage_label, due = current_stage(rec)
     has_call = has_state_call(fid)
     pending = in_scheduler_pending(fid)
@@ -395,6 +455,18 @@ def main() -> int:
     print(f"dashboard_contains_forbidden_recommend_words={str(decision_card_contains_forbidden_words(decision_card)).lower()}")
     print(f"dashboard_would_show_main_pick={str(show_main).lower()}")
     print(f"dashboard_would_show_candidate_only={str(show_candidate).lower()}")
+    print("PASS_ROOT_CAUSE_AUDIT")
+    print(f"audit.fixture_id={fid}")
+    print(f"audit.decision_state={fmt(policy.get('decision_state'))}")
+    print(f"audit.pass_root_cause={pass_root_cause(policy)}")
+    print(f"audit.has_ah={fmt((policy.get('hard_gates') or {}).get('has_ah'))}")
+    print(f"audit.has_market_fair_prob={fmt((policy.get('hard_gates') or {}).get('has_market_fair_prob'))}")
+    print(f"audit.has_score_matrix={fmt((policy.get('hard_gates') or {}).get('has_score_matrix'))}")
+    print(f"audit.failed_gates={json.dumps(policy.get('failed_gates') or [], ensure_ascii=False)}")
+    print(f"audit.dashboard_selected_call_generated_at={fmt(state.get('generated_at'))}")
+    print(f"audit.dashboard_selected_call_stage_id={fmt(state.get('stage_id'))}")
+    print("audit.decision_card_source=policy_result")
+    print(f"audit.stale_lock_override={str(stale_lock_override).lower()}")
     print(f"ai_policy_consistency={consistency}")
     print(f"ai_conflict_flags={json.dumps(conflict_flags, ensure_ascii=False)}")
     print(f"visible_text_policy_conflicts={json.dumps(visible_conflicts, ensure_ascii=False)}")
