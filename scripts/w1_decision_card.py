@@ -128,13 +128,18 @@ def _score_path_text(call: dict) -> str:
 def _movement_text(policy: dict) -> str:
     movement = policy.get("movement") if isinstance(policy.get("movement"), dict) else {}
     snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
+    history = policy.get("movement_history_status") if isinstance(policy.get("movement_history_status"), dict) else {}
     flags = _list(policy.get("movement_flags"))
     line_delta = movement.get("line_delta", "未提供")
     price_delta = movement.get("price_delta", "未提供")
     used = snapshots.get("snapshots_used")
     source = snapshots.get("snapshots_source") or "未提供"
-    flag_text = " / ".join(_s(x) for x in flags if _s(x)) or "无强反向标记"
-    return f"盘口变化：line_delta={line_delta}，price_delta={price_delta}，snapshots_used={used if used is not None else '未提供'}，source={source}，flags={flag_text}。"
+    visible_flags = ["历史盘口时间序列不足" if _s(x) in {"stale_or_missing_snapshots", "movement_history_insufficient"} else _s(x) for x in flags if _s(x)]
+    flag_text = " / ".join(dict.fromkeys(visible_flags)) or "无强反向标记"
+    history_text = ""
+    if history:
+        history_text = f" movement_history={history.get('movement_history_status', 'unknown')}，snapshot_type={history.get('snapshot_type', 'unknown')}。"
+    return f"盘口变化：line_delta={line_delta}，price_delta={price_delta}，snapshots_used={used if used is not None else '未提供'}，source={source}，flags={flag_text}。{history_text}"
 
 
 def _recommend_core(policy: dict, call: dict) -> str:
@@ -143,11 +148,13 @@ def _recommend_core(policy: dict, call: dict) -> str:
     grade_caps = _list(policy.get("grade_caps_applied"))
     calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
     cal = _s(prob.get("calibration_status") or calibration.get("status"), "untrained")
+    history = policy.get("movement_history_status") if isinstance(policy.get("movement_history_status"), dict) else {}
+    history_cap = "；当前盘口可用，但历史盘口时间序列不足，movement 维度不加分" if history.get("movement_history_status") == "insufficient" else ""
     cap_text = "；校准未训练，等级按规则受限" if cal == "untrained" or grade_caps else ""
     return (
         f"{pick} 具备盘口保护，W1覆盖率 {_pct(prob.get('cover_prob_calibrated') if prob.get('cover_prob_calibrated') is not None else prob.get('cover_prob_raw'))}"
         f" 高于市场公平概率 {_pct(prob.get('market_prob_fair'))}，edge={_edge_points(prob.get('edge_calibrated') if prob.get('edge_calibrated') is not None else prob.get('edge_raw'))}。"
-        f"{_score_path_text(call)} 支持当前受让/让球方向进入推荐池{cap_text}。"
+        f"{_score_path_text(call)} 支持当前受让/让球方向进入推荐池{history_cap}{cap_text}。"
     )
 
 
@@ -224,6 +231,14 @@ def _reason_blocks_for_recommend(policy: dict, call: dict) -> list[dict]:
     pick = _s(policy.get("main_ah_pick") or policy.get("candidate_ah_pick"), "候选方向")
     prob = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
     movement = _s(policy.get("movement_summary_cn"), "盘口变化未触发反向风险。")
+    history = policy.get("movement_history_status") if isinstance(policy.get("movement_history_status"), dict) else {}
+    market_status = policy.get("market_data_status") if isinstance(policy.get("market_data_status"), dict) else {}
+    if history.get("movement_history_status") == "insufficient":
+        current_status = "当前盘口可用" if market_status.get("has_current_ah") else "当前 AH 盘口不可用"
+        movement = (
+            f"{current_status}；但历史盘口时间序列不足，暂无法验证早盘到临场是否有退盘/升水，"
+            "因此 movement 维度不加分，等级上限受限为 B+。"
+        )
     score = _score_path(call, True)
     score_text = " / ".join([score["primary"], *score["alternates"]]).strip(" /") or "比分路径待确认"
     rows = [
@@ -320,7 +335,7 @@ def build_decision_card(scout_call: dict) -> dict:
             "score_path_cn": _score_path(scout_call, True),
             "ou_aux_cn": _s(text.get("ou_aux_cn") or ah.get("ou_pick_cn"), "大小球仅作辅助判断。"),
             "invalidation_conditions_cn": _recommend_invalidation(policy, scout_call),
-            "action_status_cn": "当前可进入推荐池，但仍需临场盘口确认。",
+            "action_status_cn": "当前可进入 B+ 推荐池；当前盘口可用，但缺少完整盘口时间序列，需临场复核退盘/升水。" if (policy.get("movement_history_status") or {}).get("movement_history_status") == "insufficient" else "当前可进入推荐池，但仍需临场盘口确认。",
             "display_rules": {"show_as_main_pick": True, "show_score_path": True, "show_reassess_triggers": False, "show_failed_gates": False},
         })
     elif decision == "OBSERVE":

@@ -358,6 +358,8 @@ def main() -> int:
     calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
     snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
     movement = policy.get("movement") if isinstance(policy.get("movement"), dict) else {}
+    market_data_status = policy.get("market_data_status") if isinstance(policy.get("market_data_status"), dict) else {}
+    movement_history_status = policy.get("movement_history_status") if isinstance(policy.get("movement_history_status"), dict) else {}
     snapshots_count, snapshots_source = odds_snapshots_for_fixture(fid)
     snapshots_count = int(snapshots.get("snapshots_count") or snapshots_count or 0)
     snapshots_source = str(snapshots.get("snapshots_source") or snapshots_source or "missing")
@@ -403,6 +405,20 @@ def main() -> int:
     print(f"cover_probability_model={fmt(ah.get('cover_probability_model'))}")
     print(f"cover_probability_market={fmt(ah.get('cover_probability_market'))}")
     print(f"cover_edge={fmt(ah.get('cover_edge'))}")
+    print("MARKET_DATA_STATUS")
+    print(f"has_current_ah={fmt(market_data_status.get('has_current_ah'))}")
+    print(f"has_current_ou={fmt(market_data_status.get('has_current_ou'))}")
+    print(f"has_current_1x2={fmt(market_data_status.get('has_current_1x2'))}")
+    print(f"market_data_source={fmt(market_data_status.get('market_data_source'))}")
+    print(f"bookmaker_count={fmt(market_data_status.get('bookmaker_count'))}")
+    print("MOVEMENT_HISTORY_STATUS")
+    print(f"has_movement_history={fmt(movement_history_status.get('has_movement_history'))}")
+    print(f"snapshots_count={fmt(movement_history_status.get('snapshots_count'))}")
+    print(f"snapshots_used={fmt(movement_history_status.get('snapshots_used'))}")
+    print(f"snapshots_source={fmt(movement_history_status.get('snapshots_source'))}")
+    print(f"snapshot_type={fmt(movement_history_status.get('snapshot_type'))}")
+    print(f"movement_history_status={fmt(movement_history_status.get('movement_history_status'))}")
+    print(f"movement_history_reason={fmt(movement_history_status.get('reason'))}")
     print(f"snapshots_count={snapshots_count}")
     print(f"snapshots_source={snapshots_source}")
     print(f"snapshots_used={fmt(snapshots.get('snapshots_used'))}")

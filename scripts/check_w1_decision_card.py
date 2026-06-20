@@ -91,6 +91,8 @@ def main() -> int:
         policy = fixture_1489393_display.get("policy_result") if isinstance(fixture_1489393_display.get("policy_result"), dict) else {}
         card = fixture_1489393_display.get("decision_card") if isinstance(fixture_1489393_display.get("decision_card"), dict) else {}
         gates = policy.get("hard_gates") if isinstance(policy.get("hard_gates"), dict) else {}
+        market_status = policy.get("market_data_status") if isinstance(policy.get("market_data_status"), dict) else {}
+        history_status = policy.get("movement_history_status") if isinstance(policy.get("movement_history_status"), dict) else {}
         if policy.get("decision_state") != "RECOMMEND" or policy.get("recommendation_grade") != "B+":
             fail("fixture 1489393 display_call must resolve current state to RECOMMEND/B+, not old PASS")
         if card.get("card_type") != "RECOMMEND_CARD":
@@ -98,6 +100,14 @@ def main() -> int:
         for gate in ("has_ah", "has_market_fair_prob", "has_score_matrix"):
             if gates.get(gate) is not True:
                 fail(f"fixture 1489393 display_call missing {gate}=true")
+        if market_status.get("has_current_ah") is not True:
+            fail("fixture 1489393 must distinguish current AH as available")
+        if history_status.get("movement_history_status") == "insufficient":
+            text = json.dumps(card, ensure_ascii=False)
+            if "历史盘口时间序列不足" not in text:
+                fail("fixture 1489393 insufficient movement history must use explicit history wording")
+            if "盘口快照不足" in text or "盘口数据不足" in text or "盘口缺失" in text:
+                fail("fixture 1489393 current AH available must not use ambiguous/missing market wording")
     if checked == 0:
         print("SKIP: missing runtime input with policy_result calls")
         return 0

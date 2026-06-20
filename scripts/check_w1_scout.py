@@ -597,6 +597,28 @@ def validate_call(c: dict, policy: dict) -> list[str]:
             errs.append("policy_result.movement_flags must be list")
         if not str(policy_result.get("movement_summary_cn") or "").strip():
             errs.append("policy_result.movement_summary_cn must be present")
+        market_data_status = policy_result.get("market_data_status")
+        if not isinstance(market_data_status, dict):
+            errs.append("policy_result.market_data_status must be present")
+        else:
+            for key in ("has_current_ah", "has_current_ou", "has_current_1x2", "market_data_source", "bookmaker_count"):
+                if key not in market_data_status:
+                    errs.append(f"policy_result.market_data_status.{key} missing")
+        movement_history_status = policy_result.get("movement_history_status")
+        if not isinstance(movement_history_status, dict):
+            errs.append("policy_result.movement_history_status must be present")
+        else:
+            for key in ("has_movement_history", "snapshots_count", "snapshots_used", "snapshots_source", "snapshot_type", "movement_history_status", "reason"):
+                if key not in movement_history_status:
+                    errs.append(f"policy_result.movement_history_status.{key} missing")
+            if movement_history_status.get("movement_history_status") == "insufficient":
+                if "movement_history_insufficient" not in (policy_result.get("movement_flags") or []):
+                    errs.append("insufficient movement history must flag movement_history_insufficient")
+                if "历史盘口时间序列不足" not in str(policy_result.get("movement_summary_cn") or ""):
+                    errs.append("insufficient movement history summary must use 历史盘口时间序列不足 wording")
+            if market_data_status.get("has_current_ah") is True and movement_history_status.get("movement_history_status") == "insufficient":
+                if "盘口缺失" in str(policy_result.get("movement_summary_cn") or "") or "盘口数据不足" in str(policy_result.get("movement_summary_cn") or ""):
+                    errs.append("current AH available must not be described as 盘口缺失/盘口数据不足")
         calibration = policy_result.get("calibration")
         probability = policy_result.get("probability") if isinstance(policy_result.get("probability"), dict) else {}
         if not isinstance(calibration, dict):
@@ -732,6 +754,12 @@ def normalize_runtime_call_for_validation(call: dict, bundle: dict | None) -> di
     fid = str(call.get("fixture_id") or (bundle or {}).get("fixture_id") or "")
     try:
         normalized = analyst_mod.harden_call(deepcopy(call), fid, deepcopy(bundle) if bundle else None)
+        if isinstance(bundle, dict):
+            try:
+                normalized["policy_result"] = W1REC.build_policy_result(bundle)
+                normalized["policy_enforced"] = True
+            except Exception:
+                pass
         if call.get("schema_version") != "scout_ah_recommendation_v2":
             normalized["_legacy_runtime_normalized"] = True
             policy_result = normalized.get("policy_result") if isinstance(normalized.get("policy_result"), dict) else {}

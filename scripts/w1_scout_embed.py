@@ -92,6 +92,7 @@ POLICY_FALLBACK_PASS_REASONS = (
 sys.path.insert(0, str(ROOT / "scripts"))
 import w1_scout_analyst as W1ANALYST  # noqa: E402
 import w1_decision_card as W1CARD  # noqa: E402
+import w1_recommendation_policy as W1REC  # noqa: E402
 
 
 def read_reviews() -> list[dict]:
@@ -143,6 +144,12 @@ def display_call(call: dict) -> dict:
     out = {key: copy.deepcopy(value) for key, value in working.items() if key in DISPLAY_CALL_KEYS}
     if out.get("safety_label"):
         out["safety_label"] = clean_visible_text(out.get("safety_label")).replace("非资金指令", "非操作指令")
+    if isinstance(bundle, dict):
+        try:
+            out["policy_result"] = W1REC.build_policy_result(bundle)
+            out["policy_enforced"] = True
+        except Exception:
+            pass
     enforce_policy_display_copy(out)
     if isinstance(out.get("policy_result"), dict):
         out["decision_card"] = W1CARD.build_decision_card(out)

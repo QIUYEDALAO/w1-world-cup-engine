@@ -421,6 +421,33 @@ def assert_scout_embed(text: str) -> None:
             for key in ("hard_gates", "failed_gates", "movement_flags"):
                 if key not in policy_result:
                     fail(f"Embedded Scout call {call.get('fixture_id')} policy_result.{key} missing")
+            market_data_status = policy_result.get("market_data_status") if isinstance(policy_result.get("market_data_status"), dict) else {}
+            movement_history_status = policy_result.get("movement_history_status") if isinstance(policy_result.get("movement_history_status"), dict) else {}
+            if not market_data_status:
+                fail(f"Embedded Scout call {call.get('fixture_id')} policy_result.market_data_status missing")
+            if not movement_history_status:
+                fail(f"Embedded Scout call {call.get('fixture_id')} policy_result.movement_history_status missing")
+            if market_data_status.get("has_current_ah") is True:
+                visible_policy = json.dumps({
+                    "decision_card": call.get("decision_card"),
+                    "recommendation_text": ((call.get("read") or {}).get("recommendation_text") if isinstance(call.get("read"), dict) else {}),
+                    "movement_summary_cn": policy_result.get("movement_summary_cn"),
+                }, ensure_ascii=False)
+                for bad in ("盘口缺失", "盘口数据不足"):
+                    if bad in visible_policy:
+                        fail(f"Embedded Scout call {call.get('fixture_id')} has current AH but visible text says {bad}")
+            if movement_history_status.get("movement_history_status") == "insufficient":
+                if "movement_history_insufficient" not in (policy_result.get("movement_flags") or []):
+                    fail(f"Embedded Scout call {call.get('fixture_id')} insufficient movement history must flag movement_history_insufficient")
+                visible_policy = json.dumps({
+                    "decision_card": call.get("decision_card"),
+                    "recommendation_text": ((call.get("read") or {}).get("recommendation_text") if isinstance(call.get("read"), dict) else {}),
+                    "movement_summary_cn": policy_result.get("movement_summary_cn"),
+                }, ensure_ascii=False)
+                if "历史盘口时间序列不足" not in visible_policy:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} insufficient movement history must say 历史盘口时间序列不足")
+                if "盘口快照不足" in visible_policy:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} must not use ambiguous 盘口快照不足 wording")
             decision_card = call.get("decision_card")
             if not isinstance(decision_card, dict):
                 fail(f"Embedded Scout call {call.get('fixture_id')} missing decision_card")

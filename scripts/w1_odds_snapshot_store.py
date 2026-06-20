@@ -224,6 +224,37 @@ def fixture_snapshots(fid: str, bundle: dict[str, Any] | None = None) -> dict[st
     snapshots.sort(key=lambda row: row.get("_dt") or datetime.min.replace(tzinfo=timezone.utc))
     for row in snapshots:
         row.pop("_dt", None)
+    if not snapshots and isinstance(bundle, dict):
+        market = bundle.get("market") if isinstance(bundle.get("market"), dict) else {}
+        ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+        home_handicap = _num(ah.get("home_handicap", market.get("ah_line")))
+        away_handicap = _num(ah.get("away_handicap"))
+        if away_handicap is None and home_handicap is not None:
+            away_handicap = -home_handicap
+        home_price = _num(ah.get("home_price", market.get("ah_home_price")))
+        away_price = _num(ah.get("away_price", market.get("ah_away_price")))
+        captured_at = ah.get("odds_updated_at") or market.get("odds_updated_at")
+        if home_handicap is not None and away_handicap is not None and home_price is not None and away_price is not None:
+            dt = _parse_dt(captured_at)
+            snapshots.append({
+                "fixture_id": str(fid),
+                "stage_id": "current_overlay",
+                "captured_at": dt.isoformat().replace("+00:00", "Z") if dt else str(captured_at or ""),
+                "home_team": bundle.get("home"),
+                "away_team": bundle.get("away"),
+                "home_handicap": round(float(home_handicap), 3),
+                "away_handicap": round(float(away_handicap), 3),
+                "home_price": round(float(home_price), 3),
+                "away_price": round(float(away_price), 3),
+                "bookmaker_count": int(ah.get("bookmaker_count") or market.get("bookmaker_count") or 0),
+                "source": "data/scout_current_odds",
+                "snapshot_type": "current_only",
+            })
+            return {
+                "snapshots": snapshots,
+                "raw_count": 1,
+                "source": "data/scout_current_odds",
+            }
     return {
         "snapshots": snapshots,
         "raw_count": raw_ah_count or len(raw_rows),

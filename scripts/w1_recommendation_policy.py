@@ -209,6 +209,22 @@ def _empty_result(config: dict[str, Any]) -> dict[str, Any]:
         "failed_gates": [],
         "gate_severity": "none",
         "movement_flags": [],
+        "market_data_status": {
+            "has_current_ah": False,
+            "has_current_ou": False,
+            "has_current_1x2": False,
+            "market_data_source": "missing",
+            "bookmaker_count": 0,
+        },
+        "movement_history_status": {
+            "has_movement_history": False,
+            "snapshots_count": 0,
+            "snapshots_used": 0,
+            "snapshots_source": "missing",
+            "snapshot_type": "missing",
+            "movement_history_status": "insufficient",
+            "reason": "当前盘口状态未知，无法验证早盘到临场变化。",
+        },
         "snapshots": {
             "snapshots_count": 0,
             "snapshots_source": "missing",
@@ -278,6 +294,29 @@ def _ah_market(bundle: dict[str, Any]) -> dict[str, Any]:
         "odds_updated_at": ah.get("odds_updated_at") or market.get("odds_updated_at"),
         "snapshots_count": _num(ah.get("snapshots_count", market.get("odds_snapshots_count"))),
         "snapshots_source": ah.get("snapshots_source") or market.get("odds_snapshots_source"),
+    }
+
+
+def market_data_status(bundle: dict[str, Any], ah_state: dict[str, Any] | None = None) -> dict[str, Any]:
+    market = bundle.get("market") if isinstance(bundle.get("market"), dict) else {}
+    ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
+    ou = market.get("ou") if isinstance(market.get("ou"), dict) else {}
+    one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
+    ah_state = ah_state or validate_ah_market(bundle)
+    has_ou = _num(ou.get("line", market.get("ou_line"))) is not None and _num(ou.get("over_price", market.get("over_price"))) is not None and _num(ou.get("under_price", market.get("under_price"))) is not None
+    has_1x2 = any(_num(one_x_two.get(key)) is not None for key in ("p_home", "home_win", "home_odds")) or all(_num(market.get(key)) is not None for key in ("p_home", "p_draw", "p_away"))
+    bookmaker_count = 0
+    for value in (ah.get("bookmaker_count"), ou.get("bookmaker_count"), one_x_two.get("bookmaker_count"), market.get("bookmaker_count")):
+        try:
+            bookmaker_count = max(bookmaker_count, int(value or 0))
+        except (TypeError, ValueError):
+            pass
+    return {
+        "has_current_ah": bool(ah_state.get("has_ah") and ah_state.get("has_price")),
+        "has_current_ou": bool(has_ou),
+        "has_current_1x2": bool(has_1x2),
+        "market_data_source": str(ah.get("source") or market.get("market_source") or one_x_two.get("source") or "missing"),
+        "bookmaker_count": bookmaker_count,
     }
 
 
@@ -456,6 +495,27 @@ def _snapshot_meta(summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _movement_history_status(summary: dict[str, Any], snapshots: list[dict[str, Any]], min_snapshots: int) -> dict[str, Any]:
+    used = len(snapshots)
+    source = str(summary.get("snapshots_source") or "missing")
+    snapshot_type = "history" if used >= min_snapshots else "current_only" if source == "data/scout_current_odds" or (used == 1 and str((snapshots[0] or {}).get("snapshot_type") or "") == "current_only") else "partial_history" if used > 0 else "missing"
+    sufficient = used >= min_snapshots and snapshot_type == "history"
+    reason = (
+        "盘口时间序列充足，可验证早盘到临场变化。"
+        if sufficient
+        else "当前盘口可用，但缺少多阶段历史快照，无法验证早盘到临场变化。"
+    )
+    return {
+        "has_movement_history": bool(sufficient),
+        "snapshots_count": int(summary.get("snapshots_count") or 0),
+        "snapshots_used": int(used),
+        "snapshots_source": source,
+        "snapshot_type": snapshot_type,
+        "movement_history_status": "sufficient" if sufficient else "insufficient",
+        "reason": reason,
+    }
+
+
 def analyze_movement(bundle: dict[str, Any], selected_side: str, config: dict[str, Any]) -> dict[str, Any]:
     movement_cfg = config.get("movement_policy") or {}
     min_snapshots = int(movement_cfg.get("min_snapshots", 2))
@@ -464,6 +524,7 @@ def analyze_movement(bundle: dict[str, Any], selected_side: str, config: dict[st
     fid = str(bundle.get("fixture_id") or "")
     summary = SNAPSHOTS.summarize_fixture(fid, bundle)
     snapshots = summary.get("snapshots") or []
+    history_status = _movement_history_status(summary, snapshots, min_snapshots)
     flags: list[str] = []
     stale_reason = None
     if len(snapshots) < min_snapshots:
@@ -479,9 +540,10 @@ def analyze_movement(bundle: dict[str, Any], selected_side: str, config: dict[st
     if any(not str((row or {}).get("captured_at") or "").strip() for row in snapshots):
         stale_reason = stale_reason or "captured_at missing"
     if stale_reason:
-        flags.append("stale_or_missing_snapshots")
+        flags.extend(["stale_or_missing_snapshots", "movement_history_insufficient"])
         return {
             "snapshots": _snapshot_meta(summary),
+            "movement_history_status": history_status,
             "movement": {
                 "selected_side": selected_side,
                 "first_selected_handicap": _round(first_line),
@@ -492,7 +554,7 @@ def analyze_movement(bundle: dict[str, Any], selected_side: str, config: dict[st
                 "price_delta": None if first_price is None or latest_price is None else _round(latest_price - first_price, 3),
             },
             "movement_flags": flags,
-            "movement_summary_cn": "盘口快照不足，无法验证早盘到临场变化；在未校准状态下，推荐等级最高限制为 B+。",
+            "movement_summary_cn": "当前盘口可用；但历史盘口时间序列不足，无法验证早盘到临场变化，因此 movement 维度不加分，并在未校准状态下限制等级上限。",
         }
     line_delta = float(latest_line) - float(first_line)
     price_delta = float(latest_price) - float(first_price)
@@ -516,8 +578,8 @@ def analyze_movement(bundle: dict[str, Any], selected_side: str, config: dict[st
                 flags.append("reverse_move_late")
 
     flags = list(dict.fromkeys(flags))
-    if "stale_or_missing_snapshots" in flags:
-        summary_cn = "盘口快照不足，无法验证早盘到临场变化；在未校准状态下，推荐等级最高限制为 B+。"
+    if "stale_or_missing_snapshots" in flags or "movement_history_insufficient" in flags:
+        summary_cn = "当前盘口可用；但历史盘口时间序列不足，无法验证早盘到临场变化，因此 movement 维度不加分，并在未校准状态下限制等级上限。"
     elif not flags or set(flags).issubset({"selected_side_steam", "line_moved_with_pick"}):
         summary_cn = (
             f"盘口快照充足，候选方向 {selected_side or 'unknown'} 未出现退盘；"
@@ -530,6 +592,7 @@ def analyze_movement(bundle: dict[str, Any], selected_side: str, config: dict[st
         )
     return {
         "snapshots": _snapshot_meta(summary),
+        "movement_history_status": history_status,
         "movement": {
             "selected_side": selected_side,
             "first_selected_handicap": _round(first_line),
@@ -607,6 +670,7 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
     config = config or load_policy_config()
     result = _empty_result(config)
     ah_state = validate_ah_market(bundle)
+    result["market_data_status"] = market_data_status(bundle, ah_state)
     result["market"].update({
         "home_handicap": _round(ah_state.get("home_handicap")),
         "away_handicap": _round(ah_state.get("away_handicap")),
@@ -674,13 +738,14 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
     result["failed_gates"] = failed_info["failed_gates"]
     result["gate_severity"] = "hard" if result["failed_gates"] else "none"
     result["movement_flags"] = movement_flags
+    result["movement_history_status"] = movement_info.get("movement_history_status") or result["movement_history_status"]
     result["snapshots"] = movement_info["snapshots"]
     result["movement"] = movement_info["movement"]
     result["movement_summary_cn"] = movement_info["movement_summary_cn"]
     result["conflict_flags"] = movement_conflicts
     result["grade_caps_applied"] = movement_caps + caps
     result["reassess_triggers"] = _clean_list([
-        "等待盘口快照后复核退盘/升水" if "stale_or_missing_snapshots" in movement_flags else None,
+        "补齐历史盘口时间序列后复核退盘/升水" if "stale_or_missing_snapshots" in movement_flags or "movement_history_insufficient" in movement_flags else None,
         "首发确认后复核" if context["lineup_unconfirmed"] else None,
     ])
     if decision == "PASS":
