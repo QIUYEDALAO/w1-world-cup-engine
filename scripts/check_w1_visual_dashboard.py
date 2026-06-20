@@ -410,6 +410,11 @@ def assert_scout_embed(text: str) -> None:
             if not (market_has_terms or market_missing):
                 fail(f"Embedded Scout call {call.get('fixture_id')} market_expert_script_cn must use market-language terms or explicit missing-data downgrade")
         visible_chunks = []
+        layers = read.get("script_layers")
+        if isinstance(layers, dict):
+            for key in ("base_script_cn", "tail_script_cn", "reverse_script_cn", "market_script_cn"):
+                if layers.get(key):
+                    visible_chunks.append(str(layers.get(key)))
         for key in ("tilt_cn", "score_band_cn", "vs_market_cn", "regular_script_cn", "high_variance_tail_script_cn", "market_expert_script_cn"):
             if read.get(key):
                 visible_chunks.append(str(read.get(key)))
@@ -590,6 +595,11 @@ def assert_first_screen(text: str) -> None:
         "high_variance_tail_script_cn",
         "reverse_risks_cn",
         "market_expert_script_cn",
+        "script_layers",
+        "base_script_cn",
+        "tail_script_cn",
+        "reverse_script_cn",
+        "market_script_cn",
     ):
         if need not in scout:
             fail(f"AI-first scout card missing token: {need}")

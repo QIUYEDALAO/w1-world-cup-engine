@@ -2,13 +2,19 @@
   "policy_version": "W1_SCOUT_READ_REVIEW_V1",
   "stage": "W1_SCOUT",
   "purpose": "AI 分析师闭环策略:赛前五维解读→不可变锁定→赛后复盘→赛季自我校准。定位是理解/复盘工具,不是预测器或投注 selector。",
-
   "leagues": [
-    {"league": 1, "season": 2026, "name": "FIFA World Cup"}
+    {
+      "league": 1,
+      "season": 2026,
+      "name": "FIFA World Cup"
+    }
   ],
-
   "read_required_fields": [
-    "fixture_id", "read", "data_readiness", "honesty_label", "independent_edge"
+    "fixture_id",
+    "read",
+    "data_readiness",
+    "honesty_label",
+    "independent_edge"
   ],
   "read_subfields": {
     "read": [
@@ -24,18 +30,52 @@
       "regular_script_cn",
       "high_variance_tail_script_cn",
       "reverse_risks_cn",
-      "market_expert_script_cn"
+      "market_expert_script_cn",
+      "script_layers"
     ]
   },
   "evidence_contract": {
     "min_items": 2,
-    "sources": ["form", "xg_roll", "lineups", "injuries", "market", "score_matrix", "rest_days", "standings", "h2h", "environment", "availability"],
-    "availability": ["full", "partial", "weak_sample", "missing"],
-    "weight": ["high", "medium", "low"],
-    "required_fields": ["claim", "source", "fields", "availability", "weight"]
+    "sources": [
+      "form",
+      "xg_roll",
+      "lineups",
+      "injuries",
+      "market",
+      "score_matrix",
+      "rest_days",
+      "standings",
+      "h2h",
+      "environment",
+      "availability",
+      "market.ah",
+      "market.ou",
+      "market.1x2"
+    ],
+    "availability": [
+      "full",
+      "partial",
+      "weak_sample",
+      "missing"
+    ],
+    "weight": [
+      "high",
+      "medium",
+      "low"
+    ],
+    "required_fields": [
+      "claim",
+      "source",
+      "fields",
+      "availability",
+      "weight"
+    ]
   },
-  "readiness_levels": ["高", "中", "低"],
-
+  "readiness_levels": [
+    "高",
+    "中",
+    "低"
+  ],
   "honesty": {
     "honesty_label_required_substr": "AI 解读",
     "honesty_label_exact": "AI 解读·非预测·非推介·可能错",
@@ -44,33 +84,63 @@
     "pure_market_translation_rejected": true,
     "scoreline_must_be_band_language": true
   },
-
   "review": {
     "path": "state/scout_reviews.jsonl",
     "prematch_digest_required": true,
     "only_finished_fixtures": true,
     "prompt_rule_cn": "赛前解读原样对照实际结果和赛后统计,诚实说明读对/读漏;不许嘴硬,不许把赛后事实包装成赛前判断。"
   },
-
   "calibration": {
     "path": "state/scout_calibration.json",
-    "direction_buckets": ["明显占优", "小优", "势均"],
+    "direction_buckets": [
+      "明显占优",
+      "小优",
+      "势均"
+    ],
     "note_cn": "赛季级自我体检与校准,不是战胜市场的证据。"
   },
-
   "forbidden_terms": [
-    "稳赢", "稳赚", "必中", "必胜", "保证命中", "保证", "资金", "下注", "投注", "梭哈",
-    "重仓", "倍投", "加仓", "必红", "包中",
-    "盈利承诺", "无风险", "打败市场", "战胜市场", "独立优势", "预测器", "敢说敢干",
-    "FADE_MARKET", "LEAN_DIFFERENT", "conviction"
+    "稳赢",
+    "稳赚",
+    "必中",
+    "必胜",
+    "保证命中",
+    "保证",
+    "下注",
+    "投注",
+    "梭哈",
+    "重仓",
+    "倍投",
+    "加仓",
+    "必红",
+    "包中",
+    "盈利承诺",
+    "无风险",
+    "打败市场",
+    "战胜市场",
+    "独立优势",
+    "预测器",
+    "敢说敢干",
+    "FADE_MARKET",
+    "LEAN_DIFFERENT",
+    "conviction",
+    "必穿",
+    "资金建议",
+    "资金化推介"
   ],
-
   "leakage": {
     "bundle_prematch_only": true,
-    "forbidden_postmatch_fields": ["actual_score", "fulltime", "result_goals", "home_goals_actual", "away_goals_actual", "post_match", "ft_score"],
+    "forbidden_postmatch_fields": [
+      "actual_score",
+      "fulltime",
+      "result_goals",
+      "home_goals_actual",
+      "away_goals_actual",
+      "post_match",
+      "ft_score"
+    ],
     "rule_cn": "scout_bundle 与赛前解读只用赛前可得;当场赛后统计绝不进入赛前解读;赛果只在审计和复盘阶段对照。"
   },
-
   "growth": {
     "track_record_path": "state/scout_track_record.json",
     "lessons_path": "state/scout_lessons.md",
@@ -78,7 +148,6 @@
     "calibrate_tone": true,
     "note_cn": "每次解读前先读 track_record + lessons + calibration,用于控制语气与数据充分度,不是重训权重。"
   },
-
   "lock_audit": {
     "lock_path": "state/scout_lock.jsonl",
     "audit_path": "state/scout_audit.jsonl",
@@ -87,7 +156,6 @@
     "score_vs_market": false,
     "note_cn": "每个 fixture 只锁第一次合法赛前解读;锁定晚于开赛拒绝。赛后审计衡量读法是否校准,不是证明 edge。"
   },
-
   "redlines": [
     "允许联网抓取(由 pipeline 完成);SCOUT 不改 w1_score_engine/DEFAULT_RHO/build λ·矩阵 的市场底座",
     "不造假;赛前解读只用赛前数据;赛后只作审计和复盘",

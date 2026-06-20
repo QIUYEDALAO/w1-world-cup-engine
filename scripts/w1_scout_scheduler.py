@@ -275,12 +275,14 @@ def run_stage(item: dict[str, Any], dry_run: bool) -> dict[str, Any]:
     if dry_run:
         return {"fixture_id": fid, "stage_id": sid, "result": "dry_run", "message_cn": "dry-run 不抓取、不调用 AI、不写文件"}
     env = os.environ.copy()
+    style_mode = "aggressive_script" if sid in {"official_1h", "final_30m"} else env.get("W1_SCOUT_STYLE_MODE", "balanced")
     env.update({
         "W1_SCOUT_FORCE_FIXTURE": fid,
         "W1_SCOUT_SCHEDULE_STAGE": sid,
         "W1_SCOUT_SCHEDULE_STAGE_LABEL": str(stage.get("label_cn") or sid),
         "W1_SCOUT_FORCE_HASH": f"scheduler-{fid}-{sid}-{int(time.time())}",
         "W1_SCOUT_FORCE_REFRESH": "1",
+        "W1_SCOUT_STYLE_MODE": style_mode,
         "W1_SCOUT_SKIP_FETCH": "0",
         "W1_SCOUT_DISABLE_MEMORY_COMMIT": env.get("W1_SCOUT_DISABLE_MEMORY_COMMIT", "1"),
         "W1_SCOUT_AUTOPILOT_MAX_FIXTURES_PER_RUN": "1",

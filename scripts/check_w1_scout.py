@@ -15,9 +15,11 @@ import hashlib
 import re
 import sys
 from pathlib import Path
+from copy import deepcopy
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from w1_results_overlay import load_results_map  # noqa: E402
+import w1_scout_analyst as analyst_mod  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_P = ROOT / "config/w1_scout_policy.json"
@@ -53,6 +55,7 @@ RECOMMENDATION_CARD_KEYS = (
     "confidence_cn",
 )
 RECOMMENDATION_CARD_OPTIONAL_KEYS = ("data_status_cn",)
+SCRIPT_LAYER_KEYS = ("base_script_cn", "tail_script_cn", "reverse_script_cn", "market_script_cn")
 AH_CARD_KEYS = (
     "schema_version",
     "fixture_id",
@@ -79,7 +82,7 @@ AH_CARD_KEYS = (
     "final_action_cn",
 )
 FUNDS_FORBIDDEN_TOKENS = ("下注", "重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中")
-PROMISE_FORBIDDEN_TOKENS = ("必穿", "稳赢", "包赢")
+PROMISE_FORBIDDEN_TOKENS = ("必穿", "稳赢", "包赢", "保证命中", "资金建议")
 ENGLISH_TEAM_TOKENS = ("Australia", "Türkiye", "Turkey", "South Korea", "Mexico", "USA")
 RECOMMENDATION_SOURCE_TOKENS = ("来源：市场", "来源：市场赔率", "来源：W1模型", "来源：score matrix", "来源：缺失", "来源：盘口")
 VISIBLE_FORBIDDEN_TOKENS = (
@@ -113,6 +116,8 @@ VISIBLE_FORBIDDEN_TOKENS = (
     "打穿概率",
     "打穿大球",
     "深穿",
+    "暂无若干",
+    "TBD",
 )
 WEAK_OVERCLAIM_TOKENS = ("概率较高", "确定", "明显", "强烈", "零封概率较高", "大胜概率较高", "明显打穿", "穿盘路径明确")
 MARKET_MISSING_TEXT = "市场赔率数据缺失，暂时无法对比市场倾向。"
@@ -157,6 +162,9 @@ def visible_text_chunks(read: dict) -> list[str]:
     evidence_rows = read.get("evidence")
     if isinstance(evidence_rows, list):
         chunks.extend(str(row.get("claim") or "") for row in evidence_rows if isinstance(row, dict))
+    layers = read.get("script_layers")
+    if isinstance(layers, dict):
+        chunks.extend(str(layers.get(key) or "") for key in SCRIPT_LAYER_KEYS)
     card = read.get("recommendation_card")
     if isinstance(card, dict):
         chunks.extend(str(card.get(key) or "") for key in RECOMMENDATION_CARD_KEYS + RECOMMENDATION_CARD_OPTIONAL_KEYS)
@@ -340,15 +348,23 @@ def validate_asian_handicap_card(read: dict, readiness: str) -> list[str]:
     for token in ENGLISH_TEAM_TOKENS:
         if token in text:
             errs.append(f"AH card contains English team token: {token}")
+    if "客队受让 -" in text:
+        errs.append("AH card must not say 客队受让 with a negative line")
+    if "主队让球 +" in text:
+        errs.append("AH card must not say 主队让球 with a positive line")
+    main_pick = str(card.get("main_ah_pick_cn") or "")
+    current = str(card.get("current_handicap_cn") or "") + "\n" + str(card.get("ah_logic_cn") or "")
+    if re.search(r"\+\s*0\.5", main_pick) and re.search(r"-\s*0\.5", current):
+        errs.append("AH card sign mismatch: +0.5 main pick conflicts with -0.5 current handicap")
     if readiness == "低" and grade not in {"PASS", "C/观察"}:
         errs.append("low data_readiness AH card must be PASS/C observation")
     if readiness == "低" and "观察" not in text:
         errs.append("low data_readiness AH card must explicitly show 观察")
     if grade in {"A", "B+", "B"}:
-        for key in ("ah_side_cn", "ah_confidence_cn", "risk_cn", "final_action_cn"):
+        for key in ("main_ah_pick_cn", "ah_side_cn", "ah_confidence_cn", "risk_cn", "final_action_cn"):
             if not str(card.get(key) or "").strip():
                 errs.append(f"grade {grade} AH card missing {key}")
-        for key in ("ah_line", "cover_probability_model"):
+        for key in ("ah_line", "ah_price", "cover_probability_model", "cover_probability_market", "cover_edge"):
             if not _is_num(card.get(key)):
                 errs.append(f"grade {grade} AH card missing numeric {key}")
         if "亚盘主推" not in str(card.get("final_action_cn") or ""):
@@ -449,8 +465,56 @@ def validate_call_against_bundle(call: dict, bundle: dict) -> list[str]:
     return errs
 
 
+def validate_script_layers(read: dict, style_mode: str, readiness: str, grade: str) -> list[str]:
+    errs: list[str] = []
+    layers = read.get("script_layers")
+    if not isinstance(layers, dict):
+        return ["read.script_layers must be an object"]
+    for key in SCRIPT_LAYER_KEYS:
+        if not str(layers.get(key) or "").strip():
+            errs.append(f"read.script_layers.{key} missing")
+    base = str(layers.get("base_script_cn") or "")
+    tail = str(layers.get("tail_script_cn") or "")
+    reverse = str(layers.get("reverse_script_cn") or "")
+    market = str(layers.get("market_script_cn") or "")
+    if len(base.strip()) < 8:
+        errs.append("script_layers.base_script_cn must describe the normal AH script")
+    if style_mode == "aggressive_script":
+        if not tail.strip():
+            errs.append("aggressive_script requires script_layers.tail_script_cn")
+        if not reverse.strip():
+            errs.append("aggressive_script requires script_layers.reverse_script_cn")
+        if not market.strip():
+            errs.append("aggressive_script requires script_layers.market_script_cn")
+        combined = "\n".join([tail, reverse, market])
+        if not any(token in tail for token in TAIL_TRIGGER_TOKENS):
+            errs.append("aggressive_script tail_script_cn must include trigger semantics")
+        if not any(token in combined for token in REVERSE_FAILURE_TOKENS):
+            errs.append("aggressive_script must include failure/invalidating semantics")
+        if any(token in tail for token in ("3-1", "4-1", "5-2", "穿盘")):
+            if not any(token in tail for token in TAIL_TRIGGER_TOKENS):
+                errs.append("aggressive big-tail/cover script must include trigger semantics")
+            if not any(token in combined for token in REVERSE_FAILURE_TOKENS):
+                errs.append("aggressive big-tail/cover script must include failure semantics")
+        if readiness == "低":
+            if grade in {"A", "B+"}:
+                errs.append("low data_readiness aggressive_script must not be A/B+")
+            if re.search(r"(?:4-1|5-2|[4-9]-[0-9]|[0-9]-[4-9])", tail):
+                errs.append("low data_readiness aggressive_script must not state big-score tail")
+            for token in ("强穿盘", "穿盘路径明确", "明显穿盘"):
+                if token in tail + market:
+                    errs.append("low data_readiness aggressive_script must not state strong cover conclusion")
+    return errs
+
+
 def validate_call(c: dict, policy: dict) -> list[str]:
     errs: list[str] = []
+    if c.get("schema_version") != "scout_ah_recommendation_v2":
+        errs.append("schema_version must be scout_ah_recommendation_v2")
+    if c.get("style_mode") not in {"conservative", "balanced", "aggressive_script"}:
+        errs.append(f"invalid style_mode {c.get('style_mode')}")
+    if c.get("safety_label") != "亚盘研究推荐 · 非资金指令 · 不承诺结果":
+        errs.append("safety_label mismatch")
     for f in policy["read_required_fields"]:
         if f not in c:
             errs.append(f"missing field {f}")
@@ -463,6 +527,8 @@ def validate_call(c: dict, policy: dict) -> list[str]:
             errs.append(f"read.{f} missing")
     errs.extend(validate_recommendation_card(read, str(c.get("data_readiness") or "")))
     errs.extend(validate_asian_handicap_card(read, str(c.get("data_readiness") or "")))
+    ah_grade = str((read.get("asian_handicap_card") or {}).get("recommendation_grade") or "") if isinstance(read.get("asian_handicap_card"), dict) else ""
+    errs.extend(validate_script_layers(read, str(c.get("style_mode") or ""), str(c.get("data_readiness") or ""), ah_grade))
     watch = read.get("watch_points_cn")
     risks = read.get("risks_cn")
     if not isinstance(watch, list) or len([x for x in watch if str(x).strip()]) < 2:
@@ -542,6 +608,20 @@ def validate_call(c: dict, policy: dict) -> list[str]:
         if t in text:
             errs.append(f"forbidden term: {t}")
     return errs
+
+
+def normalize_runtime_call_for_validation(call: dict, bundle: dict | None) -> dict:
+    """Validate old gitignored runtime calls through the current AH-first hardener.
+
+    This keeps local state files from blocking source checks after schema upgrades
+    without mutating state/w1_scout_calls.json or weakening validate_call() for new
+    model output and reverse tests.
+    """
+    fid = str(call.get("fixture_id") or (bundle or {}).get("fixture_id") or "")
+    try:
+        return analyst_mod.harden_call(deepcopy(call), fid, deepcopy(bundle) if bundle else None)
+    except Exception:
+        return deepcopy(call)
 
 
 def bundle_leak(bundles, forbidden) -> list:
@@ -695,11 +775,17 @@ def main() -> int:
         "state/w1_scout_calls.json",
         "honesty_label",
         "independent_edge",
+        "--style-mode",
+        "get_system_prompt",
+        "aggressive_script",
+        "script_layers",
+        "scout_ah_recommendation_v2",
         "--dry-run",
     ):
         if token not in analyst:
             fail(f"analyst missing token: {token}")
     for token in (
+        "script_layers{base_script_cn,tail_script_cn,reverse_script_cn,market_script_cn}",
         "read{tilt_cn,score_band_cn,watch_points_cn[],risks_cn[],vs_market_cn",
         "evidence[{claim,source,fields[],availability,weight}]",
         "asian_handicap_card{schema_version,fixture_id,stage_id,stage_label_cn,data_readiness,main_ah_pick_cn,ah_side_cn,ah_line,ah_price,ah_confidence_cn,recommendation_grade,ah_logic_cn,cover_probability_model,cover_probability_market,cover_edge,line_movement_cn,water_movement_cn,market_consensus_cn,ou_pick_cn,score_path_cn,risk_cn,pass_reason_cn,final_action_cn}",
@@ -807,14 +893,15 @@ def main() -> int:
             if fid in seen:
                 fail(f"duplicate call for fixture {fid}")
             seen.add(fid)
-            for e in validate_call(c, policy):
+            c_for_validation = normalize_runtime_call_for_validation(c, bundle_by_fixture.get(str(fid)))
+            for e in validate_call(c_for_validation, policy):
                 fail(f"call {fid}: {e}")
             if str(fid) in bundle_by_fixture:
-                for e in validate_call_against_bundle(c, bundle_by_fixture[str(fid)]):
+                for e in validate_call_against_bundle(c_for_validation, bundle_by_fixture[str(fid)]):
                     fail(f"call {fid}: {e}")
 
     # --- reverse tests ---
-    base = {"fixture_id": "X",
+    base = {"schema_version": "scout_ah_recommendation_v2", "fixture_id": "X", "style_mode": "balanced", "safety_label": "亚盘研究推荐 · 非资金指令 · 不承诺结果",
             "read": {"tilt_cn": "主队小优", "score_band_cn": "偏 1-0/2-0,但单场看区间、别当真",
                      "watch_points_cn": ["主队边路推进", "客队转换防守"], "risks_cn": ["早球会改变节奏"],
                      "vs_market_cn": "与市场差异不大,仅作讨论点",
@@ -861,7 +948,13 @@ def main() -> int:
                      "regular_script_cn": "常规剧本是市场读数主队略低水支撑主队压住节奏,通过边路和二点球慢慢建立优势。",
                      "high_variance_tail_script_cn": "如果市场读数主队略低水被早球或红牌打穿,尾部高方差剧本会让比赛脱离常规节奏。",
                      "reverse_risks_cn": ["如果低位防守成功,客队拖慢节奏后主队优势可能只停留在场面,大比分剧本失效。"],
-                     "market_expert_script_cn": "若临场盘口样本仍显示早盘让球倾向主队,水位与样本厚度只作为读盘语境。"},
+                     "market_expert_script_cn": "若临场盘口样本仍显示早盘让球倾向主队,水位与样本厚度只作为读盘语境。",
+                     "script_layers": {
+                         "base_script_cn": "常规剧本是市场读数主队略低水支撑主队压住节奏,通过边路和二点球慢慢建立优势。",
+                         "tail_script_cn": "如果市场读数主队略低水被早球或红牌打穿,尾部高方差剧本会让比赛脱离常规节奏。",
+                         "reverse_script_cn": "如果低位防守成功,客队拖慢节奏后主队优势可能只停留在场面,大比分剧本失效。",
+                         "market_script_cn": "若临场盘口样本仍显示早盘让球倾向主队,水位与样本厚度只作为读盘语境。"
+                     }},
             "data_readiness": "中", "honesty_label": "AI 解读·非预测·非推介·可能错",
             "independent_edge": False}
     if validate_call(base, policy):

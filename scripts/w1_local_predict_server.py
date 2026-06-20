@@ -1412,12 +1412,14 @@ def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
         return "基础数据已刷新；AI 解读未生成：当前 W1 server 进程未读取到 DEEPSEEK_API_KEY。请在启动 server 前 export DEEPSEEK_API_KEY，或写入 .env.local 后重启 server。"
     api_available = api_football_key_available(env)
     stage_id, stage_label = scout_stage_for_match(match)
+    style_mode = "aggressive_script" if stage_id in {"official_1h", "final_30m"} else "balanced"
     scout_env = {
         **env,
         "W1_SCOUT_FORCE_FIXTURE": fixture_id,
         "W1_SCOUT_SCHEDULE_STAGE": stage_id,
         "W1_SCOUT_SCHEDULE_STAGE_LABEL": stage_label,
         "W1_SCOUT_FORCE_REFRESH": "1",
+        "W1_SCOUT_STYLE_MODE": style_mode,
         "W1_SCOUT_PREMATCH_ONLY": "1",
         "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
     }

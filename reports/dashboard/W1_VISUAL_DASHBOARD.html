@@ -54975,12 +54975,15 @@ function pScoutAnalyst(r){
   const watch=(read.watch_points_cn||[]).slice(0,3).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
   const risks=(read.risks_cn||[]).slice(0,2).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
   const evidence=(read.evidence_chain_cn||[]).slice(0,5).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
-  const reverse=(read.reverse_risks_cn||[]).slice(0,3).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
+  const layers=read.script_layers||{};
+  const reverseText=layers.reverse_script_cn?String(layers.reverse_script_cn):'';
+  const reverseItems=reverseText?[reverseText]:(read.reverse_risks_cn||[]);
+  const reverse=reverseItems.slice(0,3).map(x=>`<li>${esc(stripAiDisplayText(x))}</li>`).join('');
   const factorN=scoutAvailableFactorCount(c);
   const vs=stripAiDisplayText(read.vs_market_cn||'');
-  const normal=stripAiDisplayText(read.regular_script_cn||'');
-  const tail=stripAiDisplayText(read.high_variance_tail_script_cn||'');
-  const marketScript=stripAiDisplayText(read.market_expert_script_cn||'');
+  const normal=stripAiDisplayText(layers.base_script_cn||read.regular_script_cn||'');
+  const tail=stripAiDisplayText(layers.tail_script_cn||read.high_variance_tail_script_cn||'');
+  const marketScript=stripAiDisplayText(layers.market_script_cn||read.market_expert_script_cn||'');
   return `<div class="card scout-hero"><h3>AI亚盘推荐卡 · DeepSeek<span class="r">阶段：${esc(stageLabel)} · 数据就绪度：${esc(String(c.data_readiness||'低'))}</span></h3>
     <div class="scout-rec-main">${esc(stripAiDisplayText(ah.final_action_cn||ah.main_ah_pick_cn||'亚盘推荐：PASS / 观察'))}</div>
     ${ahRows?`<div class="scout-rec-grid">${ahRows}</div>`:''}
