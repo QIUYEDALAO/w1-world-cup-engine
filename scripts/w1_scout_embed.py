@@ -40,6 +40,8 @@ DISPLAY_CALL_KEYS = {
     "generated_at",
     "kickoff_at",
     "data_snapshot_digest",
+    "policy_result",
+    "policy_enforced",
     "read",
     "data_readiness",
     "honesty_label",
@@ -133,6 +135,8 @@ def display_call(call: dict) -> dict:
             W1ANALYST.normalize_asian_handicap_card(working, bundle)
             W1ANALYST.normalize_recommendation_text(working, bundle)
     out = {key: copy.deepcopy(value) for key, value in working.items() if key in DISPLAY_CALL_KEYS}
+    if out.get("safety_label"):
+        out["safety_label"] = clean_visible_text(out.get("safety_label")).replace("非资金指令", "非操作指令")
     bundle = BUNDLE_BY_FIXTURE.get(str(out.get("fixture_id") or ""))
     read = out.get("read")
     if isinstance(read, dict):

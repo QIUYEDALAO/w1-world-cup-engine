@@ -355,6 +355,24 @@ def assert_scout_embed(text: str) -> None:
         for key in ("fixture_id", "read", "data_readiness", "honesty_label", "independent_edge"):
             if key not in call:
                 fail(f"Embedded Scout call #{idx} missing {key}")
+        policy_result = call.get("policy_result")
+        if not isinstance(policy_result, dict):
+            fail(f"Embedded Scout call #{idx} missing policy_result")
+        else:
+            decision = policy_result.get("decision_state")
+            if decision not in {"RECOMMEND", "OBSERVE", "PASS"}:
+                fail(f"Embedded Scout call {call.get('fixture_id')} invalid decision_state")
+            if decision == "RECOMMEND" and not policy_result.get("main_ah_pick"):
+                fail(f"Embedded Scout call {call.get('fixture_id')} RECOMMEND missing main_ah_pick")
+            if decision in {"OBSERVE", "PASS"} and policy_result.get("main_ah_pick"):
+                fail(f"Embedded Scout call {call.get('fixture_id')} {decision} must not expose main_ah_pick")
+            probability = policy_result.get("probability") if isinstance(policy_result.get("probability"), dict) else {}
+            calibration = policy_result.get("calibration") if isinstance(policy_result.get("calibration"), dict) else {}
+            if probability.get("calibration_status") != "untrained" or calibration.get("method") != "raw_passthrough":
+                fail(f"Embedded Scout call {call.get('fixture_id')} must expose untrained raw_passthrough calibration")
+            for key in ("hard_gates", "failed_gates", "movement_flags"):
+                if key not in policy_result:
+                    fail(f"Embedded Scout call {call.get('fixture_id')} policy_result.{key} missing")
         if call.get("independent_edge") is not False:
             fail(f"Embedded Scout call {call.get('fixture_id')} independent_edge must be false")
         if "AI 解读" not in str(call.get("honesty_label", "")):
@@ -517,7 +535,7 @@ def assert_first_screen(text: str) -> None:
     panel = _func_body(text, "function renderPanel(")
     if not panel:
         fail("renderPanel function missing")
-    first_expr = "pBanner()+pHeader(r)+pScoutAnalyst(r)+pScoutReview(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)"
+    first_expr = "pBanner()+pHeader(r)+pScoutAnalyst(r)+pTodayFeaturedPrep()+pScoutReview(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)"
     if first_expr not in panel:
         fail("renderPanel must lead with AI analyst + cycle status + learning status + operation controls")
     expert_idx = panel.find('`<div id="expert"')
@@ -569,9 +587,32 @@ def assert_first_screen(text: str) -> None:
         "AI亚盘推荐卡 · DeepSeek",
         "AI亚盘观察卡 · DeepSeek",
         "policy_result",
+        "policyCardType",
+        "RECOMMEND_CARD",
+        "OBSERVE_CARD",
+        "PASS_CARD",
         "policyDecision",
         "policyAllowsRecommend",
         "policyMainPick",
+        "candidatePick",
+        "Policy Engine 证据",
+        "盘口变化证据",
+        "校准状态",
+        "回测/结算预览",
+        "decision_state",
+        "recommendation_grade",
+        "candidate_ah_pick",
+        "main_ah_pick",
+        "edge_raw",
+        "edge_calibrated",
+        "calibration_status",
+        "hard_gates",
+        "failed_gates",
+        "movement_flags",
+        "calibration.status",
+        "calibration.method",
+        "raw_passthrough",
+        "样本不足，不声称已校准",
         "结论等级",
         "亚盘结论",
         "recommendation_text",
@@ -622,8 +663,13 @@ def assert_first_screen(text: str) -> None:
         "reverse_script_cn",
         "market_script_cn",
     ):
-        if need not in scout:
+        if need not in scout and need not in text:
             fail(f"AI-first scout card missing token: {need}")
+    for need in ("todayFeaturedCandidates", "pTodayFeaturedPrep", "今日精选榜预备", "今日精选：暂不生成", "未校准，仅候选", "不输出正式精选主榜", "calibration_status=untrained"):
+        if need not in text:
+            fail(f"today featured preparation missing token: {need}")
+    if "今日稳胆" in text or "今日精选强推" in text:
+        fail("today featured preparation must not expose strong-pick wording")
     first_grid = scout.find("scout-rec-grid")
     first_details = scout.find("<details")
     if first_grid >= 0 and (first_details < 0 or first_grid < first_details):
@@ -817,7 +863,7 @@ def assert_html(data: dict) -> None:
         if panel_idx < 0:
             fail("renderPanel function missing")
         panel_body = text[panel_idx:text.find("function toggleExpert", panel_idx)]
-        if "pScoutAnalyst(r)+pScoutReview(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)" not in panel_body:
+        if "pScoutAnalyst(r)+pTodayFeaturedPrep()+pScoutReview(r)+pScoutCycleStatus()+pScoutLearningStatus()+pPredict(r)" not in panel_body:
             fail("AI analyst + cycle status + learning status must render before operation controls")
         expert_idx = panel_body.find('`<div id="expert"')
         if expert_idx < 0:

@@ -13,6 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATA_JSON = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
 BUILD_SCRIPT = ROOT / "scripts/build_w1_dashboard_data.py"
+SERVER_SCRIPT = ROOT / "scripts/w1_local_predict_server.py"
+SCOUT_EMBED = ROOT / "scripts/w1_scout_embed.py"
 QATAR_CARD = ROOT / "data/processed/match_cards/group_stage_round1/fixture_1489373_qatar_vs_switzerland.json"
 ALLOWED_RESULT_SOURCES = {"post_match_auto_calibration_sample", "manual_verified_overlay", "api_football_fixture_result"}
 
@@ -125,10 +127,22 @@ def main() -> int:
             fail("dashboard_data.json is missing")
         if not BUILD_SCRIPT.is_file():
             fail("build_w1_dashboard_data.py is missing")
+        if not SERVER_SCRIPT.is_file():
+            fail("w1_local_predict_server.py is missing")
+        if not SCOUT_EMBED.is_file():
+            fail("w1_scout_embed.py is missing")
 
         text = read(DATA_JSON)
         assert_no_forbidden_text(text, DATA_JSON.relative_to(ROOT).as_posix())
         data = json.loads(text)
+        server_src = read(SERVER_SCRIPT)
+        for token in ("payload[\"scout_calls\"]", "load_scout_calls_for_dashboard", "SCOUT_EMBED.display_call", "dynamic /dashboard-data"):
+            if token not in server_src:
+                fail(f"w1_local_predict_server.py missing dynamic Scout dashboard token: {token}")
+        embed_src = read(SCOUT_EMBED)
+        for token in ("policy_result", "policy_enforced", "DISPLAY_CALL_KEYS"):
+            if token not in embed_src:
+                fail(f"w1_scout_embed.py must include policy_result in display Scout calls: {token}")
 
         if data.get("schema_version") != "W1_VISUAL_DASHBOARD_DATA_BOUND_V1":
             fail("schema_version must be W1_VISUAL_DASHBOARD_DATA_BOUND_V1")

@@ -208,6 +208,15 @@ def settlement_preview(fid: str) -> str:
     )
 
 
+def dashboard_card_type(policy: dict[str, Any]) -> str:
+    decision = str(policy.get("decision_state") or "PASS")
+    if decision == "RECOMMEND":
+        return "RECOMMEND_CARD"
+    if decision == "OBSERVE":
+        return "OBSERVE_CARD"
+    return "PASS_CARD"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Inspect Scout market summary for one fixture.")
     parser.add_argument("--fixture-id", required=True)
@@ -301,6 +310,13 @@ def main() -> int:
     print(f"pass_reason={fmt(policy.get('pass_reason'))}")
     print(f"observe_reason={fmt(policy.get('observe_reason'))}")
     print(f"policy_summary_cn={fmt(policy.get('policy_summary_cn'))}")
+    card_type = dashboard_card_type(policy)
+    show_main = bool(policy.get("decision_state") == "RECOMMEND" and policy.get("main_ah_pick"))
+    show_candidate = bool(policy.get("decision_state") in {"OBSERVE", "PASS"} and policy.get("candidate_ah_pick"))
+    print(f"dashboard_display_mode=policy_result_first")
+    print(f"dashboard_card_type={card_type}")
+    print(f"dashboard_would_show_main_pick={str(show_main).lower()}")
+    print(f"dashboard_would_show_candidate_only={str(show_candidate).lower()}")
     print(f"ai_policy_consistency={consistency}")
     print(f"ai_conflict_flags={json.dumps(conflict_flags, ensure_ascii=False)}")
     print(f"visible_text_policy_conflicts={json.dumps(visible_conflicts, ensure_ascii=False)}")
