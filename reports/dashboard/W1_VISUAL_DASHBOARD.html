@@ -54496,9 +54496,11 @@ function renderRail(){
     }else{
       res=`<span class="tag main">未开赛</span>${band?`<span class="tag">总进球 ${esc(band)}</span>`:''}`;
     }
+    const ai=scoutFixtureQueueStatus(r);
+    const aiCls=ai.status==='ready'?'main':(ai.status==='failed'?'pend':'');
     b.innerHTML=`<div class="mt">${r.home_flag||''} ${esc(teamName(r,'home'))} <span class="vs">vs</span> ${r.away_flag||''} ${esc(teamName(r,'away'))}</div>
       <div class="mm"><span class="dot ${st}"></span>${r._hm||''} CST</div>
-      <div class="mres">${res}</div>`;
+      <div class="mres">${res}<span class="tag ai-status ${aiCls}" title="${esc(ai.why)}">${esc(ai.label)}</span></div>`;
     rail.appendChild(b);
   });
 }
@@ -54866,6 +54868,27 @@ function scoutCycleStatus(){
   if(D&&D.scout_cycle_status)return D.scout_cycle_status;
   try{const el=document.getElementById('w1-scout-cycle-status');if(!el)return null;return JSON.parse(el.textContent||'{}');}catch(e){return null;}
 }
+function scoutPendingPreview(){
+  const s=scoutCycleStatus()||{};
+  const rows=(s.pending_remaining_preview||s.pending_remaining||[]).concat(s.pending_preview||[]);
+  return Array.isArray(rows)?rows:[];
+}
+function scoutFailedFixtureIds(){
+  const s=scoutCycleStatus()||{};
+  return new Set((s.failed_fixtures||[]).map(x=>String(x)));
+}
+function scoutFixtureQueueStatus(r){
+  const fid=String((r&&r.fixture_id)||'');
+  if(scoutCallFor(fid))return {status:'ready',label:'已有AI推荐',why:'当前 fixture 已有可展示 Scout read。'};
+  if(scoutFailedFixtureIds().has(fid))return {status:'failed',label:'生成失败',why:'scheduler 最近一次生成该场失败，等待下一轮或手动兜底。'};
+  const queued=scoutPendingPreview().find(x=>String((x&&x.fixture_id)||x)===fid);
+  if(queued)return {status:'queued',label:'待生成',why:'当前场仍在待处理队列：scheduler 本轮只生成了其他场次。'};
+  if(!isFutureFixture(r))return {status:'closed',label:'已过窗口',why:'已开赛或完赛，无赛前推荐，不参与赛前命中统计。'};
+  const ko=parseKO(r);const mins=ko?(ko.getTime()-Date.now())/60000:null;
+  if(mins==null)return {status:'data_gap',label:'数据未就绪',why:'当前场缺少可判定 kickoff，无法进入赛前生成窗口。'};
+  if(mins!=null&&mins>2880)return {status:'not_due',label:'未到窗口',why:'尚未进入 T-48 赛前生产窗口。'};
+  return {status:'queued',label:'待生成',why:'当前场处于赛前窗口但暂未生成，请确认 scheduler 运行，或使用手动兜底生成当前场。'};
+}
 function scoutLearningStatus(){
   try{const el=document.getElementById('w1-scout-learning-status');if(!el)return null;return JSON.parse(el.textContent||'{}');}catch(e){return null;}
 }
@@ -54909,7 +54932,10 @@ function pScoutAnalyst(r){
   if(!c||!c.read){
     const future=isFutureFixture(r), ko=new Date(r.kickoff_utc||r.kickoff||0), now=new Date(), mins=(ko-now)/60000;
     let headline='尚未进入赛前生产窗口', why='赛前推荐由 W1 Scout Scheduler 按 T-48/T-24/T-12/T-6/T-2/T-1/T-30m 自动生成；dashboard 仅展示结果。';
+    const qs=scoutFixtureQueueStatus(r);
     if(!future){headline='无赛前推荐，不参与命中统计';why='赛前窗口已关闭；不再补写赛前 read，等待赛后复盘。';}
+    else if(qs.status==='queued'&&qs.why.indexOf('待处理队列')>=0){headline='当前场仍在待处理队列';why='scheduler 本轮只生成了其他场次；本场仍在待处理队列，下一批或手动兜底会只生成当前 fixture。';}
+    else if(qs.status==='failed'){headline='当前场生成失败';why='scheduler 最近一次生成该场失败，未推进旧内容；可等待下一轮或手动兜底生成当前场。';}
     else if(mins<=30){headline='最终版待生成';why='已进入 T-30m 最终版窗口；scheduler 应生成 final_30m。';}
     else if(mins<=60){headline='正式判断待生成';why='已进入 T-1h 正式判断窗口；scheduler 应生成正式判断阶段。';}
     else if(mins<=720){headline='赛前观察待生成';why='已进入赛前观察窗口；scheduler 应按 T-12/T-6/T-2 生成阶段性 read。';}
@@ -54991,7 +55017,7 @@ function pScoutCycleStatus(){
     <div class="cycle-log"><div><div class="msg">${esc(msg)}</div>
       <div class="mini">scheduler 上次运行: ${esc(lastFetch)} · 本轮结果: ${esc(resultLabel)} · pending_total: ${esc(waitCount)} · pending_remaining: ${esc(embedGap)} · generated: ${esc(s.generated_count||0)} · embedded: ${esc(s.embedded_count||0)} · failed: ${esc(s.failed_count||0)} · 盘口异动: ${esc(moveStatus)} / ${esc(moveMsg)}</div>
       <div class="mini">状态文件: state/w1_scout_scheduler_status.json · dashboard 仅展示结果；手动按钮仅用于临时补救；已开赛只做赛后复盘</div></div>
-      <div class="ops"><button onclick="renderPanel()" title="仅刷新当前静态视图">刷新视图</button><button onclick="toggleExpert()" title="展开 W1 市场读数、FiveDim、Primary Read、候选共识和 score matrix">专家视图</button></div></div></div>`;
+      <div class="ops"><button onclick="refreshDashboardView()" title="重新拉取 /dashboard-data 并刷新当前 fixture 的 Scout 卡">刷新视图</button><button onclick="toggleExpert()" title="展开 W1 市场读数、FiveDim、Primary Read、候选共识和 score matrix">专家视图</button></div></div></div>`;
 }
 function pScoutLearningStatus(){
   const s=scoutLearningStatus();
@@ -55052,6 +55078,14 @@ async function runPredict(){
     const p=$('#prog'),m=$('#progMsg');if(p)p.classList.add('on');
     if(m)m.innerHTML='<span class="pe">强刷失败：'+esc(e.message||'/predict 不可用')+'。已保留当前快照，未覆盖。</span>';
   }
+}
+async function refreshDashboardView(){
+  const requestedFixture=RECS[active]&&RECS[active].fixture_id;
+  try{
+    const fresh=await fetchBackendDashboardData();backendConnected=true;D=fresh;prepRecs();
+    if(requestedFixture&&!setActiveByFixture(requestedFixture)){restoreSelectedFixture()||setActiveToDayDefault();}
+    renderStatusCards();renderDays();renderRail();renderPanel();
+  }catch(e){renderPanel();}
 }
 async function pollProgress(){
   const list=$('#progList'),msg=$('#progMsg');

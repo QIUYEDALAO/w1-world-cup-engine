@@ -6,6 +6,7 @@ cd "$(dirname "$0")/.." || exit 1
 
 PORT="${W1_DASHBOARD_PORT:-8765}"
 INTERVAL="${W1_SCOUT_SCHEDULER_INTERVAL_SECONDS:-60}"
+MAX_FIXTURES="${W1_SCOUT_SCHEDULER_MAX_FIXTURES_PER_RUN:-4}"
 LOG_DIR="${W1_LOCAL_LOG_DIR:-logs}"
 SERVER_LOG="${LOG_DIR}/w1_local_server.log"        # default: logs/w1_local_server.log
 SCHEDULER_LOG="${LOG_DIR}/w1_scout_scheduler.log"  # default: logs/w1_scout_scheduler.log
@@ -40,6 +41,9 @@ python3 -u scripts/w1_local_predict_server.py >"$SERVER_LOG" 2>&1 &
 server_pid="$!"
 
 echo "starting W1 Scout scheduler daemon interval=${INTERVAL}s -> ${SCHEDULER_LOG}"
+W1_SCOUT_SCHEDULER_MAX_FIXTURES_PER_RUN="$MAX_FIXTURES" \
+W1_SCOUT_SCHEDULER_CONTINUE_UNTIL_EMPTY="${W1_SCOUT_SCHEDULER_CONTINUE_UNTIL_EMPTY:-1}" \
+W1_SCOUT_SCHEDULER_MAX_BATCHES="${W1_SCOUT_SCHEDULER_MAX_BATCHES:-4}" \
 python3 -u scripts/w1_scout_scheduler.py --daemon --interval "$INTERVAL" >"$SCHEDULER_LOG" 2>&1 &
 scheduler_pid="$!"
 

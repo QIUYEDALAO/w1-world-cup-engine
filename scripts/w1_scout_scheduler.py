@@ -314,7 +314,7 @@ def parse_now(value: str | None) -> datetime:
 def run_once(args: argparse.Namespace) -> int:
     now = parse_now(args.now_override)
     queue = due_queue(now, args.fixture_id, args.stage)
-    max_fixtures = max(1, int(args.max_fixtures or os.environ.get("W1_SCOUT_SCHEDULER_MAX_FIXTURES_PER_RUN", "2")))
+    max_fixtures = max(1, int(args.max_fixtures or os.environ.get("W1_SCOUT_SCHEDULER_MAX_FIXTURES_PER_RUN", "4")))
     process_queue = queue[:max_fixtures]
     remaining = queue[max_fixtures:]
     if args.dry_run:
@@ -396,8 +396,19 @@ def main() -> int:
     parser.add_argument("--max-fixtures", type=int, default=None)
     args = parser.parse_args()
     if args.daemon:
+        continue_until_empty = os.environ.get("W1_SCOUT_SCHEDULER_CONTINUE_UNTIL_EMPTY", "1").strip().lower() not in {"0", "false", "no", "off"}
+        max_batches = max(1, int(os.environ.get("W1_SCOUT_SCHEDULER_MAX_BATCHES", "4")))
         while True:
-            rc = run_once(args)
+            rc = 0
+            for _batch in range(max_batches if continue_until_empty else 1):
+                rc = run_once(args)
+                if args.dry_run:
+                    return rc
+                status = load_json(STATUS, {})
+                if int(status.get("pending_remaining_count") or 0) <= 0:
+                    break
+                if int(status.get("processed_count") or 0) <= 0:
+                    break
             if args.dry_run:
                 return rc
             time.sleep(max(5, args.interval))

@@ -499,8 +499,8 @@ def ah_card_from_bundle(bundle: dict[str, Any], call: dict[str, Any] | None = No
     return {
         "schema_version": "scout_ah_recommendation_v1",
         "fixture_id": str(bundle.get("fixture_id") or ""),
-        "stage_id": str((call or {}).get("stage_id") or ""),
-        "stage_label_cn": str((call or {}).get("stage_label_cn") or ""),
+        "stage_id": str((call or {}).get("stage_id") or os.environ.get("W1_SCOUT_SCHEDULE_STAGE") or ""),
+        "stage_label_cn": str((call or {}).get("stage_label_cn") or os.environ.get("W1_SCOUT_SCHEDULE_STAGE_LABEL") or ""),
         "data_readiness": readiness,
         "main_ah_pick_cn": pick,
         "ah_side_cn": _ah_side_label(side),
@@ -971,6 +971,9 @@ def harden_call(call: dict[str, Any], fixture_id: str, bundle: dict[str, Any] | 
         if lifted:
             call["read"] = lifted
     call["fixture_id"] = fixture_id
+    if os.environ.get("W1_SCOUT_SCHEDULE_STAGE"):
+        call["stage_id"] = os.environ.get("W1_SCOUT_SCHEDULE_STAGE", "")
+        call["stage_label_cn"] = os.environ.get("W1_SCOUT_SCHEDULE_STAGE_LABEL", "")
     call["honesty_label"] = "AI 解读·非预测·非推介·可能错"
     call["independent_edge"] = False
     complete_read_defaults(call, bundle)

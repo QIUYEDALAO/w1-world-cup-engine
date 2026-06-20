@@ -60,6 +60,7 @@ def assert_scheduler_static() -> None:
         "W1_SCOUT_FORCE_FIXTURE", "W1_SCOUT_FORCE_HASH", "W1_SCOUT_FORCE_REFRESH", "W1_SCOUT_SCHEDULE_STAGE", "W1_SCOUT_SCHEDULE_STAGE_LABEL", "W1_SCOUT_LOCK_CMD", "stage_id", "stage_label_cn",
         "data_snapshot_digest", "w1_scout_ledger.py", "pending_remaining_count", "pending_remaining_preview", "timeout", "partial", "dashboard 仅展示 scheduler 产物",
         "dashboard_scout_calls_payload", "verify_dashboard_payload_fixture", "dashboard_payload_missing", "/dashboard-data scout_calls",
+        'W1_SCOUT_SCHEDULER_MAX_FIXTURES_PER_RUN", "4"', "W1_SCOUT_SCHEDULER_CONTINUE_UNTIL_EMPTY", "W1_SCOUT_SCHEDULER_MAX_BATCHES",
     ):
         if token not in text:
             fail(f"scheduler missing token: {token}")
@@ -135,6 +136,20 @@ def assert_viewer_runtime_contract() -> None:
     for token in ("load_scout_calls_for_dashboard", 'payload["scout_calls"]', "SCOUT_EMBED.display_call", "scout_reviews", "scout_calibration"):
         if token not in server:
             fail(f"/dashboard-data must serve dynamic Scout display payload: {token}")
+    for token in (
+        "scout_call_dashboard_ready",
+        "scout_stage_for_match",
+        "W1_SCOUT_FORCE_FIXTURE",
+        "W1_SCOUT_SCHEDULE_STAGE",
+        "W1_SCOUT_SCHEDULE_STAGE_LABEL",
+        "W1_SCOUT_FORCE_REFRESH",
+        "W1_SCOUT_DISABLE_MEMORY_COMMIT",
+        "runner force fixture=",
+        "POST /predict received",
+        "可由 /dashboard-data 上屏",
+    ):
+        if token not in server:
+            fail(f"manual Scout fallback must force and verify the selected fixture: {token}")
     html = HTML.read_text(encoding="utf-8") if HTML.is_file() else ""
     for bad in ("server 兜底检查开启", "等待下一次自动周期", "下一次检查"):
         if bad in html:
@@ -143,7 +158,17 @@ def assert_viewer_runtime_contract() -> None:
         fail("missing scripts/run_w1_local_with_scheduler.sh")
     else:
         run_local = RUN_LOCAL.read_text(encoding="utf-8")
-        for token in ("w1_local_predict_server.py", "w1_scout_scheduler.py", "--daemon", "logs/w1_local_server.log", "logs/w1_scout_scheduler.log", "trap cleanup"):
+        for token in (
+            "w1_local_predict_server.py",
+            "w1_scout_scheduler.py",
+            "--daemon",
+            "logs/w1_local_server.log",
+            "logs/w1_scout_scheduler.log",
+            "trap cleanup",
+            "W1_SCOUT_SCHEDULER_MAX_FIXTURES_PER_RUN",
+            "W1_SCOUT_SCHEDULER_CONTINUE_UNTIL_EMPTY",
+            "W1_SCOUT_SCHEDULER_MAX_BATCHES",
+        ):
             if token not in run_local:
                 fail(f"local scheduler launcher missing token: {token}")
     if not RUNBOOK.is_file():

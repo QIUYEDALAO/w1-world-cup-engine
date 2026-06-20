@@ -7,6 +7,7 @@ import argparse
 import json
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SCOUT_DIR = ROOT / "data/scout"
 BUNDLES = ROOT / "state/w1_scout_bundles.json"
 BUNDLE_SCRIPT = ROOT / "scripts/w1_scout_bundle.py"
+DASHBOARD_DATA = ROOT / "reports/dashboard/assets/w1_dashboard_data.json"
+CALLS = ROOT / "state/w1_scout_calls.json"
+SCHEDULER_STATUS = ROOT / "state/w1_scout_scheduler_status.json"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -42,6 +46,64 @@ def fmt(value: Any) -> str:
     if value in (None, "", [], {}):
         return "missing"
     return str(value)
+
+
+def parse_dt(value: Any) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def match_record(fid: str) -> dict[str, Any]:
+    payload = load_json(DASHBOARD_DATA)
+    for row in payload.get("match_records") or []:
+        if str(row.get("fixture_id")) == fid:
+            return row
+    return {}
+
+
+def current_stage(rec: dict[str, Any]) -> tuple[str, str, bool]:
+    kickoff = parse_dt(rec.get("kickoff_utc") or rec.get("kickoff"))
+    if kickoff is None:
+        return "unknown", "未知阶段", False
+    minutes = (kickoff - datetime.now(timezone.utc)).total_seconds() / 60.0
+    if minutes <= 0:
+        return "closed", "赛前窗口已关闭", False
+    if minutes <= 30:
+        return "final_30m", "最终版", True
+    if minutes <= 60:
+        return "official_1h", "正式判断", True
+    if minutes <= 120:
+        return "watch_2h", "赛前观察", True
+    if minutes <= 360:
+        return "watch_6h", "赛前观察", True
+    if minutes <= 720:
+        return "watch_12h", "赛前观察", True
+    if minutes <= 1440:
+        return "early_24h", "早盘参考", True
+    if minutes <= 2880:
+        return "early_48h", "早盘参考", True
+    return "not_due", "尚未进入赛前生产窗口", False
+
+
+def has_state_call(fid: str) -> bool:
+    payload = load_json(CALLS)
+    return any(str(call.get("fixture_id") or "") == fid and isinstance(call.get("read"), dict) for call in payload.get("calls") or [])
+
+
+def in_scheduler_pending(fid: str) -> bool:
+    payload = load_json(SCHEDULER_STATUS)
+    rows = payload.get("pending_remaining_preview") or []
+    return any(str((row or {}).get("fixture_id") or row) == fid for row in rows)
 
 
 def pass_reason(bundle: dict[str, Any]) -> str:
@@ -74,7 +136,17 @@ def main() -> int:
     ou = market.get("ou") if isinstance(market.get("ou"), dict) else {}
     one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
 
+    rec = match_record(fid)
+    stage_id, stage_label, due = current_stage(rec)
+    has_call = has_state_call(fid)
+    pending = in_scheduler_pending(fid)
+    reason = "has scout call" if has_call else "pending in scheduler queue" if pending else "not due or not generated yet" if due else stage_label
+
     print(f"fixture_id={fid}")
+    print(f"match={fmt(rec.get('match'))}")
+    print(f"current_stage={stage_id} label={stage_label} due={due}")
+    print(f"has_state_scout_call={has_call}")
+    print(f"in_scheduler_pending_remaining={pending}")
     print(f"scout_file_exists={scout_path.is_file()}")
     print(f"scout_market_source={fmt((scout.get('market') or {}).get('market_source')) if scout else 'missing'}")
     print(f"availability.market_1x2={fmt(availability.get('market_1x2'))}")
@@ -88,6 +160,7 @@ def main() -> int:
     print(f"cover_probability_market={fmt(ah.get('cover_probability_market'))}")
     print(f"cover_edge={fmt(ah.get('cover_edge'))}")
     print(f"pass_reason={pass_reason(bundle)}")
+    print(f"missing_recommendation_reason={reason}")
     return 0
 
 

@@ -112,6 +112,7 @@ def assert_no_forbidden_terms(path: Path) -> None:
         .replace("pending_total", "scheduler_total")
         .replace("pending_remaining_count", "scheduler_remaining_count")
         .replace("pending_remaining", "scheduler_remaining")
+        .replace("pending_preview", "scheduler_preview")
     )
     for term in FORBIDDEN_SOURCE_TERMS:
         if term.isascii():
@@ -541,9 +542,9 @@ def assert_first_screen(text: str) -> None:
         if need not in scout_call:
             fail(f"scoutCallFor must select the highest readable staged Scout call: {need}")
     if "const c=scoutCallFor(r.fixture_id)" not in scout:
-        fail("pScoutAnalyst must use scoutCallFor(r.fixture_id) as the single source for card vs pending state")
+        fail("pScoutAnalyst must use scoutCallFor(r.fixture_id) as the single source for card vs queued state")
     if "if(!c||!c.read)" not in scout:
-        fail("pScoutAnalyst pending state must only render when no best readable Scout call exists")
+        fail("pScoutAnalyst queued state must only render when no best readable Scout call exists")
     fetch_backend = _func_body(text, "async function fetchBackendDashboardData(")
     if "syncDynamicScoutPayload(j)" not in fetch_backend:
         fail("fetchBackendDashboardData must refresh dynamic Scout calls from /dashboard-data")
@@ -615,6 +616,30 @@ def assert_first_screen(text: str) -> None:
     for need in ("尚未进入赛前生产窗口", "早盘参考待生成", "赛前观察待生成", "正式判断待生成", "最终版待生成", "赛前窗口已关闭", "等待赛后复盘"):
         if need not in scout:
             fail(f"Scout analyst empty state missing autopilot wording: {need}")
+    for need in ("scoutFixtureQueueStatus(r)", "当前场仍在待处理队列", "scheduler 本轮只生成了其他场次", "当前场生成失败"):
+        if need not in scout:
+            fail(f"Scout analyst must distinguish current-fixture scheduler state: {need}")
+    queue_status = _func_body(text, "function scoutFixtureQueueStatus(")
+    if not queue_status:
+        fail("scoutFixtureQueueStatus function missing")
+    for need in ("已有AI推荐", "待生成", "数据未就绪", "已过窗口", "未到窗口", "scoutPendingPreview()", "scoutFailedFixtureIds()", "手动兜底生成当前场", "status:'queued'"):
+        if need not in queue_status:
+            fail(f"per-fixture AI status missing token: {need}")
+    failed_ids = _func_body(text, "function scoutFailedFixtureIds(")
+    if "failed_fixtures" not in failed_ids:
+        fail("scoutFailedFixtureIds must read scheduler failed_fixtures")
+    pending_preview = _func_body(text, "function scoutPendingPreview(")
+    if "pending_remaining_preview" not in pending_preview or "pending_preview" not in pending_preview:
+        fail("scoutPendingPreview must read scheduler pending preview fields")
+    rail = _func_body(text, "function renderRail(")
+    if "scoutFixtureQueueStatus(r)" not in rail or "ai-status" not in rail:
+        fail("left fixture rail must show per-fixture AI status")
+    refresh_view = _func_body(text, "async function refreshDashboardView(")
+    if not refresh_view:
+        fail("refreshDashboardView function missing")
+    for need in ("fetchBackendDashboardData()", "requestedFixture", "setActiveByFixture(requestedFixture)", "renderPanel()"):
+        if need not in refresh_view:
+            fail(f"refreshDashboardView must refresh dynamic Scout payload without losing selected fixture: {need}")
     learning_func = _func_body(text, "function pScoutLearningStatus(")
     if not learning_func:
         fail("pScoutLearningStatus function missing")

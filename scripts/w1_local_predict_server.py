@@ -1354,6 +1354,15 @@ def scout_call_exists(fixture_id: str) -> bool:
     return False
 
 
+def scout_call_dashboard_ready(fixture_id: str) -> bool:
+    """Dynamic readiness: /dashboard-data can serve this fixture's Scout call."""
+    payload = load_scout_calls_for_dashboard()
+    for call in payload.get("calls") or []:
+        if str(call.get("fixture_id") or "") == str(fixture_id) and isinstance(call.get("read"), dict):
+            return True
+    return False
+
+
 def scout_embedded_in_dashboard(fixture_id: str) -> bool:
     if not DASHBOARD_HTML.is_file():
         return False
@@ -1371,6 +1380,26 @@ def scout_embedded_in_dashboard(fixture_id: str) -> bool:
     return False
 
 
+def scout_stage_for_match(match: dict[str, Any]) -> tuple[str, str]:
+    kickoff = parse_utc_datetime(match.get("kickoff_utc") or match.get("kickoff"))
+    if kickoff is None:
+        return "watch_12h", "赛前观察"
+    minutes = (kickoff - datetime.now(timezone.utc)).total_seconds() / 60.0
+    if minutes <= 30:
+        return "final_30m", "最终版"
+    if minutes <= 60:
+        return "official_1h", "正式判断"
+    if minutes <= 120:
+        return "watch_2h", "赛前观察"
+    if minutes <= 360:
+        return "watch_6h", "赛前观察"
+    if minutes <= 720:
+        return "watch_12h", "赛前观察"
+    if minutes <= 1440:
+        return "early_24h", "早盘参考"
+    return "early_48h", "早盘参考"
+
+
 def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
     fixture_id = str(match.get("fixture_id") or "")
     if not manual_scout_enabled():
@@ -1382,12 +1411,17 @@ def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
     if not deepseek_key_available(env):
         return "基础数据已刷新；AI 解读未生成：当前 W1 server 进程未读取到 DEEPSEEK_API_KEY。请在启动 server 前 export DEEPSEEK_API_KEY，或写入 .env.local 后重启 server。"
     api_available = api_football_key_available(env)
+    stage_id, stage_label = scout_stage_for_match(match)
     scout_env = {
         **env,
         "W1_SCOUT_FORCE_FIXTURE": fixture_id,
+        "W1_SCOUT_SCHEDULE_STAGE": stage_id,
+        "W1_SCOUT_SCHEDULE_STAGE_LABEL": stage_label,
+        "W1_SCOUT_FORCE_REFRESH": "1",
         "W1_SCOUT_PREMATCH_ONLY": "1",
         "W1_SCOUT_DISABLE_MEMORY_COMMIT": "1",
     }
+    print(f"runner force fixture={fixture_id} stage={stage_id} label={stage_label}")
     if not api_available:
         scout_env["W1_SCOUT_SKIP_FETCH"] = "1"
     try:
@@ -1400,15 +1434,15 @@ def run_manual_scout_cycle(match: dict[str, Any], env: dict[str, str]) -> str:
         tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-1:] or ["Scout cycle failed"]
         return "AI 解读未生成：Scout 单场周期失败；未推进旧内容。" + (" " + tail[0] if tail else "")
     has_call = scout_call_exists(fixture_id)
-    has_embed = scout_embedded_in_dashboard(fixture_id)
-    if has_call and has_embed:
+    dashboard_ready = scout_call_dashboard_ready(fixture_id)
+    if has_call and dashboard_ready:
         api_note = "实时 API 可用，本轮先刷新基础数据，再生成 Scout 解读。" if api_available else "实时 API 未配置，本轮使用本地缓存 / match card / 已有 bundle 生成 Scout 解读；不伪造缺失数据。"
         stdout = proc.stdout or ""
         if "embed_existing" in stdout or "补写 dashboard 上屏" in stdout or "dashboard embed missing" in stdout:
-            return f"{api_note} 已有合法赛前解读，本轮已补写 dashboard 上屏；未重复调用 AI。"
-        return f"{api_note} Scout 单场赛前解读已生成并上屏，已按首次合法赛前 call 锁定。"
-    if has_call and not has_embed:
-        return "AI 解读已生成但未上屏：dashboard embed 校验失败，请检查 w1_scout_embed.py。"
+            return f"{api_note} 已有合法赛前解读，本轮已补写 dashboard 动态上屏；未重复调用 AI。"
+        return f"{api_note} Scout 单场赛前解读已生成并可由 /dashboard-data 上屏，已按当前阶段 {stage_label} 锁定。"
+    if has_call and not dashboard_ready:
+        return "AI 解读已生成但未上屏：/dashboard-data scout_calls 校验失败，请检查动态 payload。"
     return "AI 解读未生成：Scout 单场周期未产出合法 read；未推进旧内容。"
 
 
@@ -1417,14 +1451,14 @@ def final_refresh_message(live_status: str, scout_message: str) -> str:
         return "完成 ✓ 已刷新基础数据；AI 解读未生成：当前 W1 server 进程未读取到 DEEPSEEK_API_KEY。请在启动 server 前 export DEEPSEEK_API_KEY，或写入 .env.local 后重启 server。"
     if "W1_MANUAL_REFRESH_TRIGGER_SCOUT=0" in scout_message:
         return "完成 ✓ 已刷新基础数据；Scout 自动解读已被 W1_MANUAL_REFRESH_TRIGGER_SCOUT=0 关闭。"
-    if "补写 dashboard 上屏" in scout_message:
-        return "完成 ✓ 已刷新基础数据；已有合法赛前解读，本轮已补写 dashboard 上屏；未重复调用 AI。"
+    if "补写 dashboard 上屏" in scout_message or "补写 dashboard 动态上屏" in scout_message:
+        return "完成 ✓ 已刷新基础数据；已有合法赛前解读，本轮已补写 dashboard 动态上屏；未重复调用 AI。"
     if "使用本地缓存" in scout_message and (
-        "已生成并上屏" in scout_message
+        "已生成并上屏" in scout_message or "可由 /dashboard-data 上屏" in scout_message
     ):
-        return "完成 ✓ 已刷新基础数据；实时 API 缺失，本轮使用本地缓存生成 Scout 解读，上屏成功。"
-    if "已生成并上屏" in scout_message or "补写 dashboard 上屏" in scout_message:
-        return "完成 ✓ 已刷新基础数据，并生成本场 Scout 解读，上屏成功。"
+        return "完成 ✓ 已刷新基础数据；实时 API 缺失，本轮使用本地缓存生成 Scout 解读，动态上屏成功。"
+    if "已生成并上屏" in scout_message or "可由 /dashboard-data 上屏" in scout_message or "补写 dashboard 动态上屏" in scout_message:
+        return "完成 ✓ 已刷新基础数据，并生成本场 Scout 解读，动态上屏成功。"
     return f"完成 ✓ 已刷新基础数据；{scout_message or f'实时刷新 {live_status}。'}"
 
 
