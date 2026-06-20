@@ -16,6 +16,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import w1_odds_snapshot_store as SNAPSHOTS
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/w1_recommendation_policy.json"
 BUNDLES = ROOT / "state/w1_scout_bundles.json"
@@ -95,11 +97,30 @@ def _empty_result(config: dict[str, Any]) -> dict[str, Any]:
         "failed_gates": [],
         "gate_severity": "none",
         "movement_flags": [],
+        "snapshots": {
+            "snapshots_count": 0,
+            "snapshots_source": "missing",
+            "snapshots_used": 0,
+            "first_stage_id": None,
+            "latest_stage_id": None,
+            "first_captured_at": None,
+            "latest_captured_at": None,
+        },
+        "movement": {
+            "selected_side": "",
+            "first_selected_handicap": None,
+            "latest_selected_handicap": None,
+            "first_selected_price": None,
+            "latest_selected_price": None,
+            "line_delta": None,
+            "price_delta": None,
+        },
         "conflict_flags": [],
         "grade_caps_applied": [],
         "reassess_triggers": [],
         "pass_reason": "",
         "observe_reason": "",
+        "movement_summary_cn": "",
         "policy_summary_cn": "",
     }
 
@@ -274,6 +295,10 @@ def _cap_grade(grade: str, max_grade: str) -> str:
     return GRADE_BY_ORDER[min(GRADE_ORDER.get(grade, 0), GRADE_ORDER.get(max_grade, 0))]
 
 
+def _downgrade_grade(grade: str, steps: int = 1) -> str:
+    return GRADE_BY_ORDER[max(0, GRADE_ORDER.get(grade, 0) - int(steps))]
+
+
 def apply_grade_caps(grade: str, context: dict[str, Any], config: dict[str, Any]) -> tuple[str, list[str]]:
     caps: list[str] = []
     calibration = config.get("calibration") or {}
@@ -293,6 +318,149 @@ def apply_grade_caps(grade: str, context: dict[str, Any], config: dict[str, Any]
                 caps.append("untrained_with_lineup_unconfirmed_max_grade")
             grade = capped
     return grade, caps
+
+
+def _selected_values(snapshot: dict[str, Any], side: str) -> tuple[float | None, float | None]:
+    if side == "home":
+        return _num(snapshot.get("home_handicap")), _num(snapshot.get("home_price"))
+    if side == "away":
+        return _num(snapshot.get("away_handicap")), _num(snapshot.get("away_price"))
+    return None, None
+
+
+def _snapshot_meta(summary: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "snapshots_count": int(summary.get("snapshots_count") or 0),
+        "snapshots_source": summary.get("snapshots_source") or "missing",
+        "snapshots_used": int(summary.get("snapshots_used") or 0),
+        "first_stage_id": summary.get("first_stage_id"),
+        "latest_stage_id": summary.get("latest_stage_id"),
+        "first_captured_at": summary.get("first_captured_at"),
+        "latest_captured_at": summary.get("latest_captured_at"),
+    }
+
+
+def analyze_movement(bundle: dict[str, Any], selected_side: str, config: dict[str, Any]) -> dict[str, Any]:
+    movement_cfg = config.get("movement_policy") or {}
+    min_snapshots = int(movement_cfg.get("min_snapshots", 2))
+    price_threshold = float(movement_cfg.get("price_move_threshold", 0.04))
+    late_stage_ids = set(str(item) for item in movement_cfg.get("late_stage_ids", ["official_1h", "final_30m"]))
+    fid = str(bundle.get("fixture_id") or "")
+    summary = SNAPSHOTS.summarize_fixture(fid, bundle)
+    snapshots = summary.get("snapshots") or []
+    flags: list[str] = []
+    stale_reason = None
+    if len(snapshots) < min_snapshots:
+        stale_reason = "valid snapshots fewer than minimum"
+    if not selected_side:
+        stale_reason = stale_reason or "selected side missing"
+    first = snapshots[0] if snapshots else {}
+    latest = snapshots[-1] if snapshots else {}
+    first_line, first_price = _selected_values(first, selected_side)
+    latest_line, latest_price = _selected_values(latest, selected_side)
+    if first_line is None or latest_line is None or first_price is None or latest_price is None:
+        stale_reason = stale_reason or "selected line/price missing"
+    if any(not str((row or {}).get("captured_at") or "").strip() for row in snapshots):
+        stale_reason = stale_reason or "captured_at missing"
+    if stale_reason:
+        flags.append("stale_or_missing_snapshots")
+        return {
+            "snapshots": _snapshot_meta(summary),
+            "movement": {
+                "selected_side": selected_side,
+                "first_selected_handicap": _round(first_line),
+                "latest_selected_handicap": _round(latest_line),
+                "first_selected_price": _round(first_price, 3),
+                "latest_selected_price": _round(latest_price, 3),
+                "line_delta": None if first_line is None or latest_line is None else _round(latest_line - first_line),
+                "price_delta": None if first_price is None or latest_price is None else _round(latest_price - first_price, 3),
+            },
+            "movement_flags": flags,
+            "movement_summary_cn": "盘口快照不足，无法验证早盘到临场变化；在未校准状态下，推荐等级最高限制为 B+。",
+        }
+    line_delta = float(latest_line) - float(first_line)
+    price_delta = float(latest_price) - float(first_price)
+    if line_delta < 0:
+        flags.append("line_moved_against_pick")
+    elif line_delta > 0:
+        flags.append("line_moved_with_pick")
+    if price_delta > price_threshold:
+        flags.extend(["price_moved_against_pick", "selected_side_drift"])
+    elif price_delta < -price_threshold:
+        flags.append("selected_side_steam")
+
+    if len(snapshots) >= 2:
+        prev = snapshots[-2]
+        prev_line, prev_price = _selected_values(prev, selected_side)
+        late_stage = str(latest.get("stage_id") or "") in late_stage_ids or str(prev.get("stage_id") or "") in late_stage_ids
+        if prev_line is not None and latest_line is not None and prev_price is not None and latest_price is not None:
+            late_line_delta = float(latest_line) - float(prev_line)
+            late_price_delta = float(latest_price) - float(prev_price)
+            if late_stage and (late_line_delta < 0 or late_price_delta > price_threshold):
+                flags.append("reverse_move_late")
+
+    flags = list(dict.fromkeys(flags))
+    if "stale_or_missing_snapshots" in flags:
+        summary_cn = "盘口快照不足，无法验证早盘到临场变化；在未校准状态下，推荐等级最高限制为 B+。"
+    elif not flags or set(flags).issubset({"selected_side_steam", "line_moved_with_pick"}):
+        summary_cn = (
+            f"盘口快照充足，候选方向 {selected_side or 'unknown'} 未出现退盘；"
+            f"盘口变化 {line_delta:+.2f}，水位变化 {price_delta:+.2f}，未触发反向风险。"
+        )
+    else:
+        summary_cn = (
+            f"盘口快照显示候选方向出现反向变化：盘口变化 {line_delta:+.2f}，"
+            f"水位变化 {price_delta:+.2f}，触发 {', '.join(flags)}。"
+        )
+    return {
+        "snapshots": _snapshot_meta(summary),
+        "movement": {
+            "selected_side": selected_side,
+            "first_selected_handicap": _round(first_line),
+            "latest_selected_handicap": _round(latest_line),
+            "first_selected_price": _round(first_price, 3),
+            "latest_selected_price": _round(latest_price, 3),
+            "line_delta": _round(line_delta),
+            "price_delta": _round(price_delta, 3),
+        },
+        "movement_flags": flags,
+        "movement_summary_cn": summary_cn,
+    }
+
+
+def apply_movement_policy(grade: str, movement_flags: list[str], config: dict[str, Any]) -> tuple[str, list[str], list[str], str]:
+    movement_cfg = config.get("movement_policy") or {}
+    caps: list[str] = []
+    conflicts: list[str] = []
+    observe_reason = ""
+    if "reverse_move_late" in movement_flags:
+        conflicts.append("reverse_move_late")
+        if GRADE_ORDER.get(grade, 0) > GRADE_ORDER["B"]:
+            grade = "B"
+            caps.append("reverse_move_late_observe")
+        observe_reason = "临场盘口出现反向变化，降为观察。"
+    adverse_line = "line_moved_against_pick" in movement_flags
+    adverse_price = "price_moved_against_pick" in movement_flags
+    if adverse_line:
+        conflicts.append("line_moved_against_pick")
+        steps = int(movement_cfg.get("line_moved_against_pick_downgrade", 1))
+        before = grade
+        grade = _downgrade_grade(grade, steps)
+        if grade != before:
+            caps.append("line_moved_against_pick_downgrade")
+    if adverse_price:
+        conflicts.append("price_moved_against_pick")
+        steps = int(movement_cfg.get("price_moved_against_pick_downgrade", 1))
+        before = grade
+        grade = _downgrade_grade(grade, steps)
+        if grade != before:
+            caps.append("price_moved_against_pick_downgrade")
+    if adverse_line and adverse_price:
+        if GRADE_ORDER.get(grade, 0) > GRADE_ORDER["B"]:
+            grade = "B"
+        caps.append("double_adverse_move_min_observe")
+        observe_reason = observe_reason or "盘口和水位同时朝候选方向反向变化，降为观察。"
+    return grade, caps, list(dict.fromkeys(conflicts)), observe_reason
 
 
 def map_grade_to_decision_state(grade: str, failed_gates: list[str], config: dict[str, Any]) -> str:
@@ -319,13 +487,6 @@ def _pass_reason(failed: list[str]) -> str:
     return "hard gate 未通过，不形成亚盘推荐。"
 
 
-def _movement_flags(bundle: dict[str, Any]) -> list[str]:
-    ah = _ah_market(bundle)
-    if not ah.get("snapshots_count") or float(ah.get("snapshots_count") or 0) <= 0:
-        return ["stale_or_missing_snapshots"]
-    return []
-
-
 def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
     config = config or load_policy_config()
     result = _empty_result(config)
@@ -345,7 +506,9 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
     edge_result = compute_cover_edges(bundle, market_probs) if market_probs else {}
     candidate = choose_candidate_side(edge_result)
     failed_info = detect_hard_gates(bundle, candidate)
-    movement_flags = _movement_flags(bundle)
+    candidate_side = str(candidate.get("side") or "")
+    movement_info = analyze_movement(bundle, candidate_side, config)
+    movement_flags = movement_info["movement_flags"]
     calibration_status = str((config.get("calibration") or {}).get("default_status", "untrained"))
     lineup = bundle.get("lineup") if isinstance(bundle.get("lineup"), dict) else {}
     context = {
@@ -356,12 +519,16 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
     edge = candidate.get("edge")
     edge_pp = None if edge is None else float(edge) * 100.0
     grade = "PASS" if failed_info["failed_gates"] else apply_grade_thresholds(edge_pp, config)
+    movement_caps: list[str] = []
+    movement_conflicts: list[str] = []
+    movement_observe_reason = ""
+    if grade != "PASS":
+        grade, movement_caps, movement_conflicts, movement_observe_reason = apply_movement_policy(grade, movement_flags, config)
     if grade != "PASS":
         grade, caps = apply_grade_caps(grade, context, config)
     else:
         caps = []
     decision = map_grade_to_decision_state(grade, failed_info["failed_gates"], config)
-    candidate_side = str(candidate.get("side") or "")
     candidate_pick = _pick_text(bundle, candidate_side, candidate.get("handicap"))
     selected_handicap = _round(candidate.get("handicap"))
     selected_price = _round(candidate.get("price"), 3)
@@ -390,7 +557,11 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
     result["failed_gates"] = failed_info["failed_gates"]
     result["gate_severity"] = "hard" if result["failed_gates"] else "none"
     result["movement_flags"] = movement_flags
-    result["grade_caps_applied"] = caps
+    result["snapshots"] = movement_info["snapshots"]
+    result["movement"] = movement_info["movement"]
+    result["movement_summary_cn"] = movement_info["movement_summary_cn"]
+    result["conflict_flags"] = movement_conflicts
+    result["grade_caps_applied"] = movement_caps + caps
     result["reassess_triggers"] = _clean_list([
         "等待盘口快照后复核退盘/升水" if "stale_or_missing_snapshots" in movement_flags else None,
         "首发确认后复核" if context["lineup_unconfirmed"] else None,
@@ -398,10 +569,13 @@ def build_policy_result(bundle: dict[str, Any], config: dict[str, Any] | None = 
     if decision == "PASS":
         result["main_ah_pick"] = ""
         result["main_ah_side"] = ""
-        result["pass_reason"] = _pass_reason(result["failed_gates"] or ["edge_below_threshold"])
+        if movement_conflicts:
+            result["pass_reason"] = "盘口变化触发 PASS：候选方向出现退盘、升水或临场反向变化。"
+        else:
+            result["pass_reason"] = _pass_reason(result["failed_gates"] or ["edge_below_threshold"])
     elif decision == "OBSERVE":
         result["main_ah_pick"] = ""
-        result["observe_reason"] = f"{candidate_pick} 有边际优势但等级为 B，仅观察，不作为强推荐。"
+        result["observe_reason"] = movement_observe_reason or f"{candidate_pick} 有边际优势但等级为 B，仅观察，不作为强推荐。"
     result["policy_summary_cn"] = (
         f"{decision} / {grade}: {candidate_pick or '无候选主推'}; "
         f"edge={_round(edge)}; calibration={calibration_status}; mode={result['policy_mode']}"
@@ -610,7 +784,63 @@ def _assert(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
-def _sample_bundle(edge: float | None = 0.06, *, missing_ah: bool = False, missing_price: bool = False, missing_score: bool = False, invalid_sign: bool = False, stale: bool = False, lineup_confirmed: bool = True) -> dict[str, Any]:
+def _sample_snapshots(kind: str = "stable") -> list[dict[str, Any]]:
+    base = [
+        {
+            "fixture_id": "test",
+            "stage_id": "early_24h",
+            "captured_at": "2026-06-20T00:00:00Z",
+            "home_handicap": -0.5,
+            "away_handicap": 0.5,
+            "home_price": 2.0,
+            "away_price": 1.86,
+            "bookmaker_count": 8,
+            "source": "self-test",
+        },
+        {
+            "fixture_id": "test",
+            "stage_id": "watch_6h",
+            "captured_at": "2026-06-20T01:00:00Z",
+            "home_handicap": -0.5,
+            "away_handicap": 0.5,
+            "home_price": 2.05,
+            "away_price": 1.80,
+            "bookmaker_count": 8,
+            "source": "self-test",
+        },
+    ]
+    if kind == "one":
+        return base[:1]
+    if kind == "line_against":
+        base[-1]["home_handicap"] = -0.25
+        base[-1]["away_handicap"] = 0.25
+    elif kind == "price_against":
+        base[-1]["away_price"] = 1.92
+    elif kind == "double_against":
+        base[-1]["home_handicap"] = -0.25
+        base[-1]["away_handicap"] = 0.25
+        base[-1]["away_price"] = 1.92
+    elif kind == "reverse_late":
+        base.append({
+            "fixture_id": "test",
+            "stage_id": "final_30m",
+            "captured_at": "2026-06-20T01:30:00Z",
+            "home_handicap": -0.25,
+            "away_handicap": 0.25,
+            "home_price": 1.9,
+            "away_price": 1.98,
+            "bookmaker_count": 8,
+            "source": "self-test",
+        })
+    elif kind == "steam":
+        base[-1]["away_price"] = 1.76
+    elif kind == "line_with":
+        base[-1]["home_handicap"] = -0.75
+        base[-1]["away_handicap"] = 0.75
+    return base
+
+
+def _sample_bundle(edge: float | None = 0.06, *, missing_ah: bool = False, missing_price: bool = False, missing_score: bool = False, invalid_sign: bool = False, stale: bool = False, lineup_confirmed: bool = True, movement: str = "stable") -> dict[str, Any]:
     home_price = None if missing_price else 2.0
     away_price = None if missing_price else 1.8
     home_handicap = 0.5 if invalid_sign else -0.5
@@ -630,13 +860,18 @@ def _sample_bundle(edge: float | None = 0.06, *, missing_ah: bool = False, missi
         "snapshots_count": None if stale else 2,
         "snapshots_source": None if stale else "self-test",
     }
-    return {
+    bundle = {
         "fixture_id": "test",
         "home": "主队",
         "away": "客队",
         "lineup": {"confirmed": lineup_confirmed},
         "market": {"ah": ah},
     }
+    if not missing_ah and not stale:
+        bundle["odds_snapshots"] = _sample_snapshots(movement)
+    elif stale and not missing_ah:
+        bundle["odds_snapshots"] = _sample_snapshots("one")
+    return bundle
 
 
 def self_test() -> None:
@@ -645,6 +880,12 @@ def self_test() -> None:
         ("recommend_a_minus", _sample_bundle(0.06), "A-", "RECOMMEND"),
         ("a_cap_untrained", _sample_bundle(0.08), "A-", "RECOMMEND"),
         ("stale_cap", _sample_bundle(0.08, stale=True), "B+", "RECOMMEND"),
+        ("line_against_downgrade", _sample_bundle(0.06, movement="line_against"), "B+", "RECOMMEND"),
+        ("price_against_downgrade", _sample_bundle(0.06, movement="price_against"), "B+", "RECOMMEND"),
+        ("double_against_observe", _sample_bundle(0.06, movement="double_against"), "B", "OBSERVE"),
+        ("reverse_late_pass", _sample_bundle(0.06, movement="reverse_late"), "PASS", "PASS"),
+        ("selected_side_steam_no_upgrade", _sample_bundle(0.04, movement="steam"), "B+", "RECOMMEND"),
+        ("line_with_pick_no_upgrade", _sample_bundle(0.04, movement="line_with"), "B+", "RECOMMEND"),
         ("observe_b", _sample_bundle(0.02), "B", "OBSERVE"),
         ("pass_low_edge", _sample_bundle(0.01), "PASS", "PASS"),
         ("pass_missing_ah", _sample_bundle(0.06, missing_ah=True), "PASS", "PASS"),

@@ -15,12 +15,14 @@ POLICY = ROOT / "scripts/w1_recommendation_policy.py"
 BUNDLE = ROOT / "scripts/w1_scout_bundle.py"
 BUNDLES = ROOT / "state/w1_scout_bundles.json"
 MARKET_DEBUG = ROOT / "scripts/w1_scout_market_debug.py"
+SNAPSHOT_STORE = ROOT / "scripts/w1_odds_snapshot_store.py"
 
 sys.path.insert(0, str(ROOT / "scripts"))
 import w1_recommendation_policy as W1REC  # noqa: E402
 
 DECISIONS = {"RECOMMEND", "OBSERVE", "PASS"}
 GRADES = {"A", "A-", "B+", "B", "PASS"}
+GRADE_ORDER = {"PASS": 0, "B": 1, "B+": 2, "A-": 3, "A": 4}
 
 
 def fail(message: str) -> None:
@@ -65,6 +67,44 @@ def validate_policy_result(result: dict[str, Any], label: str = "policy_result")
     failed = result.get("failed_gates")
     if not isinstance(failed, list):
         fail(f"{label}.failed_gates must be list")
+    snapshots = result.get("snapshots")
+    if not isinstance(snapshots, dict):
+        fail(f"{label}.snapshots must be object")
+    for key in ("snapshots_count", "snapshots_source", "snapshots_used", "first_stage_id", "latest_stage_id", "first_captured_at", "latest_captured_at"):
+        if key not in snapshots:
+            fail(f"{label}.snapshots.{key} missing")
+    movement = result.get("movement")
+    if not isinstance(movement, dict):
+        fail(f"{label}.movement must be object")
+    for key in ("selected_side", "first_selected_handicap", "latest_selected_handicap", "first_selected_price", "latest_selected_price", "line_delta", "price_delta"):
+        if key not in movement:
+            fail(f"{label}.movement.{key} missing")
+    flags = result.get("movement_flags")
+    if not isinstance(flags, list):
+        fail(f"{label}.movement_flags must be list")
+    if not str(result.get("movement_summary_cn") or "").strip():
+        fail(f"{label}.movement_summary_cn missing")
+    cfg = load_json(CONFIG)
+    min_snapshots = int((cfg.get("movement_policy") or {}).get("min_snapshots", 2))
+    if int(snapshots.get("snapshots_used") or 0) < min_snapshots and "stale_or_missing_snapshots" not in flags:
+        fail(f"{label} insufficient snapshots must flag stale_or_missing_snapshots")
+    if "stale_or_missing_snapshots" in flags and probability.get("calibration_status") == "untrained" and GRADE_ORDER[grade] > GRADE_ORDER["B+"]:
+        fail(f"{label} stale/untrained must cap grade to B+")
+    caps = result.get("grade_caps_applied")
+    if not isinstance(caps, list):
+        fail(f"{label}.grade_caps_applied must be list")
+    if "line_moved_against_pick" in flags and not any("line_moved_against_pick" in str(item) for item in caps):
+        fail(f"{label} line_moved_against_pick must record downgrade")
+    if "price_moved_against_pick" in flags and not any("price_moved_against_pick" in str(item) for item in caps):
+        fail(f"{label} price_moved_against_pick must record downgrade")
+    if "reverse_move_late" in flags and decision not in {"OBSERVE", "PASS"}:
+        fail(f"{label} reverse_move_late must OBSERVE/PASS")
+    if decision in {"OBSERVE", "PASS"} and result.get("main_ah_pick"):
+        fail(f"{label} OBSERVE/PASS must clear main_ah_pick")
+    if any(flag in flags for flag in ("line_moved_against_pick", "price_moved_against_pick", "reverse_move_late")) and decision in {"OBSERVE", "PASS"}:
+        reason = str(result.get("observe_reason") or result.get("pass_reason") or "")
+        if not any(token in reason for token in ("盘口", "水位", "反向", "退盘", "升水")):
+            fail(f"{label} movement-driven OBSERVE/PASS must explain market movement")
     if probability.get("market_prob_fair") is None and decision != "PASS":
         fail(f"{label} missing market_prob_fair outside PASS")
     if probability.get("calibration_status") == "untrained" and grade == "A":
@@ -107,6 +147,29 @@ def reverse_tests() -> None:
     stale = W1REC.build_policy_result(W1REC._sample_bundle(0.08, stale=True), cfg)
     if stale.get("recommendation_grade") != "B+":
         fail("reverse stale cap failed")
+    if "stale_or_missing_snapshots" not in stale.get("movement_flags", []):
+        fail("reverse stale must flag stale_or_missing_snapshots")
+    one = W1REC.build_policy_result(W1REC._sample_bundle(0.08, movement="one"), cfg)
+    if "stale_or_missing_snapshots" not in one.get("movement_flags", []) or one.get("recommendation_grade") != "B+":
+        fail("reverse one snapshot stale cap failed")
+    line_against = W1REC.build_policy_result(W1REC._sample_bundle(0.06, movement="line_against"), cfg)
+    if "line_moved_against_pick" not in line_against.get("movement_flags", []) or line_against.get("recommendation_grade") != "B+":
+        fail("reverse line moved against downgrade failed")
+    price_against = W1REC.build_policy_result(W1REC._sample_bundle(0.06, movement="price_against"), cfg)
+    if "price_moved_against_pick" not in price_against.get("movement_flags", []) or price_against.get("recommendation_grade") != "B+":
+        fail("reverse price moved against downgrade failed")
+    double_against = W1REC.build_policy_result(W1REC._sample_bundle(0.06, movement="double_against"), cfg)
+    if double_against.get("decision_state") != "OBSERVE" or "double_adverse_move_min_observe" not in double_against.get("grade_caps_applied", []):
+        fail("reverse double adverse OBSERVE failed")
+    reverse_late = W1REC.build_policy_result(W1REC._sample_bundle(0.06, movement="reverse_late"), cfg)
+    if reverse_late.get("decision_state") not in {"OBSERVE", "PASS"} or "reverse_move_late" not in reverse_late.get("movement_flags", []):
+        fail("reverse late move OBSERVE/PASS failed")
+    steam = W1REC.build_policy_result(W1REC._sample_bundle(0.04, movement="steam"), cfg)
+    if steam.get("recommendation_grade") != "B+" or "selected_side_steam" not in steam.get("movement_flags", []):
+        fail("reverse selected side steam must not upgrade")
+    line_with = W1REC.build_policy_result(W1REC._sample_bundle(0.04, movement="line_with"), cfg)
+    if line_with.get("recommendation_grade") != "B+" or "line_moved_with_pick" not in line_with.get("movement_flags", []):
+        fail("reverse line moved with pick must not upgrade")
     observe = W1REC.build_policy_result(W1REC._sample_bundle(0.02), cfg)
     if observe.get("decision_state") != "OBSERVE" or observe.get("main_ah_pick"):
         fail("reverse observe mapping failed")
@@ -198,9 +261,12 @@ def main() -> int:
         "W1_RECOMMENDATION_POLICY_MODE",
         "enforce_call_with_policy",
         "policy_consistency_issues",
+        "analyze_movement",
+        "apply_movement_policy",
     ])
     assert_file_contains(BUNDLE, ["policy_result", "build_policy_result"])
-    assert_file_contains(MARKET_DEBUG, ["policy_version", "decision_state", "policy_summary_cn"])
+    assert_file_contains(SNAPSHOT_STORE, ["fixture_snapshots", "summarize_fixture", "home_handicap", "away_price"])
+    assert_file_contains(MARKET_DEBUG, ["policy_version", "decision_state", "policy_summary_cn", "movement_summary_cn"])
     payload = ensure_bundles()
     seen_decisions = set()
     for bundle in payload.get("bundles", []):

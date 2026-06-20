@@ -383,6 +383,7 @@ def policy_prompt_line(bundle: dict[str, Any]) -> str:
         "observe_reason",
         "movement_flags",
         "grade_caps_applied",
+        "movement_summary_cn",
         "policy_summary_cn",
     )
     compact = {key: policy.get(key) for key in keys}

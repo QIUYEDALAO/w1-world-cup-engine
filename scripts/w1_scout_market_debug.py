@@ -202,7 +202,11 @@ def main() -> int:
     one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
     policy = policy_result(bundle)
     probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
+    movement = policy.get("movement") if isinstance(policy.get("movement"), dict) else {}
     snapshots_count, snapshots_source = odds_snapshots_for_fixture(fid)
+    snapshots_count = int(snapshots.get("snapshots_count") or snapshots_count or 0)
+    snapshots_source = str(snapshots.get("snapshots_source") or snapshots_source or "missing")
     consistency, conflict_flags, visible_conflicts = consistency_for_fixture(fid, bundle, policy)
 
     rec = match_record(fid)
@@ -230,6 +234,17 @@ def main() -> int:
     print(f"cover_edge={fmt(ah.get('cover_edge'))}")
     print(f"snapshots_count={snapshots_count}")
     print(f"snapshots_source={snapshots_source}")
+    print(f"snapshots_used={fmt(snapshots.get('snapshots_used'))}")
+    print(f"first_stage_id={fmt(snapshots.get('first_stage_id'))}")
+    print(f"latest_stage_id={fmt(snapshots.get('latest_stage_id'))}")
+    print(f"first_captured_at={fmt(snapshots.get('first_captured_at'))}")
+    print(f"latest_captured_at={fmt(snapshots.get('latest_captured_at'))}")
+    print(f"first_selected_handicap={fmt(movement.get('first_selected_handicap'))}")
+    print(f"latest_selected_handicap={fmt(movement.get('latest_selected_handicap'))}")
+    print(f"line_delta={fmt(movement.get('line_delta'))}")
+    print(f"first_selected_price={fmt(movement.get('first_selected_price'))}")
+    print(f"latest_selected_price={fmt(movement.get('latest_selected_price'))}")
+    print(f"price_delta={fmt(movement.get('price_delta'))}")
     print(f"policy_version={fmt(policy.get('policy_version'))}")
     print(f"policy_mode={fmt(policy.get('policy_mode'))}")
     print(f"policy_enforced={policy.get('policy_mode') == 'enforced'}")
@@ -248,6 +263,9 @@ def main() -> int:
     print(f"movement_flags={json.dumps(policy.get('movement_flags') or [], ensure_ascii=False)}")
     print(f"conflict_flags={json.dumps(policy.get('conflict_flags') or [], ensure_ascii=False)}")
     print(f"grade_caps_applied={json.dumps(policy.get('grade_caps_applied') or [], ensure_ascii=False)}")
+    print(f"movement_summary_cn={fmt(policy.get('movement_summary_cn'))}")
+    print(f"final_decision_state={fmt(policy.get('decision_state'))}")
+    print(f"final_recommendation_grade={fmt(policy.get('recommendation_grade'))}")
     print(f"pass_reason={fmt(policy.get('pass_reason'))}")
     print(f"observe_reason={fmt(policy.get('observe_reason'))}")
     print(f"policy_summary_cn={fmt(policy.get('policy_summary_cn'))}")

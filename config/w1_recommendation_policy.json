@@ -18,6 +18,17 @@
     "method": "multiplicative",
     "future_methods": ["shin", "power"]
   },
+  "movement_policy": {
+    "min_snapshots": 2,
+    "price_move_threshold": 0.04,
+    "late_stage_ids": ["official_1h", "final_30m"],
+    "line_moved_against_pick_downgrade": 1,
+    "price_moved_against_pick_downgrade": 1,
+    "double_adverse_move_min_decision_state": "OBSERVE",
+    "reverse_move_late_action": "OBSERVE",
+    "selected_side_steam_allows_upgrade": false,
+    "line_moved_with_pick_allows_upgrade": false
+  },
   "grade_to_decision_state": {
     "A": "RECOMMEND",
     "A-": "RECOMMEND",

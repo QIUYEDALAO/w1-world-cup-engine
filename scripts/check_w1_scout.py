@@ -586,6 +586,16 @@ def validate_call(c: dict, policy: dict) -> list[str]:
             errs.append(f"policy_result consistency: {issue}")
         if c.get("policy_enforced") is not True:
             errs.append("policy_enforced must be true")
+        if not isinstance(policy_result.get("snapshots"), dict):
+            errs.append("policy_result.snapshots must be present")
+        if not isinstance(policy_result.get("movement"), dict):
+            errs.append("policy_result.movement must be present")
+        if not isinstance(policy_result.get("movement_flags"), list):
+            errs.append("policy_result.movement_flags must be list")
+        if not str(policy_result.get("movement_summary_cn") or "").strip():
+            errs.append("policy_result.movement_summary_cn must be present")
+        if "reverse_move_late" in (policy_result.get("movement_flags") or []) and policy_result.get("decision_state") not in {"OBSERVE", "PASS"}:
+            errs.append("policy_result reverse_move_late must OBSERVE/PASS")
     for f in policy["read_required_fields"]:
         if f not in c:
             errs.append(f"missing field {f}")
