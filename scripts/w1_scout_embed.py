@@ -146,6 +146,7 @@ def display_call(call: dict) -> dict:
     enforce_policy_display_copy(out)
     if isinstance(out.get("policy_result"), dict):
         out["decision_card"] = W1CARD.build_decision_card(out)
+        sync_decision_card_display_copy(out)
     bundle = BUNDLE_BY_FIXTURE.get(str(out.get("fixture_id") or ""))
     read = out.get("read")
     if isinstance(read, dict):
@@ -244,6 +245,33 @@ def enforce_policy_display_copy(out: dict) -> None:
         ah["final_action_cn"] = "亚盘结论：观察。"
         ah["recommendation_grade"] = "观察"
         card["ah_pick_cn"] = (f"{candidate}｜仅观察｜来源：Policy Engine" if candidate else "候选方向待确认｜仅观察｜来源：Policy Engine")
+
+
+def sync_decision_card_display_copy(out: dict) -> None:
+    """Mirror the locked decision_card into fallback visible text."""
+    decision_card = out.get("decision_card") if isinstance(out.get("decision_card"), dict) else {}
+    read = out.get("read") if isinstance(out.get("read"), dict) else {}
+    rec_text = read.get("recommendation_text") if isinstance(read.get("recommendation_text"), dict) else {}
+    if not decision_card or not rec_text:
+        return
+    reasons = decision_card.get("reason_blocks_cn") if isinstance(decision_card.get("reason_blocks_cn"), list) else []
+    score = decision_card.get("score_path_cn") if isinstance(decision_card.get("score_path_cn"), dict) else {}
+    alternates = " / ".join(str(x) for x in score.get("alternates", []) if str(x).strip()) or "待确认"
+    rec_text["headline_cn"] = str(decision_card.get("headline_cn") or rec_text.get("headline_cn") or "").strip()
+    rec_text["grade_cn"] = str(decision_card.get("subheadline_cn") or rec_text.get("grade_cn") or "").strip()
+    rec_text["core_judgement_cn"] = str(decision_card.get("one_line_verdict_cn") or rec_text.get("core_judgement_cn") or "").strip()
+    rec_text["reason_bullets_cn"] = [
+        str(row.get("text") or "").strip()
+        for row in reasons
+        if isinstance(row, dict) and str(row.get("text") or "").strip()
+    ][:4]
+    rec_text["score_recommendation_cn"] = f"主比分：{score.get('primary') or '待确认'}；备选：{alternates}；风险：{score.get('risk') or '待确认'}"
+    rec_text["ou_aux_cn"] = str(decision_card.get("ou_aux_cn") or rec_text.get("ou_aux_cn") or "").strip()
+    rec_text["live_invalidation_cn"] = [
+        str(item).strip()
+        for item in (decision_card.get("invalidation_conditions_cn") if isinstance(decision_card.get("invalidation_conditions_cn"), list) else [])
+        if str(item).strip()
+    ]
 
 
 def load_bundle_map() -> dict[str, dict]:

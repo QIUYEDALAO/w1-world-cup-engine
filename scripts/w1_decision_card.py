@@ -18,6 +18,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_VERSION = "w1_decision_card_v1"
 REASON_LABELS = ("盘口结构", "模型优势", "路径一致性")
+OPTIONAL_REASON_LABELS = ("盘口变化",)
 FORBIDDEN_GENERAL = ("重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中", "必穿", "保证命中", "资金建议", "稳胆", "稳赢")
 FORBIDDEN_NON_RECOMMEND = ("主推", "强推", "重点推荐", "可作为主方向", "正式推荐", "AI亚盘推荐：", "亚盘推荐：")
 
@@ -50,6 +51,18 @@ def _edge_points(value: Any) -> str:
     if n is None:
         return "缺失"
     return f"{n * 100:.1f}".rstrip("0").rstrip(".") + "个百分点"
+
+
+def _confidence_from_grade(grade: str, decision: str) -> str:
+    if decision == "PASS":
+        return "低"
+    if decision == "OBSERVE" or grade == "B":
+        return "观察"
+    return {
+        "A": "高",
+        "A-": "中高",
+        "B+": "中",
+    }.get(grade, "中")
 
 
 def _list(value: Any) -> list:
@@ -93,6 +106,49 @@ def _score_path(call: dict, visible: bool) -> dict:
         "risk": risk or "待确认",
         "visible": bool(visible),
     }
+
+
+def _line_text(policy: dict) -> str:
+    market = policy.get("market") if isinstance(policy.get("market"), dict) else {}
+    line = market.get("selected_handicap")
+    price = market.get("selected_price")
+    line_num = _num(line)
+    price_num = _num(price)
+    line_cn = "未提供" if line_num is None else f"{line_num:+.2f}".rstrip("0").rstrip(".")
+    price_cn = "未提供" if price_num is None else f"{price_num:.2f}".rstrip("0").rstrip(".")
+    return f"盘口 {line_cn}，水位 {price_cn}"
+
+
+def _score_path_text(call: dict) -> str:
+    score = _score_path(call, True)
+    alternates = " / ".join(score["alternates"]) if score["alternates"] else "待确认"
+    return f"主路径 {score['primary']}，备选 {alternates}，风险 {score['risk']}"
+
+
+def _movement_text(policy: dict) -> str:
+    movement = policy.get("movement") if isinstance(policy.get("movement"), dict) else {}
+    snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
+    flags = _list(policy.get("movement_flags"))
+    line_delta = movement.get("line_delta", "未提供")
+    price_delta = movement.get("price_delta", "未提供")
+    used = snapshots.get("snapshots_used")
+    source = snapshots.get("snapshots_source") or "未提供"
+    flag_text = " / ".join(_s(x) for x in flags if _s(x)) or "无强反向标记"
+    return f"盘口变化：line_delta={line_delta}，price_delta={price_delta}，snapshots_used={used if used is not None else '未提供'}，source={source}，flags={flag_text}。"
+
+
+def _recommend_core(policy: dict, call: dict) -> str:
+    pick = _s(policy.get("main_ah_pick") or policy.get("candidate_ah_pick"), "候选方向")
+    prob = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    grade_caps = _list(policy.get("grade_caps_applied"))
+    calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
+    cal = _s(prob.get("calibration_status") or calibration.get("status"), "untrained")
+    cap_text = "；校准未训练，等级按规则受限" if cal == "untrained" or grade_caps else ""
+    return (
+        f"{pick} 具备盘口保护，W1覆盖率 {_pct(prob.get('cover_prob_calibrated') if prob.get('cover_prob_calibrated') is not None else prob.get('cover_prob_raw'))}"
+        f" 高于市场公平概率 {_pct(prob.get('market_prob_fair'))}，edge={_edge_points(prob.get('edge_calibrated') if prob.get('edge_calibrated') is not None else prob.get('edge_raw'))}。"
+        f"{_score_path_text(call)} 支持当前受让/让球方向进入推荐池{cap_text}。"
+    )
 
 
 def _policy_snapshot(policy: dict) -> dict:
@@ -170,11 +226,15 @@ def _reason_blocks_for_recommend(policy: dict, call: dict) -> list[dict]:
     movement = _s(policy.get("movement_summary_cn"), "盘口变化未触发反向风险。")
     score = _score_path(call, True)
     score_text = " / ".join([score["primary"], *score["alternates"]]).strip(" /") or "比分路径待确认"
-    return [
-        {"label": "盘口结构", "text": f"{pick} 具备盘口保护；{movement}"},
-        {"label": "模型优势", "text": f"W1覆盖率高于市场公平概率约{_edge_points(prob.get('edge_calibrated') if prob.get('edge_calibrated') is not None else prob.get('edge_raw'))}，对应{_s(policy.get('recommendation_grade'), '推荐')}区间。"},
-        {"label": "路径一致性", "text": f"比分路径集中在 {score_text}，服务当前亚盘方向。"},
+    rows = [
+        {"label": "盘口结构", "text": f"{pick}：{_line_text(policy)}，当前方向具备盘口保护；{movement}"},
+        {"label": "模型优势", "text": f"W1覆盖率 {_pct(prob.get('cover_prob_calibrated') if prob.get('cover_prob_calibrated') is not None else prob.get('cover_prob_raw'))} vs 市场公平概率 {_pct(prob.get('market_prob_fair'))}，edge_raw={prob.get('edge_raw', '未提供')}，edge_calibrated={prob.get('edge_calibrated', '未提供')}，对应{_s(policy.get('recommendation_grade'), '推荐')}区间。"},
+        {"label": "路径一致性", "text": f"比分路径集中在 {score_text}，风险比分 {score['risk']}，服务当前亚盘方向。"},
     ]
+    snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
+    if snapshots or policy.get("movement") or policy.get("movement_flags") or policy.get("grade_caps_applied"):
+        rows.append({"label": "盘口变化", "text": _movement_text(policy) + (" 等级封顶：" + " / ".join(_s(x) for x in _list(policy.get("grade_caps_applied")) if _s(x)) if _list(policy.get("grade_caps_applied")) else "")})
+    return rows
 
 
 def _observe_reason_blocks(policy: dict, call: dict) -> list[dict]:
@@ -202,6 +262,21 @@ def _invalidation(policy: dict, call: dict) -> list[str]:
     while len(rows) < 3:
         rows.append(["盘口退盘或候选方向水位明显升高。", "关键首发或后腰防线信息出现反向变化。", "早球改变比赛节奏，原路径降权。"][len(rows)])
     return rows[:4]
+
+
+def _recommend_invalidation(policy: dict, call: dict) -> list[str]:
+    rows = _invalidation(policy, call)
+    cleaned: list[str] = []
+    for row in rows:
+        text = row.replace("降级为 PASS / 观察", "方向失效并需重新评估")
+        text = text.replace("降级为PASS", "方向失效")
+        text = text.replace("降级为 PASS", "方向失效")
+        text = text.replace("转 PASS", "转为重新评估")
+        text = text.replace("PASS / 观察", "重新评估")
+        text = text.replace("降级观察", "重新评估")
+        text = text.replace("降级为观察", "重新评估")
+        cleaned.append(text)
+    return cleaned[:4]
 
 
 def _reassess(policy: dict) -> list[str]:
@@ -238,13 +313,13 @@ def build_decision_card(scout_call: dict) -> dict:
         base.update({
             "card_type": "RECOMMEND_CARD",
             "headline_cn": f"AI亚盘决策：RECOMMEND｜{main_pick}",
-            "subheadline_cn": f"等级：{grade}｜信心：{_s(ah.get('ah_confidence_cn'), '中')}｜校准状态：{cal}",
+            "subheadline_cn": f"等级：{grade}｜信心：{_confidence_from_grade(grade, decision)}｜校准状态：{cal}",
             "main_pick_cn": main_pick,
-            "one_line_verdict_cn": _s(text.get("core_judgement_cn"), f"模型给到{main_pick}方向约{_edge_points((policy.get('probability') or {}).get('edge_calibrated'))}优势，且比分路径支持当前方向。"),
+            "one_line_verdict_cn": _recommend_core(policy, scout_call),
             "reason_blocks_cn": _reason_blocks_for_recommend(policy, scout_call),
             "score_path_cn": _score_path(scout_call, True),
             "ou_aux_cn": _s(text.get("ou_aux_cn") or ah.get("ou_pick_cn"), "大小球仅作辅助判断。"),
-            "invalidation_conditions_cn": _invalidation(policy, scout_call),
+            "invalidation_conditions_cn": _recommend_invalidation(policy, scout_call),
             "action_status_cn": "当前可进入推荐池，但仍需临场盘口确认。",
             "display_rules": {"show_as_main_pick": True, "show_score_path": True, "show_reassess_triggers": False, "show_failed_gates": False},
         })
@@ -252,7 +327,7 @@ def build_decision_card(scout_call: dict) -> dict:
         base.update({
             "card_type": "OBSERVE_CARD",
             "headline_cn": f"AI亚盘决策：OBSERVE｜{candidate or '候选待确认'}（候选）",
-            "subheadline_cn": f"等级：{grade or 'B'}｜观察｜校准状态：{cal}",
+            "subheadline_cn": f"等级：{grade or 'B'}｜信心：观察｜校准状态：{cal}",
             "one_line_verdict_cn": _s(policy.get("observe_reason"), "当前方向有轻微信号，但不足以进入放行区间，需等待盘口和阵容进一步确认。"),
             "reason_blocks_cn": _observe_reason_blocks(policy, scout_call),
             "score_path_cn": _score_path(scout_call, False),
@@ -295,6 +370,14 @@ def validation_errors(card: dict, policy: dict | None = None) -> list[str]:
     decision = _s(card.get("decision_state"))
     grade = _s(card.get("recommendation_grade"))
     text = json.dumps(card, ensure_ascii=False)
+    recommend_forbidden = (
+        "PASS / 观察",
+        "无推荐",
+        "不进入推荐池",
+        "降级为 PASS",
+        "降级为观察",
+        "Policy Engine 判定未形成可主推条件",
+    )
     if card.get("schema_version") != SCHEMA_VERSION:
         errors.append("schema_version mismatch")
     if policy:
@@ -307,12 +390,34 @@ def validation_errors(card: dict, policy: dict | None = None) -> list[str]:
             errors.append("RECOMMEND missing main_pick_cn")
         if grade not in {"A", "A-", "B+"}:
             errors.append("RECOMMEND grade must be A/A-/B+")
-        if len(card.get("reason_blocks_cn") or []) != 3:
-            errors.append("RECOMMEND reason_blocks must be exactly 3")
-        if [r.get("label") for r in card.get("reason_blocks_cn") or []] != list(REASON_LABELS):
-            errors.append("RECOMMEND reason labels mismatch")
+        if len(card.get("reason_blocks_cn") or []) < 3:
+            errors.append("RECOMMEND reason_blocks must be at least 3")
+        labels = [r.get("label") for r in card.get("reason_blocks_cn") or []]
+        for label in REASON_LABELS:
+            if label not in labels:
+                errors.append(f"RECOMMEND reason label missing: {label}")
         if len(card.get("invalidation_conditions_cn") or []) < 3:
             errors.append("RECOMMEND needs 3 invalidation conditions")
+        body_text = json.dumps(
+            {
+                "headline_cn": card.get("headline_cn"),
+                "subheadline_cn": card.get("subheadline_cn"),
+                "one_line_verdict_cn": card.get("one_line_verdict_cn"),
+                "reason_blocks_cn": card.get("reason_blocks_cn"),
+                "score_path_cn": card.get("score_path_cn"),
+                "action_status_cn": card.get("action_status_cn"),
+            },
+            ensure_ascii=False,
+        )
+        for token in recommend_forbidden:
+            if token in body_text:
+                errors.append(f"RECOMMEND body contains contradictory token: {token}")
+        if grade in {"A-", "B+"} and "信心：低" in _s(card.get("subheadline_cn")):
+            errors.append(f"{grade} confidence must not be low")
+        if "edge" not in body_text and "覆盖率" not in body_text:
+            errors.append("RECOMMEND body must include model edge/coverage evidence")
+        if "比分" not in body_text and "score_path" not in body_text:
+            errors.append("RECOMMEND body must include score path evidence")
     elif decision == "OBSERVE":
         if card.get("main_pick_cn"):
             errors.append("OBSERVE must not have main_pick_cn")
