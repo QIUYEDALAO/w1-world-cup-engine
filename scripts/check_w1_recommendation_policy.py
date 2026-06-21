@@ -177,6 +177,19 @@ def ensure_bundles() -> dict[str, Any]:
 
 def reverse_tests() -> None:
     cfg = W1REC.load_policy_config(CONFIG)
+    if W1REC.validate_ah_market(W1REC._sample_bundle(0.06, home_handicap=-1.5, away_handicap=1.5)).get("ah_sign_valid") is not True:
+        fail("reverse AH symmetry: home favorite -1.5/+1.5 must be valid")
+    if W1REC.validate_ah_market(W1REC._sample_bundle(0.06, home_handicap=1.5, away_handicap=-1.5)).get("ah_sign_valid") is not True:
+        fail("reverse AH symmetry: away favorite +1.5/-1.5 must be valid")
+    if W1REC.validate_ah_market(W1REC._sample_bundle(0.06, home_handicap=0.0, away_handicap=0.0)).get("ah_sign_valid") is not True:
+        fail("reverse AH symmetry: level ball 0/0 must be valid")
+    for label, home_line, away_line in (
+        ("both_positive", 0.5, 0.5),
+        ("both_negative", -0.5, -0.5),
+        ("asymmetric", 0.5, -1.0),
+    ):
+        if W1REC.validate_ah_market(W1REC._sample_bundle(0.06, home_handicap=home_line, away_handicap=away_line)).get("ah_sign_valid") is not False:
+            fail(f"reverse AH symmetry: {label} must be invalid")
     recommend = W1REC.build_policy_result(W1REC._sample_bundle(0.06), cfg)
     validate_policy_result(recommend, "reverse.recommend")
     a_cap = W1REC.build_policy_result(W1REC._sample_bundle(0.08), cfg)
@@ -217,6 +230,7 @@ def reverse_tests() -> None:
         "missing_price": W1REC._sample_bundle(0.06, missing_price=True),
         "missing_score": W1REC._sample_bundle(0.06, missing_score=True),
         "invalid_sign": W1REC._sample_bundle(0.06, invalid_sign=True),
+        "invalid_asymmetric": W1REC._sample_bundle(0.06, home_handicap=0.5, away_handicap=-1.0),
     }.items():
         result = W1REC.build_policy_result(bundle, cfg)
         validate_policy_result(result, f"reverse.{name}")
@@ -298,6 +312,7 @@ def main() -> int:
         fail("config mode must be enforced")
     assert_file_contains(POLICY, [
         "def implied_probs_two_way",
+        "_ah_lines_symmetric",
         "def build_policy_result",
         "calibration_status",
         "multiplicative",
@@ -310,7 +325,7 @@ def main() -> int:
     ])
     assert_file_contains(BUNDLE, ["policy_result", "build_policy_result"])
     assert_file_contains(SNAPSHOT_STORE, ["fixture_snapshots", "summarize_fixture", "home_handicap", "away_price"])
-    assert_file_contains(MARKET_DEBUG, ["policy_version", "decision_state", "policy_summary_cn", "movement_summary_cn"])
+    assert_file_contains(MARKET_DEBUG, ["policy_version", "decision_state", "policy_summary_cn", "movement_summary_cn", "home_handicap=", "away_handicap=", "ah_sign_valid="])
     payload = ensure_bundles()
     seen_decisions = set()
     for bundle in payload.get("bundles", []):

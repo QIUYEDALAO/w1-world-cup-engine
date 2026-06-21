@@ -1000,6 +1000,10 @@ def main() -> int:
     for token in ("build_decision_card", "validation_errors", "REASON_LABELS", "RECOMMEND_CARD", "OBSERVE_CARD", "PASS_CARD", "W1 score matrix 缺失", "当前为价值不足，不是盘口缺失", "score_path_settlement", "settle_ah_pick", "SUPPORT_SETTLEMENTS", "RISK_SETTLEMENTS"):
         if token not in decision_src:
             fail(f"decision card module missing protocol token: {token}")
+    rec_policy_src = (ROOT / "scripts/w1_recommendation_policy.py").read_text(encoding="utf-8")
+    for token in ("_ah_lines_symmetric", "home_handicap", "away_handicap", "AH 盘口两边不对称"):
+        if token not in rec_policy_src:
+            fail(f"recommendation policy missing AH sign symmetry guard token: {token}")
 
     # bundle leakage
     leaks = bundle_leak(bundles, forbidden_pm)

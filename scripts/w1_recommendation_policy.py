@@ -273,6 +273,14 @@ def implied_probs_two_way(home_price: float, away_price: float) -> dict[str, flo
     }
 
 
+def _ah_lines_symmetric(home_line: Any, away_line: Any, tolerance: float = 1e-6) -> bool:
+    home = _num(home_line)
+    away = _num(away_line)
+    if home is None or away is None:
+        return False
+    return abs(float(home) + float(away)) <= tolerance
+
+
 def _ah_market(bundle: dict[str, Any]) -> dict[str, Any]:
     market = bundle.get("market") if isinstance(bundle.get("market"), dict) else {}
     ah = market.get("ah") if isinstance(market.get("ah"), dict) else {}
@@ -325,7 +333,7 @@ def validate_ah_market(bundle: dict[str, Any]) -> dict[str, Any]:
     has_ah = ah["home_handicap"] is not None and ah["away_handicap"] is not None
     has_price = ah["home_price"] is not None and ah["away_price"] is not None and ah["home_price"] > 1.0 and ah["away_price"] > 1.0
     has_score_matrix = ah["home_cover_prob"] is not None and ah["away_cover_prob"] is not None
-    ah_sign_valid = bool(has_ah and ah["home_handicap"] <= 0 and ah["away_handicap"] >= 0)
+    ah_sign_valid = bool(has_ah and _ah_lines_symmetric(ah["home_handicap"], ah["away_handicap"]))
     dirty_data_free = all(
         value is None or (isinstance(value, (int, float)) and math.isfinite(value))
         for value in (
@@ -650,7 +658,7 @@ def map_grade_to_decision_state(grade: str, failed_gates: list[str], config: dic
 
 def _pass_reason(failed: list[str]) -> str:
     if "invalid_ah_sign" in failed:
-        return "AH 盘口符号异常，主队让球/客队受让方向不可信。"
+        return "AH 盘口两边不对称，主客让受关系无法校验。"
     if "missing_ah" in failed:
         return "AH 盘口缺失，不形成亚盘放行条件。"
     if "missing_price" in failed:
@@ -909,9 +917,27 @@ def enforce_call_with_policy(call: dict[str, Any], policy_result: dict[str, Any]
     if decision == "RECOMMEND":
         text["headline_cn"] = f"AI亚盘推荐：{main_pick}"
         text["grade_cn"] = f"{grade}｜信心：中高" if grade in {"A", "A-"} else f"{grade}｜信心：中"
-        text.setdefault("core_judgement_cn", policy.get("policy_summary_cn") or f"Policy Engine 允许输出 {main_pick}，edge={edge}，市场公平概率={market_prob}。")
+        score_text = str(text.get("score_recommendation_cn") or ah.get("score_path_cn") or "比分路径待确认")
+        text["core_judgement_cn"] = (
+            f"Policy Engine 允许输出 {main_pick}：W1覆盖率 {probability.get('cover_prob_calibrated') or probability.get('cover_prob_raw')}，"
+            f"市场隐含 {market_prob}，edge={edge}；比分路径 {score_text}。"
+        )
+        if not isinstance(text.get("reason_bullets_cn"), list) or len(text.get("reason_bullets_cn") or []) < 3:
+            text["reason_bullets_cn"] = [
+                f"W1覆盖率与市场隐含形成正 edge，候选方向为 {main_pick}。",
+                f"盘口与水位由 Policy Engine 校验，当前硬门槛通过。",
+                f"比分路径：{score_text}。",
+            ]
+        existing_invalid = text.get("live_invalidation_cn") if isinstance(text.get("live_invalidation_cn"), list) else []
+        if len(existing_invalid or []) < 3 or not any(token in "\n".join(str(x) for x in existing_invalid) for token in ("失效", "降权", "降级")):
+            text["live_invalidation_cn"] = [
+                "若盘口退盘或水位明显反向，当前方向失效并重新评估。",
+                "若首发关键点反向变化，当前方向降权。",
+                "若早球改变比分节奏，比分与大小球辅助判断降权。",
+            ]
         ah["main_ah_pick_cn"] = main_pick
         ah["recommendation_grade"] = grade
+        ah["pass_reason_cn"] = ""
         ah["final_action_cn"] = f"亚盘主推：{main_pick}；若临场条件反向，降级观察。"
     elif decision == "OBSERVE":
         text["headline_cn"] = "AI亚盘结论：观察，不进入强判断"
@@ -1033,11 +1059,12 @@ def _sample_snapshots(kind: str = "stable") -> list[dict[str, Any]]:
     return base
 
 
-def _sample_bundle(edge: float | None = 0.06, *, missing_ah: bool = False, missing_price: bool = False, missing_score: bool = False, invalid_sign: bool = False, stale: bool = False, lineup_confirmed: bool = True, movement: str = "stable") -> dict[str, Any]:
+def _sample_bundle(edge: float | None = 0.06, *, missing_ah: bool = False, missing_price: bool = False, missing_score: bool = False, invalid_sign: bool = False, stale: bool = False, lineup_confirmed: bool = True, movement: str = "stable", home_handicap: float = -0.5, away_handicap: float = 0.5) -> dict[str, Any]:
     home_price = None if missing_price else 2.0
     away_price = None if missing_price else 1.8
-    home_handicap = 0.5 if invalid_sign else -0.5
-    away_handicap = -0.5 if invalid_sign else 0.5
+    if invalid_sign:
+        home_handicap = 0.5
+        away_handicap = 0.5
     fair = implied_probs_two_way(2.0, 1.8)
     away_cover = None if missing_score else round(fair["away_fair"] + (edge or 0.0), 4)
     home_cover = None if missing_score else round(1.0 - away_cover, 4)
@@ -1069,8 +1096,19 @@ def _sample_bundle(edge: float | None = 0.06, *, missing_ah: bool = False, missi
 
 def self_test() -> None:
     cfg = load_policy_config()
+    for name, home_line, away_line, expected in (
+        ("home_favorite", -1.5, 1.5, True),
+        ("away_favorite", 1.5, -1.5, True),
+        ("level_ball", 0, 0, True),
+        ("both_positive", 0.5, 0.5, False),
+        ("both_negative", -0.5, -0.5, False),
+        ("asymmetric", 0.5, -1.0, False),
+    ):
+        _assert(_ah_lines_symmetric(home_line, away_line) is expected, f"{name}: AH symmetry expected {expected}")
     cases = [
         ("recommend_a_minus", _sample_bundle(0.06), "A-", "RECOMMEND"),
+        ("away_favorite_valid", _sample_bundle(0.06, home_handicap=0.5, away_handicap=-0.5), "A-", "RECOMMEND"),
+        ("level_ball_valid", _sample_bundle(0.06, home_handicap=0.0, away_handicap=0.0), "A-", "RECOMMEND"),
         ("a_cap_untrained", _sample_bundle(0.08), "A-", "RECOMMEND"),
         ("stale_cap", _sample_bundle(0.08, stale=True), "B+", "RECOMMEND"),
         ("line_against_downgrade", _sample_bundle(0.06, movement="line_against"), "B+", "RECOMMEND"),
@@ -1085,6 +1123,8 @@ def self_test() -> None:
         ("pass_missing_price", _sample_bundle(0.06, missing_price=True), "PASS", "PASS"),
         ("pass_missing_score", _sample_bundle(0.06, missing_score=True), "PASS", "PASS"),
         ("pass_invalid_sign", _sample_bundle(0.06, invalid_sign=True), "PASS", "PASS"),
+        ("pass_both_negative", _sample_bundle(0.06, home_handicap=-0.5, away_handicap=-0.5), "PASS", "PASS"),
+        ("pass_asymmetric", _sample_bundle(0.06, home_handicap=0.5, away_handicap=-1.0), "PASS", "PASS"),
     ]
     for name, bundle, grade, decision in cases:
         result = build_policy_result(bundle, cfg)

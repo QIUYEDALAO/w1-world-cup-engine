@@ -16,6 +16,7 @@ CALLS = ROOT / "state/w1_scout_calls.json"
 sys.path.insert(0, str(ROOT / "scripts"))
 import w1_decision_card as W1CARD  # noqa: E402
 import w1_scout_embed as SCOUT_EMBED  # noqa: E402
+import w1_recommendation_policy as W1REC  # noqa: E402
 
 GENERIC_PASS_TEXT = (
     "hard gate / edge / 数据就绪度 / movement / calibration 任一条件不足",
@@ -63,6 +64,12 @@ def main() -> int:
         print(proc.stdout)
         print(proc.stderr, file=sys.stderr)
         fail("w1_decision_card.py --self-test failed")
+    if W1REC.validate_ah_market(W1REC._sample_bundle(0.06, home_handicap=1.5, away_handicap=-1.5)).get("ah_sign_valid") is not True:
+        fail("away favorite AH +1.5/-1.5 must be valid")
+    if W1REC.validate_ah_market(W1REC._sample_bundle(0.06, home_handicap=0.5, away_handicap=0.5)).get("ah_sign_valid") is not False:
+        fail("same-sign AH +0.5/+0.5 must be invalid")
+    if W1REC.validate_ah_market(W1REC._sample_bundle(0.06, home_handicap=0.5, away_handicap=-1.0)).get("ah_sign_valid") is not False:
+        fail("asymmetric AH +0.5/-1.0 must be invalid")
 
     if not CALLS.is_file():
         print("SKIP: missing runtime input state/w1_scout_calls.json")

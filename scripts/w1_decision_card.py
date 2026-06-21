@@ -331,7 +331,7 @@ def _pass_reason_items(policy: dict) -> list[str]:
         rows.append(f"AH 数据可用，但 edge={_edge_points(edge)}，未达到 1.5pp 最低门槛。")
         rows.append("当前为价值不足，不是盘口缺失。")
     if "invalid_ah_sign" in failed:
-        rows.append("AH 盘口符号异常，主队让球/客队受让方向不可信。")
+        rows.append("AH 盘口两边不对称，主客让受关系无法校验。")
     if "missing_ah" in failed:
         rows.append("AH 盘口缺失，无法形成亚盘放行条件。")
     if "missing_price" in failed:

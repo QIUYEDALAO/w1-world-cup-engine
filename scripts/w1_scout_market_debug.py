@@ -458,6 +458,12 @@ def main() -> int:
     print(f"market_prob_fair={fmt(probability.get('market_prob_fair'))}")
     print(f"overround={fmt(probability.get('overround'))}")
     print(f"hard_gates={json.dumps(policy.get('hard_gates') or {}, ensure_ascii=False, sort_keys=True)}")
+    hard_gates = policy.get("hard_gates") if isinstance(policy.get("hard_gates"), dict) else {}
+    print(f"home_handicap={fmt((policy.get('market') or {}).get('home_handicap'))}")
+    print(f"away_handicap={fmt((policy.get('market') or {}).get('away_handicap'))}")
+    print(f"has_ah={fmt(hard_gates.get('has_ah'))}")
+    print(f"has_price={fmt(hard_gates.get('has_price'))}")
+    print(f"ah_sign_valid={fmt(hard_gates.get('ah_sign_valid'))}")
     print(f"failed_gates={json.dumps(policy.get('failed_gates') or [], ensure_ascii=False)}")
     print(f"movement_flags={json.dumps(policy.get('movement_flags') or [], ensure_ascii=False)}")
     print(f"conflict_flags={json.dumps(policy.get('conflict_flags') or [], ensure_ascii=False)}")
