@@ -24,11 +24,26 @@ GENERIC_PASS_TEXT = (
     "Policy Engine 未提供具体 pass_reason 或 failed_gates；请复核 policy_result。",
     "本场不进入推荐池；dashboard 不用泛化比赛剧本替代 Policy 根因。",
 )
+SUPPORT_SETTLEMENTS = {"full_win", "half_win", "push"}
+RISK_SETTLEMENTS = {"half_loss", "full_loss"}
 
 
 def fail(message: str) -> None:
     print(f"W1 decision card check FAIL: {message}", file=sys.stderr)
     raise SystemExit(1)
+
+
+def settlement_scores(card: dict) -> tuple[set[str], set[str]]:
+    settlement = card.get("score_path_settlement") if isinstance(card.get("score_path_settlement"), dict) else {}
+    support = {str((row or {}).get("score")) for row in settlement.get("support_paths") or [] if isinstance(row, dict)}
+    risk = {str((row or {}).get("score")) for row in settlement.get("risk_paths") or [] if isinstance(row, dict)}
+    for row in settlement.get("support_paths") or []:
+        if (row or {}).get("settlement") not in SUPPORT_SETTLEMENTS:
+            fail(f"support score has invalid settlement: {row}")
+    for row in settlement.get("risk_paths") or []:
+        if (row or {}).get("settlement") not in RISK_SETTLEMENTS:
+            fail(f"risk score has invalid settlement: {row}")
+    return support, risk
 
 
 def main() -> int:
@@ -74,6 +89,27 @@ def main() -> int:
             fail(f"fixture {display.get('fixture_id')} non-RECOMMEND exposes main pick")
         if policy.get("decision_state") == "RECOMMEND" and card.get("decision_state") == "PASS":
             fail(f"fixture {display.get('fixture_id')} policy RECOMMEND rendered as PASS")
+        if card.get("decision_state") == "RECOMMEND":
+            support, risk = settlement_scores(card)
+            if not support:
+                fail(f"fixture {display.get('fixture_id')} RECOMMEND missing support settlement paths")
+            if str(display.get("fixture_id") or "") == "1489392":
+                if "2-0" in support:
+                    fail("fixture 1489392 Curacao +1.5 must not use 2-0 as support")
+                if "2-0" not in risk:
+                    fail("fixture 1489392 Curacao +1.5 must classify 2-0 as risk")
+                if "0-0" not in support:
+                    fail("fixture 1489392 Curacao +1.5 must classify 0-0 as support")
+            if str(display.get("fixture_id") or "") == "1489393":
+                if "2-0" not in risk:
+                    fail("fixture 1489393 Ivory Coast +1.5 must classify 2-0 as risk")
+                if not ({"1-1", "2-1", "1-0"} & support):
+                    fail("fixture 1489393 Ivory Coast +1.5 must keep close-score support paths")
+            if str(display.get("fixture_id") or "") == "1539006":
+                if "1-0" in support:
+                    fail("fixture 1539006 Paraguay +0.5 must not use 1-0 as support")
+                if not ({"0-0", "1-1"} & support):
+                    fail("fixture 1539006 Paraguay +0.5 must classify draw paths as support")
         failed = policy.get("failed_gates") if isinstance(policy.get("failed_gates"), list) else []
         if policy.get("decision_state") == "PASS":
             if not failed and not policy.get("pass_reason"):

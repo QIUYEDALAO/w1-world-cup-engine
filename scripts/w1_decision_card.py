@@ -11,16 +11,23 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import sys
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+import w1_ah_settlement as AH_SETTLEMENT  # noqa: E402
+
 SCHEMA_VERSION = "w1_decision_card_v1"
 REASON_LABELS = ("盘口结构", "模型优势", "路径一致性")
 OPTIONAL_REASON_LABELS = ("盘口变化",)
 FORBIDDEN_GENERAL = ("重仓", "梭哈", "倍投", "加仓", "稳赚", "必红", "包中", "必穿", "保证命中", "资金建议", "稳胆", "稳赢")
 FORBIDDEN_NON_RECOMMEND = ("主推", "强推", "重点推荐", "可作为主方向", "正式推荐", "AI亚盘推荐：", "亚盘推荐：")
+SUPPORT_SETTLEMENTS = {"full_win", "half_win", "push"}
+RISK_SETTLEMENTS = {"half_loss", "full_loss"}
 
 
 def _s(value: Any, default: str = "") -> str:
@@ -108,6 +115,127 @@ def _score_path(call: dict, visible: bool) -> dict:
     }
 
 
+def _parse_scores(text: Any) -> list[str]:
+    return re.findall(r"(?<!\d)(\d+)\s*-\s*(\d+)(?!\d)", _s(text))
+
+
+def _normalize_score(score: Any) -> str:
+    pairs = _parse_scores(score)
+    if not pairs:
+        return ""
+    home, away = pairs[0]
+    return f"{int(home)}-{int(away)}"
+
+
+def _score_numbers(score: str) -> tuple[int, int] | None:
+    clean = _normalize_score(score)
+    if not clean:
+        return None
+    home, away = clean.split("-", 1)
+    return int(home), int(away)
+
+
+def _raw_score_groups(call: dict) -> dict[str, list[str]]:
+    score = _score_path(call, True)
+    groups = {
+        "support": [],
+        "risk": [],
+    }
+    for raw in [score.get("primary"), *score.get("alternates", [])]:
+        clean = _normalize_score(raw)
+        if clean and clean not in groups["support"]:
+            groups["support"].append(clean)
+    for raw in _parse_scores(score.get("risk")):
+        clean = f"{int(raw[0])}-{int(raw[1])}"
+        if clean and clean not in groups["risk"]:
+            groups["risk"].append(clean)
+    return groups
+
+
+def _selected_side(policy: dict) -> str:
+    side = _s(policy.get("main_ah_side") or policy.get("candidate_ah_side")).lower()
+    return side if side in {"home", "away"} else ""
+
+
+def _selected_handicap(policy: dict) -> float | None:
+    market = policy.get("market") if isinstance(policy.get("market"), dict) else {}
+    return _num(market.get("selected_handicap"))
+
+
+def _settle_score_for_policy(score: str, policy: dict) -> dict:
+    numbers = _score_numbers(score)
+    side = _selected_side(policy)
+    handicap = _selected_handicap(policy)
+    if numbers is None or not side or handicap is None:
+        return {"score": score, "settlement": "invalid", "reason": "missing score/side/handicap"}
+    home, away = numbers
+    selected_goals, opponent_goals = (home, away) if side == "home" else (away, home)
+    result = AH_SETTLEMENT.settle_ah_pick(selected_goals, opponent_goals, handicap)
+    return {
+        "score": f"{home}-{away}",
+        "settlement": result.get("settlement_result"),
+        "settlement_value": result.get("settlement_value"),
+    }
+
+
+def settled_score_path(policy: dict, call: dict) -> tuple[dict, dict]:
+    raw = _raw_score_groups(call)
+    ordered: list[tuple[str, str]] = []
+    for score in raw["support"]:
+        ordered.append((score, "support"))
+    for score in raw["risk"]:
+        if score not in [item[0] for item in ordered]:
+            ordered.append((score, "risk"))
+
+    support_paths: list[dict] = []
+    risk_paths: list[dict] = []
+    invalid_paths: list[dict] = []
+    score_paths_reclassified = False
+    for score, original_group in ordered:
+        row = _settle_score_for_policy(score, policy)
+        settlement = row.get("settlement")
+        if settlement in SUPPORT_SETTLEMENTS:
+            support_paths.append(row)
+            if original_group != "support":
+                score_paths_reclassified = True
+        elif settlement in RISK_SETTLEMENTS:
+            risk_paths.append(row)
+            if original_group != "risk":
+                score_paths_reclassified = True
+        else:
+            invalid_paths.append(row)
+
+    if not support_paths and raw["support"]:
+        invalid_paths.extend({"score": score, "settlement": "invalid", "reason": "no settlement support"} for score in raw["support"])
+
+    primary = support_paths[0]["score"] if support_paths else (_normalize_score((_score_path(call, True).get("primary"))) or "待确认")
+    alternates = [row["score"] for row in support_paths[1:4]]
+    risk_scores = [row["score"] for row in risk_paths]
+    risk = " / ".join(risk_scores[:4]) if risk_scores else "待确认"
+    display = {
+        "primary": primary,
+        "alternates": alternates,
+        "risk": risk,
+        "visible": True,
+    }
+    settlement = {
+        "main_pick": _s(policy.get("main_ah_pick") or policy.get("candidate_ah_pick")),
+        "support_paths": support_paths,
+        "risk_paths": risk_paths,
+        "invalid_paths": invalid_paths,
+        "score_paths_reclassified": score_paths_reclassified,
+    }
+    return display, settlement
+
+
+def _suspicious_edge(policy: dict) -> bool:
+    prob = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+    edge = _num(prob.get("edge_raw"))
+    cover = _num(prob.get("cover_prob_raw"))
+    market = _num(prob.get("market_prob_fair"))
+    return bool((edge is not None and abs(edge) >= 0.20) or (cover is not None and market is not None and abs(cover - market) >= 0.20))
+
+
 def _line_text(policy: dict) -> str:
     market = policy.get("market") if isinstance(policy.get("market"), dict) else {}
     line = market.get("selected_handicap")
@@ -119,8 +247,8 @@ def _line_text(policy: dict) -> str:
     return f"盘口 {line_cn}，水位 {price_cn}"
 
 
-def _score_path_text(call: dict) -> str:
-    score = _score_path(call, True)
+def _score_path_text(call: dict, score_path: dict | None = None) -> str:
+    score = score_path or _score_path(call, True)
     alternates = " / ".join(score["alternates"]) if score["alternates"] else "待确认"
     return f"主路径 {score['primary']}，备选 {alternates}，风险 {score['risk']}"
 
@@ -142,7 +270,7 @@ def _movement_text(policy: dict) -> str:
     return f"盘口变化：line_delta={line_delta}，price_delta={price_delta}，snapshots_used={used if used is not None else '未提供'}，source={source}，flags={flag_text}。{history_text}"
 
 
-def _recommend_core(policy: dict, call: dict) -> str:
+def _recommend_core(policy: dict, call: dict, score_path: dict | None = None) -> str:
     pick = _s(policy.get("main_ah_pick") or policy.get("candidate_ah_pick"), "候选方向")
     prob = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
     grade_caps = _list(policy.get("grade_caps_applied"))
@@ -154,7 +282,7 @@ def _recommend_core(policy: dict, call: dict) -> str:
     return (
         f"{pick} 具备盘口保护，W1覆盖率 {_pct(prob.get('cover_prob_calibrated') if prob.get('cover_prob_calibrated') is not None else prob.get('cover_prob_raw'))}"
         f" 高于市场公平概率 {_pct(prob.get('market_prob_fair'))}，edge={_edge_points(prob.get('edge_calibrated') if prob.get('edge_calibrated') is not None else prob.get('edge_raw'))}。"
-        f"{_score_path_text(call)} 支持当前受让/让球方向进入推荐池{history_cap}{cap_text}。"
+        f"{_score_path_text(call, score_path)} 支持当前受让/让球方向进入推荐池{history_cap}{cap_text}。"
     )
 
 
@@ -227,7 +355,16 @@ def _pass_reason_items(policy: dict) -> list[str]:
     return rows or ["Policy Engine 缺少可展示的具体风控字段；请复核 policy_result / failed_gates。"]
 
 
-def _reason_blocks_for_recommend(policy: dict, call: dict) -> list[dict]:
+def _settlement_reason_text(policy: dict, settlement: dict, score_path: dict) -> str:
+    pick = _s(policy.get("main_ah_pick") or policy.get("candidate_ah_pick"), "候选方向")
+    support = [row.get("score") for row in settlement.get("support_paths") or [] if row.get("score")]
+    risk = [row.get("score") for row in settlement.get("risk_paths") or [] if row.get("score")]
+    support_text = " / ".join(support[:4]) if support else score_path.get("primary", "待确认")
+    risk_text = " / ".join(risk[:4]) if risk else "暂无明确输盘比分"
+    return f"{support_text} 均覆盖 {pick}；{risk_text} 属于当前方向的输盘/半输风险，因此列入风险路径，不作为推荐支撑。"
+
+
+def _reason_blocks_for_recommend(policy: dict, call: dict, settlement: dict | None = None, score_path: dict | None = None, suspicious: bool = False) -> list[dict]:
     pick = _s(policy.get("main_ah_pick") or policy.get("candidate_ah_pick"), "候选方向")
     prob = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
     movement = _s(policy.get("movement_summary_cn"), "盘口变化未触发反向风险。")
@@ -239,13 +376,15 @@ def _reason_blocks_for_recommend(policy: dict, call: dict) -> list[dict]:
             f"{current_status}；但历史盘口时间序列不足，暂无法验证早盘到临场是否有退盘/升水，"
             "因此 movement 维度不加分，等级上限受限为 B+。"
         )
-    score = _score_path(call, True)
-    score_text = " / ".join([score["primary"], *score["alternates"]]).strip(" /") or "比分路径待确认"
+    score = score_path or _score_path(call, True)
+    settlement_text = _settlement_reason_text(policy, settlement, score) if settlement else f"比分路径集中在 {' / '.join([score['primary'], *score['alternates']]).strip(' /') or '比分路径待确认'}，风险比分 {score['risk']}，服务当前亚盘方向。"
     rows = [
         {"label": "盘口结构", "text": f"{pick}：{_line_text(policy)}，当前方向具备盘口保护；{movement}"},
         {"label": "模型优势", "text": f"W1覆盖率 {_pct(prob.get('cover_prob_calibrated') if prob.get('cover_prob_calibrated') is not None else prob.get('cover_prob_raw'))} vs 市场公平概率 {_pct(prob.get('market_prob_fair'))}，edge_raw={prob.get('edge_raw', '未提供')}，edge_calibrated={prob.get('edge_calibrated', '未提供')}，对应{_s(policy.get('recommendation_grade'), '推荐')}区间。"},
-        {"label": "路径一致性", "text": f"比分路径集中在 {score_text}，风险比分 {score['risk']}，服务当前亚盘方向。"},
+        {"label": "路径一致性", "text": settlement_text},
     ]
+    if suspicious:
+        rows.append({"label": "异常复核", "text": "模型与市场分歧较大，需复核盘口价格、盘口线和数据源一致性。"})
     snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
     if snapshots or policy.get("movement") or policy.get("movement_flags") or policy.get("grade_caps_applied"):
         rows.append({"label": "盘口变化", "text": _movement_text(policy) + (" 等级封顶：" + " / ".join(_s(x) for x in _list(policy.get("grade_caps_applied")) if _s(x)) if _list(policy.get("grade_caps_applied")) else "")})
@@ -312,6 +451,8 @@ def build_decision_card(scout_call: dict) -> dict:
     cal = _calibration_cn(policy)
     text = _rec_text(scout_call)
     ah = _ah(scout_call)
+    settled_path, path_settlement = settled_score_path(policy, scout_call)
+    suspicious_edge_flag = _suspicious_edge(policy)
 
     base = {
         "schema_version": SCHEMA_VERSION,
@@ -330,9 +471,13 @@ def build_decision_card(scout_call: dict) -> dict:
             "headline_cn": f"AI亚盘决策：RECOMMEND｜{main_pick}",
             "subheadline_cn": f"等级：{grade}｜信心：{_confidence_from_grade(grade, decision)}｜校准状态：{cal}",
             "main_pick_cn": main_pick,
-            "one_line_verdict_cn": _recommend_core(policy, scout_call),
-            "reason_blocks_cn": _reason_blocks_for_recommend(policy, scout_call),
-            "score_path_cn": _score_path(scout_call, True),
+            "one_line_verdict_cn": _recommend_core(policy, scout_call, settled_path),
+            "reason_blocks_cn": _reason_blocks_for_recommend(policy, scout_call, path_settlement, settled_path, suspicious_edge_flag),
+            "score_path_cn": settled_path,
+            "score_path_settlement": path_settlement,
+            "score_paths_reclassified": bool(path_settlement.get("score_paths_reclassified")),
+            "suspicious_edge_flag": suspicious_edge_flag,
+            "suspicious_edge_note_cn": "模型与市场分歧较大，需复核盘口价格、盘口线和数据源一致性。" if suspicious_edge_flag else "",
             "ou_aux_cn": _s(text.get("ou_aux_cn") or ah.get("ou_pick_cn"), "大小球仅作辅助判断。"),
             "invalidation_conditions_cn": _recommend_invalidation(policy, scout_call),
             "action_status_cn": "当前可进入 B+ 推荐池；当前盘口可用，但缺少完整盘口时间序列，需临场复核退盘/升水。" if (policy.get("movement_history_status") or {}).get("movement_history_status") == "insufficient" else "当前可进入推荐池，但仍需临场盘口确认。",
@@ -346,6 +491,7 @@ def build_decision_card(scout_call: dict) -> dict:
             "one_line_verdict_cn": _s(policy.get("observe_reason"), "当前方向有轻微信号，但不足以进入放行区间，需等待盘口和阵容进一步确认。"),
             "reason_blocks_cn": _observe_reason_blocks(policy, scout_call),
             "score_path_cn": _score_path(scout_call, False),
+            "suspicious_edge_flag": suspicious_edge_flag,
             "ou_aux_cn": _s(text.get("ou_aux_cn") or ah.get("ou_pick_cn"), "大小球仅作辅助判断。"),
             "upgrade_conditions_cn": _reassess(policy),
             "downgrade_conditions_cn": _invalidation(policy, scout_call),
@@ -365,6 +511,7 @@ def build_decision_card(scout_call: dict) -> dict:
             "one_line_verdict_cn": reasons[0] if reasons else "当前盘口没有形成可推荐优势，系统主动过滤本场亚盘方向。",
             "reason_blocks_cn": _pass_reason_blocks(policy, scout_call),
             "score_path_cn": _score_path(scout_call, False),
+            "suspicious_edge_flag": suspicious_edge_flag,
             "ou_aux_cn": _s(text.get("ou_aux_cn") or ah.get("ou_pick_cn"), "大小球仅作辅助判断。"),
             "invalidation_conditions_cn": _reassess(policy),
             "pass_reason_blocks_cn": _pass_reason_blocks(policy, scout_call),
@@ -433,6 +580,26 @@ def validation_errors(card: dict, policy: dict | None = None) -> list[str]:
             errors.append("RECOMMEND body must include model edge/coverage evidence")
         if "比分" not in body_text and "score_path" not in body_text:
             errors.append("RECOMMEND body must include score path evidence")
+        settlement = card.get("score_path_settlement") if isinstance(card.get("score_path_settlement"), dict) else {}
+        if not settlement:
+            errors.append("RECOMMEND missing score_path_settlement")
+        else:
+            support = settlement.get("support_paths") if isinstance(settlement.get("support_paths"), list) else []
+            risk = settlement.get("risk_paths") if isinstance(settlement.get("risk_paths"), list) else []
+            if not support:
+                errors.append("RECOMMEND score_path_settlement needs support_paths")
+            for row in support:
+                if (row or {}).get("settlement") not in SUPPORT_SETTLEMENTS:
+                    errors.append(f"support path has non-support settlement: {(row or {}).get('score')}={(row or {}).get('settlement')}")
+            for row in risk:
+                if (row or {}).get("settlement") not in RISK_SETTLEMENTS:
+                    errors.append(f"risk path has non-risk settlement: {(row or {}).get('score')}={(row or {}).get('settlement')}")
+        prob = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
+        edge = _num(prob.get("edge_raw"))
+        cover = _num(prob.get("cover_prob_raw"))
+        market = _num(prob.get("market_prob_fair"))
+        if ((edge is not None and abs(edge) >= 0.20) or (cover is not None and market is not None and abs(cover - market) >= 0.20)) and card.get("suspicious_edge_flag") is not True:
+            errors.append("large model-market edge must set suspicious_edge_flag")
     elif decision == "OBSERVE":
         if card.get("main_pick_cn"):
             errors.append("OBSERVE must not have main_pick_cn")
@@ -470,6 +637,8 @@ def validation_errors(card: dict, policy: dict | None = None) -> list[str]:
                 errors.append(f"forbidden non-recommend token: {token}")
         if any(mark in text for mark in ("A-", "B+")):
             errors.append("OBSERVE/PASS must not display A-/B+ strong grades")
+    if "盘口快照不足" in text:
+        errors.append("visible text must not use ambiguous 盘口快照不足 wording")
     return errors
 
 
@@ -486,7 +655,13 @@ def sample_call(decision: str, grade: str, *, failed: list[str] | None = None, m
         "decision_state": decision,
         "recommendation_grade": grade,
         "main_ah_pick": main,
+        "main_ah_side": "away" if main else "",
         "candidate_ah_pick": candidate,
+        "candidate_ah_side": "away",
+        "market": {
+            "selected_handicap": 0.5,
+            "selected_price": 1.80,
+        },
         "probability": {
             "edge_raw": 0.0617 if decision != "PASS" else 0.006,
             "edge_calibrated": 0.0617 if decision != "PASS" else 0.006,

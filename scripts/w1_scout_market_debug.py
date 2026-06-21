@@ -14,6 +14,7 @@ from typing import Any
 import w1_recommendation_policy as W1REC
 import w1_scout_backtest as BT
 import w1_decision_card as W1CARD
+import w1_scout_embed as SCOUT_EMBED
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -353,7 +354,8 @@ def main() -> int:
     one_x_two = market.get("one_x_two") if isinstance(market.get("one_x_two"), dict) else {}
     policy = policy_result(bundle)
     state = state_call(fid) or {}
-    decision_card = W1CARD.build_decision_card({**state, "fixture_id": fid, "policy_result": policy})
+    display = SCOUT_EMBED.display_call({**state, "fixture_id": fid, "policy_result": policy, "policy_enforced": True})
+    decision_card = display.get("decision_card") if isinstance(display.get("decision_card"), dict) else W1CARD.build_decision_card({**state, "fixture_id": fid, "policy_result": policy})
     probability = policy.get("probability") if isinstance(policy.get("probability"), dict) else {}
     calibration = policy.get("calibration") if isinstance(policy.get("calibration"), dict) else {}
     snapshots = policy.get("snapshots") if isinstance(policy.get("snapshots"), dict) else {}
@@ -474,6 +476,14 @@ def main() -> int:
     print(f"dashboard_decision_card_headline={fmt(decision_card.get('headline_cn'))}")
     print(f"dashboard_decision_card_grade={fmt(decision_card.get('recommendation_grade'))}")
     print(f"dashboard_decision_card_main_pick={fmt(decision_card.get('main_pick_cn'))}")
+    settlement = decision_card.get("score_path_settlement") if isinstance(decision_card.get("score_path_settlement"), dict) else {}
+    support_scores = [str((row or {}).get("score")) for row in settlement.get("support_paths") or [] if isinstance(row, dict)]
+    risk_scores = [str((row or {}).get("score")) for row in settlement.get("risk_paths") or [] if isinstance(row, dict)]
+    print(f"dashboard_score_path_settlement={json.dumps(settlement, ensure_ascii=False, sort_keys=True)}")
+    print(f"dashboard_score_support_paths={'/'.join(support_scores) if support_scores else 'missing'}")
+    print(f"dashboard_score_risk_paths={'/'.join(risk_scores) if risk_scores else 'missing'}")
+    print(f"dashboard_score_paths_reclassified={str(bool(decision_card.get('score_paths_reclassified'))).lower()}")
+    print(f"dashboard_suspicious_edge_flag={str(bool(decision_card.get('suspicious_edge_flag'))).lower()}")
     print(f"dashboard_left_status_label={dashboard_left_status_label(policy)}")
     print(f"dashboard_card_title={dashboard_card_title(policy)}")
     print(f"dashboard_pass_reason_source={dashboard_pass_reason_source(policy)}")

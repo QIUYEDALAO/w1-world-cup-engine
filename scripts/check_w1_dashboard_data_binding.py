@@ -162,10 +162,16 @@ def main() -> int:
             if token not in build_src:
                 fail(f"build_w1_dashboard_data.py must bind local Scout odds fallback for score matrix: {token}")
         decision_src = read(ROOT / "scripts/w1_decision_card.py")
+        for token in ("score_path_settlement", "settle_ah_pick", "SUPPORT_SETTLEMENTS", "RISK_SETTLEMENTS", "suspicious_edge_flag"):
+            if token not in decision_src:
+                fail(f"decision card must guard score paths by AH settlement: {token}")
         for token in ("missing_score_matrix", "W1 score matrix 缺失", "edge_below_threshold", "当前为价值不足，不是盘口缺失"):
             if token not in decision_src:
                 fail(f"decision card must expose concrete PASS root causes: {token}")
         market_debug_src = read(ROOT / "scripts/w1_scout_market_debug.py")
+        for token in ("dashboard_score_path_settlement", "dashboard_score_support_paths", "dashboard_score_risk_paths", "dashboard_suspicious_edge_flag"):
+            if token not in market_debug_src:
+                fail(f"market debug must expose score settlement audit: {token}")
         for token in ("PASS_ROOT_CAUSE_AUDIT", "audit.pass_root_cause", "audit.stale_lock_override", "decision_card_source=policy_result", "dashboard_local_market_overlay_source", "dashboard_score_matrix_status"):
             if token not in market_debug_src:
                 fail(f"market debug must expose PASS root cause audit: {token}")
